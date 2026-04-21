@@ -306,7 +306,7 @@
     <button class="nav-btn active" data-tab="dash"><span class="nav-ico">🏠</span><span class="nav-lbl">Home</span></button>
     <button class="nav-btn" data-tab="backlog"><span class="nav-ico">📋</span><span class="nav-lbl">Backlog</span></button>
     <button class="nav-btn" data-tab="sched"><span class="nav-ico">📅</span><span class="nav-lbl">Schedule</span></button>
-    <button class="nav-btn" data-tab="matrix"><span class="nav-ico">⊞</span><span class="nav-lbl">Matrix</span></button>
+    <button class="nav-btn" data-tab="matrix"><span class="nav-ico">🎯</span><span class="nav-lbl">Matrix</span></button>
     <button class="nav-btn" data-tab="kanban"><span class="nav-ico">🗂️</span><span class="nav-lbl">Kanban</span></button>
   </nav>
 </div>
@@ -526,15 +526,22 @@ async function saveScheduled() { await dbSaveScheduled(STATE.scheduled); refresh
 // ─── AI ───────────────────────────────────────────────────────────────────────
 async function aiExtractTasks(text){
   try{
+    const apiKey=DASH_AI.apiKey||"";
     const res=await fetch("https://api.anthropic.com/v1/messages",{
       method:"POST",
-      headers:{"Content-Type":"application/json"},
+      headers:{
+        "Content-Type":"application/json",
+        "anthropic-version":"2023-06-01",
+        "anthropic-dangerous-direct-browser-access":"true",
+        ...(apiKey?{"x-api-key":apiKey}:{})
+      },
       body:JSON.stringify({
-        model:"claude-sonnet-4-20250514",
+        model:"claude-sonnet-4-5",
         max_tokens:1000,
         messages:[{role:"user",content:`Extract actionable tasks from these notes. Return ONLY a JSON array, no markdown, no preamble. Each item: {"name":"...","priority":"Low|Medium|High|Critical","category":"Work|Personal|Learning"}. If nothing actionable, return []. Notes:\n\n${text}`}]
       })
     });
+    if(!res.ok) return fallbackExtract(text);
     const data=await res.json();
     const raw=(data.content||[]).map(b=>b.text||"").join("").trim();
     const clean=raw.replace(/```json|```/g,"").trim();
@@ -555,7 +562,7 @@ function fallbackExtract(text){
 }
 
 // ─── AI PRODUCTIVITY INSIGHTS ────────────────────────────────────────────────
-async function aiProductivityInsights(allInst){
+async function aiProductivityInsights(allInst, apiKey=""){
   const td=localToday();
   const pm=computeProductivityMetrics(allInst);
   const total=allInst.length;
@@ -606,14 +613,23 @@ ${JSON.stringify(summary,null,2)}`;
 
   const res=await fetch("https://api.anthropic.com/v1/messages",{
     method:"POST",
-    headers:{"Content-Type":"application/json"},
+    headers:{
+      "Content-Type":"application/json",
+      "anthropic-version":"2023-06-01",
+      "anthropic-dangerous-direct-browser-access":"true",
+      ...(apiKey?{"x-api-key":apiKey}:{})
+    },
     body:JSON.stringify({
-      model:"claude-sonnet-4-20250514",
+      model:"claude-sonnet-4-5",
       max_tokens:1000,
       messages:[{role:"user",content:prompt}]
     })
   });
   const data=await res.json();
+  if(!res.ok){
+    const errMsg=data?.error?.message||data?.error?.type||`HTTP ${res.status}`;
+    throw new Error(errMsg);
+  }
   const raw=(data.content||[]).map(b=>b.text||"").join("").trim();
   const clean=raw.replace(/```json|```/g,"").trim();
   const parsed=JSON.parse(clean);
@@ -624,17 +640,43 @@ ${JSON.stringify(summary,null,2)}`;
 // ─── NOTIFICATIONS ────────────────────────────────────────────────────────────
 async function requestNotifPermission(){
   if(!("Notification" in window)) return "unavailable";
-  if(Notification.permission==="granted") return "granted";
-  try{ return await Notification.requestPermission(); }
-  catch{ return "blocked"; }
+  if(Notification.permission==="granted"){ STATE.notifOk=true; return "granted"; }
+  if(Notification.permission==="denied") return "denied";
+  // Must be called in direct response to a user gesture
+  try{
+    const result=await Notification.requestPermission();
+    if(result==="granted") STATE.notifOk=true;
+    return result;
+  }catch{
+    // Older callback-based API fallback
+    return new Promise(res=>{
+      try{
+        Notification.requestPermission(r=>{ if(r==="granted") STATE.notifOk=true; res(r); });
+      }catch{ res("unavailable"); }
+    });
+  }
 }
-function scheduleNotification(task,minutesBefore=15){
+
+function scheduleNotification(task, minutesBefore=15){
   if(!("Notification" in window)||Notification.permission!=="granted") return;
   const date=taskDate(task), time=task.startTime||"09:00";
   if(!date) return;
-  const delay=new Date(`${date}T${time}`).getTime()-minutesBefore*60000-Date.now();
-  if(delay<0||delay>86400000) return;
-  setTimeout(()=>{ try{ new Notification("⏰ FlowTask",{body:`"${task.name}" in ${minutesBefore}min`,tag:task.scheduledId}); }catch{} },delay);
+  const fireAt=new Date(`${date}T${time}`).getTime()-minutesBefore*60000;
+  const delay=fireAt-Date.now();
+  // Only schedule if within 24 hours and in the future
+  if(delay<=0||delay>86400000) return;
+  const timerId=setTimeout(()=>{
+    try{
+      new Notification("⏰ FlowTask",{
+        body:`"${task.name}" starts in ${minutesBefore} min`,
+        tag:task.scheduledId,
+        icon:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230a0a0f'/%3E%3Ctext x='32' y='46' font-size='36' text-anchor='middle' fill='%2360a5fa'%3E⬡%3C/text%3E%3C/svg%3E"
+      });
+    }catch{}
+  },delay);
+  // Store timer id on window so it can be cleared if needed
+  window._notifTimers=window._notifTimers||{};
+  window._notifTimers[task.scheduledId]=timerId;
 }
 
 // ─── TOAST ────────────────────────────────────────────────────────────────────
@@ -748,7 +790,7 @@ function computeProductivityMetrics(allInst){
 }
 
 // ─── DASHBOARD ────────────────────────────────────────────────────────────────
-let DASH_AI={loading:false,result:null,error:null};
+let DASH_AI={loading:false,result:null,error:null,apiKey:""};
 
 function renderDash(allInst){
   const td=localToday();
@@ -919,9 +961,14 @@ function renderDash(allInst){
   <div class="d-sec" style="border:1px solid #2563eb44;background:#0a1628;margin-bottom:12px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
       <div class="d-st" style="margin-bottom:0">🤖 AI Productivity Insights</div>
-      <button id="ai-insights-btn" style="background:${DASH_AI.loading?"#1e3a5f":"#1d4ed8"};border:none;border-radius:7px;color:#fff;padding:5px 10px;font-size:10px;font-weight:700;cursor:pointer;flex-shrink:0" ${DASH_AI.loading?"disabled":""}>
+      <button id="ai-insights-btn" style="background:${DASH_AI.loading?"#1e3a5f":"#1d4ed8"};border:none;border-radius:7px;color:#fff;padding:5px 10px;font-size:10px;font-weight:700;cursor:pointer;flex-shrink:0;opacity:${DASH_AI.loading?0.7:1}" ${DASH_AI.loading?"disabled":""}>
         ${DASH_AI.loading?"Analyzing…":"✨ Get Insights"}
       </button>
+    </div>
+    <div style="margin-bottom:10px">
+      <label style="font-size:10px;color:#475569;font-weight:600;display:block;margin-bottom:4px">Anthropic API Key</label>
+      <input id="ai-api-key" type="password" class="inp" style="font-size:12px;padding:7px 10px" placeholder="sk-ant-api03-..." value="${e(DASH_AI.apiKey||'')}"/>
+      <div style="font-size:10px;color:#334155;margin-top:3px">Key is stored only in memory and never saved to disk.</div>
     </div>
     ${DASH_AI.loading?`<div style="display:flex;align-items:center;gap:8px;padding:8px 0">
       <div style="width:16px;height:16px;border:2px solid #3b82f6;border-top-color:transparent;border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0"></div>
@@ -930,7 +977,7 @@ function renderDash(allInst){
     ${DASH_AI.result?`<div id="ai-insights-panel">
       ${DASH_AI.result.map((ins,i)=>`
         <div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #0f172a${i===DASH_AI.result.length-1?";border-bottom:none":""}">
-          <div style="font-size:18px;flex-shrink:0;line-height:1.2">${ins.icon}</div>
+          <div style="font-size:18px;flex-shrink:0;line-height:1.2">${ins.icon||"💡"}</div>
           <div>
             <div style="font-size:12px;font-weight:700;color:#e2e8f0;margin-bottom:2px">${e(ins.title)}</div>
             <div style="font-size:11px;color:#94a3b8;line-height:1.5">${e(ins.detail)}</div>
@@ -938,8 +985,10 @@ function renderDash(allInst){
           </div>
         </div>`).join("")}
     </div>`:""}
-    ${DASH_AI.error?`<div style="font-size:11px;color:#f87171;padding:6px 0">${e(DASH_AI.error)}</div>`:""}
-    ${!DASH_AI.loading&&!DASH_AI.result&&!DASH_AI.error?`<div style="font-size:11px;color:#334155;line-height:1.6">Tap "Get Insights" to have Claude analyze your task patterns and suggest personalised improvements.</div>`:""}
+    ${DASH_AI.error?`<div style="background:#1c0a0a;border:1px solid #7f1d1d;border-radius:7px;padding:9px 11px;margin-top:4px">
+      <div style="font-size:11px;color:#f87171;line-height:1.5">${e(DASH_AI.error)}</div>
+    </div>`:""}
+    ${!DASH_AI.loading&&!DASH_AI.result&&!DASH_AI.error?`<div style="font-size:11px;color:#334155;line-height:1.6">Enter your Anthropic API key above, then tap "Get Insights" to have Claude analyze your task patterns.</div>`:""}
   </div>
 
   <!-- Next 7 days -->
@@ -1055,7 +1104,7 @@ function renderBacklog(){
             ${Array.isArray(t.tags)&&t.tags.length>0?`<div class="t-row">${t.tags.map(g=>`<span class="tag">#${e(g)}</span>`).join("")}</div>`:""}
           </div>
           ${!BL_STATE.bulk?`<div style="display:flex;gap:4px;flex-shrink:0">
-            <button class="ico-btn" data-bl-sched="${t.id}" title="Schedule">◷</button>
+            <button class="ico-btn" data-bl-sched="${t.id}" title="Schedule" style="font-size:15px">📅</button>
             <button class="ico-btn" data-bl-clone="${t.id}" title="Clone">⧉</button>
             <button class="ico-btn" data-bl-edit="${t.id}" title="Edit">✎</button>
             <button class="ico-btn" style="color:#ef4444" data-bl-del="${t.id}" title="Delete">✕</button>
@@ -1357,13 +1406,25 @@ function bindContent(allInst){
   const aiBtn=document.getElementById("ai-insights-btn");
   if(aiBtn) aiBtn.addEventListener("click",async()=>{
     if(DASH_AI.loading) return;
-    DASH_AI={loading:true,result:null,error:null};
+    const keyEl=document.getElementById("ai-api-key");
+    const apiKey=(keyEl?keyEl.value.trim():DASH_AI.apiKey)||"";
+    if(!apiKey){
+      DASH_AI={...DASH_AI,error:"Please enter your Anthropic API key above."};
+      render(); return;
+    }
+    DASH_AI={loading:true,result:null,error:null,apiKey};
     render();
     try{
-      const result=await aiProductivityInsights(allInst);
-      DASH_AI={loading:false,result,error:null};
+      const result=await aiProductivityInsights(allInst,apiKey);
+      DASH_AI={loading:false,result,error:null,apiKey};
     }catch(err){
-      DASH_AI={loading:false,result:null,error:"Could not fetch insights. Check your connection."};
+      const msg=err?.message||String(err)||"Unknown error";
+      const hint=msg.includes("401")||msg.includes("auth")||msg.includes("invalid_api_key")
+        ? "Invalid API key. Check your key at console.anthropic.com."
+        : msg.includes("CORS")||msg.includes("Failed to fetch")
+        ? "Network error. Check your connection and try again."
+        : `Error: ${msg}`;
+      DASH_AI={loading:false,result:null,error:hint,apiKey};
     }
     render();
   });
@@ -2100,11 +2161,20 @@ function openSettingsModal(){
     <div class="m-hdr"><h3 class="m-title">⚙ Settings</h3><button class="close-btn" id="sett-close">✕</button></div>
     <div class="slbl">Notifications</div>
     <div class="sett-row">
-      <span style="font-size:13px;color:#e2e8f0">🔔 Push Reminders</span>
-      ${STATE.notifOk?`<span style="font-size:11px;color:#34d399;font-weight:700">Enabled ✓</span>`:`<button class="sm-btn" id="sett-notif-req">Request</button>`}
+      <div>
+        <div style="font-size:13px;color:#e2e8f0;margin-bottom:2px">🔔 Task Reminders</div>
+        <div style="font-size:10px;color:${STATE.notifOk?"#34d399":"#f59e0b"};font-weight:600">${STATE.notifOk?"Enabled ✓ — fires 15 min before start time":"Not enabled"}</div>
+      </div>
+      ${STATE.notifOk
+        ?`<button class="sm-btn" id="sett-notif-test">Test 🔔</button>`
+        :`<button class="sm-btn" id="sett-notif-req" style="background:#1d4ed8;border-color:#3b82f6;color:#fff">Enable</button>`}
     </div>
-    <div style="font-size:11px;color:#475569;margin-bottom:8px;line-height:1.6">
-      ${STATE.notifOk?"Reminders fire 15 min before task start.":"If permission is denied, enable via your browser's site settings for this page."}
+    <div style="background:#111827;border:1px solid #1e293b;border-radius:8px;padding:10px 12px;margin-bottom:12px">
+      <div style="font-size:11px;color:#94a3b8;line-height:1.7">
+        ${STATE.notifOk
+          ?`<b style="color:#34d399">Active.</b> Reminders fire 15 min before a task's start time. <b style="color:#f59e0b">Important:</b> reminders only work while this browser tab is open — they use <code style="background:#0f172a;padding:1px 4px;border-radius:3px">setTimeout</code>, not push notifications. For reliable reminders, keep the tab pinned or use a PWA install.`
+          :`Tap <b style="color:#e2e8f0">Enable</b> to allow browser notifications. You will see a system prompt asking for permission.<br><br><b style="color:#f59e0b">⚠ Mobile note:</b> Notifications require the browser tab to be open. If permission is blocked, go to <b style="color:#e2e8f0">browser Site Settings → Notifications → Allow</b> for this page.`}
+      </div>
     </div>
     <div class="slbl">Data Backup</div>
     <div class="sett-row">
@@ -2166,11 +2236,37 @@ function openSettingsModal(){
 
   const notifBtn=document.getElementById("sett-notif-req");
   if(notifBtn) notifBtn.addEventListener("click",async()=>{
+    if(!("Notification" in window)){
+      showToast("Notifications not supported in this browser","err");
+      return;
+    }
+    if(Notification.permission==="denied"){
+      showToast("Blocked — go to browser Site Settings → Notifications → Allow","err");
+      popModal(); openSettingsModal();
+      return;
+    }
     const r=await requestNotifPermission();
-    if(r==="granted"){STATE.notifOk=true;showToast("Notifications enabled!");}
-    else if(r==="unavailable") showToast("Not supported in this browser","err");
-    else showToast("Blocked — enable in browser site settings","err");
+    if(r==="granted"){
+      STATE.notifOk=true;
+      showToast("Notifications enabled! ✓");
+      // Send a test notification immediately to confirm it works
+      try{ new Notification("✅ FlowTask",{body:"Notifications are working!",tag:"flowtask-test"}); }catch{}
+    } else if(r==="unavailable"){
+      showToast("Not supported in this browser","err");
+    } else {
+      showToast("Permission denied — enable in browser site settings","err");
+    }
     popModal(); openSettingsModal();
+  });
+
+  const testBtn=document.getElementById("sett-notif-test");
+  if(testBtn) testBtn.addEventListener("click",()=>{
+    try{
+      new Notification("🔔 FlowTask Test",{body:"Notifications are working correctly!",tag:"flowtask-test"});
+      showToast("Test notification sent!");
+    }catch(err){
+      showToast(`Test failed: ${err.message}`,"err");
+    }
   });
 
   document.getElementById("sett-export").addEventListener("click",()=>{
