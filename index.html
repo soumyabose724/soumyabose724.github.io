@@ -773,12 +773,16 @@ function computeProductivityMetrics(allInst){
   const personalHoursToday=mergedCategoryHours(todayTasks,"Personal");
   const learningHoursToday=mergedCategoryHours(todayTasks,"Learning");
 
-  // Work hours this week (Mon–today) — overlap-safe per day then sum
-  // We sum per-day merged hours across the current week to avoid cross-day merges
+  // Work hours this week (Mon–Sun of current calendar week) — overlap-safe per day then sum
   const workHoursWeek=(()=>{
+    const todayDate=new Date(td+"T00:00:00");
+    const dow=todayDate.getDay(); // 0=Sun
+    const daysFromMon=(dow===0?6:dow-1);
+    const weekStart=addDays(td,-daysFromMon); // this Monday
     let total=0;
     for(let i=0;i<7;i++){
-      const date=addDays(td,-i);
+      const date=addDays(weekStart,i);
+      if(date>td) break; // don't count future days
       const dayTasks=allInst.filter(t=>taskDate(t)===date&&t.status!=="Cancelled");
       total+=mergedCategoryHours(dayTasks,"Work");
     }
@@ -794,18 +798,37 @@ let DASH_AI={loading:false,result:null,error:null,apiKey:""};
 
 function renderDash(allInst){
   const td=localToday();
-  const total=allInst.length, done=allInst.filter(t=>t.status==="Completed").length;
+
+  // ── Week boundaries (Mon–Sun of current calendar week) ──
+  const todayDate=new Date(td+"T00:00:00");
+  const dayOfWeek=todayDate.getDay(); // 0=Sun,1=Mon…6=Sat
+  const daysFromMon=(dayOfWeek===0?6:dayOfWeek-1); // days since Monday
+  const weekStart=addDays(td,-daysFromMon);         // this Monday
+  const weekEnd=addDays(weekStart,6);               // this Sunday
+  const weekTasks=allInst.filter(t=>{const d=taskDate(t);return d>=weekStart&&d<=weekEnd;});
+  const weekDone=weekTasks.filter(t=>t.status==="Completed").length;
+  const weekTotal=weekTasks.filter(t=>t.status!=="Cancelled").length;
+  const weekRate=weekTotal>0?Math.round((weekDone/weekTotal)*100):0;
+
+  // ── All-time totals (for status overview) ──
+  const total=allInst.length;
+  const done=allInst.filter(t=>t.status==="Completed").length;
+
   const inProg=allInst.filter(t=>t.status==="In Progress").length;
   const overdueTasks=allInst.filter(t=>isOverdue(t));
   const overdue=overdueTasks.length;
   const todayT=allInst.filter(t=>taskDate(t)===td);
   const todayD=todayT.filter(t=>t.status==="Completed").length;
-  const rate=total>0?Math.round((done/total)*100):0;
   const next7=Array.from({length:7},(_,i)=>addDays(td,i)).map(date=>({date,label:dayLabel(date),tasks:allInst.filter(t=>taskDate(t)===date&&t.status!=="Cancelled")}));
   const cdates=new Set(allInst.filter(t=>t.status==="Completed").map(t=>{const h=(t.statusHistory||[]).filter(h=>h.status==="Completed");return h.length?h[h.length-1].at.split("T")[0]:taskDate(t);}).filter(Boolean));
   let streak=0,chk=td; while(cdates.has(chk)){streak++;chk=addDays(chk,-1);}
-  const prioC=PRIORITIES.reduce((a,p)=>{a[p]=allInst.filter(t=>t.priority===p&&!["Completed","Cancelled"].includes(t.status)).length;return a;},{});
-  const catC=CATEGORIES.reduce((a,c)=>{a[c]=allInst.filter(t=>t.category===c&&t.status!=="Cancelled").length;return a;},{});
+
+  // ── Today-scoped category and priority counts ──
+  const todayActive=todayT.filter(t=>!["Completed","Cancelled"].includes(t.status));
+  const prioC=PRIORITIES.reduce((a,p)=>{a[p]=todayActive.filter(t=>t.priority===p).length;return a;},{});
+  const catC=CATEGORIES.reduce((a,c)=>{a[c]=todayT.filter(t=>t.category===c&&t.status!=="Cancelled").length;return a;},{});
+  const todayCatTotal=todayT.filter(t=>t.status!=="Cancelled").length;
+
   const sb=STATUSES.map(s=>({s,n:allInst.filter(t=>t.status===s).length})).filter(x=>x.n>0);
   const todayPending=todayT.filter(t=>!["Completed","Cancelled"].includes(t.status));
   const pm=computeProductivityMetrics(allInst);
@@ -821,13 +844,13 @@ function renderDash(allInst){
   <!-- KPI row -->
   <div class="kpi-row">
     <div class="kpi-card" style="border:1px solid #34d39922">
-      <div style="font-size:16px;margin-bottom:2px">✓</div>
-      <div class="kpi-val" style="color:#34d399">${rate}%</div>
-      <div class="kpi-lbl">Done</div>
-      <div class="kpi-sub">${done}/${total}</div>
+      <div style="font-size:16px;margin-bottom:2px">✅</div>
+      <div class="kpi-val" style="color:#34d399">${weekRate}%</div>
+      <div class="kpi-lbl">Week Done</div>
+      <div class="kpi-sub">${weekDone}/${weekTotal}</div>
     </div>
     <div class="kpi-card" style="border:1px solid #60a5fa22">
-      <div style="font-size:16px;margin-bottom:2px">◷</div>
+      <div style="font-size:16px;margin-bottom:2px">📅</div>
       <div class="kpi-val" style="color:#60a5fa">${todayD}/${todayT.length}</div>
       <div class="kpi-lbl">Today</div>
       <div class="kpi-sub">done</div>
@@ -848,7 +871,7 @@ function renderDash(allInst){
 
   <!-- Today's progress -->
   <div class="d-sec">
-    <div class="d-st">Today's Progress</div>
+    <div class="d-st">📊 Today's Progress</div>
     <div class="pb"><div class="pf" style="width:${todayT.length>0?Math.round((todayD/todayT.length)*100):0}%"></div></div>
     <div style="font-size:11px;color:#475569;margin-top:4px;text-align:right">${todayT.length>0?`${Math.round((todayD/todayT.length)*100)}% complete`:"No tasks today"}</div>
     ${todayPending.slice(0,3).map(t=>renderMRow(t)).join("")}
@@ -856,7 +879,7 @@ function renderDash(allInst){
   </div>
 
   ${inProg>0?`<div class="d-sec">
-    <div class="d-st">In Progress <span class="badge">${inProg}</span></div>
+    <div class="d-st">⚡ In Progress <span class="badge">${inProg}</span></div>
     ${allInst.filter(t=>t.status==="In Progress").slice(0,4).map(t=>renderMRow(t)).join("")}
   </div>`:""}
 
@@ -867,7 +890,7 @@ function renderDash(allInst){
 
   <!-- 7-day completion trend bar chart -->
   <div class="d-sec">
-    <div class="d-st">7-Day Completion Trend</div>
+    <div class="d-st">📈 7-Day Completion Trend</div>
     <div style="display:flex;gap:4px;align-items:flex-end;height:60px;margin-bottom:6px">
       ${pm.trend7.map(d=>`
         <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end">
@@ -896,7 +919,7 @@ function renderDash(allInst){
       </div>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;padding-top:8px;border-top:1px solid #0f172a">
-      <span style="font-size:11px;color:#64748b">Work this week</span>
+      <span style="font-size:11px;color:#64748b">Work this week (Mon–${new Date(weekEnd+"T00:00:00").toLocaleDateString("en-US",{weekday:"short"})})</span>
       <span style="font-size:13px;font-weight:700;color:#60a5fa">${pm.workHoursWeek>0?fmtHours(pm.workHoursWeek):"—"}</span>
     </div>
     <div style="font-size:10px;color:#334155;margin-top:4px">Overlap-safe · requires start &amp; end time on tasks</div>
@@ -993,7 +1016,7 @@ function renderDash(allInst){
 
   <!-- Next 7 days -->
   <div class="d-sec">
-    <div class="d-st">Next 7 Days</div>
+    <div class="d-st">📅 Next 7 Days</div>
     <div style="overflow-x:auto;display:flex;gap:8px;padding-bottom:4px">
       ${next7.map(({date,label,tasks})=>`
         <div class="up-day" ${date===td?`style="border:1px solid #3b82f6;background:#1e3a5f"`:""}>
@@ -1005,8 +1028,9 @@ function renderDash(allInst){
   </div>
 
   <div class="d-sec">
-    <div class="d-st">By Category</div>
-    ${CATEGORIES.map(c=>{const n=catC[c],pct=total>0?Math.round((n/total)*100):0;const cc={Work:"#60a5fa",Personal:"#34d399",Learning:"#f59e0b"};return`
+    <div class="d-st">🗂️ By Category <span style="font-size:9px;color:#334155;text-transform:none;letter-spacing:0;font-weight:400">(today)</span></div>
+    ${todayCatTotal===0?`<div style="color:#334155;font-size:12px;text-align:center;padding:12px 0">No tasks today</div>`:
+    CATEGORIES.map(c=>{const n=catC[c],pct=todayCatTotal>0?Math.round((n/todayCatTotal)*100):0;const cc={Work:"#60a5fa",Personal:"#34d399",Learning:"#f59e0b"};return`
     <div style="margin-bottom:10px">
       <div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:12px;color:#94a3b8">${c}</span><span style="font-size:12px;color:${cc[c]};font-weight:600">${n}</span></div>
       <div class="pb"><div class="pf" style="width:${pct}%;background:${cc[c]}"></div></div>
@@ -1014,17 +1038,18 @@ function renderDash(allInst){
   </div>
 
   <div class="d-sec">
-    <div class="d-st">Active by Priority</div>
+    <div class="d-st">🚦 Active by Priority <span style="font-size:9px;color:#334155;text-transform:none;letter-spacing:0;font-weight:400">(today)</span></div>
+    ${todayActive.length===0?`<div style="color:#334155;font-size:12px;text-align:center;padding:12px 0">No active tasks today</div>`:`
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       ${PRIORITIES.map(p=>`<div style="flex:1;min-width:60px;background:#0a0a0f;border-radius:8px;padding:8px 10px;border:1px solid ${PC[p]}33;text-align:center">
         <div style="font-size:18px;font-weight:800;color:${PC[p]}">${prioC[p]}</div>
         <div style="font-size:10px;color:#64748b;margin-top:2px">${p}</div>
       </div>`).join("")}
-    </div>
+    </div>`}
   </div>
 
   <div class="d-sec" style="margin-bottom:24px">
-    <div class="d-st">Status Overview</div>
+    <div class="d-st">📋 Status Overview</div>
     ${sb.map(({s,n})=>{const c=SC[s];const pct=total>0?Math.round((n/total)*100):0;return`
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
       <div style="width:72px;font-size:11px;color:${c.text};flex-shrink:0">${s}</div>
@@ -1034,11 +1059,31 @@ function renderDash(allInst){
     ${sb.length===0?`<div style="color:#334155;font-size:12px;text-align:center;padding:16px 0">No tasks yet</div>`:""}
   </div>
 
-  ${STATE.backlog.length>0?`<div class="d-sec" style="margin-bottom:32px;border-left:3px solid #3b82f6">
+  ${STATE.backlog.length>0?`<div class="d-sec" style="margin-bottom:12px;border-left:3px solid #3b82f6">
     <div class="d-st">📋 Backlog (${STATE.backlog.length} unscheduled)</div>
     ${STATE.backlog.slice(0,3).map(t=>`<div style="font-size:12px;color:#94a3b8;padding:4px 0;border-bottom:1px solid #0f172a"><span style="color:${PC[t.priority]};margin-right:5px">●</span>${e(t.name)}</div>`).join("")}
     ${STATE.backlog.length>3?`<div style="font-size:11px;color:#475569;margin-top:4px">+${STATE.backlog.length-3} more</div>`:""}
   </div>`:""}
+
+  ${(()=>{
+    const allNotes=[];
+    STATE.scheduled.forEach(t=>{
+      (t.notes||[]).forEach(n=>{
+        allNotes.push({note:n,taskName:t.name,taskId:t.scheduledId,masterId:getMasterId(t)});
+      });
+    });
+    if(allNotes.length===0) return "";
+    const recent=[...allNotes].sort((a,b)=>new Date(b.note.createdAt)-new Date(a.note.createdAt)).slice(0,5);
+    return `<div class="d-sec" style="margin-bottom:32px;border-left:3px solid #f59e0b">
+      <div class="d-st">📝 Recent Notes (${allNotes.length})</div>
+      ${recent.map(({note,taskName,taskId})=>`
+        <div style="padding:8px 0;border-bottom:1px solid #0f172a;cursor:pointer" data-open-task="${taskId}">
+          <div style="font-size:11px;color:#f59e0b;font-weight:600;margin-bottom:2px">📌 ${e(taskName)}</div>
+          <div style="font-size:12px;color:#94a3b8;line-height:1.4;white-space:pre-wrap;max-height:48px;overflow:hidden">${e(note.text)}</div>
+          <div style="font-size:10px;color:#334155;margin-top:3px">${new Date(note.createdAt).toLocaleDateString("en-US",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"})}</div>
+        </div>`).join("")}
+    </div>`;
+  })()}
 </div>`;
 }
 function renderMRow(t){
@@ -1189,6 +1234,9 @@ function renderDayList(allInst){
 }
 function renderTCard(t){
   const c=SC[t.status]||SC["Not Started"]; const over=isOverdue(t);
+  const subs=t.subtasks||[]; const subDone=subs.filter(s=>s.done).length;
+  const subPct=subs.length>0?Math.round((subDone/subs.length)*100):null;
+  const tSecs=totalSecondsLogged(t);
   return `<div class="card" style="border-left:3px solid ${over?"#ef4444":c.border};${over?"background:#1c0a0a":""}${t.status==="Completed"?"opacity:0.75":""}" data-open-task="${t.scheduledId}">
     <div class="cbody">
       <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px">
@@ -1201,9 +1249,14 @@ function renderTCard(t){
         ${t.taskType==="recurring"?`<span class="rec-p">↻ ${t.frequency}</span>`:""}
         ${t.important?`<span class="f-p">⚑</span>`:""}
         ${t.urgent?`<span class="u-p">⚡</span>`:""}
+        ${tSecs>0?`<span style="background:#1e293b;color:#64748b;border-radius:5px;padding:2px 6px;font-size:10px">⏱ ${fmtSecs(tSecs)}</span>`:""}
       </div>
+      ${subPct!==null?`<div style="display:flex;align-items:center;gap:6px;margin-top:5px">
+        <div style="flex:1;height:4px;background:#1e293b;border-radius:2px;overflow:hidden"><div style="height:100%;width:${subPct}%;background:${subPct===100?"#34d399":"#3b82f6"};border-radius:2px;transition:width .3s"></div></div>
+        <span style="font-size:10px;color:${subPct===100?"#34d399":"#60a5fa"};font-weight:600;white-space:nowrap">✅ ${subDone}/${subs.length}</span>
+      </div>`:""}
       <div style="font-size:11px;color:${over?"#f87171":"#64748b"};margin-top:3px">
-        ${t.taskType==="single"?`Due: ${fmtDate(t.dueDate)}`:`Occurrence: ${fmtDate(t.instanceDate)}`}
+        ${t.taskType==="single"?`📅 Due: ${fmtDate(t.dueDate)}`:`📅 ${fmtDate(t.instanceDate)}`}
       </div>
       ${Array.isArray(t.tags)&&t.tags.length>0?`<div class="t-row">${t.tags.map(g=>`<span class="tag">#${e(g)}</span>`).join("")}</div>`:""}
     </div>
@@ -1366,15 +1419,23 @@ function renderKanban(allInst){
           ${tasks.length===0
             ?`<div style="font-size:11px;color:#1e293b;text-align:center;padding:12px 0;font-style:italic">Drop tasks here</div>`
             :`<div class="kb-col-body">
-              ${tasks.map(t=>{const over=isOverdue(t);return`
+              ${tasks.map(t=>{const over=isOverdue(t);
+                const subs=t.subtasks||[]; const subDone=subs.filter(s=>s.done).length;
+                const subPct=subs.length>0?Math.round((subDone/subs.length)*100):null;
+                const tSecs=totalSecondsLogged(t);
+                return`
                 <div class="kb-card" draggable="true" data-kb-card="${t.scheduledId}" data-kb-mid="${getMasterId(t)}" data-kb-idate="${t.instanceDate||""}" style="border-color:${over?"#ef4444":c.border};background:${over?"#1c0a0a":"#0a0a0f"}">
                   <div style="font-size:12px;font-weight:600;color:${over?"#f87171":"#e2e8f0"};line-height:1.3;margin-bottom:5px" data-open-task="${t.scheduledId}">${e(t.name)}</div>
+                  ${subPct!==null?`<div style="display:flex;align-items:center;gap:5px;margin-bottom:5px">
+                    <div style="flex:1;height:3px;background:#1e293b;border-radius:2px;overflow:hidden"><div style="height:100%;width:${subPct}%;background:${subPct===100?"#34d399":"#3b82f6"};border-radius:2px"></div></div>
+                    <span style="font-size:9px;color:${subPct===100?"#34d399":"#60a5fa"};font-weight:700">${subDone}/${subs.length}</span>
+                  </div>`:""}
                   <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
                     ${taskDate(t)?`<span style="font-size:10px;background:#111827;color:${over?"#f87171":"#64748b"};border-radius:4px;padding:1px 5px;border:1px solid ${over?"#7f1d1d":"#1e293b"}">${over?"⏰ ":""}${fmtShort(taskDate(t))}</span>`:""}
                     ${t.taskType==="recurring"?`<span style="font-size:10px;color:#60a5fa">↻</span>`:""}
                     <span style="font-size:10px;color:${PC[t.priority]}">● ${t.priority}</span>
                     <span style="font-size:10px;color:${catColors[t.category]||"#475569"}">${t.category}</span>
-                    ${taskHours(t)?`<span style="font-size:9px;color:#64748b">⏱${fmtHours(taskHours(t))}</span>`:""}
+                    ${tSecs>0?`<span style="font-size:9px;color:#64748b">⏱${fmtSecs(tSecs)}</span>`:""}
                     ${t.important?`<span style="font-size:10px;color:#4ade80">⚑</span>`:""}
                     ${t.urgent?`<span style="font-size:10px;color:#fbbf24">⚡</span>`:""}
                   </div>
@@ -1473,7 +1534,16 @@ function bindContent(allInst){
       el.addEventListener("click",e=>{e.stopPropagation();const t=STATE.backlog.find(x=>x.id===el.dataset.blEdit);if(t)openTaskFormModal(t);});
     });
     content.querySelectorAll("[data-bl-del]").forEach(el=>{
-      el.addEventListener("click",async e=>{e.stopPropagation();STATE.backlog=STATE.backlog.filter(t=>t.id!==el.dataset.blDel);await saveBacklog();showToast("Deleted","err");render();});
+      el.addEventListener("click",async e=>{
+        e.stopPropagation();
+        const id=el.dataset.blDel;
+        const task=STATE.backlog.find(t=>t.id===id);
+        if(!task) return;
+        openReasonModal(`Delete "${task.name}"?`,"Why are you deleting this task?","🗑️ Delete","#7f1d1d",async(reason)=>{
+          STATE.backlog=STATE.backlog.filter(t=>t.id!==id);
+          await saveBacklog(); showToast("Deleted","err"); render();
+        });
+      });
     });
   }
 
@@ -1541,6 +1611,13 @@ function bindContent(allInst){
         if(newStatus==="Cancelled"){
           openCancelModal(KB_DRAG); KB_DRAG=null; return;
         }
+        if(newStatus==="On Hold"){
+          const drag={...KB_DRAG}; KB_DRAG=null;
+          openReasonModal("Put On Hold","Why is this task being put on hold?","⏸️ Confirm Hold","#92400e",async(reason)=>{
+            await changeStatus(drag._masterId,drag.instanceDate,"On Hold",reason);
+          });
+          return;
+        }
         const t=allInst.find(x=>x.scheduledId===KB_DRAG.scheduledId);
         if(t&&t.status!==newStatus) await changeStatus(KB_DRAG._masterId,KB_DRAG.instanceDate,newStatus,"");
         KB_DRAG=null;
@@ -1595,6 +1672,63 @@ async function unscheduleSC(masterSId){
   STATE.backlog=[{id:gid(),name:task.name,priority:task.priority,category:task.category,tags:task.tags||[],important:!!task.important,urgent:!!task.urgent,createdAt:new Date().toISOString()},...STATE.backlog];
   STATE.scheduled=STATE.scheduled.filter(t=>(t.masterScheduledId||t.scheduledId)!==masterSId);
   await saveBacklog(); await saveScheduled(); showToast("Moved back to backlog"); render();
+}
+
+// Subtask operations
+async function addSubtask(masterSId, name){
+  STATE.scheduled=STATE.scheduled.map(t=>{
+    if((t.masterScheduledId||t.scheduledId)!==masterSId) return t;
+    const sub={id:gid(),name,done:false,createdAt:new Date().toISOString()};
+    return{...t,subtasks:[...(t.subtasks||[]),sub]};
+  });
+  await saveScheduled();
+}
+async function toggleSubtask(masterSId, subId){
+  STATE.scheduled=STATE.scheduled.map(t=>{
+    if((t.masterScheduledId||t.scheduledId)!==masterSId) return t;
+    const subtasks=(t.subtasks||[]).map(s=>s.id===subId?{...s,done:!s.done,doneAt:s.done?null:new Date().toISOString()}:s);
+    return{...t,subtasks};
+  });
+  await saveScheduled();
+}
+async function deleteSubtask(masterSId, subId){
+  STATE.scheduled=STATE.scheduled.map(t=>{
+    if((t.masterScheduledId||t.scheduledId)!==masterSId) return t;
+    return{...t,subtasks:(t.subtasks||[]).filter(s=>s.id!==subId)};
+  });
+  await saveScheduled();
+}
+
+// Time tracking operations
+let ACTIVE_TIMER={masterSId:null,startedAt:null};
+async function startTimer(masterSId){
+  ACTIVE_TIMER={masterSId,startedAt:Date.now()};
+  showToast("⏱ Timer started");
+  render();
+}
+async function stopTimer(){
+  if(!ACTIVE_TIMER.masterSId) return;
+  const elapsed=Math.round((Date.now()-ACTIVE_TIMER.startedAt)/1000);
+  if(elapsed<5){ACTIVE_TIMER={masterSId:null,startedAt:null};render();return;}
+  STATE.scheduled=STATE.scheduled.map(t=>{
+    if((t.masterScheduledId||t.scheduledId)!==ACTIVE_TIMER.masterSId) return t;
+    const entry={id:gid(),startedAt:new Date(ACTIVE_TIMER.startedAt).toISOString(),endedAt:new Date().toISOString(),seconds:elapsed};
+    return{...t,timeEntries:[...(t.timeEntries||[]),entry]};
+  });
+  await saveScheduled();
+  showToast(`⏱ Logged ${fmtSecs(elapsed)}`);
+  ACTIVE_TIMER={masterSId:null,startedAt:null};
+  render();
+}
+function totalSecondsLogged(task){
+  return(task.timeEntries||[]).reduce((a,e)=>a+(e.seconds||0),0);
+}
+function fmtSecs(s){
+  if(!s) return "0m";
+  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
+  if(h>0) return `${h}h ${m}m`;
+  if(m>0) return `${m}m ${sec}s`;
+  return `${sec}s`;
 }
 
 // ─── ESCAPE HTML ─────────────────────────────────────────────────────────────
@@ -1892,35 +2026,53 @@ function openScheduleModal(task,isReschedule){
   bind();
 }
 
-// ─── CANCEL MODAL ────────────────────────────────────────────────────────────
-function openCancelModal(taskRef){
-  let reason="";
-  const html=`<div class="modal">
-    <div class="m-hdr"><h3 class="m-title">Cancel Task</h3><button class="close-btn" id="cm-close">✕</button></div>
-    <div style="color:#94a3b8;font-size:13px;margin-bottom:10px;font-style:italic">"${e(taskRef.name||"")}"</div>
+// ─── REASON MODAL (generic) ──────────────────────────────────────────────────
+function openReasonModal(title, placeholder, confirmLabel, confirmBg, onConfirm){
+  const html=`<div class="modal" id="reason-modal">
+    <div class="m-hdr"><h3 class="m-title">${e(title)}</h3><button class="close-btn" id="rm-close">✕</button></div>
     <label class="lbl">Reason *</label>
-    <textarea class="ta" rows="3" id="cm-reason" placeholder="Why is this being cancelled?"></textarea>
+    <textarea class="ta" rows="3" id="rm-reason" placeholder="${e(placeholder)}"></textarea>
     <div class="m-act">
-      <button class="c-btn" id="cm-back">Back</button>
-      <button class="o-btn" id="cm-confirm">Confirm</button>
+      <button class="c-btn" id="rm-back">Back</button>
+      <button class="o-btn" id="rm-confirm" style="background:${confirmBg}">${e(confirmLabel)}</button>
     </div>
   </div>`;
   pushModal(html,null);
-  document.getElementById("cm-close").addEventListener("click",popModal);
-  document.getElementById("cm-back").addEventListener("click",popModal);
-  document.getElementById("cm-confirm").addEventListener("click",async()=>{
-    const r=document.getElementById("cm-reason").value.trim();
-    if(!r)return;
-    await changeStatus(taskRef._masterId,taskRef.instanceDate,"Cancelled",r);
-    clearModals();
+  const modal=document.getElementById("reason-modal");
+  const q=(sel)=>modal?modal.querySelector(sel):document.querySelector(sel);
+  q("#rm-close").addEventListener("click",popModal);
+  q("#rm-back").addEventListener("click",popModal);
+  q("#rm-confirm").addEventListener("click",async()=>{
+    const reason=q("#rm-reason").value.trim();
+    if(!reason){
+      const ta=q("#rm-reason");
+      if(ta){ta.style.borderColor="#ef4444";ta.placeholder="Please enter a reason";}
+      return;
+    }
+    popModal();
+    await onConfirm(reason);
   });
 }
 
+// ─── CANCEL MODAL ────────────────────────────────────────────────────────────
+function openCancelModal(taskRef){
+  openReasonModal(
+    `Cancel "${taskRef.name||"task"}"`,
+    "Why is this being cancelled?",
+    "❌ Confirm Cancel",
+    "#7f1d1d",
+    async(reason)=>{
+      await changeStatus(taskRef._masterId,taskRef.instanceDate,"Cancelled",reason);
+      clearModals();
+    }
+  );
+}
+
 // ─── TASK DETAIL MODAL ────────────────────────────────────────────────────────
-let TD_STATE={sec:"details",editMode:false,showSM:false,showCI:false,showUns:false,showEx:false,extr:[],selEx:[],aiLoad:false,note:"",cr:""};
+let TD_STATE={sec:"details",editMode:false,showSM:false,showCI:false,showHold:false,showUns:false,showEx:false,extr:[],selEx:[],aiLoad:false,note:"",cr:""};
 
 function openTaskModal(task){
-  TD_STATE={sec:"details",editMode:false,showSM:false,showCI:false,showUns:false,showEx:false,extr:[],selEx:[],aiLoad:false,note:"",cr:""};
+  TD_STATE={sec:"details",editMode:false,showSM:false,showCI:false,showHold:false,showUns:false,showEx:false,extr:[],selEx:[],aiLoad:false,note:"",cr:""};
   let eName=task.name,ePrio=task.priority,eCat=task.category,eImp=!!task.important,eUrg=!!task.urgent;
   const c=SC[task.status]||SC["Not Started"]; const over=isOverdue(task);
   const relNotes=(task.notes||[]).filter(n=>task.taskType==="recurring"?n.instanceDate===task.instanceDate:true);
@@ -1938,7 +2090,7 @@ function openTaskModal(task){
         <button class="close-btn" id="td-close">✕</button>
       </div>
       <div style="display:flex;gap:4px;background:#111827;border-radius:8px;padding:3px;margin-bottom:16px">
-        ${["details","notes","history"].map(s=>`<button style="flex:1;background:${TD_STATE.sec===s?"#1e3a5f":"none"};border:none;color:${TD_STATE.sec===s?"#60a5fa":"#475569"};padding:7px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600" data-td-sec="${s}">${s.charAt(0).toUpperCase()+s.slice(1)}</button>`).join("")}
+        ${[{id:"details",label:"📋 Details"},{id:"notes",label:"📝 Notes"},{id:"history",label:"🕐 History"}].map(s=>`<button style="flex:1;background:${TD_STATE.sec===s.id?"#1e3a5f":"none"};border:none;color:${TD_STATE.sec===s.id?"#60a5fa":"#475569"};padding:7px 4px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600" data-td-sec="${s.id}">${s.label}</button>`).join("")}
       </div>
       ${TD_STATE.sec==="details"?renderDetailsTab():""}
       ${TD_STATE.sec==="notes"?renderNotesTab():""}
@@ -1947,6 +2099,13 @@ function openTaskModal(task){
   }
 
   function renderDetailsTab(){
+    const subtasks=task.subtasks||[];
+    const subDone=subtasks.filter(s=>s.done).length;
+    const subPct=subtasks.length>0?Math.round((subDone/subtasks.length)*100):null;
+    const totalSecs=totalSecondsLogged(task);
+    const isTimerActive=ACTIVE_TIMER.masterSId===task._masterId;
+    const elapsedLive=isTimerActive?Math.round((Date.now()-ACTIVE_TIMER.startedAt)/1000):0;
+
     if(TD_STATE.editMode){
       return `
         <label class="lbl">Task Name</label>
@@ -1960,30 +2119,77 @@ function openTaskModal(task){
           <label style="display:flex;align-items:center;color:#94a3b8;font-size:13px;cursor:pointer"><input type="checkbox" id="td-eurg"${eUrg?" checked":""} style="margin-right:6px"/> ⚡ Urgent</label>
         </div>
         <div class="m-act">
-          <button class="c-btn" id="td-editcancel">Cancel</button>
-          <button class="o-btn" id="td-editsave">Save</button>
+          <button class="c-btn" id="td-editcancel">✕ Cancel</button>
+          <button class="o-btn" id="td-editsave">💾 Save</button>
         </div>`;
     }
+
     return `
-      <div class="dr"><span class="dr-l">Priority</span><span style="color:${PC[task.priority]}">● ${task.priority}</span></div>
-      <div class="dr"><span class="dr-l">Category</span><span style="color:#e2e8f0">${task.category}</span></div>
-      <div class="dr"><span class="dr-l">Type</span><span style="color:#e2e8f0">${task.taskType==="recurring"?`Recurring (${task.frequency})`:"Single"}</span></div>
-      ${task.taskType==="single"?`<div class="dr"><span class="dr-l">Due Date</span><span style="color:${over?"#f87171":"#e2e8f0"}">${fmtDate(task.dueDate)}</span></div>`:""}
+      <!-- Core fields -->
+      <div class="dr"><span class="dr-l">🚦 Priority</span><span style="color:${PC[task.priority]}">● ${task.priority}</span></div>
+      <div class="dr"><span class="dr-l">🗂️ Category</span><span style="color:#e2e8f0">${task.category}</span></div>
+      <div class="dr"><span class="dr-l">🔁 Type</span><span style="color:#e2e8f0">${task.taskType==="recurring"?`Recurring (${task.frequency})`:"Single"}</span></div>
+      ${task.taskType==="single"?`<div class="dr"><span class="dr-l">📅 Due</span><span style="color:${over?"#f87171":"#e2e8f0"}">${fmtDate(task.dueDate)}</span></div>`:""}
       ${task.taskType==="recurring"?`
-        <div class="dr"><span class="dr-l">Occurrence</span><span style="color:${over?"#f87171":"#e2e8f0"}">${fmtDate(task.instanceDate)}</span></div>
-        <div class="dr"><span class="dr-l">Series Start</span><span style="color:#e2e8f0">${fmtDate(task.startDate)}</span></div>
-        <div class="dr"><span class="dr-l">Series End</span><span style="color:#e2e8f0">${task.recurringEndDate?fmtDate(task.recurringEndDate):"Ongoing (1yr)"}</span></div>
-        ${Array.isArray(task.specificDays)&&task.specificDays.length>0?`<div class="dr"><span class="dr-l">Days</span><span style="color:#e2e8f0">${task.specificDays.join(", ")}</span></div>`:""}`:""}
-      <div class="dr"><span class="dr-l">Flags</span><span style="display:flex;gap:5px">
+        <div class="dr"><span class="dr-l">📅 Occurrence</span><span style="color:${over?"#f87171":"#e2e8f0"}">${fmtDate(task.instanceDate)}</span></div>
+        <div class="dr"><span class="dr-l">📅 Series</span><span style="color:#e2e8f0">${fmtDate(task.startDate)} → ${task.recurringEndDate?fmtDate(task.recurringEndDate):"1yr"}</span></div>
+        ${Array.isArray(task.specificDays)&&task.specificDays.length>0?`<div class="dr"><span class="dr-l">📆 Days</span><span style="color:#e2e8f0">${task.specificDays.join(", ")}</span></div>`:""}`:""}
+      <div class="dr"><span class="dr-l">🏷️ Flags</span><span style="display:flex;gap:5px">
         ${task.important?`<span class="f-p">⚑ Important</span>`:""}
         ${task.urgent?`<span class="u-p">⚡ Urgent</span>`:""}
         ${!task.important&&!task.urgent?`<span style="color:#334155;font-size:12px">None</span>`:""}
       </span></div>
-      ${Array.isArray(task.tags)&&task.tags.length>0?`<div class="dr"><span class="dr-l">Tags</span><div style="display:flex;flex-wrap:wrap;gap:4px">${task.tags.map(t=>`<span class="tag">#${e(t)}</span>`).join("")}</div></div>`:""}
-      ${task.cancelReason?`<div class="dr"><span class="dr-l">Reason</span><span style="color:#f87171">${e(task.cancelReason)}</span></div>`:""}
-      <div style="display:flex;gap:6px;margin-top:16px;flex-wrap:wrap">
-        ${!["Cancelled","Completed"].includes(task.status)?`<button class="sm-btn" style="flex:1" id="td-edit">✎ Edit</button>`:""}
-        <button class="sm-btn" style="flex:1" id="td-resched">⟳ Reschedule</button>
+      ${Array.isArray(task.tags)&&task.tags.length>0?`<div class="dr"><span class="dr-l">🔖 Tags</span><div style="display:flex;flex-wrap:wrap;gap:4px">${task.tags.map(t=>`<span class="tag">#${e(t)}</span>`).join("")}</div></div>`:""}
+      ${task.cancelReason?`<div class="dr"><span class="dr-l">❌ Reason</span><span style="color:#f87171">${e(task.cancelReason)}</span></div>`:""}
+      ${task.statusHistory&&task.statusHistory.some(h=>h.status==="On Hold"&&h.reason)?`<div class="dr"><span class="dr-l">⏸️ Hold Reason</span><span style="color:#fbbf24">${e([...task.statusHistory].reverse().find(h=>h.status==="On Hold"&&h.reason)?.reason||"")}</span></div>`:""}
+
+      <!-- Time Tracking -->
+      <div style="background:#0a0a0f;border:1px solid #1e293b;border-radius:9px;padding:11px;margin-top:14px;margin-bottom:4px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em">⏱️ Time Tracked</span>
+          <span style="font-size:14px;font-weight:800;color:${isTimerActive?"#34d399":"#60a5fa"}">${isTimerActive?`🔴 ${fmtSecs(totalSecs+elapsedLive)} (live)`:totalSecs>0?fmtSecs(totalSecs):"—"}</span>
+        </div>
+        ${!["Cancelled","Completed"].includes(task.status)?`
+        <div style="display:flex;gap:8px">
+          ${isTimerActive
+            ?`<button class="o-btn" id="td-timer-stop" style="background:#0d2818;border:1px solid #059669;color:#34d399">⏹ Stop Timer</button>`
+            :`<button class="o-btn" id="td-timer-start" style="background:#1e3a5f;border:1px solid #2563eb;color:#60a5fa">▶ Start Timer</button>`}
+        </div>`:""}
+        ${(task.timeEntries||[]).length>0?`<div style="margin-top:8px;max-height:80px;overflow-y:auto">
+          ${[...(task.timeEntries||[])].reverse().slice(0,5).map(en=>`<div style="font-size:10px;color:#475569;padding:2px 0;border-bottom:1px solid #0f172a">
+            ${new Date(en.startedAt).toLocaleDateString("en-US",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"})} · <span style="color:#64748b">${fmtSecs(en.seconds)}</span>
+          </div>`).join("")}
+        </div>`:""}
+      </div>
+
+      <!-- Subtasks -->
+      <div style="background:#0a0a0f;border:1px solid #1e293b;border-radius:9px;padding:11px;margin-top:8px;margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em">✅ Subtasks</span>
+          ${subPct!==null?`<div style="display:flex;align-items:center;gap:6px">
+            <div style="width:60px;height:5px;background:#1e293b;border-radius:3px;overflow:hidden"><div style="height:100%;width:${subPct}%;background:${subPct===100?"#34d399":"#3b82f6"};border-radius:3px;transition:width .3s"></div></div>
+            <span style="font-size:11px;font-weight:700;color:${subPct===100?"#34d399":"#60a5fa"}">${subDone}/${subtasks.length}</span>
+          </div>`:""}
+        </div>
+        ${subtasks.map(s=>`
+          <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #0f172a">
+            <button data-sub-toggle="${s.id}" style="width:18px;height:18px;border:2px solid ${s.done?"#059669":"#334155"};border-radius:4px;background:${s.done?"#0d2818":"transparent"};cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:#34d399">
+              ${s.done?"✓":""}
+            </button>
+            <span style="flex:1;font-size:12px;color:${s.done?"#475569":"#e2e8f0"};${s.done?"text-decoration:line-through":""}">${e(s.name)}</span>
+            <button data-sub-del="${s.id}" style="background:none;border:none;color:#334155;cursor:pointer;font-size:12px;padding:2px 4px;">✕</button>
+          </div>`).join("")}
+        ${!["Cancelled","Completed"].includes(task.status)?`
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <input class="inp" id="td-sub-inp" placeholder="Add subtask..." style="flex:1;padding:7px 10px;font-size:12px"/>
+          <button id="td-sub-add" class="o-btn" style="padding:7px 12px;font-size:12px">+ Add</button>
+        </div>`:""}
+      </div>
+
+      <!-- Actions -->
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${!["Cancelled","Completed"].includes(task.status)?`<button class="sm-btn" style="flex:1" id="td-edit">✏️ Edit</button>`:""}
+        <button class="sm-btn" style="flex:1" id="td-resched">🔄 Reschedule</button>
         <button class="sm-btn" style="flex:1;color:#f87171;border-color:#dc262655" id="td-unsched">↩ Unschedule</button>
       </div>
       ${TD_STATE.showUns?`<div style="background:#1c0a0a;border:1px solid #dc262666;border-radius:8px;padding:12px;margin-top:10px">
@@ -1995,17 +2201,25 @@ function openTaskModal(task){
       </div>`:""}
       ${!["Cancelled","Completed"].includes(task.status)?`
         <div style="margin-top:12px">
-          <button class="o-btn" style="width:100%" id="td-status-btn">Change Status ▾</button>
+          <button class="o-btn" style="width:100%;background:#1e293b;color:#94a3b8;border:1px solid #334155" id="td-status-btn">🔀 Change Status ▾</button>
           ${TD_STATE.showSM?`<div class="s-mnu">
-            ${STATUSES.filter(s=>s!==task.status).map(s=>{const sc=SC[s];return`<button class="s-mi" style="color:${sc.text}" data-td-status="${s}">${s}</button>`;}).join("")}
+            ${STATUSES.filter(s=>s!==task.status).map(s=>{const sc=SC[s];const icons={"Not Started":"⏳","In Progress":"⚡","On Hold":"⏸️","Completed":"✅","Cancelled":"❌"};return`<button class="s-mi" style="color:${sc.text}" data-td-status="${s}">${icons[s]||""} ${s}</button>`;}).join("")}
           </div>`:""}
         </div>
-        ${TD_STATE.showCI?`<div style="margin-top:12px">
-          <label class="lbl">Cancellation Reason *</label>
+        ${TD_STATE.showCI?`<div style="background:#1c0a0a;border:1px solid #dc262666;border-radius:8px;padding:12px;margin-top:10px">
+          <div style="color:#f87171;font-size:12px;font-weight:700;margin-bottom:6px">❌ Cancellation Reason *</div>
           <textarea class="ta" rows="3" id="td-cr" placeholder="Why is this being cancelled?">${e(TD_STATE.cr)}</textarea>
           <div class="m-act">
             <button class="c-btn" id="td-ci-back">Back</button>
-            <button class="o-btn" id="td-ci-confirm">Confirm</button>
+            <button class="o-btn" style="background:#7f1d1d" id="td-ci-confirm">Confirm Cancel</button>
+          </div>
+        </div>`:""}
+        ${TD_STATE.showHold?`<div style="background:#2d2006;border:1px solid #d9770666;border-radius:8px;padding:12px;margin-top:10px">
+          <div style="color:#fbbf24;font-size:12px;font-weight:700;margin-bottom:6px">⏸️ On Hold Reason *</div>
+          <textarea class="ta" rows="3" id="td-hold-reason" placeholder="Why is this being put on hold?"></textarea>
+          <div class="m-act">
+            <button class="c-btn" id="td-hold-back">Back</button>
+            <button class="o-btn" style="background:#92400e;color:#fde68a" id="td-hold-confirm">Confirm Hold</button>
           </div>
         </div>`:""}
       `:""}`;
@@ -2062,63 +2276,106 @@ function openTaskModal(task){
   }
 
   function bind(){
-    const tdClose=document.getElementById("td-close");
+    const modal=document.getElementById("td-modal");
+    const q=(sel)=>modal?modal.querySelector(sel):document.querySelector(sel);
+    const qa=(sel)=>modal?modal.querySelectorAll(sel):document.querySelectorAll(sel);
+
+    const tdClose=q("#td-close");
     if(tdClose) tdClose.addEventListener("click",popModal);
 
-    document.querySelectorAll("[data-td-sec]").forEach(b=>b.addEventListener("click",()=>{TD_STATE.sec=b.dataset.tdSec;rerender();}));
+    qa("[data-td-sec]").forEach(b=>b.addEventListener("click",()=>{TD_STATE.sec=b.dataset.tdSec;rerender();}));
 
     // details tab
-    const tdEdit=document.getElementById("td-edit");
+    const tdEdit=q("#td-edit");
     if(tdEdit) tdEdit.addEventListener("click",()=>{TD_STATE.editMode=true;rerender();});
-    const tdEditCancel=document.getElementById("td-editcancel");
+    const tdEditCancel=q("#td-editcancel");
     if(tdEditCancel) tdEditCancel.addEventListener("click",()=>{TD_STATE.editMode=false;rerender();});
-    const tdEditSave=document.getElementById("td-editsave");
+    const tdEditSave=q("#td-editsave");
     if(tdEditSave) tdEditSave.addEventListener("click",async()=>{
-      const ni=document.getElementById("td-ename"); if(ni)eName=ni.value.trim();
-      const ii=document.getElementById("td-eimp"); if(ii)eImp=ii.checked;
-      const ui=document.getElementById("td-eurg"); if(ui)eUrg=ui.checked;
+      const ni=q("#td-ename"); if(ni)eName=ni.value.trim();
+      const ii=q("#td-eimp"); if(ii)eImp=ii.checked;
+      const ui=q("#td-eurg"); if(ui)eUrg=ui.checked;
       await editMeta(task._masterId,{name:eName,priority:ePrio,category:eCat,important:eImp,urgent:eUrg});
       TD_STATE.editMode=false; clearModals();
     });
-    document.querySelectorAll("[data-td-eprio]").forEach(b=>b.addEventListener("click",()=>{ePrio=b.dataset.tdEprio;rerender();}));
-    document.querySelectorAll("[data-td-ecat]").forEach(b=>b.addEventListener("click",()=>{eCat=b.dataset.tdEcat;rerender();}));
+    qa("[data-td-eprio]").forEach(b=>b.addEventListener("click",()=>{ePrio=b.dataset.tdEprio;rerender();}));
+    qa("[data-td-ecat]").forEach(b=>b.addEventListener("click",()=>{eCat=b.dataset.tdEcat;rerender();}));
 
-    const tdResched=document.getElementById("td-resched");
+    const tdResched=q("#td-resched");
     if(tdResched) tdResched.addEventListener("click",()=>{popModal();openScheduleModal(task,true);});
-    const tdUnsched=document.getElementById("td-unsched");
+    const tdUnsched=q("#td-unsched");
     if(tdUnsched) tdUnsched.addEventListener("click",()=>{TD_STATE.showUns=true;rerender();});
-    const tdUnsKeep=document.getElementById("td-uns-keep");
+    const tdUnsKeep=q("#td-uns-keep");
     if(tdUnsKeep) tdUnsKeep.addEventListener("click",()=>{TD_STATE.showUns=false;rerender();});
-    const tdUnsConfirm=document.getElementById("td-uns-confirm");
+    const tdUnsConfirm=q("#td-uns-confirm");
     if(tdUnsConfirm) tdUnsConfirm.addEventListener("click",async()=>{await unscheduleSC(task._masterId);clearModals();});
 
-    const tdStatusBtn=document.getElementById("td-status-btn");
-    if(tdStatusBtn) tdStatusBtn.addEventListener("click",()=>{TD_STATE.showSM=!TD_STATE.showSM;rerender();});
-    document.querySelectorAll("[data-td-status]").forEach(b=>b.addEventListener("click",async()=>{
+    const tdStatusBtn=q("#td-status-btn");
+    if(tdStatusBtn) tdStatusBtn.addEventListener("click",()=>{TD_STATE.showSM=!TD_STATE.showSM;TD_STATE.showCI=false;TD_STATE.showHold=false;rerender();});
+    qa("[data-td-status]").forEach(b=>b.addEventListener("click",async()=>{
       const s=b.dataset.tdStatus;
-      if(s==="Cancelled"){TD_STATE.showCI=true;TD_STATE.showSM=false;rerender();}
+      if(s==="Cancelled"){TD_STATE.showCI=true;TD_STATE.showSM=false;TD_STATE.showHold=false;rerender();}
+      else if(s==="On Hold"){TD_STATE.showHold=true;TD_STATE.showSM=false;TD_STATE.showCI=false;rerender();}
       else{await changeStatus(task._masterId,task.instanceDate,s,"");clearModals();}
     }));
-    const tdCiBack=document.getElementById("td-ci-back");
+    const tdCiBack=q("#td-ci-back");
     if(tdCiBack) tdCiBack.addEventListener("click",()=>{TD_STATE.showCI=false;rerender();});
-    const tdCiConfirm=document.getElementById("td-ci-confirm");
+    const tdCiConfirm=q("#td-ci-confirm");
     if(tdCiConfirm) tdCiConfirm.addEventListener("click",async()=>{
-      const r=document.getElementById("td-cr")?.value?.trim();
+      const r=q("#td-cr")?.value?.trim();
       if(!r)return;
       TD_STATE.cr=r;
       await changeStatus(task._masterId,task.instanceDate,"Cancelled",r);
       clearModals();
     });
+    const tdHoldBack=q("#td-hold-back");
+    if(tdHoldBack) tdHoldBack.addEventListener("click",()=>{TD_STATE.showHold=false;rerender();});
+    const tdHoldConfirm=q("#td-hold-confirm");
+    if(tdHoldConfirm) tdHoldConfirm.addEventListener("click",async()=>{
+      const r=q("#td-hold-reason")?.value?.trim();
+      if(!r)return;
+      await changeStatus(task._masterId,task.instanceDate,"On Hold",r);
+      clearModals();
+    });
+
+    // Timer buttons
+    const timerStart=q("#td-timer-start");
+    if(timerStart) timerStart.addEventListener("click",()=>{startTimer(task._masterId);});
+    const timerStop=q("#td-timer-stop");
+    if(timerStop) timerStop.addEventListener("click",()=>{stopTimer();});
+
+    // Subtask add
+    const subAdd=q("#td-sub-add");
+    if(subAdd) subAdd.addEventListener("click",async()=>{
+      const inp=q("#td-sub-inp");
+      const val=inp?.value?.trim();
+      if(!val) return;
+      await addSubtask(task._masterId,val);
+      // update local task subtasks
+      task.subtasks=[...(task.subtasks||[]),{id:gid(),name:val,done:false,createdAt:new Date().toISOString()}];
+      if(inp) inp.value="";
+      rerender();
+    });
+    qa("[data-sub-toggle]").forEach(b=>b.addEventListener("click",async()=>{
+      await toggleSubtask(task._masterId,b.dataset.subToggle);
+      const sub=(task.subtasks||[]).find(s=>s.id===b.dataset.subToggle);
+      if(sub) sub.done=!sub.done;
+      rerender();
+    }));
+    qa("[data-sub-del]").forEach(b=>b.addEventListener("click",async()=>{
+      await deleteSubtask(task._masterId,b.dataset.subDel);
+      task.subtasks=(task.subtasks||[]).filter(s=>s.id!==b.dataset.subDel);
+      rerender();
+    }));
 
     // notes tab
-    const tdNote=document.getElementById("td-note");
+    const tdNote=q("#td-note");
     if(tdNote) tdNote.addEventListener("input",e=>{TD_STATE.note=e.target.value;});
-    const tdSaveNote=document.getElementById("td-save-note");
+    const tdSaveNote=q("#td-save-note");
     if(tdSaveNote) tdSaveNote.addEventListener("click",async()=>{
-      const noteText=(document.getElementById("td-note")?.value||"").trim();
+      const noteText=(q("#td-note")?.value||"").trim();
       if(!noteText)return;
       await addNote(task._masterId,task.instanceDate,noteText);
-      // Update local notes
       task.notes=[...(task.notes||[]),{id:gid(),text:noteText,instanceDate:task.instanceDate,createdAt:new Date().toISOString()}];
       TD_STATE.note="";
       TD_STATE.aiLoad=true;
@@ -2128,7 +2385,7 @@ function openTaskModal(task){
       if(found.length>0){TD_STATE.extr=found;TD_STATE.selEx=found.map(t=>t.id);TD_STATE.showEx=true;}
       rerender();
     });
-    document.querySelectorAll("[data-ex-id]").forEach(cb=>{
+    qa("[data-ex-id]").forEach(cb=>{
       cb.addEventListener("change",()=>{
         const id=cb.dataset.exId;
         if(cb.checked) TD_STATE.selEx=[...TD_STATE.selEx,id];
@@ -2136,9 +2393,9 @@ function openTaskModal(task){
         rerender();
       });
     });
-    const tdExDismiss=document.getElementById("td-ex-dismiss");
+    const tdExDismiss=q("#td-ex-dismiss");
     if(tdExDismiss) tdExDismiss.addEventListener("click",()=>{TD_STATE.showEx=false;rerender();});
-    const tdExAdd=document.getElementById("td-ex-add");
+    const tdExAdd=q("#td-ex-add");
     if(tdExAdd) tdExAdd.addEventListener("click",async()=>{
       const add=TD_STATE.extr.filter(t=>TD_STATE.selEx.includes(t.id));
       STATE.backlog=[...add.map(t=>({id:gid(),name:t.name,priority:t.priority||"Medium",category:t.category||"Work",tags:[],important:false,urgent:false,createdAt:new Date().toISOString()})),...STATE.backlog];
