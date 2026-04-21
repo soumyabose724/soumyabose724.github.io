@@ -35,7 +35,7 @@
   #nav{position:absolute;bottom:0;left:0;right:0;display:flex;background:#0d1117;border-top:1px solid #1e293b;z-index:100;padding-bottom:env(safe-area-inset-bottom);}
   .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 2px;background:none;border:none;cursor:pointer;color:#475569;transition:color .15s;}
   .nav-btn.active{color:#60a5fa;}
-  .nav-ico{font-size:16px;line-height:1;}
+  .nav-ico{font-size:18px;line-height:1;}
   .nav-lbl{font-size:9px;margin-top:2px;font-weight:500;}
   .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:200;display:flex;align-items:flex-end;justify-content:center;}
   .modal{background:#0d1117;border:1px solid #1e293b;border-radius:18px 18px 0 0;width:100%;max-width:430px;padding:18px;max-height:92vh;overflow-y:auto;}
@@ -127,7 +127,7 @@
       color:#60a5fa;
       border-left-color:#60a5fa;
     }
-    .nav-ico{font-size:17px;}
+    .nav-ico{font-size:18px;}
     .nav-lbl{font-size:13px;font-weight:600;margin-top:0;}
     /* Modals — centered dialog on desktop */
     .overlay{align-items:center;}
@@ -303,11 +303,11 @@
   </div>
   <div id="content"></div>
   <nav id="nav">
-    <button class="nav-btn active" data-tab="dash"><span class="nav-ico">⌂</span><span class="nav-lbl">Home</span></button>
-    <button class="nav-btn" data-tab="backlog"><span class="nav-ico">◈</span><span class="nav-lbl">Backlog</span></button>
-    <button class="nav-btn" data-tab="sched"><span class="nav-ico">◷</span><span class="nav-lbl">Schedule</span></button>
+    <button class="nav-btn active" data-tab="dash"><span class="nav-ico">🏠</span><span class="nav-lbl">Home</span></button>
+    <button class="nav-btn" data-tab="backlog"><span class="nav-ico">📋</span><span class="nav-lbl">Backlog</span></button>
+    <button class="nav-btn" data-tab="sched"><span class="nav-ico">📅</span><span class="nav-lbl">Schedule</span></button>
     <button class="nav-btn" data-tab="matrix"><span class="nav-ico">⊞</span><span class="nav-lbl">Matrix</span></button>
-    <button class="nav-btn" data-tab="kanban"><span class="nav-ico">⋮⋮</span><span class="nav-lbl">Kanban</span></button>
+    <button class="nav-btn" data-tab="kanban"><span class="nav-ico">🗂️</span><span class="nav-lbl">Kanban</span></button>
   </nav>
 </div>
 <div id="modal-root"></div>
@@ -320,7 +320,17 @@ const CATEGORIES  = ["Work","Personal","Learning"];
 const STATUSES    = ["Not Started","In Progress","On Hold","Completed","Cancelled"];
 const FREQUENCIES = ["Daily","Weekly","Monthly","Specific Weekdays"];
 const WEEKDAYS    = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-const TAG_SUGG    = ["urgent","deep-work","meeting","review","research","admin","creative","health","finance","family","side-project","reading","exercise","networking"];
+// Base preset suggestions — user-added tags are merged in at runtime
+const TAG_SUGG_BASE = ["urgent","deep-work","meeting","review","research","admin","creative","health","finance","family","side-project","reading","exercise","networking"];
+let TAG_SUGG = [...TAG_SUGG_BASE]; // mutable; extended with user-added tags
+
+// Collect all unique tags ever used across backlog + scheduled, merge with base presets
+function refreshTagSugg(){
+  const used=new Set(TAG_SUGG_BASE);
+  STATE.backlog.forEach(t=>(t.tags||[]).forEach(g=>used.add(g)));
+  STATE.scheduled.forEach(t=>(t.tags||[]).forEach(g=>used.add(g)));
+  TAG_SUGG=[...used].sort((a,b)=>a.localeCompare(b));
+}
 const SC = {
   "Not Started":{bg:"#1e293b",text:"#94a3b8",border:"#334155"},
   "In Progress":{bg:"#1e3a5f",text:"#60a5fa",border:"#2563eb"},
@@ -508,9 +518,10 @@ async function loadState() {
   STATE.backlog   = await dbGetAll("backlog");
   STATE.scheduled = await dbGetAll("scheduled");
   if("Notification" in window) STATE.notifOk = Notification.permission==="granted";
+  refreshTagSugg();
 }
-async function saveBacklog()   { await dbSaveBacklog(STATE.backlog); }
-async function saveScheduled() { await dbSaveScheduled(STATE.scheduled); }
+async function saveBacklog()   { await dbSaveBacklog(STATE.backlog); refreshTagSugg(); }
+async function saveScheduled() { await dbSaveScheduled(STATE.scheduled); refreshTagSugg(); }
 
 // ─── AI ───────────────────────────────────────────────────────────────────────
 async function aiExtractTasks(text){
@@ -1580,8 +1591,10 @@ function openTaskFormModal(task){
   // Renders only the suggestions dropdown
   function updateSugg(){
     const existing=document.getElementById("tf-sugg");
-    const suggs=tagInpVal.length>0
-      ? TAG_SUGG.filter(s=>s.includes(tagInpVal.toLowerCase())&&!tags.includes(s))
+    const ti=document.getElementById("tf-taginp");
+    const liveVal=(ti?ti.value:tagInpVal).toLowerCase();
+    const suggs=liveVal.length>0
+      ? TAG_SUGG.filter(s=>s.includes(liveVal)&&!tags.includes(s))
       : [];
     if(suggs.length===0){
       if(existing) existing.remove();
@@ -1611,7 +1624,7 @@ function openTaskFormModal(task){
       <div class="opt-row" id="tf-prio-row">${PRIORITIES.map(p=>`<button class="opt-btn" style="${prio===p?`background:${PC[p]}33;border:1px solid ${PC[p]};color:${PC[p]}`:""}" data-tf-prio="${p}">${p}</button>`).join("")}</div>
       <label class="lbl">Category</label>
       <div class="opt-row" id="tf-cat-row">${CATEGORIES.map(c=>`<button class="opt-btn${cat===c?" opt-on":""}" data-tf-cat="${c}">${c}</button>`).join("")}</div>
-      <label class="lbl">Tags <span style="color:#334155;text-transform:none;font-weight:400;font-size:10px">(Enter or comma)</span></label>
+      <label class="lbl">Tags <span style="color:#334155;text-transform:none;font-weight:400;font-size:10px">(Enter, comma, or Save to add)</span></label>
       <div class="tag-box" id="tf-tag-box">
         ${tags.map(t=>`<span class="tag" style="display:inline-flex;align-items:center;gap:3px">#${e(t)}<button style="background:none;border:none;color:#7dd3fc;cursor:pointer;padding:0;margin-left:2px;font-size:10px;line-height:1" data-tf-rmtag="${t}">✕</button></span>`).join("")}
         <input class="tag-inp" id="tf-taginp" placeholder="${tags.length===0?"Add tag…":""}"/>
@@ -1677,9 +1690,10 @@ function openTaskFormModal(task){
       ti.addEventListener("keydown",ev=>{
         if(ev.key==="Enter"||ev.key===","){
           ev.preventDefault();
-          addTag(tagInpVal);
+          const val=ti.value.replace(/,/g,"").trim();
+          if(val) addTag(val);
         }
-        if(ev.key==="Backspace"&&tagInpVal===""){
+        if(ev.key==="Backspace"&&ti.value===""){
           tags=tags.slice(0,-1);
           updateTagBox();
           updateSugg();
@@ -1690,6 +1704,9 @@ function openTaskFormModal(task){
     document.getElementById("tf-save").addEventListener("click",async()=>{
       name=document.getElementById("tf-name").value.trim();
       if(!name)return;
+      // Commit any tag text that was typed but not confirmed with Enter/comma
+      const ti=document.getElementById("tf-taginp");
+      if(ti&&ti.value.trim()) addTag(ti.value);
       if(task){
         STATE.backlog=STATE.backlog.map(t=>t.id===task.id?{...t,name,priority:prio,category:cat,tags:[...tags],important:imp,urgent:urg}:t);
         await saveBacklog(); showToast("Updated");
