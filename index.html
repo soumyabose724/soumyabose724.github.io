@@ -60,10 +60,9 @@
       margin:0 auto;
       display:grid;
       grid-template-columns:220px 1fr;
-      grid-template-rows:auto auto 1fr;
+      grid-template-rows:auto 1fr;
       grid-template-areas:
         "sidebar header"
-        "sidebar banner"
         "sidebar content";
       overflow:hidden;
       border-left:1px solid #1e293b;
@@ -75,10 +74,6 @@
       border-left:1px solid #1e293b;
     }
     #header .logo{font-size:0;}
-    #install-banner{
-      grid-area:banner;
-      border-left:1px solid #1e293b;
-    }
     #content{
       grid-area:content;
       padding-bottom:24px;
@@ -275,11 +270,6 @@
   .cancel-zone{border:1px dashed #dc262655;border-radius:10px;padding:12px;text-align:center;color:#7f1d1d;font-size:12px;}
   input[type=checkbox]{accent-color:#3b82f6;}
   @keyframes spin{to{transform:rotate(360deg);}}
-  #install-banner{display:none;align-items:center;justify-content:space-between;background:#1e3a5f;border-bottom:1px solid #2563eb;padding:9px 14px;gap:10px;flex-shrink:0;}
-  #install-banner .ib-text{font-size:12px;color:#93c5fd;font-weight:600;flex:1;}
-  #install-banner .ib-sub{font-size:10px;color:#60a5fa;margin-top:1px;}
-  #install-banner .ib-btn{background:#2563eb;border:none;border-radius:7px;color:#fff;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;}
-  #install-banner .ib-close{background:none;border:none;color:#60a5fa;font-size:14px;cursor:pointer;padding:2px 6px;flex-shrink:0;}
   .ins-how{background:#111827;border:1px solid #1e293b;border-radius:9px;padding:12px;margin-top:8px;font-size:11px;color:#94a3b8;line-height:1.7;}
   .ins-how b{color:#60a5fa;}
 </style>
@@ -292,14 +282,6 @@
       <button class="sett-btn" id="btn-settings">⚙</button>
       <span class="hdate" id="hdate"></span>
     </div>
-  </div>
-  <div id="install-banner">
-    <div>
-      <div class="ib-text">📱 Install FlowTask</div>
-      <div class="ib-sub">Add to home screen for the best experience</div>
-    </div>
-    <button class="ib-btn" id="install-btn">Install</button>
-    <button class="ib-close" id="install-dismiss">✕</button>
   </div>
   <div id="content"></div>
   <nav id="nav">
@@ -400,7 +382,9 @@ const isOverdue = t => {
   if(t.taskType==="recurring") return !!(t.instanceDate&&t.instanceDate<td);
   return false;
 };
-const taskDate = t => t.taskType==="recurring"?t.instanceDate:(t.dueDate||t.startDate||"");
+// taskDate returns the date a task instance "lives on" for display/filtering purposes.
+// For recurring: instanceDate. For single: startDate first, then dueDate fallback.
+const taskDate = t => t.taskType==="recurring"?t.instanceDate:(t.startDate||t.dueDate||"");
 const getMasterId = t => t.masterScheduledId || t.scheduledId;
 
 // ─── TASK DURATION HELPERS ────────────────────────────────────────────────────
@@ -1150,9 +1134,9 @@ function renderBacklog(){
           </div>
           ${!BL_STATE.bulk?`<div style="display:flex;gap:4px;flex-shrink:0">
             <button class="ico-btn" data-bl-sched="${t.id}" title="Schedule" style="font-size:15px">📅</button>
-            <button class="ico-btn" data-bl-clone="${t.id}" title="Clone">⧉</button>
-            <button class="ico-btn" data-bl-edit="${t.id}" title="Edit">✎</button>
-            <button class="ico-btn" style="color:#ef4444" data-bl-del="${t.id}" title="Delete">✕</button>
+            <button class="ico-btn" data-bl-clone="${t.id}" title="Duplicate" style="font-size:15px">📋</button>
+            <button class="ico-btn" data-bl-edit="${t.id}" title="Edit" style="font-size:15px">✏️</button>
+            <button class="ico-btn" style="color:#ef4444;font-size:15px" data-bl-del="${t.id}" title="Delete">🗑️</button>
           </div>`:""}
         </div>`).join("")}
     </div>`}
@@ -1256,7 +1240,8 @@ function renderTCard(t){
         <span style="font-size:10px;color:${subPct===100?"#34d399":"#60a5fa"};font-weight:600;white-space:nowrap">✅ ${subDone}/${subs.length}</span>
       </div>`:""}
       <div style="font-size:11px;color:${over?"#f87171":"#64748b"};margin-top:3px">
-        ${t.taskType==="single"?`📅 Due: ${fmtDate(t.dueDate)}`:`📅 ${fmtDate(t.instanceDate)}`}
+        ${t.taskType==="single"?`📅 ${fmtDate(t.startDate||t.dueDate)}`:`📅 ${fmtDate(t.instanceDate)}`}
+        ${t.startTime?` · ⏰ ${t.startTime}`:""}${t.endTime?` — ${t.endTime}`:""}
       </div>
       ${Array.isArray(t.tags)&&t.tags.length>0?`<div class="t-row">${t.tags.map(g=>`<span class="tag">#${e(g)}</span>`).join("")}</div>`:""}
     </div>
@@ -1264,10 +1249,25 @@ function renderTCard(t){
   </div>`;
 }
 function renderTL(allInst){
-  const tasks=allInst.filter(t=>taskDate(t)===SC_STATE.selDate);
-  const hours=Array.from({length:24},(_,i)=>i);
+  const tasks=allInst.filter(t=>taskDate(t)===SC_STATE.selDate&&t.startTime);
   const catColors={Work:"#60a5fa",Personal:"#34d399",Learning:"#f59e0b"};
   const hrsEntries=CATEGORIES.map(c=>({c,h:mergedCategoryHours(tasks,c)})).filter(x=>x.h>0);
+  const ROW_H=56; // px per hour row
+  const allHours=Array.from({length:24},(_,i)=>i);
+
+  // Build positioned task blocks
+  // Each task: top = startMins/60 * ROW_H, height = durationMins/60 * ROW_H (min 28px)
+  function taskBlock(t){
+    const [sh,sm]=t.startTime.split(":").map(Number);
+    const startPx=(sh*60+sm)/60*ROW_H;
+    const span=taskMinuteSpan(t);
+    const heightPx=span?Math.max(28,(span[1]-span[0])/60*ROW_H):28;
+    const c=SC[t.status]||SC["Not Started"];
+    const over=isOverdue(t);
+    return{t,startPx,heightPx,c,over};
+  }
+  const blocks=tasks.map(taskBlock).sort((a,b)=>a.startPx-b.startPx);
+
   return `
     <div class="d-nav">
       <button class="n-arr" data-sc-date-offset="-1">‹</button>
@@ -1279,16 +1279,29 @@ function renderTL(allInst){
       ${hrsEntries.map(({c,h})=>`<span style="font-size:10px;background:${catColors[c]}18;color:${catColors[c]};border:1px solid ${catColors[c]}44;border-radius:5px;padding:2px 7px;font-weight:600">${c}: ${fmtHours(h)}</span>`).join("")}
     </div>`:""}
     <div class="tl-max" style="overflow-y:auto;max-height:calc(100vh - 280px)">
-      ${hours.map(h=>{
-        const ht=tasks.filter(t=>parseInt((t.startTime||"08:00").split(":")[0])===h);
-        return `<div class="tl-row">
-          <div class="tl-hr">${p2(h)}:00</div>
-          <div class="tl-c">${ht.map(t=>{const c=SC[t.status],over=isOverdue(t);return`
-            <div style="background:${over?"#1c0a0a":c.bg};border-left:3px solid ${over?"#ef4444":c.border};border-radius:5px;padding:4px 7px;cursor:pointer" data-open-task="${t.scheduledId}">
-              <div style="color:${over?"#f87171":c.text};font-weight:600;font-size:12px">${e(t.name)}${over?" ⏰":""}</div>
-              <div style="color:#94a3b8;font-size:10px">${t.startTime||"—"} — ${t.endTime||"?"}${taskHours(t)?` · ${fmtHours(taskHours(t))}`:""}  <span style="color:${catColors[t.category]||"#64748b"}">${t.category}</span></div>
-            </div>`;}).join("")}</div>
-        </div>`;}).join("")}
+      <div style="display:flex;">
+        <!-- Hour labels column -->
+        <div style="width:44px;flex-shrink:0;">
+          ${allHours.map(h=>`<div style="height:${ROW_H}px;color:#334155;font-size:10px;padding-top:5px;text-align:right;padding-right:6px;border-bottom:1px solid #0f172a">${p2(h)}:00</div>`).join("")}
+        </div>
+        <!-- Task area: absolute positioning -->
+        <div style="flex:1;position:relative;border-left:1px solid #1e293b;">
+          <!-- Hour grid lines -->
+          ${allHours.map(h=>`<div style="position:absolute;top:${h*ROW_H}px;left:0;right:0;height:${ROW_H}px;border-bottom:1px solid #0f172a;pointer-events:none"></div>`).join("")}
+          <!-- Task blocks -->
+          ${blocks.map(({t,startPx,heightPx,c,over})=>`
+            <div data-open-task="${t.scheduledId}" style="position:absolute;top:${startPx}px;left:4px;right:4px;height:${heightPx}px;
+              background:${over?"#1c0a0a":c.bg};border-left:3px solid ${over?"#ef4444":c.border};
+              border-radius:5px;padding:4px 7px;cursor:pointer;overflow:hidden;z-index:2;
+              border:1px solid ${over?"#7f1d1d":c.border}33;">
+              <div style="color:${over?"#f87171":c.text};font-weight:600;font-size:11px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e(t.name)}${over?" ⏰":""}</div>
+              ${heightPx>34?`<div style="color:#64748b;font-size:10px;margin-top:1px">${t.startTime}${t.endTime?` — ${t.endTime}`:""}${taskHours(t)?` · ${fmtHours(taskHours(t))}`:""}
+                <span style="color:${catColors[t.category]||"#64748b"};margin-left:4px">${t.category}</span></div>`:""}
+            </div>`).join("")}
+          <!-- Total height spacer -->
+          <div style="height:${24*ROW_H}px;pointer-events:none"></div>
+        </div>
+      </div>
     </div>`;
 }
 function renderCal(allInst){
@@ -2140,8 +2153,13 @@ function openTaskModal(task){
         ${!task.important&&!task.urgent?`<span style="color:#334155;font-size:12px">None</span>`:""}
       </span></div>
       ${Array.isArray(task.tags)&&task.tags.length>0?`<div class="dr"><span class="dr-l">🔖 Tags</span><div style="display:flex;flex-wrap:wrap;gap:4px">${task.tags.map(t=>`<span class="tag">#${e(t)}</span>`).join("")}</div></div>`:""}
-      ${task.cancelReason?`<div class="dr"><span class="dr-l">❌ Reason</span><span style="color:#f87171">${e(task.cancelReason)}</span></div>`:""}
-      ${task.statusHistory&&task.statusHistory.some(h=>h.status==="On Hold"&&h.reason)?`<div class="dr"><span class="dr-l">⏸️ Hold Reason</span><span style="color:#fbbf24">${e([...task.statusHistory].reverse().find(h=>h.status==="On Hold"&&h.reason)?.reason||"")}</span></div>`:""}
+      ${task.status==="Cancelled"&&task.cancelReason?`<div class="dr"><span class="dr-l">❌ Cancel Reason</span><span style="color:#f87171">${e(task.cancelReason)}</span></div>`:""}
+      ${(()=>{
+        if(task.status!=="On Hold"||!task.statusHistory) return "";
+        const lastHold=[...task.statusHistory].reverse().find(h=>h.status==="On Hold"&&h.reason);
+        if(!lastHold) return "";
+        return '<div class="dr"><span class="dr-l">⏸️ Hold Reason</span><span style="color:#fbbf24">'+e(lastHold.reason)+'</span></div>';
+      })()}
 
       <!-- Time Tracking -->
       <div style="background:#0a0a0f;border:1px solid #1e293b;border-radius:9px;padding:11px;margin-top:14px;margin-bottom:4px">
@@ -2226,39 +2244,53 @@ function openTaskModal(task){
   }
 
   function renderNotesTab(){
+    const currentNotes=[...relNotes].reverse();
     return `
-      <textarea class="ta" rows="4" id="td-note" placeholder="Add notes...\n\nTip: Claude AI detects actionable tasks automatically.">${e(TD_STATE.note)}</textarea>
+      <!-- Note input -->
+      <textarea class="ta" rows="3" id="td-note" placeholder="Add a note..." style="font-size:13px">${e(TD_STATE.note)}</textarea>
       <button class="o-btn" style="margin-top:8px;width:100%;${TD_STATE.aiLoad?"opacity:0.7":""}" id="td-save-note" ${TD_STATE.aiLoad?"disabled":""}>
-        ${TD_STATE.aiLoad?"🤖 AI Analyzing...":"Save Note"}
+        ${TD_STATE.aiLoad?"🤖 AI Analyzing...":"💾 Save Note"}
       </button>
-      ${TD_STATE.aiLoad?`<div style="font-size:11px;color:#60a5fa;text-align:center;margin-top:6px">Detecting actionable tasks…</div>`:""}
-      <div style="margin-top:16px">
-        ${relNotes.length===0?`<div style="color:#475569;font-size:13px;text-align:center;padding:20px 0">No notes yet</div>`:
-          [...relNotes].reverse().map(n=>`
-            <div style="background:#111827;border:1px solid #1e293b;border-radius:8px;padding:12px;margin-bottom:8px">
-              <div style="color:#e2e8f0;font-size:13px;white-space:pre-wrap">${e(n.text)}</div>
-              <div style="color:#475569;font-size:10px;margin-top:4px">${new Date(n.createdAt).toLocaleString()}</div>
-            </div>`).join("")}
-      </div>
-      ${TD_STATE.showEx?`<div style="background:#0f1a2e;border:1px solid #1e3a5f;border-radius:10px;padding:14px;margin-top:8px">
-        <div style="color:#60a5fa;font-weight:700;margin-bottom:4px">🤖 AI found ${TD_STATE.extr.length} task(s):</div>
-        <div style="color:#475569;font-size:11px;margin-bottom:10px">Select which to add to backlog</div>
+      ${TD_STATE.aiLoad?`<div style="display:flex;align-items:center;gap:6px;margin-top:8px">
+        <div style="width:12px;height:12px;border:2px solid #3b82f6;border-top-color:transparent;border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0"></div>
+        <span style="font-size:11px;color:#60a5fa">Detecting actionable tasks…</span>
+      </div>`:""}
+      ${TD_STATE.showEx?`<div style="background:#0f1a2e;border:1px solid #1e3a5f;border-radius:10px;padding:12px;margin-top:8px">
+        <div style="color:#60a5fa;font-weight:700;font-size:12px;margin-bottom:4px">🤖 AI found ${TD_STATE.extr.length} task(s):</div>
+        <div style="color:#475569;font-size:11px;margin-bottom:8px">Select which to add to backlog</div>
         ${TD_STATE.extr.map(t=>`
-          <label style="display:flex;align-items:flex-start;padding:6px 0;cursor:pointer;gap:8px">
-            <input type="checkbox" ${TD_STATE.selEx.includes(t.id)?"checked":""} data-ex-id="${t.id}" style="margin-top:2px"/>
-            <div>
-              <div style="color:#e2e8f0;font-size:13px">${e(t.name)}</div>
+          <label style="display:flex;align-items:center;padding:5px 0;cursor:pointer;gap:8px">
+            <input type="checkbox" ${TD_STATE.selEx.includes(t.id)?"checked":""} data-ex-id="${t.id}"/>
+            <div style="flex:1">
+              <div style="color:#e2e8f0;font-size:12px">${e(t.name)}</div>
               <div style="display:flex;gap:4px;margin-top:2px">
                 <span style="font-size:10px;color:${PC[t.priority||"Medium"]};background:#0f172a;border-radius:4px;padding:1px 5px">${t.priority||"Medium"}</span>
                 <span style="font-size:10px;color:#94a3b8;background:#1e293b;border-radius:4px;padding:1px 5px">${t.category||"Work"}</span>
               </div>
             </div>
           </label>`).join("")}
-        <div class="m-act">
+        <div class="m-act" style="margin-top:8px">
           <button class="c-btn" id="td-ex-dismiss">Dismiss</button>
-          <button class="o-btn" id="td-ex-add">Add to Backlog</button>
+          <button class="o-btn" id="td-ex-add">➕ Add to Backlog</button>
         </div>
-      </div>`:""}`;
+      </div>`:""}
+      <!-- Notes list: full height, all notes -->
+      <div style="margin-top:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">📝 Notes (${currentNotes.length})</span>
+        </div>
+        ${currentNotes.length===0?`<div style="color:#475569;font-size:13px;text-align:center;padding:24px 0">No notes yet</div>`
+          :currentNotes.map(n=>`
+            <div style="background:#111827;border:1px solid #1e293b;border-radius:9px;padding:12px;margin-bottom:8px">
+              <div style="color:#e2e8f0;font-size:13px;white-space:pre-wrap;line-height:1.5;margin-bottom:6px">${e(n.text)}</div>
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <span style="color:#475569;font-size:10px">${new Date(n.createdAt).toLocaleString()}</span>
+                <button data-note-to-backlog="${n.id}" style="background:#1e3a5f;border:1px solid #2563eb44;border-radius:5px;color:#60a5fa;font-size:10px;font-weight:600;padding:3px 8px;cursor:pointer">
+                  ➕ Backlog
+                </button>
+              </div>
+            </div>`).join("")}
+      </div>`;
   }
 
   function renderHistoryTab(){
@@ -2375,15 +2407,29 @@ function openTaskModal(task){
     if(tdSaveNote) tdSaveNote.addEventListener("click",async()=>{
       const noteText=(q("#td-note")?.value||"").trim();
       if(!noteText)return;
+      const newNote={id:gid(),text:noteText,instanceDate:task.instanceDate,createdAt:new Date().toISOString()};
       await addNote(task._masterId,task.instanceDate,noteText);
-      task.notes=[...(task.notes||[]),{id:gid(),text:noteText,instanceDate:task.instanceDate,createdAt:new Date().toISOString()}];
+      // Update local task.notes and relNotes immediately so the list refreshes
+      task.notes=[...(task.notes||[]),newNote];
       TD_STATE.note="";
       TD_STATE.aiLoad=true;
-      rerender();
+      rerender(); // instant refresh — note appears right away
       const found=await aiExtractTasks(noteText);
       TD_STATE.aiLoad=false;
       if(found.length>0){TD_STATE.extr=found;TD_STATE.selEx=found.map(t=>t.id);TD_STATE.showEx=true;}
       rerender();
+    });
+    // "➕ Backlog" button on each note
+    qa("[data-note-to-backlog]").forEach(btn=>{
+      btn.addEventListener("click",async()=>{
+        const noteId=btn.dataset.noteToBacklog;
+        const note=(task.notes||[]).find(n=>n.id===noteId);
+        if(!note) return;
+        const newTask={id:gid(),name:note.text.split("\n")[0].slice(0,80),priority:"Medium",category:task.category||"Work",tags:task.tags||[],important:false,urgent:false,createdAt:new Date().toISOString()};
+        STATE.backlog=[newTask,...STATE.backlog];
+        await saveBacklog();
+        showToast("Added to backlog ✓");
+      });
     });
     qa("[data-ex-id]").forEach(cb=>{
       cb.addEventListener("change",()=>{
@@ -2609,33 +2655,11 @@ let _deferredInstallPrompt=null;
 window.addEventListener("beforeinstallprompt",e=>{
   e.preventDefault();
   _deferredInstallPrompt=e;
-  const banner=document.getElementById("install-banner");
-  if(banner) banner.style.display="flex";
 });
 
 window.addEventListener("appinstalled",()=>{
   _deferredInstallPrompt=null;
-  const banner=document.getElementById("install-banner");
-  if(banner) banner.style.display="none";
   showToast("FlowTask installed! 🎉");
-});
-
-document.getElementById("install-btn").addEventListener("click",async()=>{
-  if(_deferredInstallPrompt){
-    _deferredInstallPrompt.prompt();
-    const{outcome}=await _deferredInstallPrompt.userChoice;
-    if(outcome==="accepted"){
-      _deferredInstallPrompt=null;
-      document.getElementById("install-banner").style.display="none";
-    }
-  } else {
-    // File:// or no prompt available — show instructions modal
-    openInstallGuideModal();
-  }
-});
-
-document.getElementById("install-dismiss").addEventListener("click",()=>{
-  document.getElementById("install-banner").style.display="none";
 });
 
 // Show install guide in settings if accessed from file://
@@ -2678,20 +2702,6 @@ window._openInstallGuide=openInstallGuideModal;
   await openDB();
   await loadState();
   render();
-  // Show install banner with guide button if on mobile and no deferred prompt yet
-  // (deferred prompt arrives asynchronously; this shows a softer "how to install" hint)
-  const isMobile=/android|iphone|ipad|ipod/i.test(navigator.userAgent);
-  const isStandalone=window.matchMedia("(display-mode:standalone)").matches||window.navigator.standalone;
-  if(isMobile&&!isStandalone){
-    setTimeout(()=>{
-      if(!_deferredInstallPrompt){
-        // Show banner anyway with manual guide
-        const banner=document.getElementById("install-banner");
-        if(banner) banner.style.display="flex";
-        document.getElementById("install-btn").textContent="How to Install";
-      }
-    },2000);
-  }
 })();
 </script>
 </body>
