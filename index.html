@@ -244,15 +244,41 @@ const isOverdue = t => {
 const taskDate = t => t.taskType==="recurring"?t.instanceDate:(t.dueDate||t.startDate||"");
 const getMasterId = t => t.masterScheduledId || t.scheduledId;
 
-// ─── TASK DURATION HELPER ─────────────────────────────────────────────────────
-// Returns duration in decimal hours between startTime and endTime.
-// Returns null if either is missing or endTime <= startTime.
-function taskHours(t){
+// ─── TASK DURATION HELPERS ────────────────────────────────────────────────────
+// Returns [startMins, endMins] for a task, or null if times missing/invalid.
+function taskMinuteSpan(t){
   if(!t.startTime||!t.endTime) return null;
   const [sh,sm]=t.startTime.split(":").map(Number);
   const [eh,em]=t.endTime.split(":").map(Number);
-  const mins=(eh*60+em)-(sh*60+sm);
-  return mins>0?mins/60:null;
+  const s=sh*60+sm, e=eh*60+em;
+  return e>s?[s,e]:null;
+}
+// Raw (non-merged) hours for a single task — used for individual task display only.
+function taskHours(t){
+  const span=taskMinuteSpan(t);
+  return span?(span[1]-span[0])/60:null;
+}
+// Merge overlapping [start,end] minute intervals and return total minutes covered.
+function mergeIntervals(intervals){
+  if(!intervals.length) return 0;
+  const sorted=[...intervals].sort((a,b)=>a[0]-b[0]);
+  let total=0, cur=sorted[0];
+  for(let i=1;i<sorted.length;i++){
+    const next=sorted[i];
+    if(next[0]<cur[1]){ cur=[cur[0],Math.max(cur[1],next[1])]; }
+    else{ total+=cur[1]-cur[0]; cur=next; }
+  }
+  total+=cur[1]-cur[0];
+  return total;
+}
+// Overlap-safe total hours for a list of tasks filtered to a category.
+// Pass category="All" to sum all categories.
+function mergedCategoryHours(tasks, category){
+  const spans=tasks
+    .filter(t=>category==="All"||t.category===category)
+    .map(taskMinuteSpan)
+    .filter(Boolean);
+  return mergeIntervals(spans)/60;
 }
 // Format decimal hours to "Xh Ym"
 function fmtHours(h){
@@ -403,6 +429,10 @@ async function aiProductivityInsights(allInst){
     priorityBreakdown:priBreakdown,
     backlogSize:STATE.backlog.length,
     trend7days:pm.trend7.map(d=>d.n),
+    workHoursToday:pm.workHoursToday>0?parseFloat(pm.workHoursToday.toFixed(1)):0,
+    personalHoursToday:pm.personalHoursToday>0?parseFloat(pm.personalHoursToday.toFixed(1)):0,
+    learningHoursToday:pm.learningHoursToday>0?parseFloat(pm.learningHoursToday.toFixed(1)):0,
+    workHoursThisWeek:pm.workHoursWeek>0?parseFloat(pm.workHoursWeek.toFixed(1)):0,
   };
   const prompt=`You are a productivity coach. Analyze this user's task management data and return ONLY a JSON array of 4-5 insight objects. No markdown, no preamble.
 
@@ -535,7 +565,26 @@ function computeProductivityMetrics(allInst){
     return{date,n,label:new Date(date+"T00:00:00").toLocaleDateString("en-US",{weekday:"short"})};
   });
 
-  return{weeklyVelocity,avgAgeDays,peakHourLabel,prioAdherence,overdueRate,onHold,trend7};
+  // Work hours today — overlap-safe, all statuses except Cancelled
+  const todayTasks=allInst.filter(t=>taskDate(t)===td&&t.status!=="Cancelled");
+  const workHoursToday=mergedCategoryHours(todayTasks,"Work");
+  const personalHoursToday=mergedCategoryHours(todayTasks,"Personal");
+  const learningHoursToday=mergedCategoryHours(todayTasks,"Learning");
+
+  // Work hours this week (Mon–today) — overlap-safe per day then sum
+  // We sum per-day merged hours across the current week to avoid cross-day merges
+  const workHoursWeek=(()=>{
+    let total=0;
+    for(let i=0;i<7;i++){
+      const date=addDays(td,-i);
+      const dayTasks=allInst.filter(t=>taskDate(t)===date&&t.status!=="Cancelled");
+      total+=mergedCategoryHours(dayTasks,"Work");
+    }
+    return total;
+  })();
+
+  return{weeklyVelocity,avgAgeDays,peakHourLabel,prioAdherence,overdueRate,onHold,trend7,
+    workHoursToday,personalHoursToday,learningHoursToday,workHoursWeek};
 }
 
 // ─── DASHBOARD ────────────────────────────────────────────────────────────────
@@ -625,6 +674,30 @@ function renderDash(allInst){
           <div style="font-size:9px;color:${d.date===td?"#60a5fa":"#475569"};font-weight:${d.date===td?700:400}">${d.label}</div>
         </div>`).join("")}
     </div>
+  </div>
+
+  <!-- Work Hours Today card -->
+  <div class="d-sec" style="border:1px solid #60a5fa33;background:#060d1a;margin-bottom:12px">
+    <div class="d-st" style="margin-bottom:10px">⏱ Today's Scheduled Hours</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
+      <div style="text-align:center;background:#0a0a0f;border-radius:8px;padding:10px 6px;border:1px solid #60a5fa33">
+        <div style="font-size:18px;font-weight:800;color:#60a5fa">${pm.workHoursToday>0?fmtHours(pm.workHoursToday):"—"}</div>
+        <div style="font-size:9px;color:#64748b;margin-top:3px;font-weight:600">WORK</div>
+      </div>
+      <div style="text-align:center;background:#0a0a0f;border-radius:8px;padding:10px 6px;border:1px solid #34d39933">
+        <div style="font-size:18px;font-weight:800;color:#34d399">${pm.personalHoursToday>0?fmtHours(pm.personalHoursToday):"—"}</div>
+        <div style="font-size:9px;color:#64748b;margin-top:3px;font-weight:600">PERSONAL</div>
+      </div>
+      <div style="text-align:center;background:#0a0a0f;border-radius:8px;padding:10px 6px;border:1px solid #f59e0b33">
+        <div style="font-size:18px;font-weight:800;color:#f59e0b">${pm.learningHoursToday>0?fmtHours(pm.learningHoursToday):"—"}</div>
+        <div style="font-size:9px;color:#64748b;margin-top:3px;font-weight:600">LEARNING</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding-top:8px;border-top:1px solid #0f172a">
+      <span style="font-size:11px;color:#64748b">Work this week</span>
+      <span style="font-size:13px;font-weight:700;color:#60a5fa">${pm.workHoursWeek>0?fmtHours(pm.workHoursWeek):"—"}</span>
+    </div>
+    <div style="font-size:10px;color:#334155;margin-top:4px">Overlap-safe · requires start &amp; end time on tasks</div>
   </div>
 
   <!-- Productivity metrics 2-up -->
@@ -862,11 +935,9 @@ function renderDayList(allInst){
   const td=localToday();
   const catColors={Work:"#60a5fa",Personal:"#34d399",Learning:"#f59e0b"};
 
-  // Daily total hours per category (across all dates in view)
+  // Overlap-safe daily hours per category
   function dayHoursByCat(tasks){
-    const h={Work:0,Personal:0,Learning:0};
-    tasks.forEach(t=>{const hrs=taskHours(t);if(hrs&&CATEGORIES.includes(t.category))h[t.category]+=hrs;});
-    return h;
+    return CATEGORIES.reduce((acc,c)=>{acc[c]=mergedCategoryHours(tasks,c);return acc;},{});
   }
 
   return `
@@ -934,7 +1005,7 @@ function renderTL(allInst){
   const tasks=allInst.filter(t=>taskDate(t)===SC_STATE.selDate);
   const hours=Array.from({length:24},(_,i)=>i);
   const catColors={Work:"#60a5fa",Personal:"#34d399",Learning:"#f59e0b"};
-  const hrsEntries=CATEGORIES.map(c=>({c,h:tasks.filter(t=>t.category===c).reduce((a,t)=>{const h=taskHours(t);return a+(h||0);},0)})).filter(x=>x.h>0);
+  const hrsEntries=CATEGORIES.map(c=>({c,h:mergedCategoryHours(tasks,c)})).filter(x=>x.h>0);
   return `
     <div class="d-nav">
       <button class="n-arr" data-sc-date-offset="-1">‹</button>
@@ -982,7 +1053,7 @@ function renderCal(allInst){
     ${selTasks.length>0?`<div style="margin-top:12px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
         <div style="font-size:11px;color:#475569;font-weight:600">${fmtDate(SC_STATE.selDate)}</div>
-        ${(()=>{const catColors={Work:"#60a5fa",Personal:"#34d399",Learning:"#f59e0b"};const he=CATEGORIES.map(c=>({c,h:selTasks.filter(t=>t.category===c).reduce((a,t)=>{const h=taskHours(t);return a+(h||0);},0)})).filter(x=>x.h>0);return he.length>0?`<div style="display:flex;gap:4px;flex-wrap:wrap">${he.map(({c,h})=>`<span style="font-size:9px;background:${catColors[c]}18;color:${catColors[c]};border:1px solid ${catColors[c]}44;border-radius:4px;padding:1px 5px;font-weight:600">${c[0]}: ${fmtHours(h)}</span>`).join("")}</div>`:"";})()}
+        ${(()=>{const catColors={Work:"#60a5fa",Personal:"#34d399",Learning:"#f59e0b"};const he=CATEGORIES.map(c=>({c,h:mergedCategoryHours(selTasks,c)})).filter(x=>x.h>0);return he.length>0?`<div style="display:flex;gap:4px;flex-wrap:wrap">${he.map(({c,h})=>`<span style="font-size:9px;background:${catColors[c]}18;color:${catColors[c]};border:1px solid ${catColors[c]}44;border-radius:4px;padding:1px 5px;font-weight:600">${c[0]}: ${fmtHours(h)}</span>`).join("")}</div>`:"";})()}
       </div>
       <div class="list">${selTasks.map(t=>renderTCard(t)).join("")}</div>
     </div>`:""}`;
@@ -1050,8 +1121,8 @@ function renderKanban(allInst){
     {id:"all",    label:"All",    cnt:allInst.length,                               color:"#64748b"},
   ];
   const catColors={Work:"#60a5fa",Personal:"#34d399",Learning:"#f59e0b"};
-  // hours summary for the current pool
-  const hrsEntries=CATEGORIES.map(c=>({c,h:pool.filter(t=>t.category===c).reduce((a,t)=>{const h=taskHours(t);return a+(h||0);},0)})).filter(x=>x.h>0);
+  // overlap-safe total hours for the current pool
+  const hrsEntries=CATEGORIES.map(c=>({c,h:mergedCategoryHours(pool,c)})).filter(x=>x.h>0);
   return `<div class="view">
     <div class="view-header"><h2 class="view-title">Kanban</h2></div>
     <div style="display:flex;gap:3px;background:#111827;border-radius:8px;padding:3px;margin-bottom:10px">
