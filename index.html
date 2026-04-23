@@ -1538,6 +1538,9 @@ function renderDayList(allInst){
       const cancelled=tasks.filter(t=>t.status==="Cancelled");
       const hrs=dayHoursByCat(tasks);
       const hrsEntries=CATEGORIES.map(c=>({c,h:hrs[c]})).filter(x=>x.h>0);
+      // For past dates: hide completed by default unless all tasks are completed (show summary)
+      const hidePastDone=isPast&&!isToday&&done.length>0&&active.length===0&&cancelled.length===0;
+      const showDoneToggle=isPast&&!isToday&&done.length>0&&active.length>0;
       return `<div style="margin-bottom:20px">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
           <div style="flex:1;height:1px;background:#1e293b"></div>
@@ -1549,12 +1552,20 @@ function renderDayList(allInst){
           <span style="font-size:10px;color:#475569;font-weight:600;align-self:center">⏱</span>
           ${hrsEntries.map(({c,h})=>`<span style="font-size:10px;background:${catColor(c)}18;color:${catColor(c)};border:1px solid ${catColor(c)}44;border-radius:5px;padding:2px 7px;font-weight:600">${c}: ${fmtHours(h)}</span>`).join("")}
         </div>`:""}
-        <div class="list">${active.map(t=>renderTCard(t)).join("")}</div>
-        ${cancelled.length>0?`<div class="list" style="margin-top:6px;opacity:0.5">${cancelled.map(t=>renderTCard(t)).join("")}</div>`:""}
-        ${done.length>0?`<div style="margin-top:6px">
-          <div style="font-size:10px;color:#334155;margin-bottom:4px;padding-left:4px">✓ Completed (${done.length})</div>
-          <div class="list" style="opacity:0.6">${done.map(t=>renderTCard(t)).join("")}</div>
+        ${hidePastDone
+          ? `<div style="display:flex;align-items:center;gap:6px;padding:6px 8px;background:#0d2818;border-radius:7px;border:1px solid #059669">
+              <span style="font-size:11px;color:#34d399">✅ ${done.length} completed</span>
+              <button data-sc-show-done="${date}" style="margin-left:auto;background:none;border:1px solid #059669;border-radius:5px;color:#34d399;font-size:10px;padding:2px 8px;cursor:pointer">Show</button>
+            </div>`
+          : `<div class="list">${active.map(t=>renderTCard(t)).join("")}</div>
+        ${cancelled.length>0?`<div class="list" style="margin-top:6px">${cancelled.map(t=>renderTCard(t)).join("")}</div>`:""}
+        ${done.length>0?`<div style="margin-top:6px" ${showDoneToggle?`id="done-section-${date}"`:""}">
+          ${showDoneToggle?`<button data-sc-toggle-done="${date}" style="font-size:10px;color:#334155;margin-bottom:4px;padding:2px 6px;background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:4px">▸ Completed (${done.length})</button>
+          <div id="done-list-${date}" style="display:none">${done.map(t=>renderTCard(t)).join("")}</div>`
+          :`<div style="font-size:10px;color:#334155;margin-bottom:4px;padding-left:4px">✓ Completed (${done.length})</div>
+          <div class="list">${done.map(t=>renderTCard(t)).join("")}</div>`}
         </div>`:""}
+        `}
       </div>`;
     }).join("")}`;
 }
@@ -1564,21 +1575,24 @@ function renderTCard(t){
   const subPct=subs.length>0?Math.round((subDone/subs.length)*100):null;
   const tSecs=totalSecondsLogged(t);
   const canComplete=!["Completed","Cancelled"].includes(t.status);
+  const canInProgress=!["Completed","Cancelled","In Progress"].includes(t.status);
   const sid=t.scheduledId;
-  return `<div class="swipe-container sc-swipe-container" data-sc-sid="${sid}">
-    <!-- Right actions: Complete / Hold / Cancel -->
+  const opacity=t.status==="Completed"?";opacity:0.7":t.status==="Cancelled"?";opacity:0.45":"";
+  return `<div class="swipe-container sc-swipe-container" data-sc-sid="${sid}"${opacity?` style="${opacity.slice(1)}"`:""}">
+    <!-- Right actions: status changes -->
     <div class="swipe-actions-right">
       ${canComplete?`<button class="swipe-act-btn" data-sc-complete="${sid}" style="background:#059669;color:#fff">✅<span>Done</span></button>`:""}
+      ${canInProgress?`<button class="swipe-act-btn" data-sc-inprog="${sid}" style="background:#1d4ed8;color:#fff">⚡<span>Start</span></button>`:""}
       ${canComplete&&t.status!=="On Hold"?`<button class="swipe-act-btn" data-sc-hold="${sid}" style="background:#d97706;color:#fff">⏸<span>Hold</span></button>`:""}
       ${canComplete?`<button class="swipe-act-btn" data-sc-cancel="${sid}" style="background:#dc2626;color:#fff">❌<span>Cancel</span></button>`:""}
-      ${!canComplete?`<button class="swipe-act-btn" data-sc-reopen="${sid}" style="background:#2563eb;color:#fff">↩<span>Reopen</span></button>`:""}
+      ${!canComplete?`<button class="swipe-act-btn" data-sc-reopen="${sid}" style="background:#475569;color:#fff">↩<span>Reopen</span></button>`:""}
     </div>
     <!-- Left actions: Detail / Reschedule -->
     <div class="swipe-actions-left">
       <button class="swipe-act-btn" data-sc-detail="${sid}" style="background:#0284c7;color:#fff">🔍<span>Detail</span></button>
       <button class="swipe-act-btn" data-sc-resched="${sid}" style="background:#7c3aed;color:#fff">📅<span>Reschedule</span></button>
     </div>
-    <div class="card swipe-card" style="border-left:3px solid ${over?"#ef4444":c.border};${over?"background:#1c0a0a":""}${t.status==="Completed"?"opacity:0.75":""}">
+    <div class="card swipe-card" style="border-left:3px solid ${over?"#ef4444":c.border};${over?"background:#1c0a0a":""}">
       <div class="cbody">
         <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px">
           <span class="cname">${e(t.name)}</span>
@@ -1938,6 +1952,26 @@ function bindContent(allInst){
     content.querySelectorAll("[data-cal-date]").forEach(el=>{
       el.addEventListener("click",()=>{SC_STATE.selDate=el.dataset.calDate;render();});
     });
+    // Show completed (past days fully done) and toggle done section
+    content.querySelectorAll("[data-sc-show-done]").forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        const date=btn.dataset.scShowDone;
+        // Re-render with the date's done items visible — just re-render for now
+        // by temporarily filtering to show that date's completed tasks
+        SC_STATE.fsStatus="All"; render();
+      });
+    });
+    content.querySelectorAll("[data-sc-toggle-done]").forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        const date=btn.dataset.scToggleDone;
+        const list=document.getElementById(`done-list-${date}`);
+        if(list){
+          const isHidden=list.style.display==="none";
+          list.style.display=isHidden?"block":"none";
+          btn.textContent=`${isHidden?"▾":"▸"} Completed (${list.children.length})`;
+        }
+      });
+    });
   }
 
   // ── Matrix bindings ──
@@ -2030,6 +2064,14 @@ async function changeStatus(masterSId,iDate,newS,reason=""){
       STATE.scheduled=snapshot; invalidateCache(); await saveScheduled(); render();
     }:null
   );
+  // Confetti when all today's tasks are done
+  if(newS==="Completed"){
+    const td=localToday();
+    const inst=getAllInst();
+    const pendingToday=inst.filter(t=>taskDate(t)===td&&!["Completed","Cancelled"].includes(t.status)).length;
+    const doneToday=inst.filter(t=>{const h=(t.statusHistory||[]).find(x=>x.status==="Completed");return h&&h.at.split("T")[0]===td;}).length;
+    if(pendingToday===0&&doneToday>0) triggerConfetti();
+  }
   render();
 }
 async function editMeta(masterSId,upd){
@@ -3188,6 +3230,10 @@ function attachCardSwipes(allInst){
         e.stopPropagation();closeAllSwipes();
         changeStatus(getMasterId(task),task.instanceDate,'Completed','');
       });
+      container.querySelector(`[data-sc-inprog="${sid}"]`)?.addEventListener('click',e=>{
+        e.stopPropagation();closeAllSwipes();
+        changeStatus(getMasterId(task),task.instanceDate,'In Progress','');
+      });
       container.querySelector(`[data-sc-hold="${sid}"]`)?.addEventListener('click',e=>{
         e.stopPropagation();closeAllSwipes();
         openReasonModal('Put On Hold','Why is this being put on hold?','⏸ Confirm Hold','#92400e',async reason=>{
@@ -3630,17 +3676,8 @@ function bindReports(allInst){
 }
 
 // Confetti also triggers when completing last task of day from any tab
-const _origChangeStatus=changeStatus;
-async function changeStatus(masterSId,iDate,newS,reason=""){
-  await _origChangeStatus(masterSId,iDate,newS,reason);
-  if(newS==="Completed"){
-    const td=localToday();
-    const inst=getAllInst();
-    const pendingToday=inst.filter(t=>taskDate(t)===td&&!["Completed","Cancelled"].includes(t.status)).length;
-    const doneToday=inst.filter(t=>{const h=(t.statusHistory||[]).find(x=>x.status==="Completed");return h&&h.at.split("T")[0]===td;}).length;
-    if(pendingToday===0&&doneToday>0) triggerConfetti();
-  }
-}
+// Confetti also triggers when completing last task of day from any tab
+// (inlined into changeStatus above — no wrapper needed)
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 (async()=>{
