@@ -192,7 +192,7 @@
   .ovd-p{background:#450a0a;color:#f87171;border:1px solid #dc2626;border-radius:5px;padding:2px 6px;font-size:10px;font-weight:700;}
   .t-row{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;}
   .tag{background:#0f172a;color:#7dd3fc;border:1px solid #1e3a5f;border-radius:5px;padding:1px 6px;font-size:10px;}
-  .ico-btn{background:none;border:none;color:#475569;cursor:pointer;font-size:15px;padding:3px 4px;line-height:1;transition:color .15s;}
+  .ico-btn{background:none;border:none;color:#475569;cursor:pointer;font-size:16px;padding:6px 8px;line-height:1;transition:color .15s;min-width:36px;min-height:36px;display:inline-flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;}
   .ico-btn:hover{color:#94a3b8;}
   .toggle{display:flex;gap:3px;background:#111827;border-radius:7px;padding:3px;}
   .tog-btn{background:none;border:none;color:#475569;padding:4px 9px;border-radius:5px;cursor:pointer;font-size:14px;transition:background .15s,color .15s;}
@@ -418,12 +418,27 @@
   #fab:active{transform:scale(0.92);}
   @media(min-width:900px){#fab{bottom:24px;right:calc(50% - 580px);}}
 
-  /* ── SWIPE ───────────────────────────────────────────────────── */
-  .swipe-wrap{position:relative;overflow:hidden;border-radius:11px;}
-  .swipe-actions{position:absolute;top:0;right:0;bottom:0;display:flex;align-items:stretch;}
-  .swipe-act{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 14px;font-size:11px;font-weight:700;cursor:pointer;border:none;gap:4px;}
-  .swipe-act.done{background:#059669;color:#fff;}
-  .swipe-act.edit{background:#2563eb;color:#fff;}
+  /* ── SWIPE REVEAL CONTAINER ─────────────────────────────────── */
+  .swipe-container{position:relative;overflow:hidden;border-radius:11px;margin-bottom:8px;}
+  .swipe-card{border-radius:11px;transition:transform .25s cubic-bezier(.25,.46,.45,.94);will-change:transform;margin-bottom:0!important;}
+  .swipe-actions-right{
+    position:absolute;right:0;top:0;bottom:0;display:flex;align-items:stretch;
+    border-radius:0 11px 11px 0;overflow:hidden;
+  }
+  .swipe-actions-left{
+    position:absolute;left:0;top:0;bottom:0;display:flex;align-items:stretch;
+    border-radius:11px 0 0 11px;overflow:hidden;
+  }
+  .swipe-act-btn{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:0 14px;border:none;cursor:pointer;gap:4px;font-size:18px;min-width:64px;
+    transition:opacity .15s;
+  }
+  .swipe-act-btn span{font-size:10px;font-weight:700;}
+  .swipe-act-sched{background:#2563eb;color:#fff;}
+  .swipe-act-edit{background:#0284c7;color:#fff;}
+  .swipe-act-del{background:#dc2626;color:#fff;}
+  .swipe-act-clone{background:#059669;color:#fff;}
 
   /* ── DENSITY TOGGLE ──────────────────────────────────────────── */
   body.compact .card{padding:7px 9px;}
@@ -1431,29 +1446,36 @@ function renderBacklog(){
     </div>`:
     `<div class="list" id="bl-list">
       ${filtered.map((t,i)=>`
-        <div class="card" data-blid="${t.id}" data-idx="${i}" style="${BL_STATE.bulk?"":"cursor:default"}">
-          ${BL_STATE.bulk?`<div style="display:flex;align-items:center;margin-right:4px;cursor:pointer;flex-shrink:0" data-bl-check="${t.id}">
-            <div style="width:18px;height:18px;border:2px solid ${BL_STATE.sel.has(t.id)?"#3b82f6":"#334155"};border-radius:4px;background:${BL_STATE.sel.has(t.id)?"#3b82f6":"transparent"};display:flex;align-items:center;justify-content:center">
-              ${BL_STATE.sel.has(t.id)?`<span style="color:#fff;font-size:10px;font-weight:700">✓</span>`:""}
-            </div>
-          </div>`:""}
-          <div class="pdot" style="background:${PC[t.priority]}"></div>
-          <div class="cbody">
-            <div class="cname">${e(t.name)}</div>
-            <div class="cmeta">
-              <span class="cat-p">${t.category}</span>
-              <span class="pr-p" style="color:${PC[t.priority]}">${t.priority}</span>
-              ${t.important?`<span class="f-p">⚑</span>`:""}
-              ${t.urgent?`<span class="u-p">⚡</span>`:""}
-            </div>
-            ${Array.isArray(t.tags)&&t.tags.length>0?`<div class="t-row">${t.tags.map(g=>`<span class="tag">#${e(g)}</span>`).join("")}</div>`:""}
+        <div class="swipe-container" data-blid="${t.id}" data-idx="${i}">
+          <!-- Swipe action buttons revealed on swipe -->
+          <div class="swipe-actions-right" data-swipe-actions="${t.id}">
+            <button class="swipe-act-btn swipe-act-sched" data-bl-sched="${t.id}">📅<span>Schedule</span></button>
+            <button class="swipe-act-btn swipe-act-edit" data-bl-edit="${t.id}">✏️<span>Edit</span></button>
+            <button class="swipe-act-btn swipe-act-del" data-bl-del="${t.id}">🗑️<span>Delete</span></button>
           </div>
-          ${!BL_STATE.bulk?`<div style="display:flex;gap:4px;flex-shrink:0">
-            <button class="ico-btn" data-bl-sched="${t.id}" title="Schedule" style="font-size:15px">📅</button>
-            <button class="ico-btn" data-bl-clone="${t.id}" title="Duplicate" style="font-size:15px">📋</button>
-            <button class="ico-btn" data-bl-edit="${t.id}" title="Edit" style="font-size:15px">✏️</button>
-            <button class="ico-btn" style="color:#ef4444;font-size:15px" data-bl-del="${t.id}" title="Delete">🗑️</button>
-          </div>`:""}
+          <div class="swipe-actions-left" data-swipe-actions-left="${t.id}">
+            <button class="swipe-act-btn swipe-act-clone" data-bl-clone="${t.id}">📋<span>Copy</span></button>
+          </div>
+          <!-- The card itself -->
+          <div class="card swipe-card" style="position:relative;z-index:2;background:#111827">
+            ${BL_STATE.bulk?`<div style="display:flex;align-items:center;margin-right:4px;cursor:pointer;flex-shrink:0" data-bl-check="${t.id}">
+              <div style="width:18px;height:18px;border:2px solid ${BL_STATE.sel.has(t.id)?"#3b82f6":"#334155"};border-radius:4px;background:${BL_STATE.sel.has(t.id)?"#3b82f6":"transparent"};display:flex;align-items:center;justify-content:center">
+                ${BL_STATE.sel.has(t.id)?`<span style="color:#fff;font-size:10px;font-weight:700">✓</span>`:""}
+              </div>
+            </div>`:""}
+            <div class="pdot" style="background:${PC[t.priority]}"></div>
+            <div class="cbody">
+              <div class="cname">${e(t.name)}</div>
+              <div class="cmeta">
+                <span class="cat-p">${t.category}</span>
+                <span class="pr-p" style="color:${PC[t.priority]}">${t.priority}</span>
+                ${t.effort?`<span style="background:#1e293b;color:#64748b;border-radius:4px;padding:1px 5px;font-size:10px">${t.effort}</span>`:""}
+                ${t.important?`<span class="f-p">⚑</span>`:""}
+                ${t.urgent?`<span class="u-p">⚡</span>`:""}
+              </div>
+              ${Array.isArray(t.tags)&&t.tags.length>0?`<div class="t-row">${t.tags.map(g=>`<span class="tag">#${e(g)}</span>`).join("")}</div>`:""}
+            </div>
+          </div>
         </div>`).join("")}
     </div>`}
   </div>`;
@@ -1541,31 +1563,47 @@ function renderTCard(t){
   const subs=t.subtasks||[]; const subDone=subs.filter(s=>s.done).length;
   const subPct=subs.length>0?Math.round((subDone/subs.length)*100):null;
   const tSecs=totalSecondsLogged(t);
-  return `<div class="card" style="border-left:3px solid ${over?"#ef4444":c.border};${over?"background:#1c0a0a":""}${t.status==="Completed"?"opacity:0.75":""}" data-open-task="${t.scheduledId}">
-    <div class="cbody">
-      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px">
-        <span class="cname">${e(t.name)}</span>
-        ${over?`<span class="ovd-p">⏰ Overdue</span>`:""}
-      </div>
-      <div class="cmeta">
-        <span class="s-pill" style="background:${c.bg};color:${c.text};border:1px solid ${c.border}">${t.status}</span>
-        <span class="cat-p">${t.category}</span>
-        ${t.taskType==="recurring"?`<span class="rec-p">↻ ${t.frequency}</span>`:""}
-        ${t.important?`<span class="f-p">⚑</span>`:""}
-        ${t.urgent?`<span class="u-p">⚡</span>`:""}
-        ${tSecs>0?`<span style="background:#1e293b;color:#64748b;border-radius:5px;padding:2px 6px;font-size:10px">⏱ ${fmtSecs(tSecs)}</span>`:""}
-      </div>
-      ${subPct!==null?`<div style="display:flex;align-items:center;gap:6px;margin-top:5px">
-        <div style="flex:1;height:4px;background:#1e293b;border-radius:2px;overflow:hidden"><div style="height:100%;width:${subPct}%;background:${subPct===100?"#34d399":"#3b82f6"};border-radius:2px;transition:width .3s"></div></div>
-        <span style="font-size:10px;color:${subPct===100?"#34d399":"#60a5fa"};font-weight:600;white-space:nowrap">✅ ${subDone}/${subs.length}</span>
-      </div>`:""}
-      <div style="font-size:11px;color:${over?"#f87171":"#64748b"};margin-top:3px">
-        ${t.taskType==="single"?`● ${fmtDate(t.startDate||t.dueDate)}`:`● ${fmtDate(t.instanceDate)}`}
-        ${t.startTime?` · ⏰ ${t.startTime}`:""}${t.endTime?` — ${t.endTime}`:""}
-      </div>
-      ${Array.isArray(t.tags)&&t.tags.length>0?`<div class="t-row">${t.tags.map(g=>`<span class="tag">#${e(g)}</span>`).join("")}</div>`:""}
+  const canComplete=!["Completed","Cancelled"].includes(t.status);
+  const sid=t.scheduledId;
+  return `<div class="swipe-container sc-swipe-container" data-sc-sid="${sid}">
+    <!-- Right actions: Complete / Hold / Cancel -->
+    <div class="swipe-actions-right">
+      ${canComplete?`<button class="swipe-act-btn" data-sc-complete="${sid}" style="background:#059669;color:#fff">✅<span>Done</span></button>`:""}
+      ${canComplete&&t.status!=="On Hold"?`<button class="swipe-act-btn" data-sc-hold="${sid}" style="background:#d97706;color:#fff">⏸<span>Hold</span></button>`:""}
+      ${canComplete?`<button class="swipe-act-btn" data-sc-cancel="${sid}" style="background:#dc2626;color:#fff">❌<span>Cancel</span></button>`:""}
+      ${!canComplete?`<button class="swipe-act-btn" data-sc-reopen="${sid}" style="background:#2563eb;color:#fff">↩<span>Reopen</span></button>`:""}
     </div>
-    <div class="pdot" style="background:${PC[t.priority]};margin-left:8px;flex-shrink:0"></div>
+    <!-- Left actions: Detail / Reschedule -->
+    <div class="swipe-actions-left">
+      <button class="swipe-act-btn" data-sc-detail="${sid}" style="background:#0284c7;color:#fff">🔍<span>Detail</span></button>
+      <button class="swipe-act-btn" data-sc-resched="${sid}" style="background:#7c3aed;color:#fff">📅<span>Reschedule</span></button>
+    </div>
+    <div class="card swipe-card" style="border-left:3px solid ${over?"#ef4444":c.border};${over?"background:#1c0a0a":""}${t.status==="Completed"?"opacity:0.75":""}">
+      <div class="cbody">
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px">
+          <span class="cname">${e(t.name)}</span>
+          ${over?`<span class="ovd-p">⏰ Overdue</span>`:""}
+        </div>
+        <div class="cmeta">
+          <span class="s-pill" style="background:${c.bg};color:${c.text};border:1px solid ${c.border}">${t.status}</span>
+          <span class="cat-p">${t.category}</span>
+          ${t.taskType==="recurring"?`<span class="rec-p">↻ ${t.frequency}</span>`:""}
+          ${t.important?`<span class="f-p">⚑</span>`:""}
+          ${t.urgent?`<span class="u-p">⚡</span>`:""}
+          ${tSecs>0?`<span style="background:#1e293b;color:#64748b;border-radius:5px;padding:2px 6px;font-size:10px">⏱ ${fmtSecs(tSecs)}</span>`:""}
+        </div>
+        ${subPct!==null?`<div style="display:flex;align-items:center;gap:6px;margin-top:5px">
+          <div style="flex:1;height:4px;background:#1e293b;border-radius:2px;overflow:hidden"><div style="height:100%;width:${subPct}%;background:${subPct===100?"#34d399":"#3b82f6"};border-radius:2px;transition:width .3s"></div></div>
+          <span style="font-size:10px;color:${subPct===100?"#34d399":"#60a5fa"};font-weight:600;white-space:nowrap">✅ ${subDone}/${subs.length}</span>
+        </div>`:""}
+        <div style="font-size:11px;color:${over?"#f87171":"#64748b"};margin-top:3px">
+          ${t.taskType==="single"?`📅 ${fmtDate(t.startDate||t.dueDate)}`:`📅 ${fmtDate(t.instanceDate)}`}
+          ${t.startTime?` · ⏰ ${t.startTime}`:""}${t.endTime?` — ${t.endTime}`:""}
+        </div>
+        ${Array.isArray(t.tags)&&t.tags.length>0?`<div class="t-row">${t.tags.map(g=>`<span class="tag">#${e(g)}</span>`).join("")}</div>`:""}
+      </div>
+      <div class="pdot" style="background:${PC[t.priority]};margin-left:8px;flex-shrink:0"></div>
+    </div>
   </div>`;
 }
 function renderTL(allInst){
@@ -1685,11 +1723,20 @@ function renderMatrix(allInst){
           <div style="color:${qd.color};font-weight:700;font-size:12px;margin-bottom:2px">${qd.label}</div>
           <div style="color:#64748b;font-size:9px;margin-bottom:8px;line-height:1.3">${qd.sub}</div>
           ${q[qd.key].length===0?`<div style="color:#2d3748;font-size:10px;font-style:italic">None</div>`:q[qd.key].map(t=>`
-            <div class="mat-task" data-open-task="${t.scheduledId}">
-              <div style="font-size:10px;font-weight:600;color:#e2e8f0;line-height:1.3;margin-bottom:2px">${e(t.name)}</div>
-              <div style="font-size:9px;color:#64748b;display:flex;gap:4px;align-items:center">
-                <span style="color:${PC[t.priority]}">●</span>${fmtShort(taskDate(t))||t.status}
-                ${isOverdue(t)?`<span style="color:#f87171">⏰</span>`:""}
+            <div class="swipe-container mx-swipe-container" data-mx-sid="${t.scheduledId}" style="margin-bottom:4px">
+              <div class="swipe-actions-right">
+                ${!["Completed","Cancelled"].includes(t.status)?`<button class="swipe-act-btn" data-mx-complete="${t.scheduledId}" style="background:#059669;color:#fff;padding:0 10px">✅<span>Done</span></button>`:""}
+                ${!["Completed","Cancelled"].includes(t.status)?`<button class="swipe-act-btn" data-mx-cancel="${t.scheduledId}" style="background:#dc2626;color:#fff;padding:0 10px">❌<span>Cancel</span></button>`:""}
+              </div>
+              <div class="swipe-actions-left">
+                <button class="swipe-act-btn" data-mx-detail="${t.scheduledId}" style="background:#0284c7;color:#fff;padding:0 10px">🔍<span>Detail</span></button>
+              </div>
+              <div class="mat-task swipe-card" style="margin-bottom:0">
+                <div style="font-size:10px;font-weight:600;color:#e2e8f0;line-height:1.3;margin-bottom:2px">${e(t.name)}</div>
+                <div style="font-size:9px;color:#64748b;display:flex;gap:4px;align-items:center">
+                  <span style="color:${PC[t.priority]}">●</span>${fmtShort(taskDate(t))||t.status}
+                  ${isOverdue(t)?`<span style="color:#f87171">⏰</span>`:""}
+                </div>
               </div>
             </div>`).join("")}
         </div>`).join("")}
@@ -1756,23 +1803,34 @@ function renderKanban(allInst){
                 const subs=t.subtasks||[]; const subDone=subs.filter(s=>s.done).length;
                 const subPct=subs.length>0?Math.round((subDone/subs.length)*100):null;
                 const tSecs=totalSecondsLogged(t);
+                const canAct=!["Completed","Cancelled"].includes(t.status);
                 return`
-                <div class="kb-card" draggable="true" data-kb-card="${t.scheduledId}" data-kb-mid="${getMasterId(t)}" data-kb-idate="${t.instanceDate||""}" style="border-color:${over?"#ef4444":c.border};background:${over?"#1c0a0a":"#0a0a0f"}">
-                  <div style="font-size:12px;font-weight:600;color:${over?"#f87171":"#e2e8f0"};line-height:1.3;margin-bottom:5px" data-open-task="${t.scheduledId}">${e(t.name)}</div>
-                  ${subPct!==null?`<div style="display:flex;align-items:center;gap:5px;margin-bottom:5px">
-                    <div style="flex:1;height:3px;background:#1e293b;border-radius:2px;overflow:hidden"><div style="height:100%;width:${subPct}%;background:${subPct===100?"#34d399":"#3b82f6"};border-radius:2px"></div></div>
-                    <span style="font-size:9px;color:${subPct===100?"#34d399":"#60a5fa"};font-weight:700">${subDone}/${subs.length}</span>
-                  </div>`:""}
-                  <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-                    ${taskDate(t)?`<span style="font-size:10px;background:#111827;color:${over?"#f87171":"#64748b"};border-radius:4px;padding:1px 5px;border:1px solid ${over?"#7f1d1d":"#1e293b"}">${over?"⏰ ":""}${fmtShort(taskDate(t))}</span>`:""}
-                    ${t.taskType==="recurring"?`<span style="font-size:10px;color:#60a5fa">↻</span>`:""}
-                    <span style="font-size:10px;color:${PC[t.priority]}">● ${t.priority}</span>
-                    <span style="font-size:10px;color:${catColor(t.category)||"#475569"}">${t.category}</span>
-                    ${tSecs>0?`<span style="font-size:9px;color:#64748b">⏱${fmtSecs(tSecs)}</span>`:""}
-                    ${t.important?`<span style="font-size:10px;color:#4ade80">⚑</span>`:""}
-                    ${t.urgent?`<span style="font-size:10px;color:#fbbf24">⚡</span>`:""}
+                <div class="swipe-container kb-swipe-container" data-kb-sid="${t.scheduledId}" data-kb-mid="${getMasterId(t)}" data-kb-idate="${t.instanceDate||""}">
+                  <div class="swipe-actions-right">
+                    ${canAct?`<button class="swipe-act-btn" data-kb-sw-complete="${t.scheduledId}" style="background:#059669;color:#fff;padding:0 10px">✅<span>Done</span></button>`:""}
+                    ${canAct&&status!=="In Progress"?`<button class="swipe-act-btn" data-kb-sw-inprog="${t.scheduledId}" style="background:#1d4ed8;color:#fff;padding:0 10px">⚡<span>Start</span></button>`:""}
+                    ${canAct?`<button class="swipe-act-btn" data-kb-sw-cancel="${t.scheduledId}" style="background:#dc2626;color:#fff;padding:0 10px">❌<span>Cancel</span></button>`:""}
                   </div>
-                  ${Array.isArray(t.tags)&&t.tags.length>0?`<div class="t-row" style="margin-top:4px">${t.tags.slice(0,2).map(g=>`<span class="tag" style="font-size:9px">#${e(g)}</span>`).join("")}${t.tags.length>2?`<span class="tag" style="font-size:9px">+${t.tags.length-2}</span>`:""}</div>`:""}
+                  <div class="swipe-actions-left">
+                    <button class="swipe-act-btn" data-kb-sw-detail="${t.scheduledId}" style="background:#0284c7;color:#fff;padding:0 10px">🔍<span>Detail</span></button>
+                  </div>
+                  <div class="kb-card swipe-card" draggable="true" data-kb-card="${t.scheduledId}" data-kb-mid="${getMasterId(t)}" data-kb-idate="${t.instanceDate||""}" style="border-color:${over?"#ef4444":c.border};background:${over?"#1c0a0a":"#0a0a0f"};margin-bottom:0">
+                    <div style="font-size:12px;font-weight:600;color:${over?"#f87171":"#e2e8f0"};line-height:1.3;margin-bottom:5px">${e(t.name)}</div>
+                    ${subPct!==null?`<div style="display:flex;align-items:center;gap:5px;margin-bottom:5px">
+                      <div style="flex:1;height:3px;background:#1e293b;border-radius:2px;overflow:hidden"><div style="height:100%;width:${subPct}%;background:${subPct===100?"#34d399":"#3b82f6"};border-radius:2px"></div></div>
+                      <span style="font-size:9px;color:${subPct===100?"#34d399":"#60a5fa"};font-weight:700">${subDone}/${subs.length}</span>
+                    </div>`:""}
+                    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                      ${taskDate(t)?`<span style="font-size:10px;background:#111827;color:${over?"#f87171":"#64748b"};border-radius:4px;padding:1px 5px;border:1px solid ${over?"#7f1d1d":"#1e293b"}">${over?"⏰ ":""}${fmtShort(taskDate(t))}</span>`:""}
+                      ${t.taskType==="recurring"?`<span style="font-size:10px;color:#60a5fa">↻</span>`:""}
+                      <span style="font-size:10px;color:${PC[t.priority]}">● ${t.priority}</span>
+                      <span style="font-size:10px;color:${catColor(t.category)||"#475569"}">${t.category}</span>
+                      ${tSecs>0?`<span style="font-size:9px;color:#64748b">⏱${fmtSecs(tSecs)}</span>`:""}
+                      ${t.important?`<span style="font-size:10px;color:#4ade80">⚑</span>`:""}
+                      ${t.urgent?`<span style="font-size:10px;color:#fbbf24">⚡</span>`:""}
+                    </div>
+                    ${Array.isArray(t.tags)&&t.tags.length>0?`<div class="t-row" style="margin-top:4px">${t.tags.slice(0,2).map(g=>`<span class="tag" style="font-size:9px">#${e(g)}</span>`).join("")}${t.tags.length>2?`<span class="tag" style="font-size:9px">+${t.tags.length-2}</span>`:""}</div>`:""}
+                  </div>
                 </div>`}).join("")}
             </div>`}
         </div>`;}).join("")}
@@ -1852,41 +1910,7 @@ function bindContent(allInst){
       STATE.backlog=STATE.backlog.filter(t=>!BL_STATE.sel.has(t.id));
       await saveBacklog(); showToast(`${BL_STATE.sel.size} deleted`,"err"); BL_STATE.sel=new Set(); BL_STATE.bulk=false; render();
     });
-    content.querySelectorAll("[data-bl-check]").forEach(el=>{
-      el.addEventListener("click",()=>{
-        const id=el.dataset.blCheck;
-        if(BL_STATE.sel.has(id)) BL_STATE.sel.delete(id); else BL_STATE.sel.add(id);
-        render();
-      });
-    });
-    content.querySelectorAll("[data-bl-sched]").forEach(el=>{
-      el.addEventListener("click",e=>{e.stopPropagation();const t=STATE.backlog.find(x=>x.id===el.dataset.blSched);if(t)openScheduleModal(t,false);});
-    });
-    content.querySelectorAll("[data-bl-clone]").forEach(el=>{
-      el.addEventListener("click",async e=>{e.stopPropagation();const t=STATE.backlog.find(x=>x.id===el.dataset.blClone);if(!t)return;
-        STATE.backlog=[{...t,id:gid(),name:`${t.name} (copy)`,createdAt:new Date().toISOString()},...STATE.backlog];
-        await saveBacklog(); showToast("Cloned"); render();
-      });
-    });
-    content.querySelectorAll("[data-bl-edit]").forEach(el=>{
-      el.addEventListener("click",e=>{e.stopPropagation();const t=STATE.backlog.find(x=>x.id===el.dataset.blEdit);if(t)openTaskFormModal(t);});
-    });
-    content.querySelectorAll("[data-bl-del]").forEach(el=>{
-      el.addEventListener("click",async e=>{
-        e.stopPropagation();
-        const id=el.dataset.blDel;
-        const task=STATE.backlog.find(t=>t.id===id);
-        if(!task) return;
-        openReasonModal(`Delete "${task.name}"?`,"Why are you deleting this task?","🗑️ Delete","#7f1d1d",async(reason)=>{
-          const snapshot=[...STATE.backlog];
-          STATE.backlog=STATE.backlog.filter(t=>t.id!==id);
-          await saveBacklog();
-          haptic(15);
-          showToast("Deleted","err",async()=>{ STATE.backlog=snapshot; await saveBacklog(); render(); });
-          render();
-        });
-      });
-    });
+    // Note: bl-check, bl-sched, bl-clone, bl-edit, bl-del are all bound in attachCardSwipes()
   }
 
   // ── Scheduled bindings ──
@@ -2109,6 +2133,47 @@ function renderModalStack(){
   const top=MODAL_STACK[MODAL_STACK.length-1];
   root.innerHTML=`<div class="overlay" id="modal-overlay">${top.html}</div>`;
   document.getElementById("modal-overlay").addEventListener("click",e=>{if(e.target.id==="modal-overlay")popModal();});
+}
+
+// ─── REASON MODAL ────────────────────────────────────────────────────────────
+function openReasonModal(title, placeholder, confirmLabel, confirmBg, onConfirm){
+  const html=`<div class="modal" id="reason-modal">
+    <div class="m-hdr"><h3 class="m-title">${e(title)}</h3><button class="close-btn" id="rm-close">✕</button></div>
+    <label class="lbl">Reason *</label>
+    <textarea class="ta" rows="3" id="rm-reason" placeholder="${e(placeholder)}"></textarea>
+    <div class="m-act">
+      <button class="c-btn" id="rm-back">Back</button>
+      <button class="o-btn" id="rm-confirm" style="background:${confirmBg}">${e(confirmLabel)}</button>
+    </div>
+  </div>`;
+  pushModal(html,null);
+  const modal=document.getElementById("reason-modal");
+  modal.querySelector("#rm-close").addEventListener("click",popModal);
+  modal.querySelector("#rm-back").addEventListener("click",popModal);
+  modal.querySelector("#rm-confirm").addEventListener("click",async()=>{
+    const reason=modal.querySelector("#rm-reason").value.trim();
+    if(!reason){
+      const ta=modal.querySelector("#rm-reason");
+      if(ta){ta.style.borderColor="#ef4444";ta.placeholder="Please enter a reason";}
+      return;
+    }
+    popModal();
+    await onConfirm(reason);
+  });
+}
+
+// ─── CANCEL MODAL ────────────────────────────────────────────────────────────
+function openCancelModal(taskRef){
+  openReasonModal(
+    `Cancel "${taskRef.name||"task"}"`,
+    "Why is this being cancelled?",
+    "❌ Confirm Cancel",
+    "#7f1d1d",
+    async(reason)=>{
+      await changeStatus(taskRef._masterId,taskRef.instanceDate,"Cancelled",reason);
+      clearModals();
+    }
+  );
 }
 
 // ─── TASK FORM MODAL ──────────────────────────────────────────────────────────
@@ -2963,64 +3028,254 @@ function openQuickCaptureModal(){
   modal.querySelector("#qc-name").addEventListener("keydown",ev=>{if(ev.key==="Enter")modal.querySelector("#qc-save").click();});
 }
 
-// ── Swipe gestures on task cards ──
-function attachSwipe(el, onSwipeLeft, onSwipeRight){
-  let startX=0, startY=0, dx=0, swiping=false;
-  el.addEventListener("touchstart",ev=>{
-    startX=ev.touches[0].clientX;
-    startY=ev.touches[0].clientY;
-    dx=0; swiping=false;
-  },{passive:true});
-  el.addEventListener("touchmove",ev=>{
-    dx=ev.touches[0].clientX-startX;
-    const dy=Math.abs(ev.touches[0].clientY-startY);
-    if(Math.abs(dx)>dy&&Math.abs(dx)>8) swiping=true;
-    if(swiping&&Math.abs(dx)>10) el.style.transform=`translateX(${dx*0.5}px)`;
-  },{passive:true});
-  el.addEventListener("touchend",()=>{
-    el.style.transform="";
-    if(!swiping) return;
-    if(dx<-60&&onSwipeLeft) onSwipeLeft();
-    else if(dx>60&&onSwipeRight) onSwipeRight();
+// ── Swipe gestures — iOS-style reveal ──
+// Backlog: swipe left reveals Schedule/Edit/Delete; swipe right reveals Copy.
+// Tap revealed button to trigger action. Tap card body to dismiss.
+let _openSwipeId=null;
+
+function closeAllSwipes(){
+  document.querySelectorAll('.swipe-card').forEach(c=>{
+    c.style.transition='transform .25s cubic-bezier(.25,.46,.45,.94)';
+    c.style.transform='';
   });
+  _openSwipeId=null;
 }
-// Attach swipe to all .card elements after render
+
 function attachCardSwipes(allInst){
-  if(STATE.tab==="backlog"){
-    document.querySelectorAll("[data-blid]").forEach(card=>{
-      const id=card.dataset.blid;
+  const content=document.getElementById('content');
+  if(STATE.tab==='backlog'&&!BL_STATE.bulk){
+    document.querySelectorAll('.swipe-container').forEach(container=>{
+      const id=container.dataset.blid;
+      const card=container.querySelector('.swipe-card');
+      const actR=container.querySelector('.swipe-actions-right');
+      const actL=container.querySelector('.swipe-actions-left');
+      if(!card||!id) return;
       const task=STATE.backlog.find(t=>t.id===id);
       if(!task) return;
-      // Swipe right → schedule, swipe left → delete confirm
-      attachSwipe(card,
-        ()=>{ haptic(12); openReasonModal(`Delete "${task.name}"?`,"Why deleting?","🗑️ Delete","#7f1d1d",async()=>{
+
+      let startX=0,startY=0,dx=0,active=false,moved=false;
+
+      card.addEventListener('touchstart',ev=>{
+        startX=ev.touches[0].clientX; startY=ev.touches[0].clientY;
+        dx=0; active=true; moved=false;
+        if(_openSwipeId&&_openSwipeId!==id) closeAllSwipes();
+      },{passive:true});
+
+      card.addEventListener('touchmove',ev=>{
+        if(!active) return;
+        dx=ev.touches[0].clientX-startX;
+        const dy=Math.abs(ev.touches[0].clientY-startY);
+        if(dy>Math.abs(dx)+10){active=false;card.style.transform='';return;}
+        if(Math.abs(dx)>6){
+          moved=true;
+          const actW=actR?actR.getBoundingClientRect().width||192:192;
+          const actLW=actL?actL.getBoundingClientRect().width||64:64;
+          const clamp=dx<0?Math.max(dx,-actW-10):Math.min(dx,actLW+10);
+          card.style.transition='none';
+          card.style.transform=`translateX(${clamp}px)`;
+        }
+      },{passive:true});
+
+      card.addEventListener('touchend',()=>{
+        if(!active) return; active=false;
+        if(!moved){
+          if(_openSwipeId===id){closeAllSwipes();return;}
+          openTaskFormModal(task);
+          return;
+        }
+        const actW=actR?actR.getBoundingClientRect().width||192:192;
+        const actLW=actL?actL.getBoundingClientRect().width||64:64;
+        card.style.transition='transform .25s cubic-bezier(.25,.46,.45,.94)';
+        if(dx<-50){card.style.transform=`translateX(${-actW}px)`;_openSwipeId=id;haptic(12);}
+        else if(dx>50){card.style.transform=`translateX(${actLW}px)`;_openSwipeId=id;haptic(12);}
+        else{card.style.transform='';_openSwipeId=null;}
+      });
+
+      card.addEventListener('touchcancel',()=>{active=false;card.style.transform='';card.style.transition='';});
+
+      // Action buttons
+      container.querySelector('[data-bl-sched]')?.addEventListener('click',e=>{
+        e.stopPropagation();closeAllSwipes();openScheduleModal(task,false);
+      });
+      container.querySelector('[data-bl-edit]')?.addEventListener('click',e=>{
+        e.stopPropagation();closeAllSwipes();openTaskFormModal(task);
+      });
+      container.querySelector('[data-bl-del]')?.addEventListener('click',e=>{
+        e.stopPropagation();closeAllSwipes();
+        openReasonModal(`Delete "${task.name}"?`,'Why are you deleting this task?','🗑️ Delete','#7f1d1d',async(reason)=>{
           const snap=[...STATE.backlog];
           STATE.backlog=STATE.backlog.filter(t=>t.id!==id);
-          await saveBacklog();
-          showToast("Deleted","err",async()=>{STATE.backlog=snap;await saveBacklog();render();});
+          await saveBacklog(); haptic(15);
+          showToast('Deleted','err',async()=>{STATE.backlog=snap;await saveBacklog();render();});
           render();
-        });},
-        ()=>{ haptic(12); openScheduleModal(task,false); }
-      );
+        });
+      });
+      container.querySelector('[data-bl-clone]')?.addEventListener('click',async e=>{
+        e.stopPropagation();closeAllSwipes();
+        STATE.backlog=[{...task,id:gid(),name:task.name+' (copy)',createdAt:new Date().toISOString()},...STATE.backlog];
+        await saveBacklog();haptic(10);showToast('Duplicated ✓');render();
+      });
+    });
+
+    // Bulk check bindings
+    content.querySelectorAll('[data-bl-check]').forEach(el=>{
+      el.addEventListener('click',()=>{
+        const id=el.dataset.blCheck;
+        if(BL_STATE.sel.has(id)) BL_STATE.sel.delete(id); else BL_STATE.sel.add(id);
+        render();
+      });
     });
   }
-  if(STATE.tab==="sched"){
-    document.querySelectorAll("[data-open-task]").forEach(card=>{
-      const sid=card.dataset.openTask;
+
+  // ── Shared swipe attach helper ──
+  function addRevealSwipe(container, card, actR, actL, onTap){
+    let startX=0,startY=0,dx=0,active=false,moved=false;
+    const containerId=container.dataset.scSid||container.dataset.mxSid||container.dataset.kbSid||"";
+
+    card.addEventListener('touchstart',ev=>{
+      startX=ev.touches[0].clientX; startY=ev.touches[0].clientY;
+      dx=0; active=true; moved=false;
+      if(_openSwipeId&&_openSwipeId!==containerId) closeAllSwipes();
+    },{passive:true});
+
+    card.addEventListener('touchmove',ev=>{
+      if(!active) return;
+      dx=ev.touches[0].clientX-startX;
+      const dy=Math.abs(ev.touches[0].clientY-startY);
+      if(dy>Math.abs(dx)+10){active=false;card.style.transform='';return;}
+      if(Math.abs(dx)>6){
+        moved=true;
+        const rw=actR?actR.getBoundingClientRect().width||128:0;
+        const lw=actL?actL.getBoundingClientRect().width||64:0;
+        const clamp=dx<0?Math.max(dx,-(rw+10)):Math.min(dx,lw+10);
+        card.style.transition='none';
+        card.style.transform=`translateX(${clamp}px)`;
+      }
+    },{passive:true});
+
+    card.addEventListener('touchend',()=>{
+      if(!active) return; active=false;
+      if(!moved){
+        if(_openSwipeId===containerId){closeAllSwipes();return;}
+        if(onTap) onTap();
+        return;
+      }
+      const rw=actR?actR.getBoundingClientRect().width||128:0;
+      const lw=actL?actL.getBoundingClientRect().width||64:0;
+      card.style.transition='transform .25s cubic-bezier(.25,.46,.45,.94)';
+      if(dx<-50&&rw>0){card.style.transform=`translateX(${-rw}px)`;_openSwipeId=containerId;haptic(12);}
+      else if(dx>50&&lw>0){card.style.transform=`translateX(${lw}px)`;_openSwipeId=containerId;haptic(12);}
+      else{card.style.transform='';_openSwipeId=null;}
+    });
+    card.addEventListener('touchcancel',()=>{active=false;card.style.transform='';card.style.transition='';});
+  }
+
+  // ── Schedule tab swipe ──
+  if(STATE.tab==='sched'){
+    document.querySelectorAll('.sc-swipe-container').forEach(container=>{
+      const sid=container.dataset.scSid;
       const task=allInst.find(t=>t.scheduledId===sid);
       if(!task) return;
-      // Swipe right → mark complete, swipe left → open detail
-      attachSwipe(card,
-        ()=>{ haptic(12); openTaskModal({...task,_masterId:getMasterId(task)}); },
-        async()=>{
-          if(task.status==="Completed") return;
-          haptic(20);
-          await changeStatus(getMasterId(task),task.instanceDate,"Completed","");
-        }
-      );
+      const card=container.querySelector('.swipe-card');
+      const actR=container.querySelector('.swipe-actions-right');
+      const actL=container.querySelector('.swipe-actions-left');
+      if(!card) return;
+
+      addRevealSwipe(container,card,actR,actL,()=>openTaskModal({...task,_masterId:getMasterId(task)}));
+
+      // Action bindings
+      container.querySelector(`[data-sc-complete="${sid}"]`)?.addEventListener('click',e=>{
+        e.stopPropagation();closeAllSwipes();
+        changeStatus(getMasterId(task),task.instanceDate,'Completed','');
+      });
+      container.querySelector(`[data-sc-hold="${sid}"]`)?.addEventListener('click',e=>{
+        e.stopPropagation();closeAllSwipes();
+        openReasonModal('Put On Hold','Why is this being put on hold?','⏸ Confirm Hold','#92400e',async reason=>{
+          await changeStatus(getMasterId(task),task.instanceDate,'On Hold',reason);
+        });
+      });
+      container.querySelector(`[data-sc-cancel="${sid}"]`)?.addEventListener('click',e=>{
+        e.stopPropagation();closeAllSwipes();
+        openCancelModal({...task,_masterId:getMasterId(task)});
+      });
+      container.querySelector(`[data-sc-reopen="${sid}"]`)?.addEventListener('click',e=>{
+        e.stopPropagation();closeAllSwipes();
+        changeStatus(getMasterId(task),task.instanceDate,'Not Started','');
+      });
+      container.querySelector(`[data-sc-detail="${sid}"]`)?.addEventListener('click',e=>{
+        e.stopPropagation();closeAllSwipes();
+        openTaskModal({...task,_masterId:getMasterId(task)});
+      });
+      container.querySelector(`[data-sc-resched="${sid}"]`)?.addEventListener('click',e=>{
+        e.stopPropagation();closeAllSwipes();
+        openScheduleModal(task,true);
+      });
+    });
+  }
+
+  // ── Matrix tab swipe ──
+  if(STATE.tab==='matrix'){
+    document.querySelectorAll('.mx-swipe-container').forEach(container=>{
+      const sid=container.dataset.mxSid;
+      const task=allInst.find(t=>t.scheduledId===sid);
+      if(!task) return;
+      const card=container.querySelector('.swipe-card');
+      const actR=container.querySelector('.swipe-actions-right');
+      const actL=container.querySelector('.swipe-actions-left');
+      if(!card) return;
+
+      addRevealSwipe(container,card,actR,actL,()=>openTaskModal({...task,_masterId:getMasterId(task)}));
+
+      container.querySelector(`[data-mx-complete="${sid}"]`)?.addEventListener('click',e=>{
+        e.stopPropagation();closeAllSwipes();
+        changeStatus(getMasterId(task),task.instanceDate,'Completed','');
+      });
+      container.querySelector(`[data-mx-cancel="${sid}"]`)?.addEventListener('click',e=>{
+        e.stopPropagation();closeAllSwipes();
+        openCancelModal({...task,_masterId:getMasterId(task)});
+      });
+      container.querySelector(`[data-mx-detail="${sid}"]`)?.addEventListener('click',e=>{
+        e.stopPropagation();closeAllSwipes();
+        openTaskModal({...task,_masterId:getMasterId(task)});
+      });
+    });
+  }
+
+  // ── Kanban tab swipe ──
+  if(STATE.tab==='kanban'){
+    document.querySelectorAll('.kb-swipe-container').forEach(container=>{
+      const sid=container.dataset.kbSid;
+      const mid=container.dataset.kbMid;
+      const idate=container.dataset.kbIdate||undefined;
+      const task=allInst.find(t=>t.scheduledId===sid);
+      if(!task) return;
+      const card=container.querySelector('.swipe-card');
+      const actR=container.querySelector('.swipe-actions-right');
+      const actL=container.querySelector('.swipe-actions-left');
+      if(!card) return;
+
+      addRevealSwipe(container,card,actR,actL,()=>openTaskModal({...task,_masterId:getMasterId(task)}));
+
+      container.querySelector(`[data-kb-sw-complete="${sid}"]`)?.addEventListener('click',e=>{
+        e.stopPropagation();closeAllSwipes();
+        changeStatus(mid,idate,'Completed','');
+      });
+      container.querySelector(`[data-kb-sw-inprog="${sid}"]`)?.addEventListener('click',e=>{
+        e.stopPropagation();closeAllSwipes();
+        changeStatus(mid,idate,'In Progress','');
+      });
+      container.querySelector(`[data-kb-sw-cancel="${sid}"]`)?.addEventListener('click',e=>{
+        e.stopPropagation();closeAllSwipes();
+        openCancelModal({...task,_masterId:mid,instanceDate:idate});
+      });
+      container.querySelector(`[data-kb-sw-detail="${sid}"]`)?.addEventListener('click',e=>{
+        e.stopPropagation();closeAllSwipes();
+        openTaskModal({...task,_masterId:getMasterId(task)});
+      });
     });
   }
 }
+
 
 // ── Pull to refresh on Dashboard ──
 (()=>{
