@@ -420,21 +420,25 @@
 
   /* ── SWIPE REVEAL CONTAINER ─────────────────────────────────── */
   .swipe-container{position:relative;overflow:hidden;border-radius:11px;margin-bottom:8px;}
-  .swipe-card{border-radius:11px;transition:transform .25s cubic-bezier(.25,.46,.45,.94);will-change:transform;margin-bottom:0!important;}
+  .swipe-card{border-radius:11px;transition:transform .25s cubic-bezier(.25,.46,.45,.94);will-change:transform;margin-bottom:0!important;position:relative;z-index:2;}
   .swipe-actions-right{
     position:absolute;right:0;top:0;bottom:0;display:flex;align-items:stretch;
-    border-radius:0 11px 11px 0;overflow:hidden;
+    border-radius:0 11px 11px 0;overflow:hidden;z-index:1;
+    /* width set per-context by inline style or JS */
   }
   .swipe-actions-left{
     position:absolute;left:0;top:0;bottom:0;display:flex;align-items:stretch;
-    border-radius:11px 0 0 11px;overflow:hidden;
+    border-radius:11px 0 0 11px;overflow:hidden;z-index:1;
+    width:64px;
   }
   .swipe-act-btn{
     display:flex;flex-direction:column;align-items:center;justify-content:center;
-    padding:0 14px;border:none;cursor:pointer;gap:4px;font-size:18px;min-width:64px;
-    transition:opacity .15s;
+    border:none;cursor:pointer;gap:3px;font-size:20px;
+    flex:1;min-width:64px;max-width:64px;
+    transition:filter .1s;-webkit-tap-highlight-color:transparent;
   }
-  .swipe-act-btn span{font-size:10px;font-weight:700;}
+  .swipe-act-btn:active{filter:brightness(0.85);}
+  .swipe-act-btn span{font-size:10px;font-weight:700;letter-spacing:0.02em;}
   .swipe-act-sched{background:#2563eb;color:#fff;}
   .swipe-act-edit{background:#0284c7;color:#fff;}
   .swipe-act-del{background:#dc2626;color:#fff;}
@@ -1482,7 +1486,7 @@ function renderBacklog(){
 }
 
 // ─── SCHEDULED VIEW ───────────────────────────────────────────────────────────
-let SC_STATE={view:"list",selDate:localToday(),calYear:new Date().getFullYear(),calMonth:new Date().getMonth(),fsStatus:"All",fsCat:"All",q:""};
+let SC_STATE={view:"list",selDate:localToday(),calYear:new Date().getFullYear(),calMonth:new Date().getMonth(),fsStatus:"All",fsCat:"All",q:"",showCompleted:false};
 function renderSched(allInst){
   return `<div class="view">
     <div class="view-header">
@@ -1499,17 +1503,26 @@ function renderSched(allInst){
   </div>`;
 }
 function renderDayList(allInst){
-  const filtered=allInst.filter(t=>
-    (SC_STATE.fsStatus==="All"||t.status===SC_STATE.fsStatus)&&
-    (SC_STATE.fsCat==="All"||t.category===SC_STATE.fsCat)&&
-    (!SC_STATE.q||t.name.toLowerCase().includes(SC_STATE.q.toLowerCase())||(Array.isArray(t.tags)&&t.tags.some(g=>g.includes(SC_STATE.q.toLowerCase())))));
+  // Base filter: hide completed/cancelled unless showCompleted is on
+  const baseFiltered=allInst.filter(t=>{
+    if(!SC_STATE.showCompleted&&(t.status==="Completed"||t.status==="Cancelled")) return false;
+    if(SC_STATE.fsStatus!=="All"&&t.status!==SC_STATE.fsStatus) return false;
+    if(SC_STATE.fsCat!=="All"&&t.category!==SC_STATE.fsCat) return false;
+    if(SC_STATE.q&&!t.name.toLowerCase().includes(SC_STATE.q.toLowerCase())&&
+       !(Array.isArray(t.tags)&&t.tags.some(g=>g.includes(SC_STATE.q.toLowerCase())))) return false;
+    return true;
+  });
+
+  // Also: hide entire past dates that only have completed/cancelled tasks
   const map={};
-  filtered.forEach(t=>{const d=taskDate(t)||"no-date";if(!map[d])map[d]=[];map[d].push(t);});
+  baseFiltered.forEach(t=>{const d=taskDate(t)||"no-date";if(!map[d])map[d]=[];map[d].push(t);});
   const pw={Critical:0,High:1,Medium:2,Low:3};
   Object.keys(map).forEach(d=>{map[d].sort((a,b)=>{const ac=a.status==="Completed"?1:0,bc=b.status==="Completed"?1:0;if(ac!==bc)return ac-bc;return(pw[a.priority]??2)-(pw[b.priority]??2);});});
   const groups=Object.entries(map).sort(([a],[b])=>a.localeCompare(b));
   const td=localToday();
-  
+
+  // Count hidden completed tasks for the toggle label
+  const hiddenCount=!SC_STATE.showCompleted?allInst.filter(t=>t.status==="Completed"||t.status==="Cancelled").length:0;
 
   // Overlap-safe daily hours per category
   function dayHoursByCat(tasks){
@@ -1519,17 +1532,17 @@ function renderDayList(allInst){
   return `
     <input class="srch" id="sc-q" placeholder="🔍 Search scheduled..." value="${e(SC_STATE.q)}"/>
     <div class="f-row">
-      <select class="fsel" id="sc-fs">
-        <option value="All">All Status</option>${STATUSES.map(s=>`<option${SC_STATE.fsStatus===s?" selected":""}>${s}</option>`).join("")}
-      </select>
       <select class="fsel" id="sc-fcat">
         <option value="All">All Category</option>${allCategories().map(c=>`<option${SC_STATE.fsCat===c?" selected":""}>${c}</option>`).join("")}
       </select>
+      <button id="sc-toggle-completed" style="background:${SC_STATE.showCompleted?"#1e3a5f":"#111827"};border:1px solid ${SC_STATE.showCompleted?"#3b82f6":"#1e293b"};border-radius:7px;color:${SC_STATE.showCompleted?"#60a5fa":"#475569"};font-size:11px;font-weight:600;padding:6px 10px;cursor:pointer;white-space:nowrap;flex-shrink:0">
+        ${SC_STATE.showCompleted?"✅ Hide Done":("⬜ Show Done"+(hiddenCount>0?` (${hiddenCount})`:""  ))}
+      </button>
     </div>
     ${groups.length===0?`<div class="empty-state">
       <div class="empty-ico">📅</div>
-      <div class="empty-txt">No scheduled tasks</div>
-      <div class="empty-sub">Schedule tasks from your backlog, or tap <b style="color:#60a5fa">＋</b> to create one</div>
+      <div class="empty-txt">${SC_STATE.showCompleted||hiddenCount===0?"No scheduled tasks":"All tasks completed!"}</div>
+      <div class="empty-sub">${SC_STATE.showCompleted||hiddenCount===0?`Schedule tasks from your backlog, or tap <b style="color:#60a5fa">＋</b> to create one`:`${hiddenCount} completed task${hiddenCount!==1?"s":""} hidden — tap "Show Done" to view`}</div>
     </div>`:
     groups.map(([date,tasks])=>{
       const isToday=date===td,isPast=date!=="no-date"&&date<td;
@@ -1538,9 +1551,6 @@ function renderDayList(allInst){
       const cancelled=tasks.filter(t=>t.status==="Cancelled");
       const hrs=dayHoursByCat(tasks);
       const hrsEntries=CATEGORIES.map(c=>({c,h:hrs[c]})).filter(x=>x.h>0);
-      // For past dates: hide completed by default unless all tasks are completed (show summary)
-      const hidePastDone=isPast&&!isToday&&done.length>0&&active.length===0&&cancelled.length===0;
-      const showDoneToggle=isPast&&!isToday&&done.length>0&&active.length>0;
       return `<div style="margin-bottom:20px">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
           <div style="flex:1;height:1px;background:#1e293b"></div>
@@ -1552,73 +1562,14 @@ function renderDayList(allInst){
           <span style="font-size:10px;color:#475569;font-weight:600;align-self:center">⏱</span>
           ${hrsEntries.map(({c,h})=>`<span style="font-size:10px;background:${catColor(c)}18;color:${catColor(c)};border:1px solid ${catColor(c)}44;border-radius:5px;padding:2px 7px;font-weight:600">${c}: ${fmtHours(h)}</span>`).join("")}
         </div>`:""}
-        ${hidePastDone
-          ? `<div style="display:flex;align-items:center;gap:6px;padding:6px 8px;background:#0d2818;border-radius:7px;border:1px solid #059669">
-              <span style="font-size:11px;color:#34d399">✅ ${done.length} completed</span>
-              <button data-sc-show-done="${date}" style="margin-left:auto;background:none;border:1px solid #059669;border-radius:5px;color:#34d399;font-size:10px;padding:2px 8px;cursor:pointer">Show</button>
-            </div>`
-          : `<div class="list">${active.map(t=>renderTCard(t)).join("")}</div>
+        <div class="list">${active.map(t=>renderTCard(t)).join("")}</div>
         ${cancelled.length>0?`<div class="list" style="margin-top:6px">${cancelled.map(t=>renderTCard(t)).join("")}</div>`:""}
-        ${done.length>0?`<div style="margin-top:6px" ${showDoneToggle?`id="done-section-${date}"`:""}">
-          ${showDoneToggle?`<button data-sc-toggle-done="${date}" style="font-size:10px;color:#334155;margin-bottom:4px;padding:2px 6px;background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:4px">▸ Completed (${done.length})</button>
-          <div id="done-list-${date}" style="display:none">${done.map(t=>renderTCard(t)).join("")}</div>`
-          :`<div style="font-size:10px;color:#334155;margin-bottom:4px;padding-left:4px">✓ Completed (${done.length})</div>
-          <div class="list">${done.map(t=>renderTCard(t)).join("")}</div>`}
+        ${done.length>0?`<div style="margin-top:6px">
+          <div style="font-size:10px;color:#334155;margin-bottom:4px;padding-left:4px">✓ Completed (${done.length})</div>
+          <div class="list">${done.map(t=>renderTCard(t)).join("")}</div>
         </div>`:""}
-        `}
       </div>`;
     }).join("")}`;
-}
-function renderTCard(t){
-  const c=SC[t.status]||SC["Not Started"]; const over=isOverdue(t);
-  const subs=t.subtasks||[]; const subDone=subs.filter(s=>s.done).length;
-  const subPct=subs.length>0?Math.round((subDone/subs.length)*100):null;
-  const tSecs=totalSecondsLogged(t);
-  const canComplete=!["Completed","Cancelled"].includes(t.status);
-  const canInProgress=!["Completed","Cancelled","In Progress"].includes(t.status);
-  const sid=t.scheduledId;
-  const opacity=t.status==="Completed"?";opacity:0.7":t.status==="Cancelled"?";opacity:0.45":"";
-  return `<div class="swipe-container sc-swipe-container" data-sc-sid="${sid}"${opacity?` style="${opacity.slice(1)}"`:""}">
-    <!-- Right actions: status changes -->
-    <div class="swipe-actions-right">
-      ${canComplete?`<button class="swipe-act-btn" data-sc-complete="${sid}" style="background:#059669;color:#fff">✅<span>Done</span></button>`:""}
-      ${canInProgress?`<button class="swipe-act-btn" data-sc-inprog="${sid}" style="background:#1d4ed8;color:#fff">⚡<span>Start</span></button>`:""}
-      ${canComplete&&t.status!=="On Hold"?`<button class="swipe-act-btn" data-sc-hold="${sid}" style="background:#d97706;color:#fff">⏸<span>Hold</span></button>`:""}
-      ${canComplete?`<button class="swipe-act-btn" data-sc-cancel="${sid}" style="background:#dc2626;color:#fff">❌<span>Cancel</span></button>`:""}
-      ${!canComplete?`<button class="swipe-act-btn" data-sc-reopen="${sid}" style="background:#475569;color:#fff">↩<span>Reopen</span></button>`:""}
-    </div>
-    <!-- Left actions: Detail / Reschedule -->
-    <div class="swipe-actions-left">
-      <button class="swipe-act-btn" data-sc-detail="${sid}" style="background:#0284c7;color:#fff">🔍<span>Detail</span></button>
-      <button class="swipe-act-btn" data-sc-resched="${sid}" style="background:#7c3aed;color:#fff">📅<span>Reschedule</span></button>
-    </div>
-    <div class="card swipe-card" style="border-left:3px solid ${over?"#ef4444":c.border};${over?"background:#1c0a0a":""}">
-      <div class="cbody">
-        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px">
-          <span class="cname">${e(t.name)}</span>
-          ${over?`<span class="ovd-p">⏰ Overdue</span>`:""}
-        </div>
-        <div class="cmeta">
-          <span class="s-pill" style="background:${c.bg};color:${c.text};border:1px solid ${c.border}">${t.status}</span>
-          <span class="cat-p">${t.category}</span>
-          ${t.taskType==="recurring"?`<span class="rec-p">↻ ${t.frequency}</span>`:""}
-          ${t.important?`<span class="f-p">⚑</span>`:""}
-          ${t.urgent?`<span class="u-p">⚡</span>`:""}
-          ${tSecs>0?`<span style="background:#1e293b;color:#64748b;border-radius:5px;padding:2px 6px;font-size:10px">⏱ ${fmtSecs(tSecs)}</span>`:""}
-        </div>
-        ${subPct!==null?`<div style="display:flex;align-items:center;gap:6px;margin-top:5px">
-          <div style="flex:1;height:4px;background:#1e293b;border-radius:2px;overflow:hidden"><div style="height:100%;width:${subPct}%;background:${subPct===100?"#34d399":"#3b82f6"};border-radius:2px;transition:width .3s"></div></div>
-          <span style="font-size:10px;color:${subPct===100?"#34d399":"#60a5fa"};font-weight:600;white-space:nowrap">✅ ${subDone}/${subs.length}</span>
-        </div>`:""}
-        <div style="font-size:11px;color:${over?"#f87171":"#64748b"};margin-top:3px">
-          ${t.taskType==="single"?`📅 ${fmtDate(t.startDate||t.dueDate)}`:`📅 ${fmtDate(t.instanceDate)}`}
-          ${t.startTime?` · ⏰ ${t.startTime}`:""}${t.endTime?` — ${t.endTime}`:""}
-        </div>
-        ${Array.isArray(t.tags)&&t.tags.length>0?`<div class="t-row">${t.tags.map(g=>`<span class="tag">#${e(g)}</span>`).join("")}</div>`:""}
-      </div>
-      <div class="pdot" style="background:${PC[t.priority]};margin-left:8px;flex-shrink:0"></div>
-    </div>
-  </div>`;
 }
 function renderTL(allInst){
   const tasks=allInst.filter(t=>taskDate(t)===SC_STATE.selDate&&t.startTime);
@@ -1934,10 +1885,10 @@ function bindContent(allInst){
     });
     const scQ=document.getElementById("sc-q");
     if(scQ) scQ.addEventListener("input",e=>{SC_STATE.q=e.target.value;render();});
-    const scFs=document.getElementById("sc-fs");
-    if(scFs) scFs.addEventListener("change",e=>{SC_STATE.fsStatus=e.target.value;render();});
     const scFcat=document.getElementById("sc-fcat");
     if(scFcat) scFcat.addEventListener("change",e=>{SC_STATE.fsCat=e.target.value;render();});
+    const scToggleDone=document.getElementById("sc-toggle-completed");
+    if(scToggleDone) scToggleDone.addEventListener("click",()=>{SC_STATE.showCompleted=!SC_STATE.showCompleted;render();});
     content.querySelectorAll("[data-sc-date-offset]").forEach(el=>{
       el.addEventListener("click",()=>{SC_STATE.selDate=addDays(SC_STATE.selDate,parseInt(el.dataset.scDateOffset));render();});
     });
@@ -3085,94 +3036,21 @@ function closeAllSwipes(){
 
 function attachCardSwipes(allInst){
   const content=document.getElementById('content');
-  if(STATE.tab==='backlog'&&!BL_STATE.bulk){
-    document.querySelectorAll('.swipe-container').forEach(container=>{
-      const id=container.dataset.blid;
-      const card=container.querySelector('.swipe-card');
-      const actR=container.querySelector('.swipe-actions-right');
-      const actL=container.querySelector('.swipe-actions-left');
-      if(!card||!id) return;
-      const task=STATE.backlog.find(t=>t.id===id);
-      if(!task) return;
 
-      let startX=0,startY=0,dx=0,active=false,moved=false;
+  // Fixed button widths — must match CSS .swipe-actions-right/left width
+  const BL_RIGHT_W=192; // 3 buttons
+  const BL_LEFT_W=64;   // 1 button
+  const SC_RIGHT_W=256; // up to 4 buttons × 64px
+  const SC_LEFT_W=128;  // 2 buttons
+  const MX_RIGHT_W=128; // 2 buttons
+  const MX_LEFT_W=64;   // 1 button
+  const KB_RIGHT_W=192; // 3 buttons
+  const KB_LEFT_W=64;   // 1 button
 
-      card.addEventListener('touchstart',ev=>{
-        startX=ev.touches[0].clientX; startY=ev.touches[0].clientY;
-        dx=0; active=true; moved=false;
-        if(_openSwipeId&&_openSwipeId!==id) closeAllSwipes();
-      },{passive:true});
-
-      card.addEventListener('touchmove',ev=>{
-        if(!active) return;
-        dx=ev.touches[0].clientX-startX;
-        const dy=Math.abs(ev.touches[0].clientY-startY);
-        if(dy>Math.abs(dx)+10){active=false;card.style.transform='';return;}
-        if(Math.abs(dx)>6){
-          moved=true;
-          const actW=actR?actR.getBoundingClientRect().width||192:192;
-          const actLW=actL?actL.getBoundingClientRect().width||64:64;
-          const clamp=dx<0?Math.max(dx,-actW-10):Math.min(dx,actLW+10);
-          card.style.transition='none';
-          card.style.transform=`translateX(${clamp}px)`;
-        }
-      },{passive:true});
-
-      card.addEventListener('touchend',()=>{
-        if(!active) return; active=false;
-        if(!moved){
-          if(_openSwipeId===id){closeAllSwipes();return;}
-          openTaskFormModal(task);
-          return;
-        }
-        const actW=actR?actR.getBoundingClientRect().width||192:192;
-        const actLW=actL?actL.getBoundingClientRect().width||64:64;
-        card.style.transition='transform .25s cubic-bezier(.25,.46,.45,.94)';
-        if(dx<-50){card.style.transform=`translateX(${-actW}px)`;_openSwipeId=id;haptic(12);}
-        else if(dx>50){card.style.transform=`translateX(${actLW}px)`;_openSwipeId=id;haptic(12);}
-        else{card.style.transform='';_openSwipeId=null;}
-      });
-
-      card.addEventListener('touchcancel',()=>{active=false;card.style.transform='';card.style.transition='';});
-
-      // Action buttons
-      container.querySelector('[data-bl-sched]')?.addEventListener('click',e=>{
-        e.stopPropagation();closeAllSwipes();openScheduleModal(task,false);
-      });
-      container.querySelector('[data-bl-edit]')?.addEventListener('click',e=>{
-        e.stopPropagation();closeAllSwipes();openTaskFormModal(task);
-      });
-      container.querySelector('[data-bl-del]')?.addEventListener('click',e=>{
-        e.stopPropagation();closeAllSwipes();
-        openReasonModal(`Delete "${task.name}"?`,'Why are you deleting this task?','🗑️ Delete','#7f1d1d',async(reason)=>{
-          const snap=[...STATE.backlog];
-          STATE.backlog=STATE.backlog.filter(t=>t.id!==id);
-          await saveBacklog(); haptic(15);
-          showToast('Deleted','err',async()=>{STATE.backlog=snap;await saveBacklog();render();});
-          render();
-        });
-      });
-      container.querySelector('[data-bl-clone]')?.addEventListener('click',async e=>{
-        e.stopPropagation();closeAllSwipes();
-        STATE.backlog=[{...task,id:gid(),name:task.name+' (copy)',createdAt:new Date().toISOString()},...STATE.backlog];
-        await saveBacklog();haptic(10);showToast('Duplicated ✓');render();
-      });
-    });
-
-    // Bulk check bindings
-    content.querySelectorAll('[data-bl-check]').forEach(el=>{
-      el.addEventListener('click',()=>{
-        const id=el.dataset.blCheck;
-        if(BL_STATE.sel.has(id)) BL_STATE.sel.delete(id); else BL_STATE.sel.add(id);
-        render();
-      });
-    });
-  }
-
-  // ── Shared swipe attach helper ──
-  function addRevealSwipe(container, card, actR, actL, onTap){
+  // Generic swipe attach — takes fixed pixel widths
+  function attachReveal(container, card, rightW, leftW, onTap, containerId){
+    if(!card) return;
     let startX=0,startY=0,dx=0,active=false,moved=false;
-    const containerId=container.dataset.scSid||container.dataset.mxSid||container.dataset.kbSid||"";
 
     card.addEventListener('touchstart',ev=>{
       startX=ev.touches[0].clientX; startY=ev.touches[0].clientY;
@@ -3185,11 +3063,9 @@ function attachCardSwipes(allInst){
       dx=ev.touches[0].clientX-startX;
       const dy=Math.abs(ev.touches[0].clientY-startY);
       if(dy>Math.abs(dx)+10){active=false;card.style.transform='';return;}
-      if(Math.abs(dx)>6){
+      if(Math.abs(dx)>8){
         moved=true;
-        const rw=actR?actR.getBoundingClientRect().width||128:0;
-        const lw=actL?actL.getBoundingClientRect().width||64:0;
-        const clamp=dx<0?Math.max(dx,-(rw+10)):Math.min(dx,lw+10);
+        const clamp=dx<0?Math.max(dx,-(rightW+12)):Math.min(dx,leftW+12);
         card.style.transition='none';
         card.style.transform=`translateX(${clamp}px)`;
       }
@@ -3202,64 +3078,98 @@ function attachCardSwipes(allInst){
         if(onTap) onTap();
         return;
       }
-      const rw=actR?actR.getBoundingClientRect().width||128:0;
-      const lw=actL?actL.getBoundingClientRect().width||64:0;
       card.style.transition='transform .25s cubic-bezier(.25,.46,.45,.94)';
-      if(dx<-50&&rw>0){card.style.transform=`translateX(${-rw}px)`;_openSwipeId=containerId;haptic(12);}
-      else if(dx>50&&lw>0){card.style.transform=`translateX(${lw}px)`;_openSwipeId=containerId;haptic(12);}
+      if(dx<-48&&rightW>0){card.style.transform=`translateX(${-rightW}px)`;_openSwipeId=containerId;haptic(12);}
+      else if(dx>48&&leftW>0){card.style.transform=`translateX(${leftW}px)`;_openSwipeId=containerId;haptic(12);}
       else{card.style.transform='';_openSwipeId=null;}
     });
     card.addEventListener('touchcancel',()=>{active=false;card.style.transform='';card.style.transition='';});
   }
 
-  // ── Schedule tab swipe ──
+  if(STATE.tab==='backlog'&&!BL_STATE.bulk){
+    document.querySelectorAll('.swipe-container[data-blid]').forEach(container=>{
+      const id=container.dataset.blid;
+      const card=container.querySelector('.swipe-card');
+      const task=STATE.backlog.find(t=>t.id===id);
+      if(!card||!task) return;
+
+      // Set explicit widths on action containers (getBoundingClientRect=0 for hidden elements)
+      const actR=container.querySelector('.swipe-actions-right');
+      const actL=container.querySelector('.swipe-actions-left');
+      if(actR) actR.style.width=BL_RIGHT_W+'px';
+      if(actL) actL.style.width=BL_LEFT_W+'px';
+
+      attachReveal(container, card, BL_RIGHT_W, BL_LEFT_W,
+        ()=>openTaskFormModal(task), id);
+
+      // Bind action buttons using specific data attributes
+      container.querySelector(`[data-bl-sched="${id}"]`)?.addEventListener('click',e=>{
+        e.stopPropagation();closeAllSwipes();openScheduleModal(task,false);
+      });
+      container.querySelector(`[data-bl-edit="${id}"]`)?.addEventListener('click',e=>{
+        e.stopPropagation();closeAllSwipes();openTaskFormModal(task);
+      });
+      container.querySelector(`[data-bl-del="${id}"]`)?.addEventListener('click',e=>{
+        e.stopPropagation();closeAllSwipes();
+        openReasonModal(`Delete "${task.name}"?`,'Why are you deleting this task?','🗑️ Delete','#7f1d1d',async()=>{
+          const snap=[...STATE.backlog];
+          STATE.backlog=STATE.backlog.filter(t=>t.id!==id);
+          await saveBacklog();haptic(15);
+          showToast('Deleted','err',async()=>{STATE.backlog=snap;await saveBacklog();render();});
+          render();
+        });
+      });
+      container.querySelector(`[data-bl-clone="${id}"]`)?.addEventListener('click',async e=>{
+        e.stopPropagation();closeAllSwipes();
+        STATE.backlog=[{...task,id:gid(),name:task.name+' (copy)',createdAt:new Date().toISOString()},...STATE.backlog];
+        await saveBacklog();haptic(10);showToast('Duplicated ✓');render();
+      });
+    });
+
+    content.querySelectorAll('[data-bl-check]').forEach(el=>{
+      el.addEventListener('click',()=>{
+        const id=el.dataset.blCheck;
+        if(BL_STATE.sel.has(id)) BL_STATE.sel.delete(id); else BL_STATE.sel.add(id);
+        render();
+      });
+    });
+  }
+
+  // ── Schedule tab ──
   if(STATE.tab==='sched'){
     document.querySelectorAll('.sc-swipe-container').forEach(container=>{
       const sid=container.dataset.scSid;
       const task=allInst.find(t=>t.scheduledId===sid);
       if(!task) return;
       const card=container.querySelector('.swipe-card');
+      // Count rendered buttons to get exact widths
+      const rightBtns=container.querySelectorAll('.swipe-actions-right .swipe-act-btn').length;
+      const leftBtns=container.querySelectorAll('.swipe-actions-left .swipe-act-btn').length;
+      const rightW=rightBtns*64;
+      const leftW=leftBtns*64;
+      // Set explicit width so buttons are visible when revealed
       const actR=container.querySelector('.swipe-actions-right');
       const actL=container.querySelector('.swipe-actions-left');
-      if(!card) return;
+      if(actR) actR.style.width=rightW+'px';
+      if(actL) actL.style.width=leftW+'px';
 
-      addRevealSwipe(container,card,actR,actL,()=>openTaskModal({...task,_masterId:getMasterId(task)}));
+      attachReveal(container, card, rightW, leftW,
+        ()=>openTaskModal({...task,_masterId:getMasterId(task)}), sid);
 
-      // Action bindings
-      container.querySelector(`[data-sc-complete="${sid}"]`)?.addEventListener('click',e=>{
-        e.stopPropagation();closeAllSwipes();
-        changeStatus(getMasterId(task),task.instanceDate,'Completed','');
-      });
-      container.querySelector(`[data-sc-inprog="${sid}"]`)?.addEventListener('click',e=>{
-        e.stopPropagation();closeAllSwipes();
-        changeStatus(getMasterId(task),task.instanceDate,'In Progress','');
-      });
+      container.querySelector(`[data-sc-complete="${sid}"]`)?.addEventListener('click',e=>{e.stopPropagation();closeAllSwipes();changeStatus(getMasterId(task),task.instanceDate,'Completed','');});
+      container.querySelector(`[data-sc-inprog="${sid}"]`)?.addEventListener('click',e=>{e.stopPropagation();closeAllSwipes();changeStatus(getMasterId(task),task.instanceDate,'In Progress','');});
       container.querySelector(`[data-sc-hold="${sid}"]`)?.addEventListener('click',e=>{
         e.stopPropagation();closeAllSwipes();
-        openReasonModal('Put On Hold','Why is this being put on hold?','⏸ Confirm Hold','#92400e',async reason=>{
-          await changeStatus(getMasterId(task),task.instanceDate,'On Hold',reason);
-        });
+        openReasonModal('Put On Hold','Why is this being put on hold?','⏸ Confirm','#92400e',async reason=>{await changeStatus(getMasterId(task),task.instanceDate,'On Hold',reason);});
       });
-      container.querySelector(`[data-sc-cancel="${sid}"]`)?.addEventListener('click',e=>{
-        e.stopPropagation();closeAllSwipes();
-        openCancelModal({...task,_masterId:getMasterId(task)});
-      });
-      container.querySelector(`[data-sc-reopen="${sid}"]`)?.addEventListener('click',e=>{
-        e.stopPropagation();closeAllSwipes();
-        changeStatus(getMasterId(task),task.instanceDate,'Not Started','');
-      });
-      container.querySelector(`[data-sc-detail="${sid}"]`)?.addEventListener('click',e=>{
-        e.stopPropagation();closeAllSwipes();
-        openTaskModal({...task,_masterId:getMasterId(task)});
-      });
-      container.querySelector(`[data-sc-resched="${sid}"]`)?.addEventListener('click',e=>{
-        e.stopPropagation();closeAllSwipes();
-        openScheduleModal(task,true);
-      });
+      container.querySelector(`[data-sc-cancel="${sid}"]`)?.addEventListener('click',e=>{e.stopPropagation();closeAllSwipes();openCancelModal({...task,_masterId:getMasterId(task)});});
+      container.querySelector(`[data-sc-reopen="${sid}"]`)?.addEventListener('click',e=>{e.stopPropagation();closeAllSwipes();changeStatus(getMasterId(task),task.instanceDate,'Not Started','');});
+      container.querySelector(`[data-sc-detail="${sid}"]`)?.addEventListener('click',e=>{e.stopPropagation();closeAllSwipes();openTaskModal({...task,_masterId:getMasterId(task)});});
+      container.querySelector(`[data-sc-resched="${sid}"]`)?.addEventListener('click',e=>{e.stopPropagation();closeAllSwipes();openScheduleModal(task,true);});
     });
   }
 
-  // ── Matrix tab swipe ──
+  // ── Matrix tab ──
   if(STATE.tab==='matrix'){
     document.querySelectorAll('.mx-swipe-container').forEach(container=>{
       const sid=container.dataset.mxSid;
@@ -3268,26 +3178,21 @@ function attachCardSwipes(allInst){
       const card=container.querySelector('.swipe-card');
       const actR=container.querySelector('.swipe-actions-right');
       const actL=container.querySelector('.swipe-actions-left');
-      if(!card) return;
+      const rightW=container.querySelectorAll('.swipe-actions-right .swipe-act-btn').length*64;
+      const leftW=container.querySelectorAll('.swipe-actions-left .swipe-act-btn').length*64;
+      if(actR) actR.style.width=rightW+'px';
+      if(actL) actL.style.width=leftW+'px';
 
-      addRevealSwipe(container,card,actR,actL,()=>openTaskModal({...task,_masterId:getMasterId(task)}));
+      attachReveal(container, card, rightW, leftW,
+        ()=>openTaskModal({...task,_masterId:getMasterId(task)}), sid);
 
-      container.querySelector(`[data-mx-complete="${sid}"]`)?.addEventListener('click',e=>{
-        e.stopPropagation();closeAllSwipes();
-        changeStatus(getMasterId(task),task.instanceDate,'Completed','');
-      });
-      container.querySelector(`[data-mx-cancel="${sid}"]`)?.addEventListener('click',e=>{
-        e.stopPropagation();closeAllSwipes();
-        openCancelModal({...task,_masterId:getMasterId(task)});
-      });
-      container.querySelector(`[data-mx-detail="${sid}"]`)?.addEventListener('click',e=>{
-        e.stopPropagation();closeAllSwipes();
-        openTaskModal({...task,_masterId:getMasterId(task)});
-      });
+      container.querySelector(`[data-mx-complete="${sid}"]`)?.addEventListener('click',e=>{e.stopPropagation();closeAllSwipes();changeStatus(getMasterId(task),task.instanceDate,'Completed','');});
+      container.querySelector(`[data-mx-cancel="${sid}"]`)?.addEventListener('click',e=>{e.stopPropagation();closeAllSwipes();openCancelModal({...task,_masterId:getMasterId(task)});});
+      container.querySelector(`[data-mx-detail="${sid}"]`)?.addEventListener('click',e=>{e.stopPropagation();closeAllSwipes();openTaskModal({...task,_masterId:getMasterId(task)});});
     });
   }
 
-  // ── Kanban tab swipe ──
+  // ── Kanban tab ──
   if(STATE.tab==='kanban'){
     document.querySelectorAll('.kb-swipe-container').forEach(container=>{
       const sid=container.dataset.kbSid;
@@ -3298,30 +3203,21 @@ function attachCardSwipes(allInst){
       const card=container.querySelector('.swipe-card');
       const actR=container.querySelector('.swipe-actions-right');
       const actL=container.querySelector('.swipe-actions-left');
-      if(!card) return;
+      const rightW=container.querySelectorAll('.swipe-actions-right .swipe-act-btn').length*64;
+      const leftW=container.querySelectorAll('.swipe-actions-left .swipe-act-btn').length*64;
+      if(actR) actR.style.width=rightW+'px';
+      if(actL) actL.style.width=leftW+'px';
 
-      addRevealSwipe(container,card,actR,actL,()=>openTaskModal({...task,_masterId:getMasterId(task)}));
+      attachReveal(container, card, rightW||KB_RIGHT_W, leftW||KB_LEFT_W,
+        ()=>openTaskModal({...task,_masterId:getMasterId(task)}), sid);
 
-      container.querySelector(`[data-kb-sw-complete="${sid}"]`)?.addEventListener('click',e=>{
-        e.stopPropagation();closeAllSwipes();
-        changeStatus(mid,idate,'Completed','');
-      });
-      container.querySelector(`[data-kb-sw-inprog="${sid}"]`)?.addEventListener('click',e=>{
-        e.stopPropagation();closeAllSwipes();
-        changeStatus(mid,idate,'In Progress','');
-      });
-      container.querySelector(`[data-kb-sw-cancel="${sid}"]`)?.addEventListener('click',e=>{
-        e.stopPropagation();closeAllSwipes();
-        openCancelModal({...task,_masterId:mid,instanceDate:idate});
-      });
-      container.querySelector(`[data-kb-sw-detail="${sid}"]`)?.addEventListener('click',e=>{
-        e.stopPropagation();closeAllSwipes();
-        openTaskModal({...task,_masterId:getMasterId(task)});
-      });
+      container.querySelector(`[data-kb-sw-complete="${sid}"]`)?.addEventListener('click',e=>{e.stopPropagation();closeAllSwipes();changeStatus(mid,idate,'Completed','');});
+      container.querySelector(`[data-kb-sw-inprog="${sid}"]`)?.addEventListener('click',e=>{e.stopPropagation();closeAllSwipes();changeStatus(mid,idate,'In Progress','');});
+      container.querySelector(`[data-kb-sw-cancel="${sid}"]`)?.addEventListener('click',e=>{e.stopPropagation();closeAllSwipes();openCancelModal({...task,_masterId:mid,instanceDate:idate});});
+      container.querySelector(`[data-kb-sw-detail="${sid}"]`)?.addEventListener('click',e=>{e.stopPropagation();closeAllSwipes();openTaskModal({...task,_masterId:getMasterId(task)});});
     });
   }
 }
-
 
 // ── Pull to refresh on Dashboard ──
 (()=>{
