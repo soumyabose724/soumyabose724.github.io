@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reset Password — ArthaGrid</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* Step transitions */
+    .step-panel {
+      display: none;
+      animation: fadeUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .step-panel.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateX(10px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes checkBounce {
+      0%   { transform: scale(0); opacity: 0; }
+      60%  { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--sp-1);
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: var(--sp-6);
+      cursor: pointer;
+      background: none; border: none; padding: 0;
+      font-family: var(--font-sans);
+      transition: color var(--t-fast);
+    }
+    .back-link:hover { color: var(--primary); }
+
+    .step-title {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: var(--sp-2);
+      letter-spacing: -0.01em;
+    }
+
+    .step-subtitle {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: var(--sp-6);
+      line-height: 1.5;
+    }
+
+    .email-mask {
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    /* Success step */
+    .success-icon-wrap {
+      width: 72px; height: 72px;
+      background: var(--success-light);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto var(--sp-5);
+      animation: checkBounce 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .success-icon-wrap svg { color: var(--success); }
+  </style>
+</head>
+<body>
+
+<main class="auth-page" role="main">
+  <div class="auth-card anim-fade-up" style="max-width: 460px;">
+
+    <!-- Step Dots -->
+    <div class="step-dots" id="step-dots" aria-hidden="true">
+      <div class="step-dot active" id="dot-1"></div>
+      <div class="step-dot"        id="dot-2"></div>
+      <div class="step-dot"        id="dot-3"></div>
+      <div class="step-dot"        id="dot-4"></div>
+    </div>
+
+    <!-- ═══════════════════════════════════
+         STEP 1 — Request Reset
+    ════════════════════════════════════ -->
+    <div class="step-panel active" id="step-1" role="group" aria-label="Step 1 of 4: Enter your email">
+
+      <button class="back-link" onclick="goToLogin()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to Sign In
+      </button>
+
+      <h1 class="step-title">Reset Password</h1>
+      <p class="step-subtitle">Enter your email address and we'll send a 6-digit reset code.</p>
+
+      <!-- Error banner -->
+      <div class="alert alert-error hidden" id="s1-error" role="alert" aria-live="polite">
+        <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
+        <span class="alert__text" id="s1-error-text"></span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="email">Email Address</label>
+        <div class="input-wrapper">
+          <input
+            type="email"
+            id="email"
+            name="email"
+            class="form-input"
+            placeholder="you@example.com"
+            autocomplete="email"
+            required
+            aria-required="true"
+            autofocus
+          >
+        </div>
+      </div>
+
+      <button class="btn btn-primary btn-lg btn-full" id="s1-btn" onclick="goToStep2()" disabled>
+        Send Reset Code
+      </button>
+
+    </div><!-- /step-1 -->
+
+    <!-- ═══════════════════════════════════
+         STEP 2 — Enter OTP
+    ════════════════════════════════════ -->
+    <div class="step-panel" id="step-2" role="group" aria-label="Step 2 of 4: Enter verification code">
+
+      <button class="back-link" onclick="goToStep(1)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back
+      </button>
+
+      <h1 class="step-title">Check your email</h1>
+      <p class="step-subtitle">
+        A 6-digit code was sent to <span class="email-mask" id="email-display"></span>
+      </p>
+
+      <!-- Error banner -->
+      <div class="alert alert-error hidden" id="s2-error" role="alert" aria-live="polite">
+        <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
+        <span class="alert__text" id="s2-error-text"></span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="otp-0">Verification Code</label>
+        <div class="digit-group" id="otp-group" role="group" aria-label="6-digit verification code">
+          <input class="digit-box" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="otp-0" aria-label="Digit 1">
+          <input class="digit-box" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="otp-1" aria-label="Digit 2">
+          <input class="digit-box" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="otp-2" aria-label="Digit 3">
+          <input class="digit-box" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="otp-3" aria-label="Digit 4">
+          <input class="digit-box" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="otp-4" aria-label="Digit 5">
+          <input class="digit-box" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="otp-5" aria-label="Digit 6">
+        </div>
+
+        <!-- Timer + resend -->
+        <div class="otp-meta">
+          <div class="otp-countdown" id="otp-countdown" aria-live="polite" aria-label="Code expiry countdown">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Code expires in <span id="countdown-display">10:00</span>
+          </div>
+          <button class="otp-resend" id="resend-btn" disabled onclick="resendOTP()">
+            Resend code
+          </button>
+        </div>
+      </div>
+
+      <button class="btn btn-primary btn-lg btn-full" id="s2-btn" onclick="verifyOTP()" disabled>
+        Verify Code
+      </button>
+
+    </div><!-- /step-2 -->
+
+    <!-- ═══════════════════════════════════
+         STEP 3 — New Password
+    ════════════════════════════════════ -->
+    <div class="step-panel" id="step-3" role="group" aria-label="Step 3 of 4: Set new password">
+
+      <h1 class="step-title">Set new password</h1>
+      <p class="step-subtitle">Choose a strong password you haven't used before.</p>
+
+      <!-- Error banner -->
+      <div class="alert alert-error hidden" id="s3-error" role="alert" aria-live="polite">
+        <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
+        <span class="alert__text" id="s3-error-text"></span>
+      </div>
+
+      <!-- New password -->
+      <div class="form-group">
+        <label class="form-label" for="new-password">New Password</label>
+        <div class="input-wrapper">
+          <input
+            type="password"
+            id="new-password"
+            name="new_password"
+            class="form-input has-icon-right"
+            placeholder="min. 8 characters"
+            autocomplete="new-password"
+            minlength="8"
+            required
+            aria-required="true"
+            aria-describedby="strength-label-text"
+          >
+          <button type="button" class="input-icon-btn" id="np-toggle" aria-label="Show new password">
+            <svg id="np-eye" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Strength Meter -->
+        <div class="strength-meter" id="strength-meter" data-level="0" role="meter" aria-label="Password strength">
+          <div class="strength-meter__bars">
+            <div class="strength-bar"></div>
+            <div class="strength-bar"></div>
+            <div class="strength-bar"></div>
+            <div class="strength-bar"></div>
+            <div class="strength-bar"></div>
+          </div>
+          <div class="strength-meter__label">
+            Strength:&nbsp;<span class="strength-label-text" id="strength-label-text"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Confirm password -->
+      <div class="form-group" style="margin-bottom: var(--sp-6);">
+        <label class="form-label" for="confirm-password">Confirm New Password</label>
+        <div class="input-wrapper">
+          <input
+            type="password"
+            id="confirm-password"
+            name="confirm_password"
+            class="form-input has-icon-right"
+            placeholder="repeat password"
+            autocomplete="new-password"
+            required
+            aria-required="true"
+            aria-describedby="confirm-error"
+          >
+          <button type="button" class="input-icon-btn" id="cp-toggle" aria-label="Show confirm password">
+            <svg id="cp-eye" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+        <div class="form-error hidden" id="confirm-error" aria-live="polite">Passwords do not match.</div>
+      </div>
+
+      <button class="btn btn-primary btn-lg btn-full" id="s3-btn" onclick="resetPassword()" disabled>
+        Reset Password
+      </button>
+
+    </div><!-- /step-3 -->
+
+    <!-- ═══════════════════════════════════
+         STEP 4 — Success
+    ════════════════════════════════════ -->
+    <div class="step-panel" id="step-4" role="group" aria-label="Step 4 of 4: Password reset successful" style="text-align: center;">
+
+      <div class="success-icon-wrap" aria-hidden="true">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+
+      <h1 class="step-title">Password reset successful!</h1>
+      <p class="step-subtitle" style="margin-bottom: var(--sp-8);">
+        You can now sign in with your new password.
+      </p>
+
+      <a href="login.html" class="btn btn-primary btn-lg btn-full">
+        Sign In
+      </a>
+
+    </div><!-- /step-4 -->
+
+    <!-- Prototype demo controls (steps 2 & 3 errors) -->
+    <div class="demo-bar">
+      <div class="demo-bar__label">Prototype Demo States</div>
+      <div class="demo-bar__buttons">
+        <button class="demo-btn" onclick="demo_wrongOTP()">Wrong OTP</button>
+        <button class="demo-btn" onclick="demo_expiredOTP()">Expired OTP</button>
+        <button class="demo-btn" onclick="demo_mismatch()">Password Mismatch (step 3)</button>
+        <button class="demo-btn" onclick="goToStep(1)">→ Step 1</button>
+        <button class="demo-btn" onclick="goToStep(2)">→ Step 2</button>
+        <button class="demo-btn" onclick="goToStep(3)">→ Step 3</button>
+        <button class="demo-btn" onclick="goToStep(4)">→ Step 4 (success)</button>
+      </div>
+    </div>
+
+  </div><!-- /auth-card -->
+
+  <footer class="auth-footer">
+    Version 1.0 &nbsp;·&nbsp; © 2026 ArthaGrid &nbsp;·&nbsp; Private Use Only
+  </footer>
+
+</main>
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ─── Ripple on primary buttons ─── */
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('.btn-primary');
+    if (!btn) return;
+    const wave = document.createElement('span');
+    wave.className = 'ripple-wave';
+    const rect = btn.getBoundingClientRect();
+    wave.style.left = (e.clientX - rect.left) + 'px';
+    wave.style.top  = (e.clientY - rect.top)  + 'px';
+    btn.appendChild(wave);
+    wave.addEventListener('animationend', () => wave.remove());
+  });
+</script>
+<script>
+  /* ─── State ─── */
+  let currentStep = 1;
+  let countdownTimer = null;
+  let otpComplete = false;
+
+  const SVG_EYE_OPEN   = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
+  const SVG_EYE_CLOSED = `<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>`;
+
+  /* ─── Navigation ─── */
+  function goToStep(n) {
+    document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(`step-${n}`).classList.add('active');
+
+    // Update dots
+    const dots = document.querySelectorAll('.step-dot');
+    dots.forEach((d, i) => {
+      d.classList.remove('active', 'done');
+      if (i + 1 < n) d.classList.add('done');
+      else if (i + 1 === n) d.classList.add('active');
+    });
+
+    currentStep = n;
+
+    if (n === 2) startOTPCountdown();
+    if (n === 4) {
+      // Hide dots on success
+      document.getElementById('step-dots').style.display = 'none';
+    } else {
+      document.getElementById('step-dots').style.display = '';
+    }
+  }
+
+  function goToLogin() { location.href = 'login.html'; }
+
+  /* ─── Step 1 — Email ─── */
+  const emailInput = document.getElementById('email');
+  const s1Btn      = document.getElementById('s1-btn');
+
+  emailInput.addEventListener('input', () => {
+    s1Btn.disabled = !emailInput.value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+  });
+
+  function goToStep2() {
+    const btn = document.getElementById('s1-btn');
+    btn.classList.add('loading');
+    btn.disabled = true;
+
+    setTimeout(() => {
+      btn.classList.remove('loading');
+      btn.disabled = false;
+
+      // Mask email for display
+      const email = emailInput.value;
+      const [user, domain] = email.split('@');
+      const masked = user.slice(0, 2) + '•'.repeat(Math.max(1, user.length - 2)) + '@' + domain;
+      document.getElementById('email-display').textContent = masked;
+
+      goToStep(2);
+      // Auto-focus first OTP box
+      setTimeout(() => document.getElementById('otp-0').focus(), 50);
+    }, 1000);
+  }
+
+  /* ─── Step 2 — OTP ─── */
+  const otpGroup = document.getElementById('otp-group');
+  const s2Btn    = document.getElementById('s2-btn');
+
+  AG.initDigitBoxes(otpGroup, (code) => {
+    otpComplete = true;
+    s2Btn.disabled = false;
+    // Auto-submit on complete entry
+    setTimeout(() => verifyOTP(), 250);
+  });
+
+  // Also track partial completion for button
+  otpGroup.addEventListener('input', () => {
+    const boxes = otpGroup.querySelectorAll('.digit-box');
+    const filled = Array.from(boxes).filter(b => b.value).length;
+    s2Btn.disabled = filled < 6;
+    otpComplete = filled === 6;
+  });
+
+  function startOTPCountdown() {
+    if (countdownTimer) countdownTimer.stop();
+    const display = document.getElementById('countdown-display');
+    const resendBtn = document.getElementById('resend-btn');
+    resendBtn.disabled = true;
+
+    countdownTimer = AG.startCountdown(display, 600, () => {
+      // Expired
+      resendBtn.disabled = false;
+      document.getElementById('s2-error-text').textContent = 'Code has expired. Request a new one.';
+      document.getElementById('s2-error').classList.remove('hidden');
+    });
+  }
+
+  function resendOTP() {
+    // Reset OTP boxes
+    const boxes = otpGroup.querySelectorAll('.digit-box');
+    boxes.forEach(b => { b.value = ''; b.classList.remove('filled', 'error'); });
+    boxes[0].focus();
+    s2Btn.disabled = true;
+    document.getElementById('resend-btn').disabled = true;
+    document.getElementById('s2-error').classList.add('hidden');
+    startOTPCountdown();
+  }
+
+  function verifyOTP() {
+    const code = Array.from(otpGroup.querySelectorAll('.digit-box')).map(b => b.value).join('');
+    if (code.length < 6) return;
+
+    s2Btn.classList.add('loading');
+    s2Btn.disabled = true;
+
+    setTimeout(() => {
+      s2Btn.classList.remove('loading');
+      s2Btn.disabled = false;
+
+      // Demo: code "123456" succeeds, anything else fails
+      if (code === '123456') {
+        if (countdownTimer) countdownTimer.stop();
+        goToStep(3);
+        setTimeout(() => document.getElementById('new-password').focus(), 50);
+      } else {
+        AG.shakeDigitBoxes(otpGroup);
+        s2Btn.disabled = true;
+        document.getElementById('s2-error-text').textContent = 'Incorrect code. Please check your email and try again.';
+        document.getElementById('s2-error').classList.remove('hidden');
+      }
+    }, 900);
+  }
+
+  /* ─── Step 3 — Password ─── */
+  const newPwInput  = document.getElementById('new-password');
+  const confPwInput = document.getElementById('confirm-password');
+  const meterEl     = document.getElementById('strength-meter');
+  const s3Btn       = document.getElementById('s3-btn');
+  const confirmErr  = document.getElementById('confirm-error');
+
+  // Bind strength meter
+  AG.bindStrengthMeter(newPwInput, meterEl);
+
+  // Show meter on first input
+  newPwInput.addEventListener('input', validateStep3);
+  confPwInput.addEventListener('input', validateStep3);
+
+  function validateStep3() {
+    const pw = newPwInput.value;
+    const cp = confPwInput.value;
+    const strength = AG.getPasswordStrength(pw);
+
+    const mismatch = cp && pw !== cp;
+    confirmErr.classList.toggle('hidden', !mismatch);
+    confPwInput.classList.toggle('is-error', !!mismatch);
+
+    s3Btn.disabled = !(pw.length >= 8 && strength.level >= 3 && cp === pw && cp.length > 0);
+  }
+
+  // Eye toggles for step 3
+  function makeEyeToggle(inputId, btnId, eyeId) {
+    const input = document.getElementById(inputId);
+    const btn   = document.getElementById(btnId);
+    const eye   = document.getElementById(eyeId);
+    btn.addEventListener('click', () => {
+      const showing = input.type === 'text';
+      input.type = showing ? 'password' : 'text';
+      eye.innerHTML = showing ? SVG_EYE_OPEN : SVG_EYE_CLOSED;
+      btn.setAttribute('aria-label', showing ? `Show ${btnId.includes('np') ? 'new' : 'confirm'} password` : `Hide ${btnId.includes('np') ? 'new' : 'confirm'} password`);
+    });
+  }
+  makeEyeToggle('new-password', 'np-toggle', 'np-eye');
+  makeEyeToggle('confirm-password', 'cp-toggle', 'cp-eye');
+
+  function resetPassword() {
+    s3Btn.classList.add('loading');
+    s3Btn.disabled = true;
+
+    setTimeout(() => {
+      s3Btn.classList.remove('loading');
+      goToStep(4);
+    }, 1100);
+  }
+
+  /* ─── Demo state helpers ─── */
+  function demo_wrongOTP() {
+    goToStep(2);
+    setTimeout(() => {
+      AG.shakeDigitBoxes(otpGroup);
+      document.getElementById('s2-error-text').textContent = 'Incorrect code. Please check your email and try again.';
+      document.getElementById('s2-error').classList.remove('hidden');
+    }, 100);
+  }
+
+  function demo_expiredOTP() {
+    goToStep(2);
+    setTimeout(() => {
+      if (countdownTimer) countdownTimer.stop();
+      const display = document.getElementById('countdown-display');
+      display.textContent = '00:00';
+      display.classList.add('urgent');
+      document.getElementById('resend-btn').disabled = false;
+      document.getElementById('s2-error-text').textContent = 'Code has expired. Please request a new one.';
+      document.getElementById('s2-error').classList.remove('hidden');
+    }, 100);
+  }
+
+  function demo_mismatch() {
+    goToStep(3);
+    setTimeout(() => {
+      newPwInput.value = 'Password123';
+      confPwInput.value = 'Password456';
+      AG.bindStrengthMeter(newPwInput, meterEl);
+      newPwInput.dispatchEvent(new Event('input'));
+      confPwInput.dispatchEvent(new Event('input'));
+    }, 100);
+  }
+</script>
+
+</body>
+</html>

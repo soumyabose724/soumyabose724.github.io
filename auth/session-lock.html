@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Session Locked — ArthaGrid</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* ── Blurred fake dashboard (behind overlay) ── */
+    .fake-dashboard {
+      min-height: 100vh;
+      background: var(--bg);
+      padding: var(--sp-4);
+      filter: blur(6px);
+      pointer-events: none;
+      user-select: none;
+      overflow: hidden;
+      animation: fadeIn 0.6s ease both;
+    }
+
+    .fake-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+      background: var(--surface);
+      border-radius: var(--r-lg);
+      padding: 0 var(--sp-5);
+      margin-bottom: var(--sp-4);
+      box-shadow: var(--sh-sm);
+    }
+
+    .fake-bento {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-3);
+    }
+
+    .fake-card {
+      background: var(--surface);
+      border-radius: var(--r-xl);
+      padding: var(--sp-5);
+      box-shadow: var(--sh-sm);
+      border: 1px solid var(--border);
+    }
+
+    .fake-card.wide { grid-column: 1 / -1; }
+
+    .fake-line {
+      height: 12px;
+      border-radius: 6px;
+      background: var(--border);
+      margin-bottom: var(--sp-2);
+    }
+
+    .fake-line.short  { width: 45%; }
+    .fake-line.medium { width: 65%; }
+    .fake-line.tall   { height: 28px; width: 55%; margin-top: var(--sp-2); }
+    .fake-line.teal   { background: var(--primary-light); }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    @keyframes lockBounce {
+      0%   { transform: scale(0.5) rotate(-15deg); opacity: 0; }
+      60%  { transform: scale(1.15) rotate(5deg);  opacity: 1; }
+      80%  { transform: scale(0.95) rotate(-2deg); }
+      100% { transform: scale(1)    rotate(0deg);  opacity: 1; }
+    }
+
+    @keyframes pipPop {
+      0%   { transform: scale(0); opacity: 0; }
+      70%  { transform: scale(1.4); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes checkDraw {
+      0%   { stroke-dashoffset: 40; opacity: 0; }
+      50%  { opacity: 1; }
+      100% { stroke-dashoffset: 0; opacity: 1; }
+    }
+
+    /* ── Session lock overlay ── */
+    .session-lock {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--sp-4);
+    }
+
+    .session-lock__bg {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 15, 25, 0.58);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      animation: fadeIn 0.35s ease both;
+    }
+
+    /* Inline error inside the lock card */
+    .lock-error {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+      font-size: 13px;
+      color: var(--danger);
+      padding: var(--sp-2) var(--sp-3);
+      background: var(--danger-light);
+      border-radius: var(--r-md);
+      margin-bottom: var(--sp-4);
+      border: 1px solid #fca5a5;
+      animation: slideDown 0.2s ease;
+    }
+
+    .lock-error.hidden { display: none; }
+
+    /* Attempt counter dot pips */
+    .attempt-pips {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      margin-bottom: var(--sp-4);
+    }
+
+    .pip {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--border-strong);
+      transition: background 0.3s ease, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .pip.used {
+      background: var(--danger);
+      animation: pipPop 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    /* Unlock success flash */
+    .unlock-success-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      background: rgba(34, 197, 94, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .unlock-success-overlay.show {
+      opacity: 1;
+    }
+
+    .unlock-success-overlay svg {
+      stroke-dasharray: 40;
+      stroke-dashoffset: 40;
+    }
+
+    .unlock-success-overlay.show svg {
+      animation: checkDraw 0.5s ease 0.1s forwards;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── BACKGROUND: Simulated blurred dashboard ─── -->
+<div class="fake-dashboard" aria-hidden="true">
+  <div class="fake-topbar">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <div style="width:32px;height:32px;background:var(--primary);border-radius:8px;"></div>
+      <div class="fake-line medium" style="margin:0;"></div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <div style="width:28px;height:28px;border-radius:50%;background:var(--border);"></div>
+      <div style="width:28px;height:28px;border-radius:50%;background:var(--primary-light);"></div>
+    </div>
+  </div>
+
+  <div class="fake-bento">
+    <!-- Net Worth hero card -->
+    <div class="fake-card wide" style="background: var(--glass-bg); border: 1px solid var(--glass-border);">
+      <div class="fake-line short"></div>
+      <div class="fake-line tall teal"></div>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <div class="fake-line" style="width:30%;height:8px;background:var(--success-light);"></div>
+        <div class="fake-line" style="width:25%;height:8px;background:var(--border);"></div>
+      </div>
+    </div>
+    <!-- Income / Expense cards -->
+    <div class="fake-card">
+      <div class="fake-line short" style="width:40%;"></div>
+      <div class="fake-line tall" style="width:60%;background:var(--success-light);"></div>
+    </div>
+    <div class="fake-card">
+      <div class="fake-line short" style="width:40%;"></div>
+      <div class="fake-line tall" style="width:65%;background:var(--danger-light);"></div>
+    </div>
+    <!-- Debt + CIBIL -->
+    <div class="fake-card" style="grid-column: 1 / 2;">
+      <div class="fake-line short"></div>
+      <div style="height:8px;background:var(--border);border-radius:4px;margin:12px 0 4px;overflow:hidden;">
+        <div style="height:100%;width:38%;background:var(--primary);border-radius:4px;"></div>
+      </div>
+      <div class="fake-line" style="width:35%;height:8px;"></div>
+    </div>
+    <div class="fake-card">
+      <div class="fake-line short" style="width:60%;"></div>
+      <div class="fake-line tall" style="width:70%;background:var(--primary-light);"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── SESSION LOCK OVERLAY ─── -->
+<div class="session-lock" id="session-lock" role="dialog" aria-modal="true" aria-labelledby="lock-title">
+
+  <div class="session-lock__bg" aria-hidden="true"></div>
+
+  <div class="session-lock__card">
+
+    <!-- Lock icon -->
+    <div class="session-lock__icon-wrap" aria-hidden="true">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+        <path d="M7 11V7a5 5 0 0110 0v4"/>
+      </svg>
+    </div>
+
+    <h1 class="session-lock__title" id="lock-title">Session Locked</h1>
+    <p class="session-lock__name">Vikas Sharma</p>
+    <p class="session-lock__msg">Locked after 15 minutes of inactivity.</p>
+
+    <div class="session-lock__divider"></div>
+
+    <!-- Attempt pips (3 allowed) -->
+    <div class="attempt-pips" id="attempt-pips" aria-label="Failed attempts" role="status">
+      <div class="pip" id="pip-1"></div>
+      <div class="pip" id="pip-2"></div>
+      <div class="pip" id="pip-3"></div>
+    </div>
+
+    <!-- Error message -->
+    <div class="lock-error hidden" id="lock-error" role="alert" aria-live="assertive">
+      <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+      </svg>
+      <span id="lock-error-text"></span>
+    </div>
+
+    <!-- PIN / Password tabs -->
+    <div class="auth-tab-bar" role="tablist" aria-label="Unlock method">
+      <button
+        class="auth-tab-btn active"
+        id="tab-pin"
+        role="tab"
+        aria-selected="true"
+        aria-controls="panel-pin"
+        onclick="switchTab('pin')"
+      >
+        PIN
+      </button>
+      <button
+        class="auth-tab-btn"
+        id="tab-pw"
+        role="tab"
+        aria-selected="false"
+        aria-controls="panel-pw"
+        onclick="switchTab('pw')"
+      >
+        Password
+      </button>
+    </div>
+
+    <!-- ─── PIN Panel ─── -->
+    <div class="auth-tab-panel active" id="panel-pin" role="tabpanel" aria-labelledby="tab-pin">
+      <div class="form-group" style="margin-bottom: var(--sp-4);">
+        <label class="form-label" for="pin-0" style="text-align: center; display: block; margin-bottom: var(--sp-3);">Enter PIN</label>
+        <div class="digit-group" id="pin-group" style="justify-content: center;" role="group" aria-label="6-digit PIN">
+          <input class="digit-box digit-box--pin" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="pin-0" aria-label="PIN digit 1" autocomplete="off">
+          <input class="digit-box digit-box--pin" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="pin-1" aria-label="PIN digit 2" autocomplete="off">
+          <input class="digit-box digit-box--pin" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="pin-2" aria-label="PIN digit 3" autocomplete="off">
+          <input class="digit-box digit-box--pin" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="pin-3" aria-label="PIN digit 4" autocomplete="off">
+          <input class="digit-box digit-box--pin" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="pin-4" aria-label="PIN digit 5" autocomplete="off">
+          <input class="digit-box digit-box--pin" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="pin-5" aria-label="PIN digit 6" autocomplete="off">
+        </div>
+        <p class="form-helper" style="text-align:center; margin-top: var(--sp-2);">Auto-submits when all 6 digits entered</p>
+      </div>
+    </div>
+
+    <!-- ─── Password Panel ─── -->
+    <div class="auth-tab-panel" id="panel-pw" role="tabpanel" aria-labelledby="tab-pw">
+      <div class="form-group" style="margin-bottom: var(--sp-4);">
+        <label class="form-label" for="lock-password">Enter Password</label>
+        <div class="input-wrapper">
+          <input
+            type="password"
+            id="lock-password"
+            name="lock_password"
+            class="form-input has-icon-right"
+            placeholder="your account password"
+            autocomplete="current-password"
+            required
+          >
+          <button type="button" class="input-icon-btn" id="lp-toggle" aria-label="Show password">
+            <svg id="lp-eye" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <button class="btn btn-primary btn-lg btn-full" id="unlock-btn" onclick="tryUnlock('pw')" disabled>
+        Unlock
+      </button>
+    </div>
+
+    <!-- Sign out -->
+    <div class="session-lock__signout">
+      <button class="btn-link-danger" onclick="signOut()">Sign out</button>
+    </div>
+
+  </div><!-- /session-lock__card -->
+</div><!-- /session-lock -->
+
+<!-- Unlock success flash -->
+<div class="unlock-success-overlay" id="success-flash" aria-hidden="true">
+  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="20 6 9 17 4 12"/>
+  </svg>
+</div>
+
+<!-- Demo controls (floating below overlay for prototype use) -->
+<div style="position:fixed; bottom: var(--sp-4); left: 50%; transform: translateX(-50%); z-index: 10001; background: white; border: 1px dashed var(--border-strong); border-radius: var(--r-lg); padding: var(--sp-3) var(--sp-4); box-shadow: var(--sh-lg); max-width: 460px; width: calc(100% - 32px);">
+  <div class="demo-bar__label" style="text-align:center; margin-bottom: var(--sp-2);">Prototype Demo States</div>
+  <div class="demo-bar__buttons">
+    <button class="demo-btn" onclick="demo_wrongPin()">Wrong PIN</button>
+    <button class="demo-btn" onclick="demo_wrongPw()">Wrong Password</button>
+    <button class="demo-btn" onclick="demo_unlockSuccess()">Unlock Success</button>
+    <button class="demo-btn" onclick="demo_lockoutWarn()">2 Attempts Left</button>
+    <button class="demo-btn" onclick="resetLock()">Reset</button>
+    <button class="demo-btn" onclick="location.href='login.html'">→ Login (signed out)</button>
+  </div>
+</div>
+
+<script src="../assets/nav.js"></script>
+<script>
+  const SVG_EYE_OPEN   = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
+  const SVG_EYE_CLOSED = `<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>`;
+
+  let failCount = 0;
+  const MAX_ATTEMPTS = 3;
+
+  /* ─── Tab switching ─── */
+  function switchTab(tab) {
+    const isPIN = tab === 'pin';
+    document.getElementById('tab-pin').classList.toggle('active', isPIN);
+    document.getElementById('tab-pw').classList.toggle('active', !isPIN);
+    document.getElementById('tab-pin').setAttribute('aria-selected', isPIN);
+    document.getElementById('tab-pw').setAttribute('aria-selected', !isPIN);
+    document.getElementById('panel-pin').classList.toggle('active', isPIN);
+    document.getElementById('panel-pw').classList.toggle('active', !isPIN);
+
+    // Clear errors on tab switch
+    document.getElementById('lock-error').classList.add('hidden');
+
+    if (isPIN) {
+      clearPIN();
+      setTimeout(() => document.getElementById('pin-0').focus(), 50);
+    } else {
+      setTimeout(() => document.getElementById('lock-password').focus(), 50);
+    }
+  }
+
+  /* ─── Password eye toggle ─── */
+  const lpToggle = document.getElementById('lp-toggle');
+  const lpEye    = document.getElementById('lp-eye');
+  const lpInput  = document.getElementById('lock-password');
+  const unlockBtn = document.getElementById('unlock-btn');
+
+  lpToggle.addEventListener('click', () => {
+    const showing = lpInput.type === 'text';
+    lpInput.type = showing ? 'password' : 'text';
+    lpEye.innerHTML = showing ? SVG_EYE_OPEN : SVG_EYE_CLOSED;
+    lpToggle.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+  });
+
+  lpInput.addEventListener('input', () => {
+    unlockBtn.disabled = lpInput.value.length < 1;
+  });
+
+  lpInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !unlockBtn.disabled) tryUnlock('pw');
+  });
+
+  /* ─── PIN boxes ─── */
+  const pinGroup = document.getElementById('pin-group');
+
+  AG.initDigitBoxes(pinGroup, (code) => {
+    // Auto-submit on 6th digit
+    setTimeout(() => tryUnlock('pin', code), 150);
+  });
+
+  function clearPIN() {
+    const boxes = pinGroup.querySelectorAll('.digit-box');
+    boxes.forEach(b => { b.value = ''; b.classList.remove('filled', 'error'); });
+  }
+
+  /* ─── Unlock attempt ─── */
+  function tryUnlock(method, pinCode) {
+    if (failCount >= MAX_ATTEMPTS) return;
+
+    const btn = document.getElementById('unlock-btn');
+
+    if (method === 'pw') {
+      btn.classList.add('loading');
+      btn.disabled = true;
+    }
+
+    setTimeout(() => {
+      if (method === 'pw') {
+        btn.classList.remove('loading');
+        btn.disabled = false;
+      }
+
+      // Demo: PIN "123456" or password "password123" succeeds
+      const success = (method === 'pin' && pinCode === '123456') ||
+                      (method === 'pw'  && lpInput.value === 'password123');
+
+      if (success) {
+        unlockSuccess();
+      } else {
+        failCount++;
+        markPipUsed(failCount);
+
+        if (failCount >= MAX_ATTEMPTS) {
+          // Force logout
+          showLockError('Too many failed attempts. Signing you out for security...');
+          setTimeout(() => location.href = 'login.html?reason=security', 2200);
+        } else {
+          const remaining = MAX_ATTEMPTS - failCount;
+          if (method === 'pin') {
+            AG.shakeDigitBoxes(pinGroup);
+          } else {
+            lpInput.value = '';
+            unlockBtn.disabled = true;
+          }
+          showLockError(`Incorrect ${method === 'pin' ? 'PIN' : 'password'}. ${remaining} attempt${remaining !== 1 ? 's' : ''} remaining.`);
+        }
+      }
+    }, method === 'pw' ? 900 : 600);
+  }
+
+  function unlockSuccess() {
+    const flash = document.getElementById('success-flash');
+    flash.classList.add('show');
+    setTimeout(() => {
+      flash.classList.remove('show');
+      document.getElementById('session-lock').style.opacity = '0';
+      document.getElementById('session-lock').style.transition = 'opacity 0.3s ease';
+      document.querySelector('.fake-dashboard').style.filter = 'none';
+      document.querySelector('.fake-dashboard').style.transition = 'filter 0.4s ease';
+      setTimeout(() => {
+        document.getElementById('session-lock').style.display = 'none';
+      }, 350);
+    }, 600);
+  }
+
+  function showLockError(msg) {
+    document.getElementById('lock-error-text').textContent = msg;
+    document.getElementById('lock-error').classList.remove('hidden');
+  }
+
+  function markPipUsed(n) {
+    const pip = document.getElementById(`pip-${n}`);
+    if (pip) pip.classList.add('used');
+  }
+
+  function signOut() {
+    // POST /auth/logout → redirect
+    location.href = 'login.html';
+  }
+
+  /* ─── Demo helpers ─── */
+  function demo_wrongPin() {
+    switchTab('pin');
+    clearPIN();
+    document.getElementById('lock-error').classList.add('hidden');
+    setTimeout(() => {
+      AG.shakeDigitBoxes(pinGroup);
+      showLockError('Incorrect PIN. 2 attempts remaining.');
+      markPipUsed(1);
+      failCount = 1;
+    }, 300);
+  }
+
+  function demo_wrongPw() {
+    switchTab('pw');
+    document.getElementById('lock-error').classList.add('hidden');
+    lpInput.value = 'wrongpassword';
+    setTimeout(() => {
+      lpInput.value = '';
+      unlockBtn.disabled = true;
+      showLockError('Incorrect password. 2 attempts remaining.');
+      markPipUsed(1);
+      failCount = 1;
+    }, 400);
+  }
+
+  function demo_unlockSuccess() {
+    unlockSuccess();
+  }
+
+  function demo_lockoutWarn() {
+    showLockError('Incorrect PIN. 1 attempt remaining.');
+    document.getElementById('pip-1').classList.add('used');
+    document.getElementById('pip-2').classList.add('used');
+    failCount = 2;
+  }
+
+  function resetLock() {
+    failCount = 0;
+    document.getElementById('lock-error').classList.add('hidden');
+    document.getElementById('pip-1').classList.remove('used');
+    document.getElementById('pip-2').classList.remove('used');
+    document.getElementById('pip-3').classList.remove('used');
+    clearPIN();
+    lpInput.value = '';
+    unlockBtn.disabled = true;
+    document.getElementById('session-lock').style.display = '';
+    document.getElementById('session-lock').style.opacity = '';
+    document.querySelector('.fake-dashboard').style.filter = 'blur(6px)';
+    document.getElementById('success-flash').classList.remove('show');
+  }
+
+  /* ─── Initial focus ─── */
+  setTimeout(() => {
+    document.getElementById('pin-0').focus();
+  }, 100);
+</script>
+
+</body>
+</html>

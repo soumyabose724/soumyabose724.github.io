@@ -1,1 +1,303 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In — ArthaGrid</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
 
+<main class="auth-page" role="main">
+
+  <div class="auth-card anim-fade-up" style="max-width: 460px;">
+
+    <!-- Logo -->
+    <div class="auth-logo anim-fade-in delay-100">
+      <div class="auth-logo__icon" aria-hidden="true">₹</div>
+      <div>
+        <div class="auth-logo__title">ArthaGrid</div>
+        <div class="auth-logo__subtitle">Personal Financial OS</div>
+      </div>
+    </div>
+
+    <div class="auth-divider anim-fade-in delay-150"></div>
+
+    <!-- Error Banner (hidden by default) -->
+    <div
+      class="alert alert-error hidden"
+      role="alert"
+      aria-live="polite"
+      id="error-banner"
+    >
+      <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+      </svg>
+      <span class="alert__text" id="error-text"></span>
+    </div>
+
+    <!-- Login Form -->
+    <form
+      id="login-form"
+      class="anim-fade-up delay-200"
+      role="form"
+      aria-label="Sign in to ArthaGrid"
+      novalidate
+    >
+
+      <!-- Username -->
+      <div class="form-group">
+        <label class="form-label" for="username">Username or Email</label>
+        <div class="input-wrapper">
+          <input
+            type="text"
+            id="username"
+            name="username"
+            class="form-input"
+            placeholder="username or email"
+            autocomplete="username"
+            minlength="3"
+            required
+            aria-required="true"
+            autofocus
+          >
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="form-group" style="margin-bottom: var(--sp-6);">
+        <label class="form-label" for="password">Password</label>
+        <div class="input-wrapper">
+          <input
+            type="password"
+            id="password"
+            name="password"
+            class="form-input has-icon-right"
+            placeholder="password"
+            autocomplete="current-password"
+            minlength="8"
+            required
+            aria-required="true"
+          >
+          <button
+            type="button"
+            class="input-icon-btn"
+            id="pw-toggle"
+            aria-label="Show password"
+          >
+            <!-- Eye open (default) -->
+            <svg id="eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Rate limit warning — visible after 3 failed attempts -->
+        <div class="rate-warning hidden" id="rate-warning" aria-live="polite">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+          </svg>
+          <span id="rate-text">2 more attempts before account is temporarily locked.</span>
+        </div>
+      </div>
+
+      <!-- Sign In Button -->
+      <button
+        type="submit"
+        class="btn btn-primary btn-lg btn-full"
+        id="signin-btn"
+        disabled
+      >
+        Sign In
+      </button>
+
+    </form>
+
+    <!-- Forgot password -->
+    <div class="anim-fade-in delay-300" style="text-align: center; margin-top: var(--sp-4);">
+      <a href="forgot.html" class="btn-link text-body-sm">Forgot password?</a>
+    </div>
+
+    <!-- Prototype demo controls -->
+    <div class="demo-bar">
+      <div class="demo-bar__label">Prototype Demo States</div>
+      <div class="demo-bar__buttons">
+        <button class="demo-btn" onclick="showState('invalid')">Invalid Credentials</button>
+        <button class="demo-btn" onclick="showState('locked')">Account Locked</button>
+        <button class="demo-btn" onclick="showState('network')">Network Error</button>
+        <button class="demo-btn" onclick="showState('rateLimit')">Rate Limited</button>
+        <button class="demo-btn" onclick="showState('warning3')">3 Attempts Warning</button>
+        <button class="demo-btn" onclick="showState('warning1')">1 Attempt Warning</button>
+        <button class="demo-btn" onclick="showState('loading')">Loading State</button>
+        <button class="demo-btn" onclick="resetAll()">Reset</button>
+        <button class="demo-btn" onclick="location.href='../dashboard/index.html'">→ Dashboard (success)</button>
+      </div>
+    </div>
+
+  </div><!-- /auth-card -->
+
+  <footer class="auth-footer">
+    Version 1.0 &nbsp;·&nbsp; © 2026 ArthaGrid &nbsp;·&nbsp; Private Use Only
+  </footer>
+
+</main><!-- /auth-page -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ─── Button ripple effect ─── */
+  document.querySelectorAll('.btn-primary').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      const wave = document.createElement('span');
+      wave.className = 'ripple-wave';
+      const rect = btn.getBoundingClientRect();
+      wave.style.left = (e.clientX - rect.left) + 'px';
+      wave.style.top  = (e.clientY - rect.top)  + 'px';
+      btn.appendChild(wave);
+      wave.addEventListener('animationend', () => wave.remove());
+    });
+  });
+
+  /* ─── Page entry ─── */
+  document.querySelector('.auth-card').style.opacity = '1';
+</script>
+<script>
+  /* ─── Elements ─── */
+  const form       = document.getElementById('login-form');
+  const usernameEl = document.getElementById('username');
+  const passwordEl = document.getElementById('password');
+  const signinBtn  = document.getElementById('signin-btn');
+  const errorBanner = document.getElementById('error-banner');
+  const errorText   = document.getElementById('error-text');
+  const rateWarning = document.getElementById('rate-warning');
+  const rateText    = document.getElementById('rate-text');
+  const eyeIcon     = document.getElementById('eye-icon');
+  const pwToggle    = document.getElementById('pw-toggle');
+
+  const SVG_EYE_OPEN   = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
+  const SVG_EYE_CLOSED = `<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>`;
+
+  /* ─── Enable button when both fields have content ─── */
+  function checkReady() {
+    signinBtn.disabled = !(usernameEl.value.trim().length >= 3 && passwordEl.value.length >= 1);
+  }
+  usernameEl.addEventListener('input', checkReady);
+  passwordEl.addEventListener('input', checkReady);
+
+  /* ─── Password visibility toggle ─── */
+  pwToggle.addEventListener('click', () => {
+    const showing = passwordEl.type === 'text';
+    passwordEl.type = showing ? 'password' : 'text';
+    eyeIcon.innerHTML = showing ? SVG_EYE_OPEN : SVG_EYE_CLOSED;
+    pwToggle.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+  });
+
+  /* ─── Enter key on password submits ─── */
+  passwordEl.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !signinBtn.disabled) form.dispatchEvent(new Event('submit'));
+  });
+
+  /* ─── Form submission (demo flow) ─── */
+  let failCount = 0;
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    if (signinBtn.disabled || signinBtn.classList.contains('loading')) return;
+
+    setLoading(true);
+
+    setTimeout(() => {
+      setLoading(false);
+      failCount++;
+
+      if (failCount >= 5) {
+        displayError('locked');
+        rateWarning.classList.add('hidden');
+      } else if (failCount >= 3) {
+        displayError('invalid');
+        showRateWarning(5 - failCount);
+      } else {
+        displayError('invalid');
+      }
+    }, 1300);
+  });
+
+  /* ─── State management helpers ─── */
+  function setLoading(on) {
+    signinBtn.classList.toggle('loading', on);
+    signinBtn.disabled = on;
+    usernameEl.disabled = on;
+    passwordEl.disabled = on;
+    pwToggle.disabled = on;
+  }
+
+  const ERRORS = {
+    invalid:   'Incorrect username or password. Please try again.',
+    locked:    'Account temporarily locked. Check your email for an unlock link.',
+    network:   'Unable to connect. Check your internet connection and try again.',
+    rateLimit: 'Too many attempts. Please wait 10 minutes before trying again.',
+  };
+
+  function displayError(type) {
+    errorText.textContent = ERRORS[type] || ERRORS.invalid;
+    errorBanner.classList.remove('hidden');
+    errorBanner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function showRateWarning(remaining) {
+    rateText.textContent = `${remaining} more attempt${remaining === 1 ? '' : 's'} before account is temporarily locked.`;
+    rateWarning.classList.remove('hidden');
+  }
+
+  function resetAll() {
+    failCount = 0;
+    form.reset();
+    errorBanner.classList.add('hidden');
+    rateWarning.classList.add('hidden');
+    signinBtn.disabled = true;
+    signinBtn.classList.remove('loading');
+    usernameEl.disabled = false;
+    passwordEl.disabled = false;
+    passwordEl.type = 'password';
+    eyeIcon.innerHTML = SVG_EYE_OPEN;
+    pwToggle.setAttribute('aria-label', 'Show password');
+  }
+
+  /* ─── Prototype demo state switcher ─── */
+  function showState(state) {
+    resetAll();
+    switch (state) {
+      case 'invalid':
+        displayError('invalid');
+        break;
+      case 'locked':
+        displayError('locked');
+        break;
+      case 'network':
+        displayError('network');
+        break;
+      case 'rateLimit':
+        displayError('rateLimit');
+        break;
+      case 'warning3':
+        displayError('invalid');
+        showRateWarning(2);
+        break;
+      case 'warning1':
+        displayError('invalid');
+        showRateWarning(1);
+        break;
+      case 'loading':
+        signinBtn.disabled = false;
+        setLoading(true);
+        setTimeout(() => setLoading(false), 3000);
+        break;
+    }
+  }
+</script>
+
+</body>
+</html>
