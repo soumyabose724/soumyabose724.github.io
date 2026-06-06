@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Design System — ArthaGrid</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
+  <style>
+    /* ── Design System page-specific styles ── */
+    .ds-page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: var(--sp-10) var(--sp-6) 120px;
+    }
+
+    /* Header */
+    .ds-header {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-4);
+      padding-bottom: var(--sp-6);
+      border-bottom: 2px solid var(--border);
+      margin-bottom: var(--sp-10);
+    }
+    .ds-header__logo {
+      width: 52px; height: 52px;
+      background: var(--primary);
+      border-radius: var(--r-lg);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-mono); font-size: 26px; font-weight: 700; color: white;
+      box-shadow: var(--sh-md), 0 0 0 4px var(--primary-light);
+    }
+    .ds-header__title { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; }
+    .ds-header__sub   { font-size: 13px; color: var(--text-secondary); margin-top: 3px; }
+
+    /* Section headers */
+    .ds-section {
+      margin-bottom: var(--sp-16);
+      scroll-margin-top: 80px;
+    }
+    .ds-section-title {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--text-secondary);
+      margin-bottom: var(--sp-6);
+      display: flex; align-items: center; gap: var(--sp-3);
+    }
+    .ds-section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .ds-section-title span {
+      background: var(--primary-light); color: var(--primary-darker);
+      padding: 2px 8px; border-radius: var(--r-full); font-size: 10px;
+    }
+
+    .ds-subsection { margin-bottom: var(--sp-10); }
+    .ds-subsection-title {
+      font-size: 14px; font-weight: 600; color: var(--text-primary);
+      margin-bottom: var(--sp-4);
+      padding-bottom: var(--sp-2);
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Component rows */
+    .ds-row {
+      display: flex;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: var(--sp-3);
+      margin-bottom: var(--sp-4);
+    }
+
+    .ds-row.align-center { align-items: center; }
+
+    /* Token swatch grid */
+    .swatch-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: var(--sp-3);
+    }
+
+    .swatch {
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .swatch__color { height: 56px; }
+    .swatch__label {
+      padding: var(--sp-2) var(--sp-3);
+      background: var(--surface);
+    }
+    .swatch__name  { font-size: 12px; font-weight: 600; color: var(--text-primary); }
+    .swatch__hex   { font-size: 11px; color: var(--text-secondary); font-family: var(--font-mono); }
+    .swatch__token { font-size: 10px; color: var(--text-muted); font-family: var(--font-mono); margin-top: 1px; }
+
+    /* Typography specimens */
+    .type-specimen {
+      display: grid;
+      grid-template-columns: 140px 1fr 200px;
+      gap: var(--sp-3) var(--sp-6);
+      align-items: baseline;
+      margin-bottom: var(--sp-2);
+    }
+    .type-specimen__meta  { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); line-height: 1.6; }
+    .type-specimen__usage { font-size: 12px; color: var(--text-secondary); }
+
+    /* Token rows (spacing, radius, shadow) */
+    .token-row {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-6);
+      padding: var(--sp-2) var(--sp-2);
+      border-bottom: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      transition: background 0.15s ease;
+    }
+    .token-row:last-child { border-bottom: none; }
+    .token-row:hover { background: var(--primary-xlight); }
+    .token-name  { font-family: var(--font-mono); font-size: 12px; color: var(--primary-darker); min-width: 120px; }
+    .token-value { font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); min-width: 140px; }
+    .token-demo  { flex: 1; }
+    .token-usage { font-size: 12px; color: var(--text-secondary); }
+
+    /* Card demo container */
+    .card-demo-bg {
+      background: linear-gradient(135deg, var(--primary-darker) 0%, #1a3a5c 100%);
+      border-radius: var(--r-xl);
+      padding: var(--sp-6);
+    }
+
+    /* Input states grid */
+    .input-states {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: var(--sp-4);
+    }
+
+    /* Data display convention rows */
+    .data-row {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-4);
+      padding: var(--sp-3) 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+    .data-row:last-child { border-bottom: none; }
+    .data-row__label { min-width: 160px; color: var(--text-secondary); font-size: 13px; }
+
+    /* TOC sidebar — sticky left */
+    .ds-layout {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: var(--sp-10);
+      align-items: start;
+    }
+
+    .ds-toc {
+      position: sticky;
+      top: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: var(--sp-4);
+    }
+
+    .ds-toc__title { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: var(--sp-3); }
+    .ds-toc a {
+      display: block;
+      font-size: 13px; color: var(--text-secondary);
+      padding: 5px var(--sp-2);
+      border-radius: var(--r-sm);
+      text-decoration: none;
+      transition: all var(--t-fast);
+    }
+    .ds-toc a:hover { color: var(--primary); background: var(--primary-xlight); }
+
+    /* Segmented progress bar */
+    .seg-bar { display: flex; height: 10px; border-radius: 5px; overflow: hidden; gap: 2px; }
+    .seg-bar__seg { height: 100%; }
+
+    /* Circular progress SVG helper */
+    .circ-progress { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); }
+
+    /* Masked field display */
+    .masked { font-family: var(--font-mono); font-size: 14px; color: var(--text-secondary); letter-spacing: 0.05em; }
+
+    /* SlideOver mock */
+    .slideover-mock {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: var(--r-xl);
+      overflow: hidden;
+      height: 420px;
+      background: var(--bg);
+    }
+    .slideover-mock__main {
+      padding: var(--sp-6);
+      display: flex; flex-direction: column; gap: var(--sp-3);
+    }
+    .slideover-mock__panel {
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      display: flex; flex-direction: column;
+    }
+    .slideover-mock__header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: var(--sp-4) var(--sp-5);
+      border-bottom: 1px solid var(--border);
+    }
+    .slideover-mock__body { flex: 1; padding: var(--sp-5); overflow-y: auto; }
+    .slideover-mock__footer {
+      padding: var(--sp-4) var(--sp-5);
+      border-top: 1px solid var(--border);
+      display: flex; gap: var(--sp-3); justify-content: flex-end;
+    }
+
+    /* Modal mock */
+    .modal-mock {
+      background: var(--bg);
+      border-radius: var(--r-xl);
+      padding: var(--sp-8);
+      display: flex; align-items: center; justify-content: center;
+      min-height: 300px;
+    }
+    .modal-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-xl);
+      box-shadow: var(--sh-xl);
+      width: 100%; max-width: 480px;
+      overflow: hidden;
+    }
+    .modal-box__header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: var(--sp-5) var(--sp-6);
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-box__body   { padding: var(--sp-5) var(--sp-6); }
+    .modal-box__footer {
+      padding: var(--sp-4) var(--sp-6);
+      border-top: 1px solid var(--border);
+      display: flex; gap: var(--sp-3); justify-content: flex-end;
+    }
+
+    /* Bottom nav mock */
+    .nav-mock {
+      border: 1px solid var(--border);
+      border-radius: var(--r-xl);
+      overflow: hidden;
+      background: var(--bg);
+    }
+    .nav-mock__screen {
+      height: 180px;
+      padding: var(--sp-4);
+      display: flex; flex-direction: column; gap: var(--sp-3);
+    }
+
+    @media (max-width: 900px) {
+      .ds-layout { grid-template-columns: 1fr; }
+      .ds-toc { position: static; }
+      .slideover-mock { grid-template-columns: 1fr; height: auto; }
+      .slideover-mock__panel { border-left: none; border-top: 1px solid var(--border); }
+      .type-specimen { grid-template-columns: 100px 1fr; }
+      .type-specimen__usage { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div style="padding: var(--sp-4) var(--sp-6); background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50;">
+  <div style="max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
+    <div style="display: flex; align-items: center; gap: var(--sp-3);">
+      <div style="width: 32px; height: 32px; background: var(--primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-family: var(--font-mono); font-weight: 700; font-size: 16px;">₹</div>
+      <span style="font-weight: 600; font-size: 15px;">ArthaGrid Design System</span>
+      <span class="chip chip-active">v1.0</span>
+    </div>
+    <a href="../index.html" style="font-size: 13px; color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: 5px;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Back to Index
+    </a>
+  </div>
+</div>
+
+<div class="ds-page">
+  <div class="ds-layout">
+
+    <!-- ─── TOC ─── -->
+    <nav class="ds-toc" aria-label="Design system sections">
+      <div class="ds-toc__title">Contents</div>
+      <a href="#colors">Color System</a>
+      <a href="#typography">Typography</a>
+      <a href="#spacing">Spacing & Radius</a>
+      <a href="#shadows">Shadows</a>
+      <a href="#buttons">Buttons</a>
+      <a href="#forms">Form Fields</a>
+      <a href="#chips">Status Chips</a>
+      <a href="#cards">Cards</a>
+      <a href="#progress">Progress Bars</a>
+      <a href="#otp">OTP / PIN</a>
+      <a href="#strength">Password Strength</a>
+      <a href="#alerts">Alert Banners</a>
+      <a href="#skeleton">Skeleton Loader</a>
+      <a href="#slideover">SlideOver</a>
+      <a href="#modal">Modal</a>
+      <a href="#table">Data Table</a>
+      <a href="#navigation">Navigation</a>
+      <a href="#data-display">Data Display</a>
+      <a href="#ml-chip">ML Suggestion</a>
+    </nav>
+
+    <!-- ─── Main content ─── -->
+    <main>
+
+      <!-- Header -->
+      <div class="ds-header anim-fade-up">
+        <div class="ds-header__logo">₹</div>
+        <div>
+          <div class="ds-header__title">ArthaGrid Design System</div>
+          <div class="ds-header__sub">Component Library & Token Reference — 2026-06-05</div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════
+           1. COLOR SYSTEM
+      ════════════════════════════════════ -->
+      <section class="ds-section" id="colors">
+        <div class="ds-section-title">Color System <span>§1</span></div>
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">Brand Palette</div>
+          <div class="swatch-grid">
+            <div class="swatch"><div class="swatch__color" style="background:#0d9488;"></div><div class="swatch__label"><div class="swatch__name">Primary</div><div class="swatch__hex">#0d9488</div><div class="swatch__token">--primary</div></div></div>
+            <div class="swatch"><div class="swatch__color" style="background:#0f766e;"></div><div class="swatch__label"><div class="swatch__name">Primary Dark</div><div class="swatch__hex">#0f766e</div><div class="swatch__token">--primary-dark</div></div></div>
+            <div class="swatch"><div class="swatch__color" style="background:#115e59;"></div><div class="swatch__label"><div class="swatch__name">Primary Darker</div><div class="swatch__hex">#115e59</div><div class="swatch__token">--primary-darker</div></div></div>
+            <div class="swatch"><div class="swatch__color" style="background:#ccfbf1;"></div><div class="swatch__label"><div class="swatch__name">Primary Light</div><div class="swatch__hex">#ccfbf1</div><div class="swatch__token">--primary-light</div></div></div>
+            <div class="swatch"><div class="swatch__color" style="background:#f0fdfa;"></div><div class="swatch__label"><div class="swatch__name">Primary XLight</div><div class="swatch__hex">#f0fdfa</div><div class="swatch__token">--primary-xlight</div></div></div>
+            <div class="swatch"><div class="swatch__color" style="background:#e94560;"></div><div class="swatch__label"><div class="swatch__name">Danger / Active Nav</div><div class="swatch__hex">#e94560</div><div class="swatch__token">--danger</div></div></div>
+            <div class="swatch"><div class="swatch__color" style="background:#fef2f2;"></div><div class="swatch__label"><div class="swatch__name">Danger Light</div><div class="swatch__hex">#fef2f2</div><div class="swatch__token">--danger-light</div></div></div>
+            <div class="swatch"><div class="swatch__color" style="background:#f59e0b;"></div><div class="swatch__label"><div class="swatch__name">Warning</div><div class="swatch__hex">#f59e0b</div><div class="swatch__token">--warning</div></div></div>
+            <div class="swatch"><div class="swatch__color" style="background:#fffbeb;"></div><div class="swatch__label"><div class="swatch__name">Warning Light</div><div class="swatch__hex">#fffbeb</div><div class="swatch__token">--warning-light</div></div></div>
+            <div class="swatch"><div class="swatch__color" style="background:#22c55e;"></div><div class="swatch__label"><div class="swatch__name">Success</div><div class="swatch__hex">#22c55e</div><div class="swatch__token">--success</div></div></div>
+            <div class="swatch"><div class="swatch__color" style="background:#f0fdf4;"></div><div class="swatch__label"><div class="swatch__name">Success Light</div><div class="swatch__hex">#f0fdf4</div><div class="swatch__token">--success-light</div></div></div>
+            <div class="swatch"><div class="swatch__color" style="background:#3b82f6;"></div><div class="swatch__label"><div class="swatch__name">Info</div><div class="swatch__hex">#3b82f6</div><div class="swatch__token">--info</div></div></div>
+          </div>
+        </div>
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">Neutral Palette</div>
+          <div class="swatch-grid">
+            <div class="swatch"><div class="swatch__color" style="background:#faf8f4;"></div><div class="swatch__label"><div class="swatch__name">BG Canvas</div><div class="swatch__hex">#faf8f4</div><div class="swatch__token">--bg</div></div></div>
+            <div class="swatch"><div class="swatch__color" style="background:#ffffff; border-top:1px solid #eee;"></div><div class="swatch__label"><div class="swatch__name">Surface</div><div class="swatch__hex">#ffffff</div><div class="swatch__token">--surface</div></div></div>
+            <div class="swatch"><div class="swatch__color" style="background:#f5f5f0;"></div><div class="swatch__label"><div class="swatch__name">Surface Raised</div><div class="swatch__hex">#f5f5f0</div><div class="swatch__token">--surface-raised</div></div></div>
+            <div class="swatch"><div class="swatch__color" style="background:#1c1917;"></div><div class="swatch__label"><div class="swatch__name">Text Primary</div><div class="swatch__hex">#1c1917</div><div class="swatch__token">--text-primary</div></div></div>
+            <div class="swatch"><div class="swatch__color" style="background:#78716c;"></div><div class="swatch__label"><div class="swatch__name">Text Secondary</div><div class="swatch__hex">#78716c</div><div class="swatch__token">--text-secondary</div></div></div>
+            <div class="swatch"><div class="swatch__color" style="background:#a8a29e;"></div><div class="swatch__label"><div class="swatch__name">Text Muted</div><div class="swatch__hex">#a8a29e</div><div class="swatch__token">--text-muted</div></div></div>
+            <div class="swatch"><div class="swatch__color" style="background:#e7e5e4;"></div><div class="swatch__label"><div class="swatch__name">Border</div><div class="swatch__hex">#e7e5e4</div><div class="swatch__token">--border</div></div></div>
+            <div class="swatch"><div class="swatch__color" style="background:#d6d3d1;"></div><div class="swatch__label"><div class="swatch__name">Border Strong</div><div class="swatch__hex">#d6d3d1</div><div class="swatch__token">--border-strong</div></div></div>
+          </div>
+        </div>
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">Financial Semantic Colors</div>
+          <div class="ds-row align-center" style="flex-wrap:wrap; gap: var(--sp-4);">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><div style="width:48px;height:48px;background:var(--success);border-radius:12px;"></div><div style="font-size:11px;text-align:center;color:var(--text-secondary);">Credit /<br>Income</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><div style="width:48px;height:48px;background:var(--danger);border-radius:12px;"></div><div style="font-size:11px;text-align:center;color:var(--text-secondary);">Debit /<br>Expense</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><div style="width:48px;height:48px;background:var(--info);border-radius:12px;"></div><div style="font-size:11px;text-align:center;color:var(--text-secondary);">Transfer /<br>Neutral</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><div style="width:48px;height:48px;background:var(--primary);border-radius:12px;"></div><div style="font-size:11px;text-align:center;color:var(--text-secondary);">Primary /<br>Teal</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><div style="width:48px;height:48px;background:var(--warning);border-radius:12px;"></div><div style="font-size:11px;text-align:center;color:var(--text-secondary);">Warning /<br>Amber</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════
+           2. TYPOGRAPHY
+      ════════════════════════════════════ -->
+      <section class="ds-section" id="typography">
+        <div class="ds-section-title">Typography <span>§2</span></div>
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">Type Scale — Inter</div>
+
+          <div class="type-specimen"><div class="type-specimen__meta">text-display<br>32px / 700 / -0.02em</div><div class="text-display">₹1,23,45,678</div><div class="type-specimen__usage">Hero figures: Net Worth, Total Debt</div></div>
+          <div class="type-specimen"><div class="type-specimen__meta">text-display-sm<br>24px / 700 / -0.01em</div><div class="text-display-sm">₹12,35,000</div><div class="type-specimen__usage">Section hero numbers</div></div>
+          <div class="type-specimen"><div class="type-specimen__meta">text-h1<br>22px / 600 / -0.01em</div><div class="text-h1">Page Title</div><div class="type-specimen__usage">Page titles</div></div>
+          <div class="type-specimen"><div class="type-specimen__meta">text-h2<br>18px / 600</div><div class="text-h2">Card Title</div><div class="type-specimen__usage">Card titles, section headings</div></div>
+          <div class="type-specimen"><div class="type-specimen__meta">text-h3<br>15px / 600</div><div class="text-h3">Sub-section Header</div><div class="type-specimen__usage">Sub-section headers, column headers</div></div>
+          <div class="type-specimen"><div class="type-specimen__meta">text-body-lg<br>15px / 400</div><div class="text-body-lg">Lead body paragraph text for important content.</div><div class="type-specimen__usage">Lead paragraphs</div></div>
+          <div class="type-specimen"><div class="type-specimen__meta">text-body<br>14px / 400</div><div class="text-body">Default body text used throughout the application.</div><div class="type-specimen__usage">Default body, form labels</div></div>
+          <div class="type-specimen"><div class="type-specimen__meta">text-body-sm<br>13px / 400</div><div class="text-body-sm">Table rows, metadata, helper text and secondary info.</div><div class="type-specimen__usage">Tables, metadata</div></div>
+          <div class="type-specimen"><div class="type-specimen__meta">text-caption<br>12px / 400 / +0.01em</div><div class="text-caption">Timestamps, footnotes, legal text, version numbers.</div><div class="type-specimen__usage">Timestamps, footnotes</div></div>
+          <div class="type-specimen"><div class="type-specimen__meta">text-label<br>12px / 500 / +0.04em UPPER</div><div class="text-label">Form Label</div><div class="type-specimen__usage">Form labels above inputs</div></div>
+        </div>
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">Monospace — JetBrains Mono (all INR amounts)</div>
+          <div class="type-specimen"><div class="type-specimen__meta">text-mono<br>14px / 400</div><div class="text-mono">₹12,34,567 · 8.50% p.a. · HDFC0000060</div><div class="type-specimen__usage">All INR amounts, account numbers, %</div></div>
+          <div class="type-specimen"><div class="type-specimen__meta">text-mono-sm<br>12px / 400</div><div class="text-mono-sm">₹1,23,456 · 5/28 · AY 2027–28</div><div class="type-specimen__usage">Small figure cells in tables</div></div>
+        </div>
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">INR Formatting Examples</div>
+          <div class="ds-row" style="flex-direction: column; gap: var(--sp-1);">
+            <div class="data-row"><div class="data-row__label">Below ₹1 lakh</div><div class="text-mono">₹45,000</div></div>
+            <div class="data-row"><div class="data-row__label">1 lakh</div><div class="text-mono">₹1,00,000</div></div>
+            <div class="data-row"><div class="data-row__label">Lakhs</div><div class="text-mono">₹12,34,567</div></div>
+            <div class="data-row"><div class="data-row__label">Crores</div><div class="text-mono">₹1,23,45,678</div></div>
+            <div class="data-row"><div class="data-row__label">With paise</div><div class="text-mono">₹12,345.90</div></div>
+            <div class="data-row"><div class="data-row__label">Compact crore</div><div class="text-mono tc-primary" style="font-family:var(--font-mono);">₹12.35Cr</div></div>
+            <div class="data-row"><div class="data-row__label">Compact lakh</div><div class="text-mono tc-primary" style="font-family:var(--font-mono);">₹1.24L</div></div>
+            <div class="data-row"><div class="data-row__label">Negative (debit)</div><div class="text-mono tc-danger">−₹8,200</div></div>
+            <div class="data-row"><div class="data-row__label">Positive delta</div><div class="text-mono tc-success">+₹12,350</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════
+           3. SPACING & BORDER RADIUS
+      ════════════════════════════════════ -->
+      <section class="ds-section" id="spacing">
+        <div class="ds-section-title">Spacing & Border Radius <span>§3</span></div>
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">Spacing Scale (base 4px)</div>
+          <div>
+            <div class="token-row"><div class="token-name">--sp-1</div><div class="token-value">4px</div><div class="token-demo"><div style="width:4px;height:16px;background:var(--primary);border-radius:2px;"></div></div><div class="token-usage">Icon internal padding, micro gaps</div></div>
+            <div class="token-row"><div class="token-name">--sp-2</div><div class="token-value">8px</div><div class="token-demo"><div style="width:8px;height:16px;background:var(--primary);border-radius:2px;"></div></div><div class="token-usage">Chip gaps, compact padding</div></div>
+            <div class="token-row"><div class="token-name">--sp-3</div><div class="token-value">12px</div><div class="token-demo"><div style="width:12px;height:16px;background:var(--primary);border-radius:2px;"></div></div><div class="token-usage">Input internal padding, tag gaps</div></div>
+            <div class="token-row"><div class="token-name">--sp-4</div><div class="token-value">16px</div><div class="token-demo"><div style="width:16px;height:16px;background:var(--primary);border-radius:2px;"></div></div><div class="token-usage">Card padding (mobile), element gaps</div></div>
+            <div class="token-row"><div class="token-name">--sp-5</div><div class="token-value">20px</div><div class="token-demo"><div style="width:20px;height:16px;background:var(--primary);border-radius:2px;"></div></div><div class="token-usage">Section gaps within cards</div></div>
+            <div class="token-row"><div class="token-name">--sp-6</div><div class="token-value">24px</div><div class="token-demo"><div style="width:24px;height:16px;background:var(--primary);border-radius:2px;"></div></div><div class="token-usage">Card padding (desktop), major gaps</div></div>
+            <div class="token-row"><div class="token-name">--sp-8</div><div class="token-value">32px</div><div class="token-demo"><div style="width:32px;height:16px;background:var(--primary);border-radius:2px;"></div></div><div class="token-usage">Section spacing</div></div>
+            <div class="token-row"><div class="token-name">--sp-10</div><div class="token-value">40px</div><div class="token-demo"><div style="width:40px;height:16px;background:var(--primary);border-radius:2px;"></div></div><div class="token-usage">Page section separation</div></div>
+          </div>
+        </div>
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">Border Radius</div>
+          <div class="ds-row" style="align-items: flex-end; gap: var(--sp-4);">
+            <div style="text-align:center;"><div style="width:48px;height:48px;background:var(--primary-light);border:2px solid var(--primary);border-radius:4px;"></div><div style="font-size:11px;font-family:var(--font-mono);margin-top:6px;color:var(--text-secondary);">--r-sm<br>4px</div></div>
+            <div style="text-align:center;"><div style="width:48px;height:48px;background:var(--primary-light);border:2px solid var(--primary);border-radius:8px;"></div><div style="font-size:11px;font-family:var(--font-mono);margin-top:6px;color:var(--text-secondary);">--r-md<br>8px</div></div>
+            <div style="text-align:center;"><div style="width:48px;height:48px;background:var(--primary-light);border:2px solid var(--primary);border-radius:12px;"></div><div style="font-size:11px;font-family:var(--font-mono);margin-top:6px;color:var(--text-secondary);">--r-lg<br>12px</div></div>
+            <div style="text-align:center;"><div style="width:48px;height:48px;background:var(--primary-light);border:2px solid var(--primary);border-radius:16px;"></div><div style="font-size:11px;font-family:var(--font-mono);margin-top:6px;color:var(--text-secondary);">--r-xl<br>16px</div></div>
+            <div style="text-align:center;"><div style="width:48px;height:48px;background:var(--primary-light);border:2px solid var(--primary);border-radius:24px;"></div><div style="font-size:11px;font-family:var(--font-mono);margin-top:6px;color:var(--text-secondary);">--r-2xl<br>24px</div></div>
+            <div style="text-align:center;"><div style="width:48px;height:48px;background:var(--primary-light);border:2px solid var(--primary);border-radius:9999px;"></div><div style="font-size:11px;font-family:var(--font-mono);margin-top:6px;color:var(--text-secondary);">--r-full<br>9999px</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════
+           4. SHADOWS
+      ════════════════════════════════════ -->
+      <section class="ds-section" id="shadows">
+        <div class="ds-section-title">Shadows <span>§4</span></div>
+        <div class="ds-row align-center" style="gap: var(--sp-5);">
+          <div style="text-align:center;"><div style="width:80px;height:80px;background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--sh-sm);border:1px solid var(--border);"></div><div style="font-size:11px;font-family:var(--font-mono);margin-top:10px;color:var(--text-secondary);">--sh-sm</div></div>
+          <div style="text-align:center;"><div style="width:80px;height:80px;background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--sh-md);"></div><div style="font-size:11px;font-family:var(--font-mono);margin-top:10px;color:var(--text-secondary);">--sh-md</div></div>
+          <div style="text-align:center;"><div style="width:80px;height:80px;background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--sh-lg);"></div><div style="font-size:11px;font-family:var(--font-mono);margin-top:10px;color:var(--text-secondary);">--sh-lg</div></div>
+          <div style="text-align:center;"><div style="width:80px;height:80px;background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--sh-xl);"></div><div style="font-size:11px;font-family:var(--font-mono);margin-top:10px;color:var(--text-secondary);">--sh-xl</div></div>
+          <div style="text-align:center;"><div style="width:80px;height:80px;background:rgba(255,255,255,0.72);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(13,148,136,0.18);border-radius:var(--r-lg);box-shadow:var(--sh-glass);"></div><div style="font-size:11px;font-family:var(--font-mono);margin-top:10px;color:var(--text-secondary);">--sh-glass</div></div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════
+           5. BUTTONS
+      ════════════════════════════════════ -->
+      <section class="ds-section" id="buttons">
+        <div class="ds-section-title">Buttons <span>§5</span></div>
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">Variants</div>
+          <div class="ds-row align-center">
+            <button class="btn btn-primary btn-md">Primary</button>
+            <button class="btn btn-secondary btn-md">Secondary</button>
+            <button class="btn btn-ghost btn-md">Ghost</button>
+            <button class="btn btn-destructive btn-md">Destructive</button>
+            <button class="btn btn-primary btn-md" disabled>Disabled</button>
+          </div>
+        </div>
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">Sizes</div>
+          <div class="ds-row align-center">
+            <button class="btn btn-primary btn-sm">Small</button>
+            <button class="btn btn-primary btn-md">Medium</button>
+            <button class="btn btn-primary btn-lg">Large</button>
+          </div>
+        </div>
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">Loading State</div>
+          <div class="ds-row align-center">
+            <button class="btn btn-primary btn-md loading" style="min-width:120px;">Loading</button>
+            <button class="btn btn-secondary btn-md loading" style="min-width:120px;">Loading</button>
+          </div>
+        </div>
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">Link / Text Buttons</div>
+          <div class="ds-row align-center">
+            <button class="btn-link">Link button</button>
+            <button class="btn-link-danger">Danger link</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════
+           6. FORM FIELDS
+      ════════════════════════════════════ -->
+      <section class="ds-section" id="forms">
+        <div class="ds-section-title">Form Fields <span>§6</span></div>
+
+        <div class="input-states">
+
+          <!-- Default -->
+          <div class="form-group">
+            <label class="form-label" for="demo-default">Bank Name</label>
+            <div class="input-wrapper">
+              <input type="text" id="demo-default" class="form-input" placeholder="e.g., HDFC Bank" value="">
+            </div>
+            <div class="form-helper">Name as it appears on statements</div>
+          </div>
+
+          <!-- Filled -->
+          <div class="form-group">
+            <label class="form-label" for="demo-filled">IFSC Code</label>
+            <div class="input-wrapper">
+              <input type="text" id="demo-filled" class="form-input" value="HDFC0000060">
+            </div>
+          </div>
+
+          <!-- Error -->
+          <div class="form-group">
+            <label class="form-label" for="demo-error">UPI ID</label>
+            <div class="input-wrapper">
+              <input type="text" id="demo-error" class="form-input is-error" value="vikas@@invalid" aria-describedby="demo-error-msg">
+            </div>
+            <div class="form-error" id="demo-error-msg">Invalid UPI ID format</div>
+          </div>
+
+          <!-- Disabled -->
+          <div class="form-group">
+            <label class="form-label" for="demo-disabled">PAN</label>
+            <div class="input-wrapper">
+              <input type="text" id="demo-disabled" class="form-input" value="ABCDE1234F" disabled>
+            </div>
+            <div class="form-helper">Cannot be changed after KYC</div>
+          </div>
+
+          <!-- INR Amount -->
+          <div class="form-group">
+            <label class="form-label" for="demo-inr">Monthly EMI Amount</label>
+            <div class="input-wrapper">
+              <span style="position:absolute;left:12px;color:var(--text-secondary);font-family:var(--font-mono);font-size:15px;pointer-events:none;z-index:1;">₹</span>
+              <input type="text" id="demo-inr" class="form-input" style="padding-left:28px;font-family:var(--font-mono);text-align:right;" inputmode="decimal" placeholder="0" value="22,850">
+            </div>
+          </div>
+
+          <!-- Select -->
+          <div class="form-group">
+            <label class="form-label" for="demo-select">Loan Type</label>
+            <div class="input-wrapper">
+              <select id="demo-select" class="form-input" style="appearance:none;-webkit-appearance:none;padding-right:36px;cursor:pointer;">
+                <option>HOME_LOAN</option>
+                <option>CAR_LOAN</option>
+                <option>PERSONAL_LOAN</option>
+                <option>EDUCATION_LOAN</option>
+                <option>GOLD_LOAN</option>
+              </select>
+              <svg style="position:absolute;right:12px;pointer-events:none;color:var(--text-secondary);" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+          </div>
+
+          <!-- Toggle -->
+          <div class="form-group">
+            <label class="form-label">Auto-sweep on salary credit</label>
+            <div style="display:flex;align-items:center;gap:var(--sp-3);margin-top:var(--sp-2);">
+              <label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer;">
+                <input type="checkbox" checked style="opacity:0;width:0;height:0;" id="toggle-demo">
+                <span id="toggle-track" style="position:absolute;inset:0;background:var(--primary);border-radius:12px;transition:background 0.2s;"></span>
+                <span id="toggle-thumb" style="position:absolute;top:3px;left:23px;width:18px;height:18px;background:white;border-radius:50%;box-shadow:var(--sh-sm);transition:left 0.2s;"></span>
+              </label>
+              <span class="text-body-sm">Enabled</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════
+           7. STATUS CHIPS
+      ════════════════════════════════════ -->
+      <section class="ds-section" id="chips">
+        <div class="ds-section-title">Status Chips <span>§7</span></div>
+        <div class="ds-row" style="flex-wrap:wrap; gap: var(--sp-2);">
+          <span class="chip chip-balanced">✓ BALANCED</span>
+          <span class="chip chip-unallocated">⚠ UNALLOCATED</span>
+          <span class="chip chip-over">✕ OVER-ALLOCATED</span>
+          <span class="chip chip-projected">○ PROJECTED</span>
+          <span class="chip chip-confirmed">✓ CONFIRMED</span>
+          <span class="chip chip-overdue">! OVERDUE</span>
+          <span class="chip chip-skipped">— SKIPPED</span>
+          <span class="chip chip-on-track">▲ ON TRACK</span>
+          <span class="chip chip-behind">→ SLIGHTLY BEHIND</span>
+          <span class="chip chip-at-risk">▼ AT RISK</span>
+          <span class="chip chip-overdue">! CRITICAL</span>
+          <span class="chip chip-unallocated">⚠ WARN</span>
+          <span class="chip chip-projected">○ OPEN</span>
+          <span class="chip chip-locked">🔒 LOCKED</span>
+          <span class="chip chip-skipped">✓ CLOSED</span>
+          <span class="chip chip-active">· ACTIVE</span>
+          <span class="chip chip-behind">⚠ NEEDS REASSIGNMENT</span>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════
+           8. CARDS
+      ════════════════════════════════════ -->
+      <section class="ds-section" id="cards">
+        <div class="ds-section-title">Cards <span>§8</span></div>
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">GlassCard — on dark background (as used on dashboard)</div>
+          <div class="card-demo-bg">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4);">
+
+              <!-- Hero glass card -->
+              <div class="glass-card" style="grid-column:1/-1;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-4);">
+                  <div style="display:flex;align-items:center;gap:var(--sp-2);">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    <span class="text-h3 tc-secondary">Net Worth</span>
+                  </div>
+                  <a href="#" class="text-body-sm tc-teal" style="text-decoration:none;">Details →</a>
+                </div>
+                <div class="text-display" style="font-family:var(--font-mono);margin-bottom:var(--sp-2);">₹48,35,200</div>
+                <div style="display:flex;align-items:center;gap:var(--sp-2);">
+                  <span class="chip chip-on-track" style="font-size:12px;">▲ +₹1,23,000 (+2.6%)</span>
+                  <span class="text-caption tc-secondary">this month</span>
+                </div>
+                <div style="display:flex;gap:var(--sp-8);margin-top:var(--sp-4);padding-top:var(--sp-4);border-top:1px solid var(--glass-border);">
+                  <div><div class="text-caption tc-secondary">Total Assets</div><div class="text-mono tc-success" style="font-size:15px;font-weight:600;">₹62,10,500</div></div>
+                  <div><div class="text-caption tc-secondary">Total Liabilities</div><div class="text-mono tc-danger" style="font-size:15px;font-weight:600;">₹13,75,300</div></div>
+                  <div><div class="text-caption tc-secondary">FY 2026–27</div><div class="text-mono" style="font-size:15px;font-weight:600;">Apr → Mar</div></div>
+                </div>
+              </div>
+
+              <!-- Income glass card -->
+              <div class="glass-card">
+                <div style="display:flex;align-items:center;gap:var(--sp-2);margin-bottom:var(--sp-3);">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                  <span class="text-h3 tc-secondary">Income</span>
+                </div>
+                <div class="text-display-sm tc-success" style="font-family:var(--font-mono);">₹1,20,000</div>
+                <div class="text-caption tc-secondary" style="margin-top:4px;">June 2026</div>
+              </div>
+
+              <!-- Expenses glass card -->
+              <div class="glass-card">
+                <div style="display:flex;align-items:center;gap:var(--sp-2);margin-bottom:var(--sp-3);">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+                  <span class="text-h3 tc-secondary">Expenses</span>
+                </div>
+                <div class="text-display-sm tc-danger" style="font-family:var(--font-mono);">₹74,350</div>
+                <div class="text-caption tc-secondary" style="margin-top:4px;">62% of income</div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">GlassCard Variants (border tints)</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-3);">
+            <div class="glass-card" style="border-color:rgba(34,197,94,0.25);"><div class="text-h3" style="margin-bottom:var(--sp-2);">Success Variant</div><div class="text-caption tc-secondary">Positive, on-track states</div></div>
+            <div class="glass-card" style="border-color:rgba(245,158,11,0.25);"><div class="text-h3" style="margin-bottom:var(--sp-2);">Warning Variant</div><div class="text-caption tc-secondary">Near-breach, at-risk states</div></div>
+            <div class="glass-card" style="border-color:rgba(233,69,96,0.25);"><div class="text-h3" style="margin-bottom:var(--sp-2);">Danger Variant</div><div class="text-caption tc-secondary">Deficit, overdue, critical</div></div>
+          </div>
+        </div>
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">Skeleton Loader Card</div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);padding:var(--sp-5) var(--sp-6);">
+            <div style="display:flex;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-4);">
+              <div class="skeleton" style="width:18px;height:18px;border-radius:50%;"></div>
+              <div class="skeleton" style="width:120px;height:14px;"></div>
+            </div>
+            <div class="skeleton" style="width:55%;height:28px;margin-bottom:var(--sp-2);"></div>
+            <div class="skeleton" style="width:35%;height:12px;"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════
+           9. PROGRESS BARS
+      ════════════════════════════════════ -->
+      <section class="ds-section" id="progress">
+        <div class="ds-section-title">Progress Bars <span>§9</span></div>
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">Linear — Budget Allocation</div>
+          <div style="display:flex;flex-direction:column;gap:var(--sp-4);">
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:var(--sp-2);" class="text-body-sm"><span>Food &amp; Dining</span><span class="text-mono-sm">₹8,000 of ₹12,000 <span class="tc-secondary">(67%)</span></span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width:67%;"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:var(--sp-2);" class="text-body-sm"><span>EMI / Loans</span><span class="text-mono-sm">₹40,000 of ₹40,000 <span class="tc-secondary">(100%)</span></span></div>
+              <div class="progress-bar"><div class="progress-fill warning" style="width:100%;"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:var(--sp-2);" class="text-body-sm"><span>Entertainment — Over Limit</span><span class="text-mono-sm tc-danger">₹6,500 of ₹5,000 <span class="tc-danger">(130%)</span></span></div>
+              <div class="progress-bar"><div class="progress-fill danger" style="width:100%;"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">Circular — Goal Completion</div>
+          <div class="ds-row" style="gap:var(--sp-8);">
+            <div class="circ-progress">
+              <svg width="96" height="96" viewBox="0 0 96 96">
+                <circle cx="48" cy="48" r="40" fill="none" stroke="var(--border)" stroke-width="8"/>
+                <circle cx="48" cy="48" r="40" fill="none" stroke="var(--primary)" stroke-width="8" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="55.3" transform="rotate(-90 48 48)"/>
+                <text x="48" y="53" text-anchor="middle" font-size="16" font-weight="700" fill="var(--text-primary)" font-family="Inter">78%</text>
+              </svg>
+              <div class="text-body-sm tc-secondary">Emergency Fund</div>
+            </div>
+            <div class="circ-progress">
+              <svg width="96" height="96" viewBox="0 0 96 96">
+                <circle cx="48" cy="48" r="40" fill="none" stroke="var(--border)" stroke-width="8"/>
+                <circle cx="48" cy="48" r="40" fill="none" stroke="var(--warning)" stroke-width="8" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="138.2" transform="rotate(-90 48 48)"/>
+                <text x="48" y="53" text-anchor="middle" font-size="16" font-weight="700" fill="var(--text-primary)" font-family="Inter">45%</text>
+              </svg>
+              <div class="text-body-sm tc-secondary">Goa Vacation</div>
+            </div>
+            <div class="circ-progress">
+              <svg width="96" height="96" viewBox="0 0 96 96">
+                <circle cx="48" cy="48" r="40" fill="none" stroke="var(--border)" stroke-width="8"/>
+                <circle cx="48" cy="48" r="40" fill="none" stroke="var(--success)" stroke-width="8" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="0" transform="rotate(-90 48 48)"/>
+                <text x="48" y="53" text-anchor="middle" font-size="16" font-weight="700" fill="var(--text-primary)" font-family="Inter">100%</text>
+              </svg>
+              <div class="text-body-sm tc-secondary">New Laptop</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">Segmented — Asset Allocation</div>
+          <div class="seg-bar" style="height:12px;">
+            <div class="seg-bar__seg" style="width:45%;background:#0d9488;" title="Equity 45%"></div>
+            <div class="seg-bar__seg" style="width:25%;background:#3b82f6;" title="Mutual Funds 25%"></div>
+            <div class="seg-bar__seg" style="width:15%;background:#f59e0b;" title="Debt 15%"></div>
+            <div class="seg-bar__seg" style="width:10%;background:#eab308;" title="Gold 10%"></div>
+            <div class="seg-bar__seg" style="width:5%;background:#a8a29e;" title="Cash 5%"></div>
+          </div>
+          <div style="display:flex;gap:var(--sp-4);margin-top:var(--sp-3);flex-wrap:wrap;">
+            <span class="text-caption" style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:2px;background:#0d9488;display:inline-block;"></span>Equity 45%</span>
+            <span class="text-caption" style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:2px;background:#3b82f6;display:inline-block;"></span>Mutual Funds 25%</span>
+            <span class="text-caption" style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:2px;background:#f59e0b;display:inline-block;"></span>Debt 15%</span>
+            <span class="text-caption" style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:2px;background:#eab308;display:inline-block;"></span>Gold 10%</span>
+            <span class="text-caption" style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:2px;background:#a8a29e;display:inline-block;"></span>Cash 5%</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════
+           10. OTP / PIN DIGIT BOXES
+      ════════════════════════════════════ -->
+      <section class="ds-section" id="otp">
+        <div class="ds-section-title">OTP / PIN Digit Boxes <span>§10</span></div>
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">OTP — 6 digits (Forgot Password)</div>
+          <div class="digit-group" id="ds-otp-group">
+            <input class="digit-box" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 1">
+            <input class="digit-box" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 2">
+            <input class="digit-box" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 3">
+            <input class="digit-box" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 4">
+            <input class="digit-box" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 5">
+            <input class="digit-box" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 6">
+          </div>
+          <div class="otp-meta" style="max-width:360px; margin-top:var(--sp-3);">
+            <div class="otp-countdown">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Code expires in <span id="ds-countdown">10:00</span>
+            </div>
+            <button class="otp-resend" disabled>Resend code</button>
+          </div>
+        </div>
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">PIN — 6 digits (Session Lock)</div>
+          <div class="digit-group" id="ds-pin-group">
+            <input class="digit-box digit-box--pin" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="PIN 1">
+            <input class="digit-box digit-box--pin" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="PIN 2">
+            <input class="digit-box digit-box--pin" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="PIN 3">
+            <input class="digit-box digit-box--pin" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="PIN 4">
+            <input class="digit-box digit-box--pin" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="PIN 5">
+            <input class="digit-box digit-box--pin" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="PIN 6">
+          </div>
+        </div>
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">States</div>
+          <div class="ds-row" style="gap:var(--sp-6);">
+            <div>
+              <div class="text-caption tc-secondary" style="margin-bottom:var(--sp-2);">Filled (teal)</div>
+              <div class="digit-group">
+                <input class="digit-box filled" type="tel" value="3" maxlength="1">
+                <input class="digit-box filled" type="tel" value="7" maxlength="1">
+                <input class="digit-box" type="tel" maxlength="1" style="border-color:var(--border-focus);box-shadow:0 0 0 3px rgba(13,148,136,0.15);">
+                <input class="digit-box" type="tel" maxlength="1">
+                <input class="digit-box" type="tel" maxlength="1">
+                <input class="digit-box" type="tel" maxlength="1">
+              </div>
+            </div>
+            <div>
+              <div class="text-caption tc-secondary" style="margin-bottom:var(--sp-2);">Error (shake + red)</div>
+              <div class="digit-group">
+                <input class="digit-box error" type="tel" value="9" maxlength="1">
+                <input class="digit-box error" type="tel" value="9" maxlength="1">
+                <input class="digit-box error" type="tel" value="9" maxlength="1">
+                <input class="digit-box error" type="tel" value="9" maxlength="1">
+                <input class="digit-box error" type="tel" value="9" maxlength="1">
+                <input class="digit-box error" type="tel" value="9" maxlength="1">
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════
+           11. PASSWORD STRENGTH METER
+      ════════════════════════════════════ -->
+      <section class="ds-section" id="strength">
+        <div class="ds-section-title">Password Strength Meter <span>§11</span></div>
+        <div style="max-width:380px;">
+          <div class="form-group" style="margin-bottom:var(--sp-2);">
+            <label class="form-label" for="ds-pw-strength">New Password</label>
+            <div class="input-wrapper">
+              <input type="password" id="ds-pw-strength" class="form-input has-icon-right" placeholder="type to see strength meter">
+              <button type="button" class="input-icon-btn" id="ds-pw-toggle" aria-label="Show password">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+            <div class="strength-meter" id="ds-strength-meter" data-level="0">
+              <div class="strength-meter__bars">
+                <div class="strength-bar"></div><div class="strength-bar"></div>
+                <div class="strength-bar"></div><div class="strength-bar"></div>
+                <div class="strength-bar"></div>
+              </div>
+              <div class="strength-meter__label">Strength:&nbsp;<span class="strength-label-text"></span></div>
+            </div>
+          </div>
+
+          <div style="margin-top:var(--sp-5);">
+            <div class="text-caption tc-secondary" style="margin-bottom:var(--sp-3);">All 5 levels (click to preview):</div>
+            <div class="ds-row" style="flex-wrap:wrap;gap:var(--sp-2);">
+              <button class="demo-btn" onclick="previewStrength(1,'weak')">Weak (e.g. abc)</button>
+              <button class="demo-btn" onclick="previewStrength(2,'fair')">Fair (e.g. abcdef)</button>
+              <button class="demo-btn" onclick="previewStrength(3,'moderate')">Moderate (e.g. abcdefgh)</button>
+              <button class="demo-btn" onclick="previewStrength(4,'strong')">Strong (e.g. Abcdef12)</button>
+              <button class="demo-btn" onclick="previewStrength(5,'verystong')">Very Strong (e.g. Abcd1234!)</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════
+           12. ALERT BANNERS
+      ════════════════════════════════════ -->
+      <section class="ds-section" id="alerts">
+        <div class="ds-section-title">Alert Banners <span>§12</span></div>
+        <div style="display:flex;flex-direction:column;gap:var(--sp-3);max-width:580px;">
+          <div class="alert alert-error">
+            <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
+            <span class="alert__text">Incorrect username or password. Please try again.</span>
+          </div>
+          <div class="alert alert-warning">
+            <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+            <span class="alert__text">1 more attempt before account is temporarily locked.</span>
+          </div>
+          <div class="alert alert-success">
+            <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+            <span class="alert__text">Password reset successful. You can now sign in.</span>
+          </div>
+          <div class="alert alert-info">
+            <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+            <span class="alert__text">You're offline. Showing last updated data from 5 minutes ago.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════
+           13. SKELETON LOADER
+      ════════════════════════════════════ -->
+      <section class="ds-section" id="skeleton">
+        <div class="ds-section-title">Skeleton Loader <span>§13</span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4);">
+          <!-- Card skeleton -->
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);padding:var(--sp-5) var(--sp-6);">
+            <div style="display:flex;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-4);">
+              <div class="skeleton" style="width:18px;height:18px;border-radius:50%;flex-shrink:0;"></div>
+              <div class="skeleton" style="width:100px;height:13px;"></div>
+            </div>
+            <div class="skeleton" style="width:55%;height:24px;margin-bottom:var(--sp-2);"></div>
+            <div class="skeleton" style="width:35%;height:10px;"></div>
+          </div>
+          <!-- Table row skeletons -->
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);padding:var(--sp-3) var(--sp-5);">
+            <div style="display:flex;gap:var(--sp-3);padding:var(--sp-3) 0;border-bottom:1px solid var(--border);">
+              <div class="skeleton" style="width:60px;height:12px;"></div>
+              <div class="skeleton" style="flex:1;height:12px;"></div>
+              <div class="skeleton" style="width:70px;height:12px;"></div>
+            </div>
+            <div style="display:flex;gap:var(--sp-3);padding:var(--sp-3) 0;border-bottom:1px solid var(--border);">
+              <div class="skeleton" style="width:60px;height:12px;"></div>
+              <div class="skeleton" style="flex:1;height:12px;"></div>
+              <div class="skeleton" style="width:70px;height:12px;"></div>
+            </div>
+            <div style="display:flex;gap:var(--sp-3);padding:var(--sp-3) 0;">
+              <div class="skeleton" style="width:60px;height:12px;"></div>
+              <div class="skeleton" style="flex:1;height:12px;"></div>
+              <div class="skeleton" style="width:70px;height:12px;"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════
+           14. SLIDE-OVER PANEL
+      ════════════════════════════════════ -->
+      <section class="ds-section" id="slideover">
+        <div class="ds-section-title">SlideOver Panel <span>§14</span></div>
+        <div class="slideover-mock">
+          <div class="slideover-mock__main">
+            <div class="skeleton" style="width:60%;height:18px;"></div>
+            <div class="skeleton" style="width:90%;height:12px;"></div>
+            <div class="skeleton" style="width:75%;height:12px;"></div>
+            <div class="skeleton" style="width:80%;height:12px;margin-top:12px;"></div>
+            <div class="skeleton" style="width:50%;height:12px;"></div>
+          </div>
+          <div class="slideover-mock__panel">
+            <div class="slideover-mock__header">
+              <div class="text-h3">Add Loan Account</div>
+              <button class="btn-ghost" style="width:32px;height:32px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:var(--r-md);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <div class="slideover-mock__body">
+              <div class="form-group">
+                <label class="form-label">Lender Name</label>
+                <input type="text" class="form-input" value="HDFC Bank" style="height:40px;">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Loan Type</label>
+                <input type="text" class="form-input" value="HOME_LOAN" style="height:40px;">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Outstanding Principal</label>
+                <input type="text" class="form-input" value="₹32,50,000" style="height:40px;font-family:var(--font-mono);">
+              </div>
+            </div>
+            <div class="slideover-mock__footer">
+              <button class="btn btn-ghost btn-sm">Cancel</button>
+              <button class="btn btn-primary btn-sm">Save</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════
+           15. MODAL
+      ════════════════════════════════════ -->
+      <section class="ds-section" id="modal">
+        <div class="ds-section-title">Modal <span>§15</span></div>
+        <div class="ds-row" style="gap:var(--sp-4); flex-direction:column;">
+
+          <!-- Confirmation modal -->
+          <div class="modal-mock">
+            <div class="modal-box" style="max-width:400px;">
+              <div class="modal-box__header">
+                <div class="text-h3">Close Budget Period?</div>
+                <button class="btn-ghost" style="width:28px;height:28px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:var(--r-sm);">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </div>
+              <div class="modal-box__body">
+                <div style="display:flex;gap:var(--sp-3);align-items:flex-start;">
+                  <div style="width:40px;height:40px;background:var(--warning-light);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                  </div>
+                  <div>
+                    <div class="text-body" style="font-weight:500;margin-bottom:4px;">Close June 2026?</div>
+                    <div class="text-body-sm tc-secondary">₹3,200 unallocated balance will roll over to July 2026. This action cannot be undone.</div>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-box__footer">
+                <button class="btn btn-ghost btn-sm">Cancel</button>
+                <button class="btn btn-primary btn-sm">Close Period</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════
+           16. DATA TABLE
+      ════════════════════════════════════ -->
+      <section class="ds-section" id="table">
+        <div class="ds-section-title">Data Table <span>§16</span></div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);overflow:hidden;">
+          <!-- Filter strip -->
+          <div style="padding:var(--sp-4) var(--sp-5);border-bottom:1px solid var(--border);display:flex;gap:var(--sp-3);flex-wrap:wrap;align-items:center;">
+            <select class="form-input" style="height:36px;width:120px;font-size:13px;">
+              <option>All Types</option><option>Credit</option><option>Debit</option>
+            </select>
+            <select class="form-input" style="height:36px;width:140px;font-size:13px;">
+              <option>June 2026</option>
+            </select>
+            <div class="input-wrapper" style="flex:1;min-width:160px;">
+              <svg style="position:absolute;left:10px;color:var(--text-muted);" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" class="form-input" style="height:36px;padding-left:32px;font-size:13px;" placeholder="Search transactions…">
+            </div>
+            <button class="btn btn-secondary btn-sm">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Export
+            </button>
+          </div>
+
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Date ↕</th>
+                <th>Payee ↕</th>
+                <th>Category</th>
+                <th style="text-align:center;">Member</th>
+                <th style="text-align:right;">Amount ↕</th>
+                <th style="text-align:right;">Balance</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-body-sm tc-secondary">01 Jun</td>
+                <td>
+                  <div class="text-body-sm" style="font-weight:500;">Swiggy</div>
+                  <div style="margin-top:4px;display:flex;align-items:center;gap:var(--sp-2);">
+                    <div style="display:flex;align-items:center;gap:5px;padding:3px 8px;background:var(--primary-light);border:1px solid var(--primary);border-radius:var(--r-sm);font-size:11px;color:var(--primary-darker);">
+                      🤖 Food &amp; Dining · 87%
+                      <button class="btn btn-primary" style="height:18px;padding:0 6px;font-size:10px;border-radius:3px;margin-left:4px;">✓</button>
+                      <button style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:12px;padding:0 2px;">✕</button>
+                    </div>
+                  </div>
+                </td>
+                <td class="text-body-sm tc-secondary">Food › Dining Out</td>
+                <td style="text-align:center;"><div style="width:28px;height:28px;background:var(--primary-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--primary-darker);margin:0 auto;">V</div></td>
+                <td class="amount debit text-mono-sm">−₹450</td>
+                <td class="amount text-mono-sm tc-secondary">₹87,230</td>
+                <td class="text-caption tc-muted" style="text-align:center;">Edit · Del</td>
+              </tr>
+              <tr>
+                <td class="text-body-sm tc-secondary">01 Jun</td>
+                <td><div class="text-body-sm" style="font-weight:500;">HDFC Home Loan EMI</div><div class="text-caption tc-secondary" style="margin-top:2px;">Scheduled · confirmed</div></td>
+                <td class="text-body-sm tc-secondary">Finance › Loan EMI</td>
+                <td style="text-align:center;"><div style="width:28px;height:28px;background:var(--primary-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--primary-darker);margin:0 auto;">V</div></td>
+                <td class="amount debit text-mono-sm">−₹22,000</td>
+                <td class="amount text-mono-sm tc-secondary">₹87,680</td>
+                <td class="text-caption tc-muted" style="text-align:center;">Edit · Del</td>
+              </tr>
+              <tr>
+                <td class="text-body-sm tc-secondary">02 Jun</td>
+                <td><div class="text-body-sm" style="font-weight:500;">Salary — TCS Ltd</div></td>
+                <td class="text-body-sm tc-secondary">Income › Salary</td>
+                <td style="text-align:center;"><div style="width:28px;height:28px;background:var(--primary-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--primary-darker);margin:0 auto;">V</div></td>
+                <td class="amount credit text-mono-sm">+₹1,20,000</td>
+                <td class="amount text-mono-sm tc-secondary">₹1,09,680</td>
+                <td class="text-caption tc-muted" style="text-align:center;">Edit · Del</td>
+              </tr>
+              <tr style="opacity:0.65;">
+                <td class="text-body-sm tc-secondary">08 Jun</td>
+                <td><div class="text-body-sm" style="font-weight:500;">Airtel Mobile</div><div style="display:flex;align-items:center;gap:4px;margin-top:2px;"><span class="chip chip-projected" style="font-size:10px;">○ PROJECTED</span></div></td>
+                <td class="text-body-sm tc-secondary">Utilities › Mobile</td>
+                <td style="text-align:center;"><div style="width:28px;height:28px;background:var(--primary-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--primary-darker);margin:0 auto;">V</div></td>
+                <td class="amount debit text-mono-sm">−₹599</td>
+                <td class="amount text-mono-sm tc-secondary">—</td>
+                <td class="text-caption tc-muted" style="text-align:center;">Edit · Del</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Pagination -->
+          <div style="padding:var(--sp-3) var(--sp-5);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--sp-3);">
+            <div style="display:flex;align-items:center;gap:var(--sp-2);" class="text-body-sm tc-secondary">
+              Rows per page:
+              <select class="form-input" style="height:30px;width:60px;font-size:12px;padding:0 8px;">
+                <option>25</option><option>50</option><option>100</option>
+              </select>
+            </div>
+            <div class="text-body-sm tc-secondary">Page 1 of 8 &nbsp; (187 transactions)</div>
+            <div style="display:flex;gap:var(--sp-2);">
+              <button class="btn btn-secondary btn-sm" disabled>← Prev</button>
+              <button class="btn btn-secondary btn-sm">Next →</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════
+           17. NAVIGATION
+      ════════════════════════════════════ -->
+      <section class="ds-section" id="navigation">
+        <div class="ds-section-title">Navigation <span>§17</span></div>
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">Bottom Navigation Bar (xs/sm/md — mobile)</div>
+          <div class="nav-mock">
+            <div class="nav-mock__screen" style="background:var(--bg);">
+              <div class="skeleton" style="width:100%;height:80px;border-radius:var(--r-xl);"></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3);">
+                <div class="skeleton" style="height:60px;border-radius:var(--r-lg);"></div>
+                <div class="skeleton" style="height:60px;border-radius:var(--r-lg);"></div>
+              </div>
+            </div>
+            <nav style="display:flex;align-items:center;background:var(--surface);border-top:1px solid var(--border);height:56px;box-shadow:0 -2px 12px rgba(0,0,0,0.06);">
+              <a href="#" class="bottom-nav__item active" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;font-weight:500;text-decoration:none;color:var(--danger);min-height:48px;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+                Dashboard
+              </a>
+              <a href="#" class="bottom-nav__item" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;font-weight:500;text-decoration:none;color:var(--text-secondary);min-height:48px;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                Budget
+              </a>
+              <div style="display:flex;align-items:center;justify-content:center;padding:0 var(--sp-3);">
+                <button style="width:52px;height:52px;background:var(--primary);border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:var(--sh-lg);">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </button>
+              </div>
+              <a href="#" class="bottom-nav__item" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;font-weight:500;text-decoration:none;color:var(--text-secondary);min-height:48px;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                Invest
+              </a>
+              <a href="#" class="bottom-nav__item" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;font-weight:500;text-decoration:none;color:var(--text-secondary);min-height:48px;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Profile
+              </a>
+            </nav>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════
+           18. DATA DISPLAY CONVENTIONS
+      ════════════════════════════════════ -->
+      <section class="ds-section" id="data-display">
+        <div class="ds-section-title">Data Display Conventions <span>§18</span></div>
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">Financial Delta</div>
+          <div class="ds-row align-center" style="gap:var(--sp-6);">
+            <div style="text-align:center;"><div class="text-mono tc-success" style="font-size:15px;font-weight:600;">▲ +₹12,350 (+3.2%)</div><div class="text-caption tc-secondary" style="margin-top:4px;">Positive change</div></div>
+            <div style="text-align:center;"><div class="text-mono tc-danger" style="font-size:15px;font-weight:600;">▼ −₹8,200 (−1.1%)</div><div class="text-caption tc-secondary" style="margin-top:4px;">Negative change</div></div>
+            <div style="text-align:center;"><div class="text-mono tc-muted" style="font-size:15px;font-weight:600;">→ No change</div><div class="text-caption tc-secondary" style="margin-top:4px;">No change</div></div>
+          </div>
+        </div>
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">Masked / Sensitive Fields</div>
+          <div>
+            <div class="data-row"><div class="data-row__label">Bank Account</div><div class="masked">xxxx xxxx xxxx 4521</div></div>
+            <div class="data-row"><div class="data-row__label">Credit Card</div><div class="masked">•••• •••• •••• 7891</div></div>
+            <div class="data-row"><div class="data-row__label">PAN</div><div class="masked">•••••F1234</div></div>
+            <div class="data-row"><div class="data-row__label">Aadhaar</div><div class="masked">•••• •••• 7891</div></div>
+            <div class="data-row"><div class="data-row__label">UPI ID (default)</div><div class="masked">vikas.s•••••@ybl</div></div>
+            <div class="data-row"><div class="data-row__label">UPI ID (payment)</div><div class="masked" style="color:var(--text-primary);">vikas.sharma@ybl</div></div>
+          </div>
+        </div>
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">Date Formats</div>
+          <div>
+            <div class="data-row"><div class="data-row__label">Transaction date</div><div class="text-body">01 Jun 2026</div></div>
+            <div class="data-row"><div class="data-row__label">Short (same year)</div><div class="text-body">01 Jun</div></div>
+            <div class="data-row"><div class="data-row__label">Relative</div><div class="text-body">3 days ago &nbsp;/&nbsp; in 5 days</div></div>
+            <div class="data-row"><div class="data-row__label">Budget period</div><div class="text-body">June 2026</div></div>
+            <div class="data-row"><div class="data-row__label">Financial Year</div><div class="text-body font-weight-500">FY 2026–27</div></div>
+            <div class="data-row"><div class="data-row__label">Assessment Year</div><div class="text-body">AY 2027–28</div></div>
+            <div class="data-row"><div class="data-row__label">Countdown</div><div class="text-body">Due in 7 days &nbsp;/&nbsp; <span class="tc-danger">Overdue by 2 days</span></div></div>
+          </div>
+        </div>
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">Percentage Formatting</div>
+          <div>
+            <div class="data-row"><div class="data-row__label">Interest rate</div><div class="text-mono">8.50% p.a.</div></div>
+            <div class="data-row"><div class="data-row__label">Returns</div><div class="text-mono tc-success">+12.34%</div></div>
+            <div class="data-row"><div class="data-row__label">Utilisation</div><div class="text-mono">34%</div></div>
+            <div class="data-row"><div class="data-row__label">Allocation</div><div class="text-mono">78% funded</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════
+           19. ML SUGGESTION CHIP
+      ════════════════════════════════════ -->
+      <section class="ds-section" id="ml-chip">
+        <div class="ds-section-title">ML Suggestion Chip <span>§19</span></div>
+        <div style="max-width:500px;">
+          <div style="padding:var(--sp-3) var(--sp-4);background:var(--primary-light);border:1px solid var(--primary);border-radius:var(--r-md);display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);">
+            <div style="display:flex;align-items:center;gap:var(--sp-2);font-size:13px;color:var(--primary-darker);">
+              <span>🤖</span>
+              <span><strong>ML Suggested:</strong> Food &amp; Dining → Dining Out &nbsp;<span style="background:var(--primary);color:white;font-size:11px;padding:1px 6px;border-radius:var(--r-full);">87%</span></span>
+            </div>
+            <div style="display:flex;gap:var(--sp-2);flex-shrink:0;">
+              <button class="btn btn-primary btn-sm">✓ Confirm</button>
+              <button class="btn btn-ghost btn-sm">✕</button>
+            </div>
+          </div>
+          <div class="text-caption tc-secondary" style="margin-top:var(--sp-2);">Never silently applies — always requires explicit user confirmation.</div>
+        </div>
+      </section>
+
+    </main>
+  </div><!-- /ds-layout -->
+</div><!-- /ds-page -->
+
+<script src="./nav.js"></script>
+<script>
+  /* ── Digit box wiring for demo OTP ── */
+  AG.initDigitBoxes(document.getElementById('ds-otp-group'));
+  AG.initDigitBoxes(document.getElementById('ds-pin-group'));
+
+  /* ── OTP countdown demo ── */
+  AG.startCountdown(document.getElementById('ds-countdown'), 600);
+
+  /* ── Password strength meter ── */
+  AG.bindStrengthMeter(
+    document.getElementById('ds-pw-strength'),
+    document.getElementById('ds-strength-meter')
+  );
+
+  /* ── pw toggle ── */
+  document.getElementById('ds-pw-toggle').addEventListener('click', function() {
+    const inp = document.getElementById('ds-pw-strength');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+  });
+
+  /* ── Strength preview buttons ── */
+  const SAMPLES = {
+    1: 'abc',
+    2: 'abcdef',
+    3: 'abcdefgh',
+    4: 'Abcdef12',
+    5: 'Abcd1234!',
+  };
+
+  function previewStrength(level) {
+    const inp = document.getElementById('ds-pw-strength');
+    const meter = document.getElementById('ds-strength-meter');
+    inp.value = SAMPLES[level] || '';
+    inp.dispatchEvent(new Event('input'));
+  }
+
+  /* ── Toggle demo ── */
+  const toggleEl = document.getElementById('toggle-demo');
+  const toggleTrack = document.getElementById('toggle-track');
+  const toggleThumb = document.getElementById('toggle-thumb');
+
+  toggleEl.addEventListener('change', function() {
+    toggleTrack.style.background = this.checked ? 'var(--primary)' : 'var(--border-strong)';
+    toggleThumb.style.left = this.checked ? '23px' : '3px';
+  });
+
+  /* ── Scroll reveal for ds-sections ── */
+  const revealEls = document.querySelectorAll('.ds-section, .ds-subsection, .swatch, .token-row, .data-row');
+  revealEls.forEach(el => el.classList.add('reveal'));
+
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        // Small stagger per batch
+        setTimeout(() => {
+          entry.target.classList.add('revealed');
+        }, (i % 8) * 40);
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+  revealEls.forEach(el => revealObserver.observe(el));
+
+  /* ── Ripple on all .btn-primary clicks ── */
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('.btn-primary');
+    if (!btn) return;
+    const wave = document.createElement('span');
+    wave.className = 'ripple-wave';
+    const rect = btn.getBoundingClientRect();
+    wave.style.left = (e.clientX - rect.left) + 'px';
+    wave.style.top  = (e.clientY - rect.top)  + 'px';
+    btn.appendChild(wave);
+    wave.addEventListener('animationend', () => wave.remove());
+  });
+
+  /* ── Animate progress bars into view ── */
+  const progressFills = document.querySelectorAll('.progress-fill');
+  const barObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        const target = el.style.width;
+        el.style.width = '0%';
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => { el.style.width = target; });
+        });
+        barObserver.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  progressFills.forEach(el => barObserver.observe(el));
+
+  /* ── Number counter animation for financial figures ── */
+  function animateCount(el, target, prefix = '₹', suffix = '') {
+    const duration = 900;
+    const start = performance.now();
+    const update = (now) => {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(target * eased);
+      el.textContent = prefix + new Intl.NumberFormat('en-IN').format(current) + suffix;
+      if (progress < 1) requestAnimationFrame(update);
+    };
+    requestAnimationFrame(update);
+  }
+
+  /* ── Animate counter numbers when they scroll into view ── */
+  const counterEls = document.querySelectorAll('.text-display, .text-display-sm');
+  const counterObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        const text = el.textContent;
+        const numStr = text.replace(/[₹,\s]/g, '');
+        const num = parseInt(numStr, 10);
+        if (!isNaN(num) && num > 0) {
+          const prefix = text.includes('₹') ? '₹' : '';
+          animateCount(el, num, prefix);
+        }
+        counterObserver.unobserve(el);
+      }
+    });
+  }, { threshold: 0.6 });
+
+  counterEls.forEach(el => counterObserver.observe(el));
+</script>
+
+</body>
+</html>
