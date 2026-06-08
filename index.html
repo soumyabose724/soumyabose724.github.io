@@ -167,16 +167,16 @@
       <span class="phase-badge">P1</span>
     </h2>
     <div class="screen-grid">
-      <div class="screen-card wip"><div class="screen-card__id">WIZ-00</div><div class="screen-card__name">Welcome</div></div>
-      <div class="screen-card wip"><div class="screen-card__id">WIZ-01</div><div class="screen-card__name">Step 1 — Family</div></div>
-      <div class="screen-card wip"><div class="screen-card__id">WIZ-02</div><div class="screen-card__name">Step 2 — Income</div></div>
-      <div class="screen-card wip"><div class="screen-card__id">WIZ-03</div><div class="screen-card__name">Step 3 — Bank Accounts</div></div>
-      <div class="screen-card wip"><div class="screen-card__id">WIZ-04</div><div class="screen-card__name">Step 4 — Credit Cards</div></div>
-      <div class="screen-card wip"><div class="screen-card__id">WIZ-05</div><div class="screen-card__name">Step 5 — Loans</div></div>
-      <div class="screen-card wip"><div class="screen-card__id">WIZ-06</div><div class="screen-card__name">Step 6 — Envelopes</div></div>
-      <div class="screen-card wip"><div class="screen-card__id">WIZ-07</div><div class="screen-card__name">Step 7 — Investments</div></div>
-      <div class="screen-card wip"><div class="screen-card__id">WIZ-08</div><div class="screen-card__name">Step 8 — Insurance</div></div>
-      <div class="screen-card wip"><div class="screen-card__id">WIZ-09</div><div class="screen-card__name">Complete</div></div>
+      <a href="./setup/wizard.html" class="screen-card"><div class="screen-card__id">WIZ-00</div><div class="screen-card__name">Welcome</div><div class="screen-card__desc">Entry point — 8-step overview</div><div class="screen-card__arrow">→</div></a>
+      <a href="./setup/wizard.html#step-1" class="screen-card" onclick="sessionStorage.setItem('wizStep','1')"><div class="screen-card__id">WIZ-01</div><div class="screen-card__name">Step 1 — Family</div><div class="screen-card__desc">Household members table, Add Member slide-over</div><div class="screen-card__arrow">→</div></a>
+      <a href="./setup/wizard.html" class="screen-card" onclick="sessionStorage.setItem('wizStep','2')"><div class="screen-card__id">WIZ-02</div><div class="screen-card__name">Step 2 — Income</div><div class="screen-card__desc">Income sources with routing rules</div><div class="screen-card__arrow">→</div></a>
+      <a href="./setup/wizard.html" class="screen-card" onclick="sessionStorage.setItem('wizStep','3')"><div class="screen-card__id">WIZ-03</div><div class="screen-card__name">Step 3 — Bank Accounts</div><div class="screen-card__desc">Account cards grid, Add Account slide-over</div><div class="screen-card__arrow">→</div></a>
+      <a href="./setup/wizard.html" class="screen-card" onclick="sessionStorage.setItem('wizStep','4')"><div class="screen-card__id">WIZ-04</div><div class="screen-card__name">Step 4 — Credit Cards</div><div class="screen-card__desc">Card list with limits and statement days</div><div class="screen-card__arrow">→</div></a>
+      <a href="./setup/wizard.html" class="screen-card" onclick="sessionStorage.setItem('wizStep','5')"><div class="screen-card__id">WIZ-05</div><div class="screen-card__name">Step 5 — Loans</div><div class="screen-card__desc">Loan list with rate, EMI, tenure</div><div class="screen-card__arrow">→</div></a>
+      <a href="./setup/wizard.html" class="screen-card" onclick="sessionStorage.setItem('wizStep','6')"><div class="screen-card__id">WIZ-06</div><div class="screen-card__name">Step 6 — Envelopes</div><div class="screen-card__desc">Draggable allocation list with unallocated counter</div><div class="screen-card__arrow">→</div></a>
+      <a href="./setup/wizard.html" class="screen-card" onclick="sessionStorage.setItem('wizStep','7')"><div class="screen-card__id">WIZ-07</div><div class="screen-card__name">Step 7 — Investments</div><div class="screen-card__desc">Tabbed: MF SIPs, Equity, Provident, Gold</div><div class="screen-card__arrow">→</div></a>
+      <a href="./setup/wizard.html" class="screen-card" onclick="sessionStorage.setItem('wizStep','8')"><div class="screen-card__id">WIZ-08</div><div class="screen-card__name">Step 8 — Insurance</div><div class="screen-card__desc">Tabbed: Term, Health, Vehicle policies</div><div class="screen-card__arrow">→</div></a>
+      <a href="./setup/wizard.html" class="screen-card" onclick="sessionStorage.setItem('wizStep','9')"><div class="screen-card__id">WIZ-09</div><div class="screen-card__name">Complete</div><div class="screen-card__desc">Setup Score ring + checklist. 72% and 100% demo states</div><div class="screen-card__arrow">→</div></a>
     </div>
   </section>
 
