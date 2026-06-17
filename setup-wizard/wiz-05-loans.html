@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Step 5: Loans &amp; EMIs — ArthaGrid Setup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../assets/style.css"/>
+  <style>
+    .demo-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 9999; background: #1c1917; color: white; padding: 6px 16px; display: flex; align-items: center; gap: 8px; font-size: 12px; }
+    .demo-bar button { padding: 3px 10px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: white; cursor: pointer; font-size: 11px; }
+    .demo-bar button:hover { background: rgba(255,255,255,0.2); }
+    .demo-label { font-weight: 600; color: var(--primary); margin-right: 4px; }
+    body { padding-top: 36px; }
+
+    .wiz-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; background: var(--surface); border-bottom: 1px solid var(--border); }
+    .wiz-brand { display: flex; align-items: center; gap: 8px; }
+    .wiz-brand-icon { width: 32px; height: 32px; background: var(--primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: 700; font-family: var(--font-mono); }
+    .wiz-brand-name { font-size: 16px; font-weight: 700; color: var(--text-primary); }
+    .wiz-tagline { font-size: 13px; color: var(--text-secondary); }
+    .wiz-progress-wrap { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 24px; max-width: 760px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+    .wiz-step-dots { display: flex; align-items: center; gap: 0; margin-bottom: 12px; }
+    .wiz-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; flex-shrink: 0; border: 2px solid var(--border); background: var(--surface); color: var(--text-muted); }
+    .wiz-dot--done { background: var(--primary); border-color: var(--primary); color: white; }
+    .wiz-dot--current { background: var(--surface); border-color: var(--primary); color: var(--primary); }
+    .wiz-dot-line { flex: 1; height: 2px; background: var(--border); }
+    .wiz-dot-line--done { background: var(--primary); }
+    .wiz-progress-bar-track { height: 6px; background: var(--border); border-radius: 999px; overflow: hidden; }
+    .wiz-progress-bar-fill { height: 6px; background: var(--primary); border-radius: 999px; }
+    .wiz-progress-pct { font-size: 12px; color: var(--text-secondary); float: right; margin-top: 4px; }
+    .wiz-main { flex: 1; padding: 32px 24px 120px; }
+    .wiz-card { max-width: 760px; margin: 0 auto; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-xl); padding: 32px; box-shadow: var(--sh-md); }
+    .wiz-step-title { font-size: 22px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+    .wiz-step-subtitle { font-size: 14px; color: var(--text-secondary); margin-bottom: 24px; }
+    .wiz-footer { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 16px 24px; display: flex; align-items: center; gap: 12px; box-shadow: 0 -4px 16px rgba(0,0,0,0.06); z-index: 100; }
+    .wiz-footer .btn:last-child { margin-left: auto; }
+
+    .data-row { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 1px solid var(--border); border-radius: var(--r-lg); margin-bottom: 10px; background: var(--surface); }
+    .data-row__icon { width: 36px; height: 36px; border-radius: var(--r-md); background: var(--primary-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--primary); }
+    .data-row__info { flex: 1; }
+    .data-row__label { font-weight: 600; font-size: 14px; color: var(--text-primary); }
+    .data-row__meta { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+    .data-row__actions { display: flex; gap: 6px; }
+    .data-row__right { text-align: right; flex-shrink: 0; }
+    .data-row__amount { font-family: var(--font-mono); font-weight: 600; font-size: 13px; color: var(--text-primary); white-space: nowrap; }
+    .data-row__emi { font-size: 11px; color: var(--text-secondary); font-family: var(--font-mono); }
+
+    .inline-form { background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 20px; margin-bottom: 12px; }
+    .inline-form.hidden { display: none; }
+    .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 600px) { .form-grid-2 { grid-template-columns: 1fr; } }
+    .inline-form-title { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 16px; }
+    .inline-form-actions { display: flex; gap: 10px; margin-top: 16px; justify-content: flex-end; }
+
+    .tab-toggle { display: flex; border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; }
+    .tab-toggle__item { flex: 1; padding: 8px 14px; font-size: 13px; font-weight: 500; background: var(--surface); color: var(--text-secondary); border: none; cursor: pointer; transition: background 0.15s, color 0.15s; text-align: center; }
+    .tab-toggle__item.active { background: var(--primary); color: white; }
+    .tab-toggle__item:not(.active):hover { background: var(--surface-raised); }
+
+    .emi-preview { background: var(--primary-light); border: 1px solid var(--primary); border-radius: var(--r-md); padding: 12px 16px; margin-top: 12px; font-size: 13px; color: var(--primary-darker); font-family: var(--font-mono); line-height: 1.6; }
+    .add-btn-row { margin-top: 16px; }
+    .wiz-note { display: flex; gap: 10px; align-items: flex-start; background: var(--info-light); border-radius: var(--r-md); padding: 12px 14px; font-size: 13px; color: var(--text-secondary); margin-top: 16px; }
+    .wiz-note svg { flex-shrink: 0; margin-top: 1px; color: var(--info); }
+    .loan-type-badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 999px; border: 1px solid var(--border); color: var(--text-secondary); background: var(--surface-raised); margin-left: 6px; }
+  </style>
+</head>
+<body style="background:var(--bg);min-height:100vh;display:flex;flex-direction:column;">
+
+<div class="demo-bar">
+  <span class="demo-label">Demo</span>
+  <button onclick="showState('empty')">Empty</button>
+  <button onclick="showState('filled')">Filled</button>
+  <button onclick="showState('error')">Error</button>
+</div>
+
+<header class="wiz-header">
+  <div class="wiz-brand">
+    <div class="wiz-brand-icon">A₹</div>
+    <span class="wiz-brand-name">ArthaGrid</span>
+  </div>
+  <span class="wiz-tagline">Setting up your financial OS…</span>
+</header>
+
+<div class="wiz-progress-wrap">
+  <div class="wiz-step-dots">
+    <div class="wiz-dot wiz-dot--done"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <div class="wiz-dot-line wiz-dot-line--done"></div>
+    <div class="wiz-dot wiz-dot--done"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <div class="wiz-dot-line wiz-dot-line--done"></div>
+    <div class="wiz-dot wiz-dot--done"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <div class="wiz-dot-line wiz-dot-line--done"></div>
+    <div class="wiz-dot wiz-dot--done"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <div class="wiz-dot-line wiz-dot-line--done"></div>
+    <div class="wiz-dot wiz-dot--current">5</div>
+    <div class="wiz-dot-line"></div>
+    <div class="wiz-dot">6</div>
+    <div class="wiz-dot-line"></div>
+    <div class="wiz-dot">7</div>
+    <div class="wiz-dot-line"></div>
+    <div class="wiz-dot">8</div>
+  </div>
+  <div class="wiz-progress-bar-track">
+    <div class="wiz-progress-bar-fill" style="width:62%"></div>
+  </div>
+  <span class="wiz-progress-pct">62% complete</span>
+  <div style="clear:both"></div>
+</div>
+
+<main class="wiz-main">
+  <div class="wiz-card">
+    <h1 class="wiz-step-title">Step 5: Loans &amp; EMIs</h1>
+    <p class="wiz-step-subtitle">Add outstanding loans so ArthaGrid can track EMI schedules, interest costs, and payoff timelines. This step is optional.</p>
+
+    <!-- Home Loan -->
+    <div class="data-row">
+      <div class="data-row__icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </div>
+      <div class="data-row__info">
+        <div class="data-row__label">HDFC Home Loan <span class="loan-type-badge">HOME</span></div>
+        <div class="data-row__meta">Vikas Sharma &nbsp;·&nbsp; 8.50% p.a. &nbsp;·&nbsp; 156 months left</div>
+      </div>
+      <div class="data-row__right">
+        <div class="data-row__amount">₹42,50,000 outstanding</div>
+        <div class="data-row__emi">EMI ₹38,421/mo</div>
+      </div>
+      <div class="data-row__actions">
+        <button class="btn btn-ghost btn-sm" title="Edit"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        <button class="btn btn-ghost btn-sm" title="Delete" style="color:var(--danger)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+    </div>
+
+    <!-- Car Loan -->
+    <div class="data-row">
+      <div class="data-row__icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+      </div>
+      <div class="data-row__info">
+        <div class="data-row__label">ICICI Car Loan <span class="loan-type-badge">AUTO</span></div>
+        <div class="data-row__meta">Vikas Sharma &nbsp;·&nbsp; 9.50% p.a. &nbsp;·&nbsp; 36 months left</div>
+      </div>
+      <div class="data-row__right">
+        <div class="data-row__amount">₹6,40,000 outstanding</div>
+        <div class="data-row__emi">EMI ₹12,500/mo</div>
+      </div>
+      <div class="data-row__actions">
+        <button class="btn btn-ghost btn-sm" title="Edit"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        <button class="btn btn-ghost btn-sm" title="Delete" style="color:var(--danger)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+    </div>
+
+    <!-- Inline add form -->
+    <div class="inline-form hidden" id="form-loan">
+      <div class="inline-form-title">Add Loan</div>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Loan Type <span style="color:var(--danger)">*</span></label>
+          <select class="form-select">
+            <option>HOME</option>
+            <option>PERSONAL</option>
+            <option>AUTO</option>
+            <option>EDUCATION</option>
+            <option>GOLD</option>
+            <option>BUSINESS</option>
+            <option>OTHER</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Lender Name <span style="color:var(--danger)">*</span></label>
+          <input class="form-input" type="text" placeholder="e.g. HDFC Bank"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Member <span style="color:var(--danger)">*</span></label>
+          <select class="form-select">
+            <option>Vikas Sharma</option>
+            <option>Priya Sharma</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Repayment Structure <span style="color:var(--danger)">*</span></label>
+          <select class="form-select">
+            <option>EMI</option>
+            <option>INTEREST_ONLY</option>
+            <option>BULLET</option>
+            <option>OVERDRAFT</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Outstanding Amount ₹ <span style="color:var(--danger)">*</span></label>
+          <div class="input-wrap">
+            <span class="input-prefix">₹</span>
+            <input class="form-input" type="number" placeholder="0" min="0" style="padding-left:28px" id="loan-principal" oninput="calcEMI()"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Annual Rate % <span style="color:var(--danger)">*</span></label>
+          <input class="form-input" type="number" placeholder="8.50" step="0.01" id="loan-rate" oninput="calcEMI()"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Rate Type</label>
+          <div class="tab-toggle">
+            <button class="tab-toggle__item active" onclick="setRateType('fixed', this)">FIXED</button>
+            <button class="tab-toggle__item" onclick="setRateType('floating', this)">FLOATING</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Remaining Tenure (months) <span style="color:var(--danger)">*</span></label>
+          <input class="form-input" type="number" placeholder="156" min="1" id="loan-tenure" oninput="calcEMI()"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">EMI Day (1–28) <span style="color:var(--danger)">*</span></label>
+          <input class="form-input" type="number" placeholder="5" min="1" max="28" id="loan-emi-day"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Start Date</label>
+          <input class="form-input" type="date"/>
+        </div>
+      </div>
+
+      <div class="emi-preview" id="emi-preview-box">
+        EMI = — &nbsp;·&nbsp; Payoff: —
+      </div>
+
+      <div class="inline-form-actions">
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('form-loan').classList.add('hidden')">Cancel</button>
+        <button class="btn btn-primary btn-sm" onclick="AG.showToast('Loan added.','success');document.getElementById('form-loan').classList.add('hidden')">Add Loan</button>
+      </div>
+    </div>
+
+    <div class="add-btn-row">
+      <button class="btn btn-secondary btn-md" onclick="toggleLoan()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Loan
+      </button>
+    </div>
+
+    <div class="wiz-note">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      EMI is computed using reducing balance formula: EMI = P × r × (1+r)^n / ((1+r)^n − 1) where r = annual rate / 12 / 100. ArthaGrid generates the full amortisation schedule automatically.
+    </div>
+  </div>
+</main>
+
+<footer class="wiz-footer">
+  <a href="wiz-04-cards.html" class="btn btn-ghost btn-md">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    Back
+  </a>
+  <a href="wiz-06-envelopes.html" class="btn btn-ghost btn-md" style="color:var(--text-secondary)">Complete Later</a>
+  <a href="wiz-06-envelopes.html" class="btn btn-primary btn-md">
+    Save &amp; Continue
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+  </a>
+</footer>
+
+<script src="../assets/nav.js"></script>
+<script>
+  const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  function calcEMI() {
+    const P = parseFloat(document.getElementById('loan-principal').value) || 0;
+    const annualRate = parseFloat(document.getElementById('loan-rate').value) || 0;
+    const n = parseInt(document.getElementById('loan-tenure').value) || 0;
+    const el = document.getElementById('emi-preview-box');
+    if (!P || !annualRate || !n) { el.textContent = 'EMI = — · Payoff: —'; return; }
+    const r = annualRate / 12 / 100;
+    const emi = Math.round(P * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1));
+    const payoff = new Date();
+    payoff.setMonth(payoff.getMonth() + n);
+    el.textContent = 'EMI = ' + AG.formatINR(emi * 100) + '/month  ·  Payoff: '
+      + MONTHS_SHORT[payoff.getMonth()] + ' ' + payoff.getFullYear()
+      + ' (' + n + ' months)';
+  }
+
+  function setRateType(type, btn) {
+    btn.closest('.tab-toggle').querySelectorAll('.tab-toggle__item').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  function toggleLoan() {
+    const f = document.getElementById('form-loan');
+    f.classList.toggle('hidden');
+    if (!f.classList.contains('hidden')) f.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function showState(state) {
+    if (state === 'empty') {
+      document.querySelectorAll('.data-row').forEach(r => r.style.display = 'none');
+      AG.showToast('Empty state — no loans added', 'info');
+    } else if (state === 'filled') {
+      document.querySelectorAll('.data-row').forEach(r => r.style.display = 'flex');
+      AG.showToast('Filled state', 'success');
+    } else if (state === 'error') {
+      AG.showToast('Outstanding amount, rate, and tenure are required', 'error');
+    }
+  }
+</script>
+</body>
+</html>

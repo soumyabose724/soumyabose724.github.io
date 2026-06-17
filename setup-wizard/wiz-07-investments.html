@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Step 7: Investments — ArthaGrid Setup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../assets/style.css"/>
+  <style>
+    .demo-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 9999; background: #1c1917; color: white; padding: 6px 16px; display: flex; align-items: center; gap: 8px; font-size: 12px; }
+    .demo-bar button { padding: 3px 10px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: white; cursor: pointer; font-size: 11px; }
+    .demo-bar button:hover { background: rgba(255,255,255,0.2); }
+    .demo-label { font-weight: 600; color: var(--primary); margin-right: 4px; }
+    body { padding-top: 36px; }
+
+    .wiz-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; background: var(--surface); border-bottom: 1px solid var(--border); }
+    .wiz-brand { display: flex; align-items: center; gap: 8px; }
+    .wiz-brand-icon { width: 32px; height: 32px; background: var(--primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: 700; font-family: var(--font-mono); }
+    .wiz-brand-name { font-size: 16px; font-weight: 700; color: var(--text-primary); }
+    .wiz-tagline { font-size: 13px; color: var(--text-secondary); }
+    .wiz-progress-wrap { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 24px; max-width: 760px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+    .wiz-step-dots { display: flex; align-items: center; gap: 0; margin-bottom: 12px; }
+    .wiz-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; flex-shrink: 0; border: 2px solid var(--border); background: var(--surface); color: var(--text-muted); }
+    .wiz-dot--done { background: var(--primary); border-color: var(--primary); color: white; }
+    .wiz-dot--current { background: var(--surface); border-color: var(--primary); color: var(--primary); }
+    .wiz-dot-line { flex: 1; height: 2px; background: var(--border); }
+    .wiz-dot-line--done { background: var(--primary); }
+    .wiz-progress-bar-track { height: 6px; background: var(--border); border-radius: 999px; overflow: hidden; }
+    .wiz-progress-bar-fill { height: 6px; background: var(--primary); border-radius: 999px; }
+    .wiz-progress-pct { font-size: 12px; color: var(--text-secondary); float: right; margin-top: 4px; }
+    .wiz-main { flex: 1; padding: 32px 24px 120px; }
+    .wiz-card { max-width: 760px; margin: 0 auto; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-xl); padding: 32px; box-shadow: var(--sh-md); }
+    .wiz-step-title { font-size: 22px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+    .wiz-step-subtitle { font-size: 14px; color: var(--text-secondary); margin-bottom: 24px; }
+    .wiz-footer { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 16px 24px; display: flex; align-items: center; gap: 12px; box-shadow: 0 -4px 16px rgba(0,0,0,0.06); z-index: 100; }
+    .wiz-footer .btn:last-child { margin-left: auto; }
+
+    /* Asset class accordion */
+    .asset-class-row { border: 1px solid var(--border); border-radius: var(--r-lg); margin-bottom: 10px; overflow: hidden; }
+    .asset-class-row__header { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: var(--surface); cursor: pointer; }
+    .asset-class-row__header:hover { background: var(--primary-xlight); }
+    .asset-class-row__icon { width: 36px; height: 36px; border-radius: var(--r-md); background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .asset-class-row__info { flex: 1; }
+    .asset-class-row__label { font-weight: 600; font-size: 14px; color: var(--text-primary); }
+    .asset-class-row__meta { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+    .asset-class-row__right { text-align: right; }
+    .asset-class-row__value { font-family: var(--font-mono); font-weight: 600; font-size: 13px; color: var(--text-primary); }
+    .asset-class-row__actions { display: flex; gap: 6px; align-items: center; }
+    .asset-class-row__body { padding: 16px; background: var(--surface-raised); border-top: 1px solid var(--border); }
+    .asset-class-row__body.hidden { display: none; }
+    .chevron { transition: transform 0.2s; color: var(--text-muted); }
+    .chevron.open { transform: rotate(180deg); }
+
+    /* Stock/holding row inside accordion */
+    .holding-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--r-md); margin-bottom: 8px; background: var(--surface); }
+    .holding-row__symbol { font-family: var(--font-mono); font-weight: 700; font-size: 13px; color: var(--primary); min-width: 80px; }
+    .holding-row__info { flex: 1; font-size: 13px; color: var(--text-secondary); }
+    .holding-row__value { font-family: var(--font-mono); font-size: 13px; color: var(--text-primary); font-weight: 600; }
+
+    /* Empty asset row */
+    .asset-class-row--empty .asset-class-row__header { background: var(--surface-raised); }
+    .asset-skip-actions { display: flex; gap: 8px; }
+
+    .inline-form { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 16px; margin-top: 12px; }
+    .inline-form.hidden { display: none; }
+    .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 600px) { .form-grid-2 { grid-template-columns: 1fr; } }
+    .inline-form-title { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px; }
+    .inline-form-actions { display: flex; gap: 8px; margin-top: 12px; justify-content: flex-end; }
+
+    .wiz-note { display: flex; gap: 10px; align-items: flex-start; background: var(--info-light); border-radius: var(--r-md); padding: 12px 14px; font-size: 13px; color: var(--text-secondary); margin-top: 16px; }
+    .wiz-note svg { flex-shrink: 0; margin-top: 1px; color: var(--info); }
+  </style>
+</head>
+<body style="background:var(--bg);min-height:100vh;display:flex;flex-direction:column;">
+
+<div class="demo-bar">
+  <span class="demo-label">Demo</span>
+  <button onclick="showState('empty')">Empty</button>
+  <button onclick="showState('filled')">Filled</button>
+  <button onclick="showState('error')">Error</button>
+</div>
+
+<header class="wiz-header">
+  <div class="wiz-brand">
+    <div class="wiz-brand-icon">A₹</div>
+    <span class="wiz-brand-name">ArthaGrid</span>
+  </div>
+  <span class="wiz-tagline">Setting up your financial OS…</span>
+</header>
+
+<div class="wiz-progress-wrap">
+  <div class="wiz-step-dots">
+    <div class="wiz-dot wiz-dot--done"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <div class="wiz-dot-line wiz-dot-line--done"></div>
+    <div class="wiz-dot wiz-dot--done"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <div class="wiz-dot-line wiz-dot-line--done"></div>
+    <div class="wiz-dot wiz-dot--done"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <div class="wiz-dot-line wiz-dot-line--done"></div>
+    <div class="wiz-dot wiz-dot--done"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <div class="wiz-dot-line wiz-dot-line--done"></div>
+    <div class="wiz-dot wiz-dot--done"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <div class="wiz-dot-line wiz-dot-line--done"></div>
+    <div class="wiz-dot wiz-dot--done"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <div class="wiz-dot-line wiz-dot-line--done"></div>
+    <div class="wiz-dot wiz-dot--current">7</div>
+    <div class="wiz-dot-line"></div>
+    <div class="wiz-dot">8</div>
+  </div>
+  <div class="wiz-progress-bar-track">
+    <div class="wiz-progress-bar-fill" style="width:87%"></div>
+  </div>
+  <span class="wiz-progress-pct">87% complete</span>
+  <div style="clear:both"></div>
+</div>
+
+<main class="wiz-main">
+  <div class="wiz-card">
+    <h1 class="wiz-step-title">Step 7: Investments</h1>
+    <p class="wiz-step-subtitle">Add your current investment portfolio. Holdings are updated with live prices once setup is complete. All steps here are optional.</p>
+
+    <!-- 1. Direct Equities — has holdings -->
+    <div class="asset-class-row">
+      <div class="asset-class-row__header" onclick="toggleAsset('equities')">
+        <div class="asset-class-row__icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+        <div class="asset-class-row__info">
+          <div class="asset-class-row__label">Direct Equities</div>
+          <div class="asset-class-row__meta">2 holdings</div>
+        </div>
+        <div class="asset-class-row__right">
+          <div class="asset-class-row__value">₹3,45,000</div>
+        </div>
+        <svg class="chevron" id="chevron-equities" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="asset-class-row__body hidden" id="body-equities">
+        <div class="holding-row">
+          <span class="holding-row__symbol">RELIANCE</span>
+          <span class="holding-row__info">10 shares · Avg ₹2,450</span>
+          <span class="holding-row__value">Current ~₹2,890</span>
+          <button class="btn btn-ghost btn-sm" title="Edit"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+          <button class="btn btn-ghost btn-sm" style="color:var(--danger)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div class="holding-row">
+          <span class="holding-row__symbol">INFY</span>
+          <span class="holding-row__info">5 shares · Avg ₹1,800</span>
+          <span class="holding-row__value">Current ~₹1,920</span>
+          <button class="btn btn-ghost btn-sm" title="Edit"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+          <button class="btn btn-ghost btn-sm" style="color:var(--danger)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <button class="btn btn-ghost btn-sm" style="margin-top:4px">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Holding
+        </button>
+      </div>
+    </div>
+
+    <!-- 2. Mutual Funds — has folios -->
+    <div class="asset-class-row">
+      <div class="asset-class-row__header" onclick="toggleAsset('mf')">
+        <div class="asset-class-row__icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
+        <div class="asset-class-row__info">
+          <div class="asset-class-row__label">Mutual Funds</div>
+          <div class="asset-class-row__meta">3 folios</div>
+        </div>
+        <div class="asset-class-row__right">
+          <div class="asset-class-row__value">₹8,20,000</div>
+        </div>
+        <svg class="chevron" id="chevron-mf" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="asset-class-row__body hidden" id="body-mf">
+        <div class="holding-row">
+          <span class="holding-row__symbol" style="min-width:140px;font-size:12px">HDFC Top 100</span>
+          <span class="holding-row__info">Folio 1234567 · 245.3 units · NAV ₹1,050</span>
+          <span class="holding-row__value">₹2,57,565</span>
+          <button class="btn btn-ghost btn-sm" title="Edit"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        </div>
+        <div class="holding-row">
+          <span class="holding-row__symbol" style="min-width:140px;font-size:12px">Mirae Asset ELSS</span>
+          <span class="holding-row__info">Folio 9876543 · 310.1 units · NAV ₹980</span>
+          <span class="holding-row__value">₹3,03,898</span>
+          <button class="btn btn-ghost btn-sm" title="Edit"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        </div>
+        <div class="holding-row">
+          <span class="holding-row__symbol" style="min-width:140px;font-size:12px">SBI Bluechip</span>
+          <span class="holding-row__info">Folio 5551234 · 198.7 units · NAV ₹800</span>
+          <span class="holding-row__value">₹1,58,960</span>
+          <button class="btn btn-ghost btn-sm" title="Edit"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        </div>
+        <button class="btn btn-ghost btn-sm" style="margin-top:4px">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Folio
+        </button>
+      </div>
+    </div>
+
+    <!-- 3–8: Empty asset class rows -->
+    <div class="asset-class-row asset-class-row--empty">
+      <div class="asset-class-row__header" style="cursor:default">
+        <div class="asset-class-row__icon" style="background:var(--surface-raised);color:var(--text-muted);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg></div>
+        <div class="asset-class-row__info">
+          <div class="asset-class-row__label">EPF / PPF / NPS</div>
+          <div class="asset-class-row__meta" style="color:var(--text-muted)">Not added</div>
+        </div>
+        <div class="asset-skip-actions">
+          <button class="btn btn-secondary btn-sm" onclick="toggleEPFForm()">Add</button>
+          <button class="btn btn-ghost btn-sm" style="color:var(--text-muted)" onclick="AG.showToast('EPF/PPF/NPS skipped','info')">Skip</button>
+        </div>
+      </div>
+      <div class="inline-form hidden" id="form-epf" style="margin:0;border:none;border-top:1px solid var(--border);border-radius:0;padding:16px;">
+        <div class="form-grid-2">
+          <div class="form-group"><label class="form-label">Account Number</label><input class="form-input" type="text" placeholder="EPF/PPF/NPS account no."/></div>
+          <div class="form-group"><label class="form-label">Member</label><select class="form-select"><option>Vikas Sharma</option><option>Priya Sharma</option></select></div>
+          <div class="form-group"><label class="form-label">Current Balance ₹ <span style="color:var(--danger)">*</span></label><div class="input-wrap"><span class="input-prefix">₹</span><input class="form-input" type="number" placeholder="0" style="padding-left:28px"/></div></div>
+          <div class="form-group"><label class="form-label">As of Date</label><input class="form-input" type="date" value="2026-06-15"/></div>
+        </div>
+        <div class="inline-form-actions">
+          <button class="btn btn-ghost btn-sm" onclick="toggleEPFForm()">Cancel</button>
+          <button class="btn btn-primary btn-sm" onclick="AG.showToast('EPF/PPF/NPS added.','success');toggleEPFForm()">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="asset-class-row asset-class-row--empty">
+      <div class="asset-class-row__header" style="cursor:default">
+        <div class="asset-class-row__icon" style="background:#fef3c7;color:#92400e;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+        <div class="asset-class-row__info">
+          <div class="asset-class-row__label">Physical Gold</div>
+          <div class="asset-class-row__meta" style="color:var(--text-muted)">Not added</div>
+        </div>
+        <div class="asset-skip-actions">
+          <button class="btn btn-secondary btn-sm" onclick="AG.showToast('Physical gold form — coming soon','info')">Add</button>
+          <button class="btn btn-ghost btn-sm" style="color:var(--text-muted)" onclick="AG.showToast('Physical gold skipped','info')">Skip</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="asset-class-row asset-class-row--empty">
+      <div class="asset-class-row__header" style="cursor:default">
+        <div class="asset-class-row__icon" style="background:#fef3c7;color:#92400e;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+        <div class="asset-class-row__info">
+          <div class="asset-class-row__label">SGB (Sovereign Gold Bonds)</div>
+          <div class="asset-class-row__meta" style="color:var(--text-muted)">Not added</div>
+        </div>
+        <div class="asset-skip-actions">
+          <button class="btn btn-secondary btn-sm" onclick="AG.showToast('SGB form — coming soon','info')">Add</button>
+          <button class="btn btn-ghost btn-sm" style="color:var(--text-muted)" onclick="AG.showToast('SGB skipped','info')">Skip</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="asset-class-row asset-class-row--empty">
+      <div class="asset-class-row__header" style="cursor:default">
+        <div class="asset-class-row__icon" style="background:#eff6ff;color:#1e40af;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+        <div class="asset-class-row__info">
+          <div class="asset-class-row__label">US Stocks / ETFs</div>
+          <div class="asset-class-row__meta" style="color:var(--text-muted)">Not added</div>
+        </div>
+        <div class="asset-skip-actions">
+          <button class="btn btn-secondary btn-sm" onclick="AG.showToast('US stocks form — coming soon','info')">Add</button>
+          <button class="btn btn-ghost btn-sm" style="color:var(--text-muted)" onclick="AG.showToast('US stocks skipped','info')">Skip</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="asset-class-row asset-class-row--empty">
+      <div class="asset-class-row__header" style="cursor:default">
+        <div class="asset-class-row__icon" style="background:var(--surface-raised);color:var(--text-muted);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div class="asset-class-row__info">
+          <div class="asset-class-row__label">LIC / Endowment Policies</div>
+          <div class="asset-class-row__meta" style="color:var(--text-muted)">Not added</div>
+        </div>
+        <div class="asset-skip-actions">
+          <button class="btn btn-secondary btn-sm" onclick="AG.showToast('LIC form — coming soon','info')">Add</button>
+          <button class="btn btn-ghost btn-sm" style="color:var(--text-muted)" onclick="AG.showToast('LIC skipped','info')">Skip</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="asset-class-row asset-class-row--empty">
+      <div class="asset-class-row__header" style="cursor:default">
+        <div class="asset-class-row__icon" style="background:var(--surface-raised);color:var(--text-muted);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+        <div class="asset-class-row__info">
+          <div class="asset-class-row__label">Real Estate</div>
+          <div class="asset-class-row__meta" style="color:var(--text-muted)">Not added</div>
+        </div>
+        <div class="asset-skip-actions">
+          <button class="btn btn-secondary btn-sm" onclick="AG.showToast('Real estate form — coming soon','info')">Add</button>
+          <button class="btn btn-ghost btn-sm" style="color:var(--text-muted)" onclick="AG.showToast('Real estate skipped','info')">Skip</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="wiz-note">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Holdings are updated with live prices once setup is complete. Historical cost/NAV data you enter now will be used to compute unrealised gains.
+    </div>
+  </div>
+</main>
+
+<footer class="wiz-footer">
+  <a href="wiz-06-envelopes.html" class="btn btn-ghost btn-md">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    Back
+  </a>
+  <a href="wiz-08-insurance.html" class="btn btn-ghost btn-md" style="color:var(--text-secondary)">Complete Later</a>
+  <a href="wiz-08-insurance.html" class="btn btn-primary btn-md">
+    Save &amp; Continue
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+  </a>
+</footer>
+
+<script src="../assets/nav.js"></script>
+<script>
+  function toggleAsset(key) {
+    const body = document.getElementById('body-' + key);
+    const chev = document.getElementById('chevron-' + key);
+    if (!body) return;
+    body.classList.toggle('hidden');
+    chev.classList.toggle('open');
+  }
+  function toggleEPFForm() {
+    document.getElementById('form-epf').classList.toggle('hidden');
+  }
+  function showState(state) {
+    if (state === 'empty') {
+      document.querySelectorAll('.asset-class-row__value').forEach(v => v.textContent = '—');
+      document.querySelectorAll('.asset-class-row__meta').forEach(m => { if (m.textContent.includes('holding') || m.textContent.includes('folio')) m.textContent = 'Not added'; });
+      AG.showToast('Empty state', 'info');
+    } else if (state === 'filled') {
+      AG.showToast('Filled state already shown', 'success');
+    } else if (state === 'error') {
+      AG.showToast('Average price is required for equity holdings', 'error');
+    }
+  }
+</script>
+</body>
+</html>

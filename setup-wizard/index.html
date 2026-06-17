@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Welcome — ArthaGrid Setup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../assets/style.css"/>
+  <style>
+    .demo-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+      background: #1c1917; color: white;
+      padding: 6px 16px; display: flex; align-items: center; gap: 8px;
+      font-size: 12px;
+    }
+    .demo-bar button {
+      padding: 3px 10px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.1); color: white; cursor: pointer; font-size: 11px;
+    }
+    .demo-bar button:hover { background: rgba(255,255,255,0.2); }
+    .demo-label { font-weight: 600; color: var(--primary); margin-right: 4px; }
+    body { padding-top: 36px; }
+
+    .welcome-wrap {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      padding: 32px 24px;
+    }
+    .welcome-card {
+      max-width: 600px; width: 100%; background: var(--surface);
+      border: 1px solid var(--border); border-radius: var(--r-xl);
+      padding: 48px 40px; box-shadow: var(--sh-lg); text-align: center;
+    }
+    .welcome-logo {
+      width: 72px; height: 72px; background: var(--primary); border-radius: 20px;
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 28px; font-weight: 700; font-family: var(--font-mono);
+      margin: 0 auto 24px;
+    }
+    .welcome-title {
+      font-size: 32px; font-weight: 700; color: var(--text-primary);
+      margin-bottom: 8px; letter-spacing: -0.5px;
+    }
+    .welcome-subtitle {
+      font-size: 16px; color: var(--text-secondary); margin-bottom: 36px;
+    }
+    .welcome-bullets {
+      list-style: none; padding: 20px 24px; margin: 0 0 32px;
+      background: var(--primary-xlight); border: 1px solid var(--primary-light);
+      border-radius: var(--r-lg); text-align: left;
+    }
+    .welcome-bullets li {
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 14px; color: var(--text-primary); padding: 6px 0;
+    }
+    .welcome-bullets li svg { flex-shrink: 0; margin-top: 1px; }
+    .welcome-divider { height: 1px; background: var(--border); margin: 28px 0; }
+    .what-you-need-title {
+      font-size: 13px; font-weight: 600; color: var(--text-secondary);
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px;
+      text-align: left;
+    }
+    .need-items {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align: left;
+    }
+    @media (max-width: 500px) { .need-items { grid-template-columns: 1fr; } }
+    .need-item {
+      display: flex; align-items: flex-start; gap: 8px;
+      font-size: 13px; color: var(--text-secondary); padding: 10px 12px;
+      background: var(--surface-raised); border-radius: var(--r-md);
+      border: 1px solid var(--border);
+    }
+    .need-item svg { flex-shrink: 0; margin-top: 1px; color: var(--primary); }
+    .begin-btn-wrap { margin-top: 32px; }
+    .offline-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 12px; color: var(--text-muted); margin-top: 14px;
+    }
+    .offline-badge svg { width: 14px; height: 14px; }
+  </style>
+</head>
+<body style="background:var(--bg);min-height:100vh;display:flex;flex-direction:column;">
+
+<div class="demo-bar">
+  <span class="demo-label">Demo</span>
+  <button onclick="showState('empty')">Empty</button>
+  <button onclick="showState('filled')">Filled</button>
+  <button onclick="showState('error')">Error</button>
+</div>
+
+<div class="welcome-wrap">
+  <div class="welcome-card">
+    <div class="welcome-logo">A₹</div>
+    <h1 class="welcome-title">Welcome to ArthaGrid</h1>
+    <p class="welcome-subtitle">Your Personal Financial Operating System</p>
+
+    <ul class="welcome-bullets">
+      <li>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Steps 1–3 take ~10 minutes · Required before you can access the dashboard
+      </li>
+      <li>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Steps 4–8 can be done later · Skip and return any time from Settings
+      </li>
+      <li>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        All data stored securely on-device · No cloud account needed to get started
+      </li>
+    </ul>
+
+    <div class="welcome-divider"></div>
+
+    <p class="what-you-need-title">What you'll need</p>
+    <div class="need-items">
+      <div class="need-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        PAN card numbers for family members
+      </div>
+      <div class="need-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Bank account opening balances
+      </div>
+      <div class="need-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Monthly income amounts (salary, rent, etc.)
+      </div>
+      <div class="need-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Loan outstanding amounts &amp; EMI details
+      </div>
+    </div>
+
+    <div class="begin-btn-wrap">
+      <a href="wiz-01-family.html" class="btn btn-primary btn-lg btn-full" style="text-decoration:none;display:flex;align-items:center;justify-content:center;gap:8px;">
+        Let's Begin
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+
+    <div class="offline-badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      100% offline · Your data never leaves your device
+    </div>
+  </div>
+</div>
+
+<script src="../assets/nav.js"></script>
+<script>
+  function showState(state) {
+    if (state === 'error') {
+      AG.showToast('Welcome screen has no error state.', 'info');
+    } else {
+      AG.showToast('Welcome screen — ' + state + ' state.', 'success');
+    }
+  }
+</script>
+</body>
+</html>

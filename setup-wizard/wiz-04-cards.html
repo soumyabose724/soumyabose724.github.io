@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Step 4: Credit Cards — ArthaGrid Setup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../assets/style.css"/>
+  <style>
+    .demo-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+      background: #1c1917; color: white;
+      padding: 6px 16px; display: flex; align-items: center; gap: 8px; font-size: 12px;
+    }
+    .demo-bar button {
+      padding: 3px 10px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.1); color: white; cursor: pointer; font-size: 11px;
+    }
+    .demo-bar button:hover { background: rgba(255,255,255,0.2); }
+    .demo-label { font-weight: 600; color: var(--primary); margin-right: 4px; }
+    body { padding-top: 36px; }
+
+    .wiz-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; background: var(--surface); border-bottom: 1px solid var(--border); }
+    .wiz-brand { display: flex; align-items: center; gap: 8px; }
+    .wiz-brand-icon { width: 32px; height: 32px; background: var(--primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: 700; font-family: var(--font-mono); }
+    .wiz-brand-name { font-size: 16px; font-weight: 700; color: var(--text-primary); }
+    .wiz-tagline { font-size: 13px; color: var(--text-secondary); }
+    .wiz-progress-wrap { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 24px; max-width: 760px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+    .wiz-step-dots { display: flex; align-items: center; gap: 0; margin-bottom: 12px; }
+    .wiz-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; flex-shrink: 0; border: 2px solid var(--border); background: var(--surface); color: var(--text-muted); }
+    .wiz-dot--done { background: var(--primary); border-color: var(--primary); color: white; }
+    .wiz-dot--current { background: var(--surface); border-color: var(--primary); color: var(--primary); }
+    .wiz-dot-line { flex: 1; height: 2px; background: var(--border); }
+    .wiz-dot-line--done { background: var(--primary); }
+    .wiz-progress-bar-track { height: 6px; background: var(--border); border-radius: 999px; overflow: hidden; }
+    .wiz-progress-bar-fill { height: 6px; background: var(--primary); border-radius: 999px; }
+    .wiz-progress-pct { font-size: 12px; color: var(--text-secondary); float: right; margin-top: 4px; }
+    .wiz-main { flex: 1; padding: 32px 24px 120px; }
+    .wiz-card { max-width: 760px; margin: 0 auto; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-xl); padding: 32px; box-shadow: var(--sh-md); }
+    .wiz-step-title { font-size: 22px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+    .wiz-step-subtitle { font-size: 14px; color: var(--text-secondary); margin-bottom: 24px; }
+    .wiz-footer { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 16px 24px; display: flex; align-items: center; gap: 12px; box-shadow: 0 -4px 16px rgba(0,0,0,0.06); z-index: 100; }
+    .wiz-footer .btn:last-child { margin-left: auto; }
+
+    .data-row { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 1px solid var(--border); border-radius: var(--r-lg); margin-bottom: 10px; background: var(--surface); }
+    .data-row__icon { width: 36px; height: 36px; border-radius: var(--r-md); background: var(--primary-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--primary); }
+    .data-row__info { flex: 1; }
+    .data-row__label { font-weight: 600; font-size: 14px; color: var(--text-primary); }
+    .data-row__meta { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+    .data-row__actions { display: flex; gap: 6px; }
+    .data-row__amount { font-family: var(--font-mono); font-weight: 600; font-size: 13px; color: var(--text-primary); white-space: nowrap; text-align: right; }
+
+    .inline-form { background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 20px; margin-bottom: 12px; }
+    .inline-form.hidden { display: none; }
+    .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 600px) { .form-grid-2 { grid-template-columns: 1fr; } }
+    .inline-form-title { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 16px; }
+    .inline-form-actions { display: flex; gap: 10px; margin-top: 16px; justify-content: flex-end; }
+
+    .emi-preview {
+      background: var(--primary-light); border: 1px solid var(--primary);
+      border-radius: var(--r-md); padding: 12px 16px; margin-top: 12px;
+      font-size: 13px; color: var(--primary-darker); font-family: var(--font-mono);
+    }
+    .add-btn-row { margin-top: 16px; }
+    .wiz-note { display: flex; gap: 10px; align-items: flex-start; background: var(--info-light); border-radius: var(--r-md); padding: 12px 14px; font-size: 13px; color: var(--text-secondary); margin-top: 16px; }
+    .wiz-note svg { flex-shrink: 0; margin-top: 1px; color: var(--info); }
+  </style>
+</head>
+<body style="background:var(--bg);min-height:100vh;display:flex;flex-direction:column;">
+
+<div class="demo-bar">
+  <span class="demo-label">Demo</span>
+  <button onclick="showState('empty')">Empty</button>
+  <button onclick="showState('filled')">Filled</button>
+  <button onclick="showState('error')">Error</button>
+</div>
+
+<header class="wiz-header">
+  <div class="wiz-brand">
+    <div class="wiz-brand-icon">A₹</div>
+    <span class="wiz-brand-name">ArthaGrid</span>
+  </div>
+  <span class="wiz-tagline">Setting up your financial OS…</span>
+</header>
+
+<div class="wiz-progress-wrap">
+  <div class="wiz-step-dots">
+    <div class="wiz-dot wiz-dot--done"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <div class="wiz-dot-line wiz-dot-line--done"></div>
+    <div class="wiz-dot wiz-dot--done"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <div class="wiz-dot-line wiz-dot-line--done"></div>
+    <div class="wiz-dot wiz-dot--done"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <div class="wiz-dot-line wiz-dot-line--done"></div>
+    <div class="wiz-dot wiz-dot--current">4</div>
+    <div class="wiz-dot-line"></div>
+    <div class="wiz-dot">5</div>
+    <div class="wiz-dot-line"></div>
+    <div class="wiz-dot">6</div>
+    <div class="wiz-dot-line"></div>
+    <div class="wiz-dot">7</div>
+    <div class="wiz-dot-line"></div>
+    <div class="wiz-dot">8</div>
+  </div>
+  <div class="wiz-progress-bar-track">
+    <div class="wiz-progress-bar-fill" style="width:50%"></div>
+  </div>
+  <span class="wiz-progress-pct">50% complete</span>
+  <div style="clear:both"></div>
+</div>
+
+<main class="wiz-main">
+  <div class="wiz-card">
+    <h1 class="wiz-step-title">Step 4: Credit Cards</h1>
+    <p class="wiz-step-subtitle">Add your credit cards to track spending, due dates, and credit utilisation. This step is optional — you can complete it later.</p>
+
+    <!-- HDFC Millennia -->
+    <div class="data-row">
+      <div class="data-row__icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+      </div>
+      <div class="data-row__info">
+        <div class="data-row__label">HDFC Millennia</div>
+        <div class="data-row__meta">Vikas Sharma &nbsp;·&nbsp; Limit ₹5,00,000 &nbsp;·&nbsp; APR 42% &nbsp;·&nbsp; Stmt day 10 &nbsp;·&nbsp; Due +30 days</div>
+      </div>
+      <div class="data-row__actions">
+        <button class="btn btn-ghost btn-sm" title="Edit"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        <button class="btn btn-ghost btn-sm" title="Delete" style="color:var(--danger)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+    </div>
+
+    <!-- ICICI Amazon Pay -->
+    <div class="data-row">
+      <div class="data-row__icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+      </div>
+      <div class="data-row__info">
+        <div class="data-row__label">ICICI Amazon Pay</div>
+        <div class="data-row__meta">Vikas Sharma &nbsp;·&nbsp; Limit ₹3,00,000 &nbsp;·&nbsp; APR 39% &nbsp;·&nbsp; Stmt day 5 &nbsp;·&nbsp; Due +25 days</div>
+      </div>
+      <div class="data-row__actions">
+        <button class="btn btn-ghost btn-sm" title="Edit"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        <button class="btn btn-ghost btn-sm" title="Delete" style="color:var(--danger)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+    </div>
+
+    <!-- Inline add form -->
+    <div class="inline-form hidden" id="form-card">
+      <div class="inline-form-title">Add Credit Card</div>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Issuer <span style="color:var(--danger)">*</span></label>
+          <select class="form-select">
+            <option>HDFC Bank</option>
+            <option>ICICI Bank</option>
+            <option>SBI Card</option>
+            <option>Axis Bank</option>
+            <option>Kotak Mahindra</option>
+            <option>American Express</option>
+            <option>Citi Bank</option>
+            <option>Yes Bank</option>
+            <option>IndusInd Bank</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Card Label <span style="color:var(--danger)">*</span></label>
+          <input class="form-input" type="text" placeholder="e.g. HDFC Millennia"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Member <span style="color:var(--danger)">*</span></label>
+          <select class="form-select">
+            <option>Vikas Sharma</option>
+            <option>Priya Sharma</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Credit Limit ₹ <span style="color:var(--danger)">*</span></label>
+          <div class="input-wrap">
+            <span class="input-prefix">₹</span>
+            <input class="form-input" type="number" placeholder="0" min="0" style="padding-left:28px" id="card-limit" oninput="updateCardPreview()"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">APR % <span style="color:var(--danger)">*</span></label>
+          <input class="form-input" type="number" placeholder="42.0" step="0.1" id="card-apr"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Statement Day (1–28) <span style="color:var(--danger)">*</span></label>
+          <input class="form-input" type="number" placeholder="10" min="1" max="28" id="card-stmt-day" oninput="updateCardPreview()"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Due Day Offset (days after statement) <span style="color:var(--danger)">*</span></label>
+          <input class="form-input" type="number" placeholder="30" min="1" max="60" id="card-due-offset" oninput="updateCardPreview()"/>
+        </div>
+      </div>
+
+      <div class="emi-preview" id="card-preview">
+        Statement: — &nbsp;→&nbsp; Due: —
+      </div>
+
+      <div class="inline-form-actions">
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('form-card').classList.add('hidden')">Cancel</button>
+        <button class="btn btn-primary btn-sm" onclick="AG.showToast('Credit card added.','success');document.getElementById('form-card').classList.add('hidden')">Add Card</button>
+      </div>
+    </div>
+
+    <div class="add-btn-row">
+      <button class="btn btn-secondary btn-md" onclick="toggleCard()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Credit Card
+      </button>
+    </div>
+
+    <div class="wiz-note">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      ArthaGrid uses statement day and due offset to alert you before payment due dates. APR is used to show interest cost if you carry a balance.
+    </div>
+  </div>
+</main>
+
+<footer class="wiz-footer">
+  <a href="wiz-03-banks.html" class="btn btn-ghost btn-md">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    Back
+  </a>
+  <a href="wiz-05-loans.html" class="btn btn-ghost btn-md" style="color:var(--text-secondary)">Complete Later</a>
+  <a href="wiz-05-loans.html" class="btn btn-primary btn-md">
+    Save &amp; Continue
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+  </a>
+</footer>
+
+<script src="../assets/nav.js"></script>
+<script>
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  function updateCardPreview() {
+    const stmtDay = parseInt(document.getElementById('card-stmt-day').value) || 0;
+    const dueOffset = parseInt(document.getElementById('card-due-offset').value) || 0;
+    const el = document.getElementById('card-preview');
+    if (!stmtDay || !dueOffset) { el.textContent = 'Statement: — → Due: —'; return; }
+    const now = new Date();
+    let stmtDate = new Date(now.getFullYear(), now.getMonth(), stmtDay);
+    if (stmtDate < now) stmtDate = new Date(now.getFullYear(), now.getMonth() + 1, stmtDay);
+    const dueDate = new Date(stmtDate.getTime() + dueOffset * 86400000);
+    el.textContent = 'Statement: ' + stmtDate.getDate() + ' ' + MONTHS[stmtDate.getMonth()] + ' ' + stmtDate.getFullYear()
+      + '  →  Due: ' + dueDate.getDate() + ' ' + MONTHS[dueDate.getMonth()] + ' ' + dueDate.getFullYear();
+  }
+
+  function toggleCard() {
+    const f = document.getElementById('form-card');
+    f.classList.toggle('hidden');
+    if (!f.classList.contains('hidden')) f.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function showState(state) {
+    if (state === 'empty') {
+      document.querySelectorAll('.data-row').forEach(r => r.style.display = 'none');
+      AG.showToast('Empty state — no cards added yet', 'info');
+    } else if (state === 'filled') {
+      document.querySelectorAll('.data-row').forEach(r => r.style.display = 'flex');
+      AG.showToast('Filled state', 'success');
+    } else if (state === 'error') {
+      AG.showToast('APR and credit limit are required fields', 'error');
+    }
+  }
+</script>
+</body>
+</html>

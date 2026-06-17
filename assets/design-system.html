@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Design System — ArthaGrid</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .ds-body { max-width: 1100px; margin: 0 auto; padding: var(--sp-6) var(--sp-6) 120px; }
+    .ds-section { margin-bottom: var(--sp-12); }
+    .ds-section-title {
+      font-size: 20px; font-weight: 700; color: var(--text-primary);
+      padding-bottom: var(--sp-3); border-bottom: 2px solid var(--primary);
+      margin-bottom: var(--sp-6); display: flex; align-items: center; gap: var(--sp-3);
+    }
+    .ds-section-title svg { width: 22px; height: 22px; color: var(--primary); }
+    .ds-subsection { margin-bottom: var(--sp-6); }
+    .ds-subsection-title { font-size: 13px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted); margin-bottom: var(--sp-3); }
+    .ds-row { display: flex; flex-wrap: wrap; gap: var(--sp-3); align-items: flex-start; }
+    .ds-col { display: flex; flex-direction: column; gap: var(--sp-3); }
+    .ds-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; font-family: var(--font-mono); }
+
+    /* Color swatches */
+    .swatch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: var(--sp-3); }
+    .swatch { border-radius: var(--r-lg); overflow: hidden; border: 1px solid var(--border); }
+    .swatch__color { height: 64px; }
+    .swatch__info { padding: 8px; background: var(--surface); }
+    .swatch__name { font-size: 11px; font-weight: 600; color: var(--text-primary); }
+    .swatch__hex  { font-size: 10px; color: var(--text-muted); font-family: var(--font-mono); }
+
+    /* Typography specimens */
+    .type-row { display: flex; align-items: baseline; gap: var(--sp-4); padding: var(--sp-3) 0; border-bottom: 1px solid var(--border); }
+    .type-row:last-child { border-bottom: none; }
+    .type-class { font-size: 11px; font-family: var(--font-mono); color: var(--text-muted); min-width: 120px; flex-shrink: 0; }
+    .type-spec   { font-size: 11px; color: var(--text-muted); min-width: 140px; flex-shrink: 0; }
+
+    /* INR table */
+    .inr-table { width: 100%; font-size: 13px; border-collapse: collapse; }
+    .inr-table th { text-align: left; padding: var(--sp-2) var(--sp-3); background: var(--surface-raised); font-weight: 600; font-size: 12px; letter-spacing: 0.03em; text-transform: uppercase; color: var(--text-secondary); border-bottom: 1px solid var(--border); }
+    .inr-table td { padding: var(--sp-2) var(--sp-3); border-bottom: 1px solid var(--border); font-family: var(--font-mono); }
+    .inr-table tr:last-child td { border-bottom: none; }
+
+    /* Flutter map table */
+    .flutter-table { width: 100%; font-size: 13px; border-collapse: collapse; }
+    .flutter-table th { text-align: left; padding: var(--sp-2) var(--sp-3); background: var(--primary-light); font-weight: 600; font-size: 12px; color: var(--primary-darker); border-bottom: 1px solid var(--primary); letter-spacing: 0.03em; text-transform: uppercase; }
+    .flutter-table td { padding: var(--sp-2) var(--sp-3); border-bottom: 1px solid var(--border); vertical-align: top; }
+    .flutter-table tr:hover td { background: var(--primary-xlight); }
+    .flutter-table code { font-family: var(--font-mono); font-size: 12px; background: var(--surface-raised); padding: 1px 5px; border-radius: var(--r-sm); color: var(--primary-darker); }
+
+    .ds-note { background: var(--info-light); border-left: 3px solid var(--info); border-radius: var(--r-md); padding: var(--sp-3) var(--sp-4); font-size: 13px; color: var(--text-secondary); margin-bottom: var(--sp-4); }
+  </style>
+</head>
+<body class="page-root">
+
+  <!-- Desktop top nav -->
+  <nav class="top-nav">
+    <a href="../index.html" class="top-nav__brand">
+      <div class="top-nav__brand-icon">A₹</div>
+      <span class="top-nav__brand-name">ArthaGrid</span>
+    </a>
+    <div class="top-nav__links">
+      <a href="#" class="top-nav__link">Dashboard</a>
+      <a href="#" class="top-nav__link">Budget</a>
+      <a href="#" class="top-nav__link">Transactions</a>
+      <a href="#" class="top-nav__link">Investments</a>
+      <a href="#" class="top-nav__link active">Design System</a>
+    </div>
+    <div class="top-nav__actions">
+      <button class="icon-btn" aria-label="Notifications">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <span class="notif-badge">3</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </nav>
+
+  <!-- Mobile top bar -->
+  <header class="top-bar">
+    <a href="../index.html" class="top-bar__logo">
+      <div class="top-bar__logo-icon">A₹</div>
+    </a>
+    <span class="top-bar__title">Design System</span>
+    <div class="top-bar__spacer"></div>
+    <div class="top-bar__actions">
+      <button class="icon-btn" aria-label="Notifications">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <span class="notif-badge">3</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </header>
+
+  <main class="ds-body">
+
+    <div style="padding: var(--sp-6) 0 var(--sp-8);">
+      <div class="text-h1">Design System</div>
+      <div class="text-body-sm text-secondary-c" style="margin-top:4px;">Component library · Token reference · Flutter mapping · ArthaGrid v1.0</div>
+    </div>
+
+    <!-- ── 1. COLOR PALETTE ─────────────────────────────────── -->
+    <section class="ds-section" id="colors">
+      <div class="ds-section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
+        Color Palette
+      </div>
+
+      <div class="ds-subsection">
+        <div class="ds-subsection-title">Brand</div>
+        <div class="swatch-grid">
+          <div class="swatch"><div class="swatch__color" style="background:#0d9488"></div><div class="swatch__info"><div class="swatch__name">primary</div><div class="swatch__hex">#0d9488</div></div></div>
+          <div class="swatch"><div class="swatch__color" style="background:#0f766e"></div><div class="swatch__info"><div class="swatch__name">primary-dark</div><div class="swatch__hex">#0f766e</div></div></div>
+          <div class="swatch"><div class="swatch__color" style="background:#115e59"></div><div class="swatch__info"><div class="swatch__name">primary-darker</div><div class="swatch__hex">#115e59</div></div></div>
+          <div class="swatch"><div class="swatch__color" style="background:#ccfbf1"></div><div class="swatch__info"><div class="swatch__name">primary-light</div><div class="swatch__hex">#ccfbf1</div></div></div>
+          <div class="swatch"><div class="swatch__color" style="background:#f0fdfa"></div><div class="swatch__info"><div class="swatch__name">primary-xlight</div><div class="swatch__hex">#f0fdfa</div></div></div>
+        </div>
+      </div>
+
+      <div class="ds-subsection">
+        <div class="ds-subsection-title">Semantic</div>
+        <div class="swatch-grid">
+          <div class="swatch"><div class="swatch__color" style="background:#e94560"></div><div class="swatch__info"><div class="swatch__name">danger</div><div class="swatch__hex">#e94560</div></div></div>
+          <div class="swatch"><div class="swatch__color" style="background:#fef2f2"></div><div class="swatch__info"><div class="swatch__name">danger-light</div><div class="swatch__hex">#fef2f2</div></div></div>
+          <div class="swatch"><div class="swatch__color" style="background:#f59e0b"></div><div class="swatch__info"><div class="swatch__name">warning</div><div class="swatch__hex">#f59e0b</div></div></div>
+          <div class="swatch"><div class="swatch__color" style="background:#fffbeb"></div><div class="swatch__info"><div class="swatch__name">warning-light</div><div class="swatch__hex">#fffbeb</div></div></div>
+          <div class="swatch"><div class="swatch__color" style="background:#22c55e"></div><div class="swatch__info"><div class="swatch__name">success</div><div class="swatch__hex">#22c55e</div></div></div>
+          <div class="swatch"><div class="swatch__color" style="background:#f0fdf4"></div><div class="swatch__info"><div class="swatch__name">success-light</div><div class="swatch__hex">#f0fdf4</div></div></div>
+          <div class="swatch"><div class="swatch__color" style="background:#3b82f6"></div><div class="swatch__info"><div class="swatch__name">info</div><div class="swatch__hex">#3b82f6</div></div></div>
+          <div class="swatch"><div class="swatch__color" style="background:#eff6ff"></div><div class="swatch__info"><div class="swatch__name">info-light</div><div class="swatch__hex">#eff6ff</div></div></div>
+        </div>
+      </div>
+
+      <div class="ds-subsection">
+        <div class="ds-subsection-title">Neutrals</div>
+        <div class="swatch-grid">
+          <div class="swatch"><div class="swatch__color" style="background:#faf8f4; border-bottom:1px solid #e7e5e4"></div><div class="swatch__info"><div class="swatch__name">bg (canvas)</div><div class="swatch__hex">#faf8f4</div></div></div>
+          <div class="swatch"><div class="swatch__color" style="background:#ffffff; border-bottom:1px solid #e7e5e4"></div><div class="swatch__info"><div class="swatch__name">surface</div><div class="swatch__hex">#ffffff</div></div></div>
+          <div class="swatch"><div class="swatch__color" style="background:#f5f5f0; border-bottom:1px solid #e7e5e4"></div><div class="swatch__info"><div class="swatch__name">surface-raised</div><div class="swatch__hex">#f5f5f0</div></div></div>
+          <div class="swatch"><div class="swatch__color" style="background:#1c1917"></div><div class="swatch__info"><div class="swatch__name">text-primary</div><div class="swatch__hex">#1c1917</div></div></div>
+          <div class="swatch"><div class="swatch__color" style="background:#78716c"></div><div class="swatch__info"><div class="swatch__name">text-secondary</div><div class="swatch__hex">#78716c</div></div></div>
+          <div class="swatch"><div class="swatch__color" style="background:#a8a29e"></div><div class="swatch__info"><div class="swatch__name">text-muted</div><div class="swatch__hex">#a8a29e</div></div></div>
+          <div class="swatch"><div class="swatch__color" style="background:#e7e5e4"></div><div class="swatch__info"><div class="swatch__name">border</div><div class="swatch__hex">#e7e5e4</div></div></div>
+          <div class="swatch"><div class="swatch__color" style="background:#d6d3d1"></div><div class="swatch__info"><div class="swatch__name">border-strong</div><div class="swatch__hex">#d6d3d1</div></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 2. TYPOGRAPHY ────────────────────────────────────── -->
+    <section class="ds-section" id="typography">
+      <div class="ds-section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+        Typography
+      </div>
+      <div class="type-row"><span class="type-class">.text-display</span><span class="type-spec">32px / 700 / -0.02em</span><span class="text-display">₹2,05,000</span></div>
+      <div class="type-row"><span class="type-class">.text-display-sm</span><span class="type-spec">24px / 700 / -0.01em</span><span class="text-display-sm">Net Worth</span></div>
+      <div class="type-row"><span class="type-class">.text-h1</span><span class="type-spec">22px / 600 / -0.01em</span><span class="text-h1">Transactions</span></div>
+      <div class="type-row"><span class="type-class">.text-h2</span><span class="type-spec">18px / 600</span><span class="text-h2">HDFC Home Loan</span></div>
+      <div class="type-row"><span class="type-class">.text-h3</span><span class="type-spec">15px / 600</span><span class="text-h3">Outstanding Principal</span></div>
+      <div class="type-row"><span class="type-class">.text-body-lg</span><span class="type-spec">15px / 400</span><span class="text-body-lg">Personal Financial Operating System for India</span></div>
+      <div class="type-row"><span class="type-class">.text-body</span><span class="type-spec">14px / 400</span><span class="text-body">Vikas Sharma · SBI Savings · Last synced 2 min ago</span></div>
+      <div class="type-row"><span class="type-class">.text-body-sm</span><span class="type-spec">13px / 400</span><span class="text-body-sm">01 Jun 2026 · Food & Dining › Dining Out · ₹450</span></div>
+      <div class="type-row"><span class="type-class">.text-caption</span><span class="type-spec">12px / 400 / 0.01em</span><span class="text-caption">Updated 3 minutes ago · FY 2026–27</span></div>
+      <div class="type-row"><span class="type-class">.text-label</span><span class="type-spec">12px / 500 / 0.04em / UPPER</span><span class="text-label">Outstanding Balance</span></div>
+      <div class="type-row"><span class="type-class">.text-mono</span><span class="type-spec">JetBrains Mono 14px</span><span class="text-mono">₹45,00,000 · xxxx 4521</span></div>
+      <div class="type-row"><span class="type-class">.text-mono-sm</span><span class="type-spec">JetBrains Mono 12px</span><span class="text-mono-sm">8.50% p.a. · EMI ₹38,421</span></div>
+    </section>
+
+    <!-- ── 3. BUTTONS ───────────────────────────────────────── -->
+    <section class="ds-section" id="buttons">
+      <div class="ds-section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="10" rx="2"/></svg>
+        Buttons
+      </div>
+      <div class="ds-subsection">
+        <div class="ds-subsection-title">Primary</div>
+        <div class="ds-row">
+          <button class="btn btn-primary btn-sm">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Small
+          </button>
+          <button class="btn btn-primary btn-md">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Medium
+          </button>
+          <button class="btn btn-primary btn-lg">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Large
+          </button>
+          <button class="btn btn-primary btn-md" disabled>Disabled</button>
+        </div>
+      </div>
+      <div class="ds-subsection">
+        <div class="ds-subsection-title">Variants (medium)</div>
+        <div class="ds-row">
+          <button class="btn btn-primary btn-md">Primary</button>
+          <button class="btn btn-secondary btn-md">Secondary</button>
+          <button class="btn btn-ghost btn-md">Ghost</button>
+          <button class="btn btn-destructive btn-md">Destructive</button>
+          <button class="btn btn-ghost-danger btn-md">Ghost Danger</button>
+        </div>
+      </div>
+      <div class="ds-subsection">
+        <div class="ds-subsection-title">Icon-only</div>
+        <div class="ds-row" style="align-items:center;">
+          <button class="btn btn-icon" aria-label="Edit">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="btn btn-icon" aria-label="Delete">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          </button>
+          <button class="btn btn-icon btn-icon-sm" aria-label="Close">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+          <button class="btn btn-primary btn-md" style="border-radius:50%;width:48px;height:48px;padding:0;" aria-label="FAB Add">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 4. STATUS CHIPS ──────────────────────────────────── -->
+    <section class="ds-section" id="chips">
+      <div class="ds-section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+        Status Chips
+      </div>
+      <div class="ds-row">
+        <span class="chip chip-balanced">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>BALANCED
+        </span>
+        <span class="chip chip-unallocated">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>UNALLOCATED
+        </span>
+        <span class="chip chip-over">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>OVER-ALLOCATED
+        </span>
+        <span class="chip chip-projected">○ PROJECTED</span>
+        <span class="chip chip-confirmed">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>CONFIRMED
+        </span>
+        <span class="chip chip-overdue">! OVERDUE</span>
+        <span class="chip chip-skipped">— SKIPPED</span>
+        <span class="chip chip-on-track">▲ ON TRACK</span>
+        <span class="chip chip-behind">→ SLIGHTLY BEHIND</span>
+        <span class="chip chip-at-risk">▼ AT RISK</span>
+        <span class="chip chip-critical">! CRITICAL</span>
+        <span class="chip chip-locked">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>LOCKED
+        </span>
+        <span class="chip chip-active">· ACTIVE</span>
+        <span class="chip chip-ml">ML AUTO</span>
+        <span class="chip chip-info">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>INFO
+        </span>
+        <span class="chip chip-needs">⚠ NEEDS REASSIGNMENT</span>
+      </div>
+      <div class="ds-subsection" style="margin-top:var(--sp-4);">
+        <div class="ds-subsection-title">Delta chips</div>
+        <div class="ds-row">
+          <span class="delta delta--up">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>+₹12,350 (+3.2%)
+          </span>
+          <span class="delta delta--down">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>−₹8,200 (−1.1%)
+          </span>
+          <span class="delta delta--flat">→ No change</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 5. FORM FIELDS ───────────────────────────────────── -->
+    <section class="ds-section" id="forms">
+      <div class="ds-section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Form Fields
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:var(--sp-6);">
+
+        <div class="ds-col">
+          <div class="form-group">
+            <label class="form-label">Username <span class="required">*</span></label>
+            <input class="form-input" type="text" placeholder="username or email" value="" />
+            <span class="form-helper">Min 3 characters</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Amount (INR) <span class="required">*</span></label>
+            <div class="input-wrap">
+              <span class="input-prefix">₹</span>
+              <input class="form-input form-input--prefix" type="text" inputmode="decimal" placeholder="0" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Error State</label>
+            <input class="form-input form-input--error" type="text" value="bad@input" />
+            <span class="form-helper form-helper--error">Please enter a valid email address</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Disabled</label>
+            <input class="form-input" type="text" value="Vikas Sharma" disabled />
+          </div>
+        </div>
+
+        <div class="ds-col">
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select class="form-select">
+              <option>Food & Dining</option>
+              <option>Transport</option>
+              <option>Utilities</option>
+              <option>Finance / EMI</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Notes</label>
+            <textarea class="form-textarea" placeholder="Optional notes..."></textarea>
+          </div>
+          <div class="form-group">
+            <div class="toggle-wrap">
+              <label class="toggle">
+                <input type="checkbox" checked />
+                <span class="toggle-track"></span>
+              </label>
+              <span class="text-body">Auto-sweep enabled</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="toggle-wrap">
+              <label class="toggle">
+                <input type="checkbox" />
+                <span class="toggle-track"></span>
+              </label>
+              <span class="text-body text-muted-c">Drive backup (off)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="ds-col">
+          <div class="form-group">
+            <label class="form-label">OTP Verification Code</label>
+            <div class="digit-boxes" id="ds-otp">
+              <input type="text" class="digit-box" maxlength="1" aria-label="Digit 1" />
+              <input type="text" class="digit-box" maxlength="1" aria-label="Digit 2" />
+              <input type="text" class="digit-box" maxlength="1" aria-label="Digit 3" />
+              <input type="text" class="digit-box" maxlength="1" aria-label="Digit 4" />
+              <input type="text" class="digit-box" maxlength="1" aria-label="Digit 5" />
+              <input type="text" class="digit-box" maxlength="1" aria-label="Digit 6" />
+            </div>
+            <span class="form-helper">6-digit code from your email</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">PIN (shake on error)</label>
+            <div class="digit-boxes digit-boxes--error" id="ds-pin">
+              <input type="password" class="digit-box" value="•" maxlength="1" aria-label="PIN 1" />
+              <input type="password" class="digit-box" value="•" maxlength="1" aria-label="PIN 2" />
+              <input type="password" class="digit-box" value="•" maxlength="1" aria-label="PIN 3" />
+              <input type="password" class="digit-box" maxlength="1" aria-label="PIN 4" />
+              <input type="password" class="digit-box" maxlength="1" aria-label="PIN 5" />
+              <input type="password" class="digit-box" maxlength="1" aria-label="PIN 6" />
+            </div>
+            <span class="form-helper form-helper--error">Incorrect PIN. 2 attempts remaining.</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password Strength</label>
+            <div class="input-wrap">
+              <input class="form-input form-input--suffix" type="password" id="ds-pwd-input" placeholder="Enter password" />
+              <span class="input-suffix">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </span>
+            </div>
+            <div class="strength-meter" id="ds-strength">
+              <div class="strength-bars">
+                <div class="strength-bar"></div>
+                <div class="strength-bar"></div>
+                <div class="strength-bar"></div>
+                <div class="strength-bar"></div>
+                <div class="strength-bar"></div>
+              </div>
+              <span class="strength-label" style="color:var(--text-muted)">–</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── 6. GLASS CARD ────────────────────────────────────── -->
+    <section class="ds-section" id="cards">
+      <div class="ds-section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Cards
+      </div>
+
+      <!-- Hero -->
+      <div class="glass-card glass-card--hero" style="margin-bottom:var(--sp-4);">
+        <div class="card-header">
+          <div class="card-header__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+          </div>
+          <span class="card-header__title">Net Worth</span>
+          <span class="card-header__action">Details ›</span>
+        </div>
+        <div class="text-display" id="hero-amount" style="margin:var(--sp-2) 0 4px;">₹1,23,45,678</div>
+        <span class="delta delta--up">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>+₹1,24,000 (+1.2%) this month
+        </span>
+        <hr class="card-divider" />
+        <div style="display:flex;gap:var(--sp-6);">
+          <div><div class="text-caption text-secondary-c">Assets</div><div class="text-mono" style="color:var(--success);" id="assets-amount">₹1,45,00,000</div></div>
+          <div><div class="text-caption text-secondary-c">Liabilities</div><div class="text-mono" style="color:var(--danger);" id="liabilities-amount">−₹21,54,322</div></div>
+          <div><div class="text-caption text-secondary-c">CIBIL</div><div class="text-mono">762</div></div>
+        </div>
+      </div>
+
+      <!-- Default pair -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4);margin-bottom:var(--sp-4);">
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-header__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            </div>
+            <span class="card-header__title">Income</span>
+          </div>
+          <div class="text-display-sm" style="color:var(--success)">₹2,05,000</div>
+          <div class="text-caption text-secondary-c" style="margin-top:4px;">June 2026 · 2 sources</div>
+        </div>
+        <div class="glass-card glass-card--danger">
+          <div class="card-header">
+            <div class="card-header__icon" style="background:var(--danger-light);color:var(--danger)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+            </div>
+            <span class="card-header__title">Expenses</span>
+          </div>
+          <div class="text-display-sm" style="color:var(--danger)">₹1,72,450</div>
+          <div class="text-caption text-secondary-c" style="margin-top:4px;">84% of income · 34 txns</div>
+        </div>
+      </div>
+
+      <!-- Compact cards -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:var(--sp-3);">
+        <div class="glass-card glass-card--compact">
+          <div class="text-caption text-secondary-c">SBI Savings</div>
+          <div class="text-mono" style="font-size:16px;font-weight:600;margin-top:2px;">₹4,50,000</div>
+        </div>
+        <div class="glass-card glass-card--compact">
+          <div class="text-caption text-secondary-c">HDFC Current</div>
+          <div class="text-mono" style="font-size:16px;font-weight:600;margin-top:2px;">₹8,00,000</div>
+        </div>
+        <div class="glass-card glass-card--compact">
+          <div class="text-caption text-secondary-c">Axis FD</div>
+          <div class="text-mono" style="font-size:16px;font-weight:600;margin-top:2px;">₹10,50,000</div>
+        </div>
+        <div class="glass-card glass-card--compact glass-card--warning">
+          <div class="text-caption" style="color:var(--warning)">Car EMI due</div>
+          <div class="text-mono" style="font-size:16px;font-weight:600;color:var(--warning);margin-top:2px;">₹12,500</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 7. PROGRESS BARS ─────────────────────────────────── -->
+    <section class="ds-section" id="progress">
+      <div class="ds-section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="22" y1="12" x2="2" y2="12"/><path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z"/><line x1="6" y1="16" x2="6.01" y2="16"/><line x1="10" y1="16" x2="10.01" y2="16"/></svg>
+        Progress Bars
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-6);">
+        <div class="ds-col">
+          <div class="ds-subsection-title">Linear</div>
+          <div class="progress-wrap">
+            <div class="progress-meta">
+              <span class="progress-label">Housing EMI</span>
+              <span class="progress-value">₹38,421 / ₹40,000</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width:96%"></div></div>
+          </div>
+          <div class="progress-wrap">
+            <div class="progress-meta">
+              <span class="progress-label">Food & Dining</span>
+              <span class="progress-value text-warning-c">85%</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill progress-fill--warning" style="width:85%"></div></div>
+          </div>
+          <div class="progress-wrap">
+            <div class="progress-meta">
+              <span class="progress-label">Entertainment</span>
+              <span class="progress-value text-danger-c">118% — Over!</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill progress-fill--danger" style="width:100%"></div></div>
+          </div>
+        </div>
+        <div class="ds-col">
+          <div class="ds-subsection-title">Segmented (Asset Allocation)</div>
+          <div class="progress-segmented" style="border-radius:var(--r-sm);">
+            <div class="progress-segment" style="flex:45;background:#0d9488;" title="Equity 45%"></div>
+            <div class="progress-segment" style="flex:25;background:#3b82f6;" title="MF 25%"></div>
+            <div class="progress-segment" style="flex:15;background:#f59e0b;" title="Debt 15%"></div>
+            <div class="progress-segment" style="flex:10;background:#f59e0b;opacity:0.6;" title="Gold 10%"></div>
+            <div class="progress-segment" style="flex:5;background:#a8a29e;" title="Cash 5%"></div>
+          </div>
+          <div style="display:flex;gap:var(--sp-3);flex-wrap:wrap;margin-top:var(--sp-2);">
+            <span class="text-caption"><span style="color:#0d9488">■</span> Equity 45%</span>
+            <span class="text-caption"><span style="color:#3b82f6">■</span> MF 25%</span>
+            <span class="text-caption"><span style="color:#f59e0b">■</span> Debt 15%</span>
+            <span class="text-caption"><span style="color:#f59e0b;opacity:.7">■</span> Gold 10%</span>
+            <span class="text-caption"><span style="color:#a8a29e">■</span> Cash 5%</span>
+          </div>
+
+          <div class="ds-subsection-title" style="margin-top:var(--sp-4);">Circular (Goal — 78%)</div>
+          <div style="display:flex;align-items:center;gap:var(--sp-4);">
+            <svg width="80" height="80" viewBox="0 0 80 80">
+              <circle cx="40" cy="40" r="32" fill="none" stroke="var(--border)" stroke-width="8"/>
+              <circle cx="40" cy="40" r="32" fill="none" stroke="var(--primary)" stroke-width="8"
+                stroke-dasharray="201" stroke-dashoffset="44"
+                stroke-linecap="round" transform="rotate(-90 40 40)"/>
+              <text x="40" y="45" text-anchor="middle" font-size="14" font-weight="700" fill="var(--text-primary)" font-family="'JetBrains Mono'">78%</text>
+            </svg>
+            <div>
+              <div class="text-h3">Emergency Fund</div>
+              <div class="text-body-sm text-secondary-c">₹3,90,000 of ₹5,00,000</div>
+              <div class="chip chip-behind" style="margin-top:var(--sp-2);">→ ON TRACK</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 8. ALERTS ────────────────────────────────────────── -->
+    <section class="ds-section" id="alerts">
+      <div class="ds-section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Alerts &amp; Banners
+      </div>
+      <div class="alert-banner alert-banner--error">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        <div class="alert-banner__body"><strong>Incorrect username or password.</strong> Please try again.</div>
+      </div>
+      <div class="alert-banner alert-banner--warning">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div class="alert-banner__body"><strong>2 more attempts</strong> before account is temporarily locked.</div>
+      </div>
+      <div class="alert-banner alert-banner--success">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        <div class="alert-banner__body"><strong>EMI recorded.</strong> HDFC Home Loan payment of ₹38,421 confirmed for June 2026.</div>
+      </div>
+      <div class="alert-banner alert-banner--info">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <div class="alert-banner__body">NAV updated for 3 mutual funds. Portfolio value recalculated.</div>
+      </div>
+
+      <div class="ds-subsection" style="margin-top:var(--sp-4);">
+        <div class="ds-subsection-title">Toast (click to show)</div>
+        <div class="ds-row">
+          <button class="btn btn-secondary btn-md" onclick="AG.showToast('EMI marked as paid', 'success')">✓ Success Toast</button>
+          <button class="btn btn-secondary btn-md" onclick="AG.showToast('Failed to save. Please retry.', 'error')">✕ Error Toast</button>
+          <button class="btn btn-secondary btn-md" onclick="AG.showToast('Budget slightly over-allocated', 'warning')">⚠ Warning Toast</button>
+          <button class="btn btn-secondary btn-md" onclick="AG.showToast('NAV updated for 24 funds', 'info')">ℹ Info Toast</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 9. DATA TABLE ────────────────────────────────────── -->
+    <section class="ds-section" id="table">
+      <div class="ds-section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+        Data Table
+      </div>
+      <div class="filter-strip">
+        <button class="filter-pill active">All</button>
+        <button class="filter-pill">Income</button>
+        <button class="filter-pill">Expense</button>
+        <button class="filter-pill">Transfer</button>
+        <div class="search-input" style="max-width:220px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="Search payee, category..." />
+        </div>
+      </div>
+      <div class="table-wrap card" style="padding:0;overflow:hidden;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="sortable">Date <span class="sort-icon">↕</span></th>
+              <th class="sortable sorted-asc">Payee <span class="sort-icon">↑</span></th>
+              <th>Category</th>
+              <th class="col-right sortable">Amount <span class="sort-icon">↕</span></th>
+              <th class="col-right">Balance</th>
+              <th class="col-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-body-sm text-secondary-c">01 Jun</td>
+              <td><div style="font-weight:500">Swiggy</div><div class="text-caption text-muted-c">Dinner order</div></td>
+              <td><span class="chip chip-ml">ML</span> Food › Dining Out</td>
+              <td class="col-amount-debit">−₹450</td>
+              <td class="col-mono col-right">₹87,230</td>
+              <td><div class="row-actions"><button class="btn btn-icon btn-icon-sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="btn btn-icon btn-icon-sm" style="color:var(--danger)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg></button></div></td>
+            </tr>
+            <tr>
+              <td class="text-body-sm text-secondary-c">01 Jun</td>
+              <td><div style="font-weight:500">HDFC EMI Auto-debit</div><div class="text-caption text-muted-c">Home Loan EMI</div></td>
+              <td>Finance › Loan EMI</td>
+              <td class="col-amount-debit">−₹38,421</td>
+              <td class="col-mono col-right">₹87,680</td>
+              <td><div class="row-actions"><button class="btn btn-icon btn-icon-sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button></div></td>
+            </tr>
+            <tr>
+              <td class="text-body-sm text-secondary-c">31 May</td>
+              <td><div style="font-weight:500">SBI Salary Credit</div></td>
+              <td>Income › Salary</td>
+              <td class="col-amount-credit">+₹1,80,000</td>
+              <td class="col-mono col-right">₹1,26,101</td>
+              <td><div class="row-actions"><button class="btn btn-icon btn-icon-sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button></div></td>
+            </tr>
+            <tr>
+              <td class="text-body-sm text-secondary-c">30 May</td>
+              <td><div style="font-weight:500">SBI → HDFC Transfer</div></td>
+              <td>Transfer</td>
+              <td class="col-amount-transfer">↔ ₹20,000</td>
+              <td class="col-mono col-right">−</td>
+              <td><div class="row-actions"><button class="btn btn-icon btn-icon-sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── 10. SLIDE-OVER ───────────────────────────────────── -->
+    <section class="ds-section" id="slideover">
+      <div class="ds-section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+        Slide-Over Panel
+      </div>
+      <button class="btn btn-primary btn-md" id="open-slideover">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Transaction (SlideOver)
+      </button>
+    </section>
+
+    <!-- ── 11. MODAL ────────────────────────────────────────── -->
+    <section class="ds-section" id="modal">
+      <div class="ds-section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="5" width="14" height="14" rx="2"/><line x1="3" y1="3" x2="21" y2="21"/></svg>
+        Modal Dialogs
+      </div>
+      <div class="ds-row">
+        <button class="btn btn-secondary btn-md" id="open-modal-confirm">Confirmation Modal</button>
+        <button class="btn btn-secondary btn-md" id="open-modal-info">Info Modal</button>
+      </div>
+    </section>
+
+    <!-- ── 12. EMPTY STATE ──────────────────────────────────── -->
+    <section class="ds-section" id="empty">
+      <div class="ds-section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Empty State
+      </div>
+      <div class="card" style="max-width:420px;">
+        <div class="empty-state">
+          <div class="empty-state__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          </div>
+          <div class="empty-state__title">No bank accounts yet</div>
+          <div class="empty-state__body">Link your first bank account to start tracking your finances and balances.</div>
+          <button class="btn btn-primary btn-md">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Bank Account
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 13. INR FORMATTING ───────────────────────────────── -->
+    <section class="ds-section" id="inr">
+      <div class="ds-section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+        INR Formatting — <code style="font-size:14px;font-family:var(--font-mono);color:var(--primary)">AG.formatINR(paise)</code>
+      </div>
+      <div class="ds-note">All money values in Dart/SQLite are stored as <strong>int paise</strong>. Display always through <code>AG.formatINR()</code>. Never build ₹ strings manually.</div>
+      <div class="table-wrap card" style="padding:0;overflow:hidden;">
+        <table class="inr-table">
+          <thead><tr><th>Input (paise)</th><th>formatINR(paise)</th><th>compact: true</th><th>showPaise: true</th></tr></thead>
+          <tbody id="inr-table-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── 14. FLUTTER MAPPING ──────────────────────────────── -->
+    <section class="ds-section" id="flutter">
+      <div class="ds-section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+        Flutter Widget Mapping
+      </div>
+      <div class="ds-note">This design system is the visual reference for the Flutter Android app. Each CSS component maps to a Flutter widget. Source: <code>apps/mobile/lib/</code></div>
+      <div class="table-wrap card" style="padding:0;overflow:hidden;">
+        <table class="flutter-table">
+          <thead><tr><th>Prototype Component</th><th>CSS Class</th><th>Flutter Widget / Approach</th></tr></thead>
+          <tbody>
+            <tr><td>Glass Card</td><td><code>.glass-card</code></td><td><code>BackdropFilter(filter: ImageFilter.blur(12,12))</code> + <code>ClipRRect</code> + <code>Container</code> with decoration</td></tr>
+            <tr><td>Plain Card</td><td><code>.card</code></td><td>Material 3 <code>Card</code> widget with <code>shape: RoundedRectangleBorder</code></td></tr>
+            <tr><td>Button primary</td><td><code>.btn-primary</code></td><td><code>FilledButton</code> (Material 3) with <code>colorScheme.primary = kPrimary</code></td></tr>
+            <tr><td>Button secondary</td><td><code>.btn-secondary</code></td><td><code>OutlinedButton</code> with primary border color</td></tr>
+            <tr><td>Button ghost</td><td><code>.btn-ghost</code></td><td><code>TextButton</code></td></tr>
+            <tr><td>Button destructive</td><td><code>.btn-destructive</code></td><td><code>FilledButton</code> with <code>backgroundColor: kError</code></td></tr>
+            <tr><td>Icon button</td><td><code>.btn-icon</code></td><td><code>IconButton</code> with <code>InkWell</code> ripple</td></tr>
+            <tr><td>FAB</td><td><code>.fab</code></td><td><code>FloatingActionButton</code> — positioned above <code>NavigationBar</code></td></tr>
+            <tr><td>Bottom navigation</td><td><code>.bottom-nav</code></td><td>Material 3 <code>NavigationBar</code> (5 tabs)</td></tr>
+            <tr><td>Top nav (tablet/desktop)</td><td><code>.top-nav</code></td><td><code>NavigationRail</code> or custom <code>AppBar</code></td></tr>
+            <tr><td>Status chip</td><td><code>.chip</code></td><td>Custom <code>Container</code> widget in <code>shared/widgets/status_chip.dart</code></td></tr>
+            <tr><td>Filter pill</td><td><code>.filter-pill</code></td><td><code>FilterChip</code> or custom <code>ChoiceChip</code></td></tr>
+            <tr><td>Text input</td><td><code>.form-input</code></td><td><code>TextField</code> + <code>InputDecoration</code> (focus border <code>kPrimary</code>)</td></tr>
+            <tr><td>Select / Dropdown</td><td><code>.form-select</code></td><td><code>DropdownButtonFormField</code></td></tr>
+            <tr><td>Toggle switch</td><td><code>.toggle</code></td><td>Material 3 <code>Switch</code> with <code>activeColor: kPrimary</code></td></tr>
+            <tr><td>Digit boxes (OTP/PIN)</td><td><code>.digit-boxes</code></td><td><code>shared/widgets/pin_input_widget.dart</code> (custom)</td></tr>
+            <tr><td>Slide-over (mobile)</td><td><code>.slideover</code></td><td><code>showModalBottomSheet</code> with <code>isScrollControlled: true</code></td></tr>
+            <tr><td>Slide-over (desktop)</td><td><code>.slideover</code></td><td>Custom side panel overlay with <code>AnimatedPositioned</code></td></tr>
+            <tr><td>Modal dialog</td><td><code>.modal</code></td><td><code>showDialog</code> + <code>AlertDialog</code> or custom <code>Dialog</code></td></tr>
+            <tr><td>Toast</td><td><code>AG.showToast()</code></td><td><code>ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(...))</code></td></tr>
+            <tr><td>Skeleton loader</td><td><code>.skeleton</code></td><td><code>shimmer</code> package or animated <code>Container</code> gradient</td></tr>
+            <tr><td>Linear progress bar</td><td><code>.progress-bar</code></td><td><code>LinearProgressIndicator</code> with custom color</td></tr>
+            <tr><td>Circular progress</td><td>SVG circle</td><td><code>fl_chart</code> — <code>PieChart</code> or custom <code>CustomPainter</code></td></tr>
+            <tr><td>Data table</td><td><code>.data-table</code></td><td>Custom <code>ListView.builder</code> + <code>shared/widgets/transaction_row.dart</code></td></tr>
+            <tr><td>Charts (sparkline, bar)</td><td>custom SVG</td><td><code>fl_chart</code> package — <code>LineChart</code>, <code>BarChart</code></td></tr>
+            <tr><td>Lucide icons</td><td>inline SVG</td><td><code>lucide_icons</code> Flutter package (pub.dev)</td></tr>
+            <tr><td>INR amount text</td><td><code>.text-mono</code></td><td><code>shared/widgets/amount_text.dart</code> — always <code>formatINR(paise)</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ── SLIDE-OVER ──────────────────────────────────────── -->
+  <div class="slideover-backdrop" id="so-backdrop"></div>
+  <div class="slideover" id="so-panel" role="dialog" aria-label="Add Transaction">
+    <div class="slideover__header">
+      <span class="slideover__title">Add Transaction</span>
+      <button class="slideover__close" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="slideover__body">
+      <div class="form-group">
+        <label class="form-label">Type</label>
+        <div class="tab-toggle">
+          <button class="tab-toggle__item active">Expense</button>
+          <button class="tab-toggle__item">Income</button>
+          <button class="tab-toggle__item">Transfer</button>
+        </div>
+      </div>
+      <div class="form-group mt-4">
+        <label class="form-label">Amount <span class="required">*</span></label>
+        <div class="input-wrap">
+          <span class="input-prefix">₹</span>
+          <input class="form-input form-input--prefix" type="text" inputmode="decimal" placeholder="0" />
+        </div>
+      </div>
+      <div class="form-group mt-4">
+        <label class="form-label">Payee / Description <span class="required">*</span></label>
+        <input class="form-input" type="text" placeholder="e.g. Swiggy, HDFC EMI…" />
+      </div>
+      <div class="form-group mt-4">
+        <label class="form-label">Category</label>
+        <select class="form-select"><option>Food & Dining › Dining Out</option><option>Finance › Loan EMI</option><option>Transport › Fuel</option></select>
+      </div>
+      <div class="form-group mt-4">
+        <label class="form-label">Date</label>
+        <input class="form-input" type="date" value="2026-06-15" />
+      </div>
+      <div class="ml-suggestion">
+        <span class="ml-suggestion__text">ML Suggested: <span>Food &amp; Dining → Dining Out</span> · 87% confident</span>
+        <div class="ml-suggestion__actions">
+          <button class="btn btn-primary btn-sm">✓ Use</button>
+          <button class="btn btn-ghost btn-sm">✕</button>
+        </div>
+      </div>
+    </div>
+    <div class="slideover__footer">
+      <button class="btn btn-ghost btn-md" data-action="cancel">Cancel</button>
+      <button class="btn btn-primary btn-md">Save Transaction</button>
+    </div>
+  </div>
+
+  <!-- ── MODALS ──────────────────────────────────────────── -->
+  <div class="modal-backdrop" id="modal-confirm">
+    <div class="modal modal--sm">
+      <div class="modal__header">
+        <span class="modal__title">Close HDFC Savings Account?</span>
+        <button class="modal__close" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="modal__body">
+        <div class="alert-banner alert-banner--warning" style="margin-bottom:var(--sp-4);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+          <div class="alert-banner__body">This action will affect scheduled items.</div>
+        </div>
+        <div class="text-body">This will:</div>
+        <ul style="margin:var(--sp-3) 0 0 var(--sp-5);font-size:14px;line-height:2;color:var(--text-secondary);">
+          <li>Stop all future transactions to this account</li>
+          <li>Flag 3 scheduled items as NEEDS REASSIGNMENT</li>
+          <li>Retain all historical transactions in reports</li>
+        </ul>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn-ghost btn-md" data-action="cancel">Cancel</button>
+        <button class="btn btn-destructive btn-md">Close Account</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modal-info">
+    <div class="modal modal--md">
+      <div class="modal__header">
+        <span class="modal__title">About ArthaGrid</span>
+        <button class="modal__close" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="modal__body">
+        <p class="text-body" style="margin-bottom:var(--sp-3);">ArthaGrid is an offline-first Personal Financial OS for Indian users. All data lives on your device — no cloud, no server required.</p>
+        <p class="text-body text-secondary-c">Built with Flutter · Drift/SQLite · Riverpod v2 · go_router</p>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn-primary btn-md" data-action="cancel">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom nav (mobile only) -->
+  <nav class="bottom-nav" aria-label="Main navigation">
+    <a href="#" class="bottom-nav__item" data-tab="dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </a>
+    <a href="#" class="bottom-nav__item" data-tab="budget">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/></svg>
+      Budget
+    </a>
+    <a href="#" class="bottom-nav__item bottom-nav__item--add" data-tab="add">
+      <div class="bottom-nav__add-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </div>
+      Add
+    </a>
+    <a href="#" class="bottom-nav__item" data-tab="invest">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+      Invest
+    </a>
+    <a href="#" class="bottom-nav__item" data-tab="profile">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profile
+    </a>
+  </nav>
+
+  <script src="nav.js"></script>
+  <script>
+    // Init digit boxes
+    AG.initDigitBoxes('#ds-otp', function(val) { AG.showToast('OTP entered: ' + val, 'success'); });
+
+    // Password strength
+    document.getElementById('ds-pwd-input').addEventListener('input', function() {
+      AG.updateStrengthMeter(document.getElementById('ds-strength'), this.value);
+    });
+
+    // Slide-over
+    AG.initSlideOver('#open-slideover', '#so-panel', '#so-backdrop');
+
+    // Tab toggle inside slide-over
+    document.querySelectorAll('#so-panel .tab-toggle__item').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('#so-panel .tab-toggle__item').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+      });
+    });
+
+    // Modals
+    AG.initModal('#open-modal-confirm', '#modal-confirm');
+    AG.initModal('#open-modal-info',    '#modal-info');
+
+    // Bottom nav
+    AG.initBottomNav('dashboard');
+
+    // INR table
+    var samples = [
+      0, 100, 45000, 100000, 1000000, 10000000, 100000000,
+      12345678, 1234567890, -450000
+    ];
+    var tbody = document.getElementById('inr-table-body');
+    samples.forEach(function(p) {
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td>' + p + '</td>' +
+        '<td>' + AG.formatINR(p) + '</td>' +
+        '<td>' + AG.formatINR(p, {compact:true}) + '</td>' +
+        '<td>' + AG.formatINR(p, {showPaise:true}) + '</td>';
+      tbody.appendChild(tr);
+    });
+
+    // Hero card amounts via formatINR
+    document.getElementById('hero-amount').textContent = AG.formatINR(12345678);
+    document.getElementById('assets-amount').textContent = AG.formatINR(14500000);
+    document.getElementById('liabilities-amount').textContent = AG.formatINR(-2154322);
+  </script>
+</body>
+</html>

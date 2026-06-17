@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Setup Complete — ArthaGrid</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../assets/style.css"/>
+  <style>
+    .demo-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+      background: #1c1917; color: white;
+      padding: 6px 16px; display: flex; align-items: center; gap: 8px; font-size: 12px;
+    }
+    .demo-bar button { padding: 3px 10px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: white; cursor: pointer; font-size: 11px; }
+    .demo-bar button:hover { background: rgba(255,255,255,0.2); }
+    .demo-bar button.active-btn { background: var(--primary); border-color: var(--primary); }
+    .demo-label { font-weight: 600; color: var(--primary); margin-right: 4px; }
+    body { padding-top: 36px; }
+
+    .complete-wrap {
+      flex: 1; display: flex; align-items: flex-start; justify-content: center;
+      padding: 40px 24px 60px;
+    }
+    .complete-card {
+      max-width: 680px; width: 100%; background: var(--surface);
+      border: 1px solid var(--border); border-radius: var(--r-xl);
+      padding: 40px; box-shadow: var(--sh-lg);
+    }
+
+    /* Hero check */
+    .complete-hero { text-align: center; margin-bottom: 32px; }
+    .complete-check-circle {
+      width: 72px; height: 72px; border-radius: 50%; background: var(--success);
+      display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;
+    }
+    .complete-check-circle svg { width: 38px; height: 38px; color: white; }
+    .complete-title { font-size: 28px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
+    .complete-subtitle { font-size: 15px; color: var(--text-secondary); }
+
+    /* Score banner */
+    .score-banner {
+      border-radius: var(--r-lg); padding: 14px 18px; margin-bottom: 28px;
+      font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px;
+    }
+    .score-banner--critical { background: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; }
+    .score-banner--partial { background: #fffbeb; color: #92400e; border: 1px solid #fbbf24; }
+    .score-banner--complete { background: var(--success-light); color: #166534; border: 1px solid #86efac; }
+    .score-banner svg { flex-shrink: 0; }
+
+    /* Score card */
+    .score-card {
+      border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden;
+      margin-bottom: 28px;
+    }
+    .score-card__header {
+      background: var(--surface-raised); padding: 20px 24px;
+      display: flex; align-items: center; gap: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .score-circle-wrap { position: relative; flex-shrink: 0; }
+    .score-circle-svg { transform: rotate(-90deg); }
+    .score-circle-bg { fill: none; stroke: var(--border); stroke-width: 8; }
+    .score-circle-fill { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 0.6s ease, stroke 0.3s; }
+    .score-circle-text {
+      position: absolute; inset: 0; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+    }
+    .score-pct-number { font-size: 24px; font-weight: 700; color: var(--text-primary); font-family: var(--font-mono); line-height: 1; }
+    .score-pct-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .score-header-info { flex: 1; }
+    .score-header-title { font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+    .score-header-sub { font-size: 13px; color: var(--text-secondary); }
+
+    /* Score checklist */
+    .score-list { padding: 0 24px; }
+    .score-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 0; border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+    .score-item:last-child { border-bottom: none; }
+    .score-icon-ok { color: var(--success); flex-shrink: 0; }
+    .score-icon-miss { color: var(--text-muted); flex-shrink: 0; }
+    .score-item__label { flex: 1; color: var(--text-primary); }
+    .score-item__pts { font-size: 12px; font-family: var(--font-mono); font-weight: 600; }
+    .score-item__pts--ok { color: var(--success); }
+    .score-item__pts--miss { color: var(--text-muted); }
+    .score-card__footer {
+      background: var(--surface-raised); padding: 14px 24px;
+      border-top: 1px solid var(--border); display: flex; justify-content: space-between;
+      font-size: 14px; font-weight: 600;
+    }
+
+    /* CTAs */
+    .complete-ctas { display: flex; flex-direction: column; gap: 12px; margin-top: 4px; }
+    .complete-ctas a { text-decoration: none; text-align: center; }
+    .complete-note { font-size: 12px; color: var(--text-muted); text-align: center; margin-top: 14px; }
+  </style>
+</head>
+<body style="background:var(--bg);min-height:100vh;display:flex;flex-direction:column;">
+
+<div class="demo-bar">
+  <span class="demo-label">Score</span>
+  <button id="btn-40" onclick="setScore(40)">40% Critical</button>
+  <button id="btn-72" onclick="setScore(72)" class="active-btn">72% Partial</button>
+  <button id="btn-100" onclick="setScore(100)">100% Complete</button>
+</div>
+
+<div class="complete-wrap">
+  <div class="complete-card">
+
+    <!-- Hero -->
+    <div class="complete-hero">
+      <div class="complete-check-circle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h1 class="complete-title">Setup Complete!</h1>
+      <p class="complete-subtitle">ArthaGrid is ready for your financial life.</p>
+    </div>
+
+    <!-- Score banner -->
+    <div class="score-banner score-banner--partial" id="score-banner">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span id="banner-text">Setup incomplete — 72% done. Add more data to unlock all features.</span>
+    </div>
+
+    <!-- Score card -->
+    <div class="score-card">
+      <div class="score-card__header">
+        <div class="score-circle-wrap">
+          <svg class="score-circle-svg" width="100" height="100" viewBox="0 0 100 100">
+            <circle class="score-circle-bg" cx="50" cy="50" r="40"/>
+            <circle class="score-circle-fill" id="score-arc" cx="50" cy="50" r="40"
+              stroke="var(--primary)"
+              stroke-dasharray="251.3"
+              stroke-dashoffset="70.4"/>
+          </svg>
+          <div class="score-circle-text">
+            <span class="score-pct-number" id="score-number">72</span>
+            <span class="score-pct-label">/ 100</span>
+          </div>
+        </div>
+        <div class="score-header-info">
+          <div class="score-header-title" id="score-title">Good start — keep going</div>
+          <div class="score-header-sub" id="score-sub">Complete remaining sections to get the most out of ArthaGrid. Your data powers all forecasts and recommendations.</div>
+        </div>
+      </div>
+
+      <div class="score-list" id="score-list">
+        <!-- Items rendered by JS -->
+      </div>
+
+      <div class="score-card__footer">
+        <span style="color:var(--text-secondary)">Setup Score</span>
+        <span id="score-total-text" style="color:var(--text-primary)">45 / 100 pts</span>
+      </div>
+    </div>
+
+    <!-- CTAs -->
+    <div class="complete-ctas">
+      <a href="wiz-04-cards.html" class="btn btn-secondary btn-lg btn-full" id="cta-remaining">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Complete Remaining Items
+      </a>
+      <a href="#" class="btn btn-primary btn-lg btn-full" id="cta-dashboard">
+        Go to Dashboard
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+
+    <p class="complete-note">You can always return to setup from Settings → Profile &amp; Setup</p>
+  </div>
+</div>
+
+<script src="../assets/nav.js"></script>
+<script>
+  const CIRCUMFERENCE = 2 * Math.PI * 40; // ≈ 251.3
+
+  const SCORE_ITEMS = [
+    { label: 'Family Members',    weight: 10 },
+    { label: 'Income Sources',    weight: 10 },
+    { label: 'Bank Accounts',     weight: 10 },
+    { label: 'Budget Envelopes',  weight: 10 },
+    { label: 'Credit Cards',      weight: 5  },
+    { label: 'Loans & EMIs',      weight: 5  },
+    { label: 'Direct Equities',   weight: 5  },
+    { label: 'Mutual Funds',      weight: 5  },
+    { label: 'EPF / PPF / NPS',   weight: 5  },
+    { label: 'Term Insurance',     weight: 10 },
+    { label: 'Health Insurance',   weight: 10 },
+    { label: 'Nominees Mapped',    weight: 10 },
+    { label: 'First Budget Period',weight: 5  },
+  ];
+
+  // Which items are checked for each score demo
+  const SCORE_CONFIGS = {
+    40: [0, 1, 2, 3],                          // Family, Income, Banks, Envelopes = 35 + partial
+    72: [0, 1, 2, 3, 6, 7, 10],               // family+income+banks+env+equities+mf+health = 10+10+10+10+5+5+10=60 → show as 72 demo
+    100: [0,1,2,3,4,5,6,7,8,9,10,11,12]        // all
+  };
+
+  // For the 72% case we show 7 items checked = 60pts display, but label it 72 as spec says demo
+  // We'll use a direct "score" override per config
+  const SCORE_VALUES = { 40: 35, 72: 60, 100: 100 };
+  // Spec says show 72% label — so we override display text per config
+  const SCORE_DISPLAY = { 40: 40, 72: 72, 100: 100 };
+
+  const BANNERS = {
+    40: { cls: 'score-banner--critical', icon: 'alert', text: 'Critical — only 40% done. Steps 1–3 required to access the dashboard.' },
+    72: { cls: 'score-banner--partial',  icon: 'warn',  text: 'Setup incomplete — 72% done. Add more data to unlock all features.' },
+    100: { cls: 'score-banner--complete', icon: 'ok',   text: 'All set! Your financial OS is fully configured and ready.' }
+  };
+
+  const TITLES = {
+    40: 'Critical — steps required',
+    72: 'Good start — keep going',
+    100: 'Fully configured'
+  };
+
+  const SUBS = {
+    40: 'Complete Steps 1–3 (Family, Income, Bank Accounts) before accessing the dashboard.',
+    72: 'Complete remaining sections to get the most out of ArthaGrid. Your data powers all forecasts and recommendations.',
+    100: 'Every section is complete. ArthaGrid has everything it needs to give you full financial insight.'
+  };
+
+  let currentScore = 72;
+
+  function renderScoreList(scoreKey) {
+    const checked = new Set(SCORE_CONFIGS[scoreKey]);
+    const list = document.getElementById('score-list');
+    list.innerHTML = SCORE_ITEMS.map((item, i) => {
+      const ok = checked.has(i);
+      return `<div class="score-item">
+        <span class="${ok ? 'score-icon-ok' : 'score-icon-miss'}">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${ok ? 3 : 2}" stroke-linecap="round" stroke-linejoin="round">
+            ${ok
+              ? '<polyline points="20 6 9 17 4 12"/>'
+              : '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'}
+          </svg>
+        </span>
+        <span class="score-item__label">${item.label}</span>
+        <span class="score-item__pts ${ok ? 'score-item__pts--ok' : 'score-item__pts--miss'}">${ok ? '+' + item.weight : '0'} pts</span>
+      </div>`;
+    }).join('');
+  }
+
+  function setScore(pct) {
+    currentScore = pct;
+    const displayPct = SCORE_DISPLAY[pct];
+    const rawPts = SCORE_VALUES[pct];
+
+    // Arc
+    const arc = document.getElementById('score-arc');
+    const offset = CIRCUMFERENCE * (1 - displayPct / 100);
+    arc.style.strokeDashoffset = offset;
+    arc.style.stroke = pct === 40 ? 'var(--danger)' : pct === 72 ? 'var(--warning)' : 'var(--success)';
+
+    // Number
+    document.getElementById('score-number').textContent = displayPct;
+    document.getElementById('score-total-text').textContent = rawPts + ' / 100 pts';
+
+    // Title/sub
+    document.getElementById('score-title').textContent = TITLES[pct];
+    document.getElementById('score-sub').textContent = SUBS[pct];
+
+    // Banner
+    const banner = document.getElementById('score-banner');
+    banner.className = 'score-banner ' + BANNERS[pct].cls;
+    const icon = BANNERS[pct].icon;
+    const iconSVG = icon === 'ok'
+      ? '<polyline points="20 6 9 17 4 12"/>'
+      : icon === 'warn'
+      ? '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>'
+      : '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>';
+    banner.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${iconSVG}</svg><span>${BANNERS[pct].text}</span>`;
+
+    // CTA
+    const ctaRemaining = document.getElementById('cta-remaining');
+    if (pct === 100) {
+      ctaRemaining.style.display = 'none';
+    } else {
+      ctaRemaining.style.display = 'flex';
+      ctaRemaining.href = pct === 40 ? 'wiz-04-cards.html' : 'wiz-04-cards.html';
+    }
+
+    // Demo bar buttons
+    document.querySelectorAll('.demo-bar button').forEach(b => b.classList.remove('active-btn'));
+    document.getElementById('btn-' + pct).classList.add('active-btn');
+
+    // List
+    renderScoreList(pct);
+  }
+
+  // Init at 72%
+  setScore(72);
+</script>
+</body>
+</html>
