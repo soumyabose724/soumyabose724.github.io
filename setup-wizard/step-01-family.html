@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Step 1: Family Profile</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .radio-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .radio-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: var(--r-full);
+      border: 1.5px solid var(--border-strong);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--dur-fast) var(--ease-out);
+      background: var(--surface);
+      user-select: none;
+    }
+    .radio-pill input { display: none; }
+    .radio-pill:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-xlight); }
+    .radio-pill.selected {
+      border-color: var(--primary);
+      background: var(--primary-xlight);
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .member-card {
+      background: var(--surface);
+      border: 1.5px solid var(--glass-border);
+      border-radius: var(--r-xl);
+      padding: 16px;
+      margin-top: 16px;
+      animation: card-in var(--dur-med) var(--ease-out) both;
+    }
+    .member-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .member-card-title {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+    .remove-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--r-full);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      transition: all var(--dur-fast);
+      font-size: 16px;
+    }
+    .remove-btn:hover { background: var(--error-light); color: var(--error); }
+    .child-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 12px 14px;
+      margin-top: 12px;
+      animation: item-in var(--dur-med) var(--ease-out) both;
+    }
+    .child-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--r-full);
+      background: var(--primary-xlight);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      flex-shrink: 0;
+    }
+    .section-heading {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .section-sub {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- Demo Bar -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">State</span>
+    <button class="demo-btn" data-state="single">Single</button>
+    <button class="demo-btn active" data-state="married">Married</button>
+    <button class="demo-btn" data-state="children">With Children</button>
+  </div>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <a href="welcome.html" class="top-bar__back">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+    </a>
+    <div class="top-bar__title">Setup (Step 1 of 8)</div>
+    <button class="icon-btn" data-theme-toggle><span data-theme-icon>🌙</span></button>
+  </div>
+
+  <!-- Page Content -->
+  <div class="page-content" style="padding-bottom: 100px;">
+
+    <!-- Step Indicator -->
+    <div class="step-indicator" style="padding: 4px 0 16px;">
+      <div class="step-dot current"></div>
+      <div class="step-line"></div>
+      <div class="step-dot"></div>
+      <div class="step-line"></div>
+      <div class="step-dot"></div>
+      <div class="step-line"></div>
+      <div class="step-dot"></div>
+      <div class="step-line"></div>
+      <div class="step-dot"></div>
+      <div class="step-line"></div>
+      <div class="step-dot"></div>
+      <div class="step-line"></div>
+      <div class="step-dot"></div>
+      <div class="step-line"></div>
+      <div class="step-dot"></div>
+    </div>
+
+    <!-- Heading -->
+    <div class="section-heading">Tell us about your family</div>
+    <div class="section-sub">Your details are stored locally — never shared.</div>
+
+    <!-- Primary member -->
+    <div class="glass-card glass-card--compact" style="margin-bottom:16px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+        <div style="width:40px;height:40px;border-radius:50%;background:var(--grad-primary);display:flex;align-items:center;justify-content:center;color:#fff;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+        </div>
+        <div>
+          <div style="font-size:14px;font-weight:600;color:var(--text-primary);">You</div>
+          <div style="font-size:12px;color:var(--text-muted);">Primary account holder</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Full Name <span class="required">*</span></label>
+        <input class="form-input" type="text" value="Vikas Sharma" placeholder="Enter your full name">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Date of Birth <span class="required">*</span></label>
+        <input class="form-input" type="text" value="15 Mar 1992" placeholder="DD MMM YYYY">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">City</label>
+        <input class="form-input" type="text" value="Mumbai" placeholder="Your city">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Occupation</label>
+        <select class="form-select">
+          <option>Software Engineer</option>
+          <option>Business Owner</option>
+          <option>Doctor</option>
+          <option>Teacher</option>
+          <option>Other</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Relationship status -->
+    <div class="form-group" style="margin-bottom:16px;">
+      <label class="form-label">Relationship Status</label>
+      <div class="radio-pills" id="status-pills">
+        <label class="radio-pill" id="pill-single">
+          <input type="radio" name="status" value="single" onchange="setStatus('single')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+          Single
+        </label>
+        <label class="radio-pill selected" id="pill-married">
+          <input type="radio" name="status" value="married" checked onchange="setStatus('married')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          Married
+        </label>
+        <label class="radio-pill" id="pill-other">
+          <input type="radio" name="status" value="other" onchange="setStatus('other')">
+          Other
+        </label>
+      </div>
+    </div>
+
+    <!-- Spouse Section -->
+    <div id="spouse-section">
+      <div class="member-card">
+        <div class="member-card-header">
+          <div class="member-card-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px;">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            Spouse
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input class="form-input" type="text" value="Priya Sharma" placeholder="Spouse's full name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date of Birth</label>
+          <input class="form-input" type="text" value="20 Jun 1996" placeholder="DD MMM YYYY">
+        </div>
+      </div>
+    </div>
+
+    <!-- Children section (shown in With Children state) -->
+    <div id="children-section" style="display:none; margin-top:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div style="font-size:13px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:var(--text-secondary);">Children / Dependants</div>
+      </div>
+      <div class="child-card">
+        <div class="child-avatar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 12h.01M15 12h.01M12 17c2.5 0 4-1.5 4-3H8c0 1.5 1.5 3 4 3z"/>
+            <circle cx="12" cy="12" r="10"/>
+          </svg>
+        </div>
+        <div style="flex:1;">
+          <div style="font-size:14px;font-weight:600;color:var(--text-primary);">Aarav Sharma</div>
+          <div style="font-size:12px;color:var(--text-secondary);">Age 5 · Son</div>
+        </div>
+        <button class="remove-btn" onclick="AG.showToast('Child removed', 'info')">×</button>
+      </div>
+    </div>
+
+    <!-- Add family member button -->
+    <div style="margin-top: 16px;" id="add-member-btn">
+      <button class="btn btn--secondary btn--full" onclick="AG.showToast('Add family member sheet coming soon', 'info')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+          <line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>
+        </svg>
+        Add Family Member
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Sticky Footer -->
+  <div style="position:sticky;bottom:0;background:var(--surface);border-top:1px solid var(--border);padding:12px 16px;display:flex;gap:12px;z-index:30;">
+    <button class="btn btn--ghost" onclick="history.back()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+      Back
+    </button>
+    <a href="step-02-income.html" class="btn btn--primary" style="flex:1;text-decoration:none;">
+      Continue
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 12h14M12 5l7 7-7 7"/>
+      </svg>
+    </a>
+  </div>
+
+</div>
+</div>
+<script src="../assets/nav.js"></script>
+<script>
+function setStatus(val) {
+  document.querySelectorAll('.radio-pill').forEach(p => p.classList.remove('selected'));
+  document.getElementById('pill-' + val).classList.add('selected');
+  document.getElementById('spouse-section').style.display = (val === 'married') ? 'block' : 'none';
+}
+
+AG.initDemoBar({
+  'single': () => {
+    setStatus('single');
+    document.getElementById('children-section').style.display = 'none';
+  },
+  'married': () => {
+    setStatus('married');
+    document.getElementById('children-section').style.display = 'none';
+  },
+  'children': () => {
+    setStatus('married');
+    document.getElementById('children-section').style.display = 'block';
+  }
+});
+</script>
+</body>
+</html>

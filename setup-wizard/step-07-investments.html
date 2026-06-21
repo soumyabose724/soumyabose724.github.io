@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Step 7: Investments</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .section-heading { font-size:22px; font-weight:700; letter-spacing:-0.01em; color:var(--text-primary); margin-bottom:4px; }
+    .section-sub { font-size:14px; color:var(--text-secondary); margin-bottom:20px; }
+    .sip-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      background: var(--primary-xlight);
+      color: var(--primary);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--r-sm);
+      padding: 1px 6px;
+      font-size: 10px;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .total-bar {
+      background: var(--primary-xlight);
+      border: 1.5px solid var(--glass-border);
+      border-radius: var(--r-xl);
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 16px;
+      animation: card-in var(--dur-med) var(--ease-out) 0.35s both;
+    }
+    .total-label { font-size:13px; font-weight:600; color:var(--primary); text-transform:uppercase; letter-spacing:0.04em; }
+    .total-amount { font-family:'JetBrains Mono',monospace; font-size:20px; font-weight:700; color:var(--primary); }
+    .sip-monthly {
+      font-size: 12px;
+      color: var(--primary);
+      margin-top: 2px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- Demo Bar -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">State</span>
+    <button class="demo-btn" data-state="empty">Empty</button>
+    <button class="demo-btn active" data-state="added">Added</button>
+  </div>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <a href="step-06-budget.html" class="top-bar__back">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+    </a>
+    <div class="top-bar__title">Setup (Step 7 of 8)</div>
+    <button class="icon-btn" data-theme-toggle><span data-theme-icon>🌙</span></button>
+  </div>
+
+  <!-- Page Content -->
+  <div class="page-content" style="padding-bottom:100px;">
+
+    <!-- Step Indicator -->
+    <div class="step-indicator" style="padding:4px 0 16px;">
+      <div class="step-dot done"></div>
+      <div class="step-line done"></div>
+      <div class="step-dot done"></div>
+      <div class="step-line done"></div>
+      <div class="step-dot done"></div>
+      <div class="step-line done"></div>
+      <div class="step-dot done"></div>
+      <div class="step-line done"></div>
+      <div class="step-dot done"></div>
+      <div class="step-line done"></div>
+      <div class="step-dot done"></div>
+      <div class="step-line done"></div>
+      <div class="step-dot current"></div>
+      <div class="step-line"></div>
+      <div class="step-dot"></div>
+    </div>
+
+    <div class="section-heading">Your investments</div>
+    <div class="section-sub">Link SIPs, stocks, NPS, FDs, and other holdings.</div>
+
+    <!-- Empty State -->
+    <div id="empty-state" style="display:none;">
+      <div class="empty-state">
+        <div class="empty-state__icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+        </div>
+        <div class="empty-state__title">No investments yet</div>
+        <div class="empty-state__body">Add your SIPs, mutual funds, stocks, NPS, PPF, FD and other investments.</div>
+        <button class="btn btn--primary" onclick="document.querySelector('[data-state=added]').click()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Add Investment
+        </button>
+      </div>
+    </div>
+
+    <!-- Added State -->
+    <div id="added-state">
+
+      <!-- Axis Bluechip -->
+      <div class="list-row">
+        <div class="list-row__icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+        </div>
+        <div class="list-row__info">
+          <div class="list-row__label">
+            Axis Bluechip Fund
+            <span class="chip chip--confirmed" style="font-size:10px;height:18px;padding:0 6px;">ACTIVE</span>
+          </div>
+          <div class="list-row__meta">
+            Large Cap · Direct Growth ·
+            <span class="sip-badge">SIP ₹5,000/mo</span>
+          </div>
+        </div>
+        <div class="list-row__actions">
+          <button class="list-row__action-btn" onclick="AG.showToast('Edit investment', 'info')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+          </button>
+          <button class="list-row__action-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/>
+            </svg>
+          </button>
+        </div>
+        <div class="list-row__amount-row">
+          <div class="list-row__amount list-row__amount--income">₹89,400</div>
+          <div class="list-row__amount-caption">Current value · Invested ₹75,000 · +19.2% XIRR</div>
+        </div>
+      </div>
+
+      <!-- Parag Parikh -->
+      <div class="list-row">
+        <div class="list-row__icon list-row__icon--success">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+        </div>
+        <div class="list-row__info">
+          <div class="list-row__label">
+            Parag Parikh Flexi Cap
+            <span class="chip chip--confirmed" style="font-size:10px;height:18px;padding:0 6px;">ACTIVE</span>
+          </div>
+          <div class="list-row__meta">
+            Flexi Cap · Direct Growth ·
+            <span class="sip-badge">SIP ₹10,000/mo</span>
+          </div>
+        </div>
+        <div class="list-row__actions">
+          <button class="list-row__action-btn" onclick="AG.showToast('Edit investment', 'info')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+          </button>
+          <button class="list-row__action-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/>
+            </svg>
+          </button>
+        </div>
+        <div class="list-row__amount-row">
+          <div class="list-row__amount list-row__amount--income">₹2,34,500</div>
+          <div class="list-row__amount-caption">Current value · Invested ₹1,90,000 · +23.4% XIRR</div>
+        </div>
+      </div>
+
+      <!-- HDFC Nifty 50 -->
+      <div class="list-row">
+        <div class="list-row__icon list-row__icon--info">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+        </div>
+        <div class="list-row__info">
+          <div class="list-row__label">
+            HDFC Nifty 50 Index
+            <span class="chip chip--confirmed" style="font-size:10px;height:18px;padding:0 6px;">ACTIVE</span>
+          </div>
+          <div class="list-row__meta">
+            Index · Direct Growth ·
+            <span class="sip-badge">SIP ₹3,000/mo</span>
+          </div>
+        </div>
+        <div class="list-row__actions">
+          <button class="list-row__action-btn" onclick="AG.showToast('Edit investment', 'info')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+          </button>
+          <button class="list-row__action-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/>
+            </svg>
+          </button>
+        </div>
+        <div class="list-row__amount-row">
+          <div class="list-row__amount list-row__amount--income">₹47,200</div>
+          <div class="list-row__amount-caption">Current value · Invested ₹39,000 · +21.0% XIRR</div>
+        </div>
+      </div>
+
+      <!-- Add Investment -->
+      <button class="btn btn--secondary btn--full" style="margin-top:14px;" onclick="AG.showToast('Add investment', 'info')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Add Investment
+      </button>
+
+      <!-- Total -->
+      <div class="total-bar">
+        <div>
+          <div class="total-label">Total Portfolio Value</div>
+          <div class="sip-monthly">3 SIPs · ₹18,000/mo combined</div>
+        </div>
+        <div class="total-amount">₹3,71,100</div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Sticky Footer -->
+  <div style="position:sticky;bottom:0;background:var(--surface);border-top:1px solid var(--border);padding:12px 16px;display:flex;gap:12px;z-index:30;">
+    <button class="btn btn--ghost" onclick="history.back()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+      Back
+    </button>
+    <a href="step-08-goals.html" class="btn btn--primary" style="flex:1;text-decoration:none;">
+      Continue
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 12h14M12 5l7 7-7 7"/>
+      </svg>
+    </a>
+  </div>
+
+</div>
+</div>
+<script src="../assets/nav.js"></script>
+<script>
+AG.initDemoBar({
+  'empty': () => {
+    document.getElementById('empty-state').style.display = 'flex';
+    document.getElementById('added-state').style.display = 'none';
+  },
+  'added': () => {
+    document.getElementById('empty-state').style.display = 'none';
+    document.getElementById('added-state').style.display = 'block';
+  }
+});
+</script>
+</body>
+</html>

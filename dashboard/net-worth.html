@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Net Worth</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* ── No bottom nav on drill-down ── */
+    .page-content {
+      padding-bottom: var(--sp-12);
+      padding-top: calc(var(--top-bar-h) + var(--demo-bar-h) + var(--sp-4));
+    }
+
+    /* ── Hero card (larger) ── */
+    .nw-hero-label {
+      font-size: 11px; font-weight: 600; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--text-secondary);
+      margin-bottom: var(--sp-2);
+    }
+    .nw-fy-tag {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 11px; font-weight: 600; padding: 3px 10px;
+      border-radius: var(--r-full);
+      background: var(--primary-xlight); color: var(--primary);
+      border: 1px solid var(--primary-light); margin-bottom: var(--sp-3);
+    }
+    .nw-amount-xl {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+      font-size: 42px; font-weight: 700; line-height: 1.05;
+    }
+    .nw-equation {
+      font-size: 13px; color: var(--text-muted); margin-top: var(--sp-3);
+      display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap;
+    }
+    .nw-eq-val { font-weight: 600; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+
+    /* ── Section header ── */
+    .breakdown-section { margin-top: var(--sp-5); }
+    .breakdown-header {
+      display: flex; align-items: center; gap: var(--sp-2);
+      margin-bottom: var(--sp-3);
+    }
+    .breakdown-title {
+      font-size: 13px; font-weight: 600; letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+    .breakdown-pill {
+      font-size: 11px; font-weight: 600; padding: 2px 8px;
+      border-radius: var(--r-full); margin-left: auto;
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+    }
+    .breakdown-pill--asset    { background: var(--success-light); color: var(--success); }
+    .breakdown-pill--liability { background: var(--error-light); color: var(--error); }
+
+    /* ── Sub-row inside card ── */
+    .sub-row {
+      display: flex; align-items: center; gap: var(--sp-3);
+      padding: var(--sp-3) 0;
+      border-top: 1px solid var(--border);
+    }
+    .sub-row:first-of-type { border-top: none; margin-top: var(--sp-2); }
+    .sub-row__icon {
+      width: 34px; height: 34px; border-radius: var(--r-md); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; color: #fff;
+      font-size: 13px; font-weight: 700;
+    }
+    .sub-row__label { flex: 1; font-size: 13px; font-weight: 500; color: var(--text-primary); }
+    .sub-row__meta  { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .sub-row__amount {
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+      font-size: 14px; font-weight: 600; color: var(--text-primary); text-align: right;
+    }
+    .sub-row__amount--asset    { color: var(--success); }
+    .sub-row__amount--liability { color: var(--error); }
+
+    /* ── Section total row ── */
+    .total-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: var(--sp-3) var(--sp-4); border-radius: var(--r-md);
+      margin-top: var(--sp-2);
+    }
+    .total-row--asset    { background: var(--success-light); }
+    .total-row--liability { background: var(--error-light); }
+    .total-row__label { font-size: 13px; font-weight: 600; }
+    .total-row__amount {
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+      font-size: 16px; font-weight: 700;
+    }
+    .total-row--asset .total-row__amount    { color: var(--success); }
+    .total-row--liability .total-row__amount { color: var(--error); }
+
+    /* ── Net worth summary line ── */
+    .nw-summary-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: var(--sp-4) var(--sp-5);
+      background: var(--primary-xlight);
+      border: 1.5px solid var(--primary-light);
+      border-radius: var(--r-xl); margin-top: var(--sp-4);
+    }
+    .nw-summary-label { font-size: 14px; font-weight: 700; color: var(--primary); }
+    .nw-summary-amount {
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+      font-size: 22px; font-weight: 700; color: var(--primary);
+    }
+
+    /* ── Bar chart (trend) ── */
+    .trend-section { margin-top: var(--sp-5); }
+    .bar-chart {
+      display: flex; align-items: flex-end; gap: var(--sp-2);
+      height: 100px; padding: 0 var(--sp-2);
+    }
+    .bar-col {
+      flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px;
+    }
+    .bar-value {
+      font-size: 9px; font-weight: 600; color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace; white-space: nowrap;
+      writing-mode: vertical-lr; transform: rotate(180deg);
+      letter-spacing: .03em;
+    }
+    .bar {
+      width: 100%; border-radius: var(--r-md) var(--r-md) var(--r-sm) var(--r-sm);
+      transition: height var(--dur-slow) var(--ease-out);
+      min-height: 6px;
+      cursor: pointer;
+    }
+    .bar--current { background: var(--grad-primary); }
+    .bar--past    { background: var(--primary-light); }
+    .bar-label {
+      font-size: 10px; font-weight: 500; color: var(--text-muted);
+      text-align: center;
+    }
+    .bar-label--current { color: var(--primary); font-weight: 600; }
+
+    /* ── Trend selector pills ── */
+    .trend-tabs {
+      display: flex; gap: var(--sp-2); margin-bottom: var(--sp-4);
+    }
+    .trend-tab {
+      flex: 1; height: 32px; border-radius: var(--r-full);
+      font-size: 12px; font-weight: 600;
+      background: var(--surface); border: 1.5px solid var(--border);
+      color: var(--text-muted); cursor: pointer;
+      transition: background var(--dur-fast), color var(--dur-fast), border-color var(--dur-fast);
+    }
+    .trend-tab.active {
+      background: var(--primary); color: #fff; border-color: var(--primary);
+    }
+
+    /* ── Insight card ── */
+    .insight-card {
+      background: linear-gradient(135deg, rgba(13,148,136,.08), rgba(20,184,166,.04));
+      border: 1px solid var(--glass-border);
+      border-radius: var(--r-xl);
+      padding: var(--sp-4) var(--sp-5);
+      margin-top: var(--sp-4);
+      display: flex; gap: var(--sp-3); align-items: flex-start;
+    }
+    .insight-icon {
+      width: 36px; height: 36px; border-radius: var(--r-md); flex-shrink: 0;
+      background: var(--grad-primary);
+      display: flex; align-items: center; justify-content: center; color: #fff;
+    }
+    .insight-text { flex: 1; }
+    .insight-title { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 3px; }
+    .insight-body  { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+
+    /* ── 1-Year mode (hidden by default) ── */
+    .view-6m { display: block; }
+    .view-1y { display: none; }
+    .trend-1y-active .view-6m { display: none; }
+    .trend-1y-active .view-1y { display: block; }
+
+    /* ── Sparkline ── */
+    .sparkline-full {
+      width: 100%; height: 48px; display: block; margin-bottom: var(--sp-3);
+    }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- Demo Bar -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">View</span>
+    <button class="demo-btn" data-state="current">Current</button>
+    <button class="demo-btn" data-state="1y-trend">1 Year Trend</button>
+  </div>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <div class="top-bar__title">Net Worth</div>
+    <div class="top-bar__actions">
+      <button class="top-bar__action" onclick="AG.showToast('Share link copied', 'success')" aria-label="Share">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+          <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+        </svg>
+      </button>
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Page Content -->
+  <div class="page-content">
+
+    <!-- Hero Card -->
+    <div class="glass-card glass-card--hero" style="margin-bottom:0;">
+      <div class="nw-fy-tag">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        FY 2026-27
+      </div>
+      <div class="nw-hero-label">Net Worth</div>
+      <div class="nw-amount-xl gradient-text" id="nw-hero-amount">₹52,34,000</div>
+      <div style="margin-top:var(--sp-3);">
+        <span class="delta delta--pos" id="nw-hero-delta">▲ +₹1,24,000 (+2.4%) this month</span>
+      </div>
+      <div class="nw-equation">
+        <span>Assets</span>
+        <span class="nw-eq-val" style="color:var(--success);" id="nw-assets-total">₹1,03,74,000</span>
+        <span style="color:var(--text-muted);">−</span>
+        <span>Liabilities</span>
+        <span class="nw-eq-val" style="color:var(--error);" id="nw-liab-total">₹51,40,000</span>
+        <span style="color:var(--text-muted);">=</span>
+        <span class="nw-eq-val" style="color:var(--primary);">₹52,34,000</span>
+      </div>
+
+      <!-- Mini sparkline -->
+      <svg class="sparkline-full" viewBox="0 0 300 48" preserveAspectRatio="none" style="margin-top:var(--sp-4);">
+        <defs>
+          <linearGradient id="spark2Grad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#0D9488;stop-opacity:0.4"/>
+            <stop offset="100%" style="stop-color:#14B8A6;stop-opacity:1"/>
+          </linearGradient>
+          <linearGradient id="spark2Fill" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#0D9488;stop-opacity:0.18"/>
+            <stop offset="100%" style="stop-color:#0D9488;stop-opacity:0"/>
+          </linearGradient>
+        </defs>
+        <path d="M0,38 C40,34 80,30 120,26 C160,22 200,17 240,12 C265,9 285,7 300,6"
+              fill="none" stroke="url(#spark2Grad)" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M0,38 C40,34 80,30 120,26 C160,22 200,17 240,12 C265,9 285,7 300,6 L300,48 L0,48 Z"
+              fill="url(#spark2Fill)"/>
+        <!-- Data point dots -->
+        <circle cx="0"   cy="38" r="3" fill="var(--primary)" opacity=".5"/>
+        <circle cx="60"  cy="32" r="3" fill="var(--primary)" opacity=".6"/>
+        <circle cx="120" cy="26" r="3" fill="var(--primary)" opacity=".7"/>
+        <circle cx="180" cy="19" r="3" fill="var(--primary)" opacity=".85"/>
+        <circle cx="240" cy="12" r="3" fill="var(--primary)" opacity=".9"/>
+        <circle cx="300" cy="6"  r="4" fill="var(--primary)"/>
+      </svg>
+    </div>
+
+    <!-- ─── ASSETS ─── -->
+    <div class="breakdown-section">
+      <div class="breakdown-header">
+        <div style="width:8px;height:8px;border-radius:50%;background:var(--success);flex-shrink:0;"></div>
+        <span class="breakdown-title" style="color:var(--success);">Assets</span>
+        <span class="breakdown-pill breakdown-pill--asset" id="assets-total-pill">₹1,03,74,000</span>
+      </div>
+
+      <!-- Bank Accounts -->
+      <div class="glass-card glass-card--compact glass-card--success" style="margin-bottom:var(--sp-3);">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="display:flex;align-items:center;gap:var(--sp-3);">
+            <div class="card-icon card-icon--success" style="width:36px;height:36px;border-radius:var(--r-md);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+              </svg>
+            </div>
+            <div>
+              <div style="font-size:14px;font-weight:600;color:var(--text-primary);">Bank Accounts</div>
+              <div style="font-size:11px;color:var(--text-muted);">3 accounts</div>
+            </div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--success);">₹23,00,000</div>
+        </div>
+        <!-- Sub rows -->
+        <div class="sub-row">
+          <div class="sub-row__icon" style="background:linear-gradient(135deg,#1565C0,#1976D2);">H</div>
+          <div style="flex:1;">
+            <div class="sub-row__label">HDFC Savings</div>
+            <div class="sub-row__meta">Account ••••4821 · SB</div>
+          </div>
+          <div>
+            <div class="sub-row__amount sub-row__amount--asset">₹4,50,000</div>
+          </div>
+        </div>
+        <div class="sub-row">
+          <div class="sub-row__icon" style="background:linear-gradient(135deg,#B71C1C,#D32F2F);">A</div>
+          <div style="flex:1;">
+            <div class="sub-row__label">Axis Bank Savings</div>
+            <div class="sub-row__meta">Account ••••2233 · SB</div>
+          </div>
+          <div>
+            <div class="sub-row__amount sub-row__amount--asset">₹8,00,000</div>
+          </div>
+        </div>
+        <div class="sub-row">
+          <div class="sub-row__icon" style="background:linear-gradient(135deg,#0D47A1,#1565C0);">S</div>
+          <div style="flex:1;">
+            <div class="sub-row__label">SBI Salary Account</div>
+            <div class="sub-row__meta">Account ••••9910 · SA</div>
+          </div>
+          <div>
+            <div class="sub-row__amount sub-row__amount--asset">₹10,50,000</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Investments -->
+      <div class="glass-card glass-card--compact glass-card--success" style="margin-bottom:var(--sp-3);">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="display:flex;align-items:center;gap:var(--sp-3);">
+            <div class="card-icon card-icon--success" style="width:36px;height:36px;border-radius:var(--r-md);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+              </svg>
+            </div>
+            <div>
+              <div style="font-size:14px;font-weight:600;color:var(--text-primary);">Investments</div>
+              <div style="font-size:11px;color:var(--text-muted);">Mutual Funds + PPF</div>
+            </div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--success);">₹3,71,100</div>
+        </div>
+        <div class="sub-row">
+          <div class="sub-row__icon" style="background:linear-gradient(135deg,#0EA5E9,#38BDF8);">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div style="flex:1;">
+            <div class="sub-row__label">Axis Bluechip Fund</div>
+            <div class="sub-row__meta">SIP ₹5,000/mo · XIRR 18.4%</div>
+          </div>
+          <div class="sub-row__amount sub-row__amount--asset">₹1,84,200</div>
+        </div>
+        <div class="sub-row">
+          <div class="sub-row__icon" style="background:linear-gradient(135deg,#7C3AED,#8B5CF6);">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div style="flex:1;">
+            <div class="sub-row__label">Parag Parikh Flexi Cap</div>
+            <div class="sub-row__meta">SIP ₹3,000/mo · XIRR 21.2%</div>
+          </div>
+          <div class="sub-row__amount sub-row__amount--asset">₹98,400</div>
+        </div>
+        <div class="sub-row">
+          <div class="sub-row__icon" style="background:linear-gradient(135deg,#D97706,#F59E0B);">P</div>
+          <div style="flex:1;">
+            <div class="sub-row__label">PPF Account</div>
+            <div class="sub-row__meta">SBI · 7.1% p.a. · FY 2026-27</div>
+          </div>
+          <div class="sub-row__amount sub-row__amount--asset">₹88,500</div>
+        </div>
+      </div>
+
+      <!-- Property -->
+      <div class="glass-card glass-card--compact" style="margin-bottom:var(--sp-3); opacity:0.85;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="display:flex;align-items:center;gap:var(--sp-3);">
+            <div class="card-icon" style="background:linear-gradient(135deg,#92400E,#B45309);width:36px;height:36px;border-radius:var(--r-md);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+              </svg>
+            </div>
+            <div>
+              <div style="font-size:14px;font-weight:600;color:var(--text-primary);">Property</div>
+              <div style="font-size:11px;color:var(--text-muted);">Self-occupied · Estimated value</div>
+            </div>
+          </div>
+          <div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--success);">₹80,00,000</div>
+            <div style="font-size:10px;color:var(--text-muted);text-align:right;">est.</div>
+          </div>
+        </div>
+        <div class="sub-row">
+          <div class="sub-row__icon" style="background:linear-gradient(135deg,#92400E,#B45309);">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
+          </div>
+          <div style="flex:1;">
+            <div class="sub-row__label">2BHK, Whitefield, Bengaluru</div>
+            <div class="sub-row__meta">1,050 sq ft · Purchased 2019</div>
+          </div>
+          <div class="sub-row__amount sub-row__amount--asset">₹80,00,000</div>
+        </div>
+      </div>
+
+      <!-- Assets Total -->
+      <div class="total-row total-row--asset">
+        <div style="display:flex;align-items:center;gap:var(--sp-2);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          <span class="total-row__label" style="color:var(--success);">Total Assets</span>
+        </div>
+        <span class="total-row__amount">₹1,06,71,100</span>
+      </div>
+    </div>
+
+    <!-- ─── LIABILITIES ─── -->
+    <div class="breakdown-section">
+      <div class="breakdown-header">
+        <div style="width:8px;height:8px;border-radius:50%;background:var(--error);flex-shrink:0;"></div>
+        <span class="breakdown-title" style="color:var(--error);">Liabilities</span>
+        <span class="breakdown-pill breakdown-pill--liability" id="liab-total-pill">₹51,40,000</span>
+      </div>
+
+      <!-- Home Loan -->
+      <div class="glass-card glass-card--compact glass-card--danger" style="margin-bottom:var(--sp-3);">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="display:flex;align-items:center;gap:var(--sp-3);">
+            <div class="card-icon card-icon--danger" style="width:36px;height:36px;border-radius:var(--r-md);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+              </svg>
+            </div>
+            <div>
+              <div style="font-size:14px;font-weight:600;color:var(--text-primary);">Home Loan</div>
+              <div style="font-size:11px;color:var(--text-muted);">HDFC Bank · 8.65% p.a.</div>
+            </div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--error);">₹45,00,000</div>
+        </div>
+        <div style="margin-top:var(--sp-3);">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-bottom:6px;">
+            <span>Outstanding ₹45L of ₹60L</span>
+            <span>75% remaining</span>
+          </div>
+          <div class="progress-bar progress-bar--thick">
+            <div class="progress-bar__fill progress-bar__fill--danger" style="width:75%;"></div>
+          </div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:6px;">EMI ₹52,480/mo · Ends Mar 2032</div>
+        </div>
+      </div>
+
+      <!-- Car Loan -->
+      <div class="glass-card glass-card--compact glass-card--danger" style="margin-bottom:var(--sp-3);">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="display:flex;align-items:center;gap:var(--sp-3);">
+            <div class="card-icon card-icon--danger" style="width:36px;height:36px;border-radius:var(--r-md);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="1" y="3" width="15" height="13" rx="2"/>
+                <path d="M16 8h4l3 3v5h-7V8z"/>
+                <circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+              </svg>
+            </div>
+            <div>
+              <div style="font-size:14px;font-weight:600;color:var(--text-primary);">Car Loan</div>
+              <div style="font-size:11px;color:var(--text-muted);">Axis Bank · 9.25% p.a.</div>
+            </div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--error);">₹6,40,000</div>
+        </div>
+        <div style="margin-top:var(--sp-3);">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-bottom:6px;">
+            <span>Outstanding ₹6.4L of ₹8L</span>
+            <span>80% remaining</span>
+          </div>
+          <div class="progress-bar progress-bar--thick">
+            <div class="progress-bar__fill progress-bar__fill--warning" style="width:80%;"></div>
+          </div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:6px;">EMI ₹14,200/mo · Ends Sep 2028</div>
+        </div>
+      </div>
+
+      <!-- Credit Card -->
+      <div class="glass-card glass-card--compact glass-card--warning" style="margin-bottom:var(--sp-3);">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="display:flex;align-items:center;gap:var(--sp-3);">
+            <div class="card-icon card-icon--warning" style="width:36px;height:36px;border-radius:var(--r-md);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+              </svg>
+            </div>
+            <div>
+              <div style="font-size:14px;font-weight:600;color:var(--text-primary);">Credit Card</div>
+              <div style="font-size:11px;color:var(--text-muted);">HDFC Regalia · Bill due 15 Jul</div>
+            </div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--warning);">₹67,000</div>
+        </div>
+        <div style="margin-top:var(--sp-3); display:flex; gap:var(--sp-3);">
+          <div style="flex:1; padding:var(--sp-2) var(--sp-3); background:var(--warning-light); border-radius:var(--r-md);">
+            <div style="font-size:10px;color:var(--text-muted);margin-bottom:2px;">Limit</div>
+            <div style="font-size:13px;font-weight:700;color:var(--text-primary);font-family:'JetBrains Mono',monospace;">₹5,00,000</div>
+          </div>
+          <div style="flex:1; padding:var(--sp-2) var(--sp-3); background:var(--warning-light); border-radius:var(--r-md);">
+            <div style="font-size:10px;color:var(--text-muted);margin-bottom:2px;">Utilisation</div>
+            <div style="font-size:13px;font-weight:700;color:var(--warning);font-family:'JetBrains Mono',monospace;">13.4%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Liabilities Total -->
+      <div class="total-row total-row--liability">
+        <div style="display:flex;align-items:center;gap:var(--sp-2);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--error)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+          </svg>
+          <span class="total-row__label" style="color:var(--error);">Total Liabilities</span>
+        </div>
+        <span class="total-row__amount">₹52,07,000</span>
+      </div>
+    </div>
+
+    <!-- Net Worth Summary -->
+    <div class="nw-summary-row">
+      <div>
+        <div style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--primary);opacity:.7;margin-bottom:2px;">Net Worth</div>
+        <div style="font-size:12px;color:var(--primary);opacity:.7;">Assets − Liabilities</div>
+      </div>
+      <div class="nw-summary-amount">₹52,34,000</div>
+    </div>
+
+    <!-- Trend Section -->
+    <div class="trend-section">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--sp-3);">
+        <div style="font-size:15px;font-weight:600;color:var(--text-secondary);letter-spacing:.03em;text-transform:uppercase;">
+          Trend
+        </div>
+        <div class="trend-tabs" style="flex-direction:row;gap:var(--sp-1);margin-bottom:0;">
+          <button class="trend-tab active" id="tab-6m" onclick="setTrendView('6m')">6M</button>
+          <button class="trend-tab"        id="tab-1y" onclick="setTrendView('1y')">1Y</button>
+          <button class="trend-tab"        id="tab-3y" onclick="setTrendView('3y')">3Y</button>
+        </div>
+      </div>
+
+      <div class="glass-card glass-card--compact" id="trend-chart-card">
+        <!-- 6-Month bar chart -->
+        <div class="view-6m" id="view-6m">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:var(--sp-3);">Last 6 Months · Net Worth (₹ Lakh)</div>
+          <div class="bar-chart" id="bar-chart-6m">
+            <!-- Heights proportional: base 49.2L (min), max 52.3L. Scale 0–60px -->
+            <!-- 49.2 → 32px, 50.1 → 37px, 50.8 → 40px, 51.1 → 42px, 51.2 → 43px, 52.3 → 50px -->
+            <div class="bar-col">
+              <div class="bar bar--past" style="height:32px;" title="₹49.2L"></div>
+              <div class="bar-label">Jan</div>
+            </div>
+            <div class="bar-col">
+              <div class="bar bar--past" style="height:37px;" title="₹50.1L"></div>
+              <div class="bar-label">Feb</div>
+            </div>
+            <div class="bar-col">
+              <div class="bar bar--past" style="height:40px;" title="₹50.8L"></div>
+              <div class="bar-label">Mar</div>
+            </div>
+            <div class="bar-col">
+              <div class="bar bar--past" style="height:42px;" title="₹51.1L"></div>
+              <div class="bar-label">Apr</div>
+            </div>
+            <div class="bar-col">
+              <div class="bar bar--past" style="height:43px;" title="₹51.2L"></div>
+              <div class="bar-label">May</div>
+            </div>
+            <div class="bar-col">
+              <div class="bar bar--current" style="height:50px;" title="₹52.3L"></div>
+              <div class="bar-label bar-label--current">Jun</div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);margin-top:var(--sp-3);border-top:1px solid var(--border);padding-top:var(--sp-2);">
+            <span>Jan <strong style="color:var(--text-secondary);">₹49.2L</strong></span>
+            <span>Jun <strong style="color:var(--primary);">₹52.3L</strong></span>
+            <span class="delta delta--pos" style="height:auto;font-size:10px;">▲ +₹3.1L (+6.3%)</span>
+          </div>
+        </div>
+
+        <!-- 1-Year view -->
+        <div class="view-1y" id="view-1y">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:var(--sp-3);">Last 12 Months · Net Worth (₹ Lakh)</div>
+          <div class="bar-chart" id="bar-chart-1y">
+            <!-- 12 months: Jul'25→Jun'26 -->
+            <div class="bar-col"><div class="bar bar--past" style="height:18px;"></div><div class="bar-label">J</div></div>
+            <div class="bar-col"><div class="bar bar--past" style="height:20px;"></div><div class="bar-label">A</div></div>
+            <div class="bar-col"><div class="bar bar--past" style="height:22px;"></div><div class="bar-label">S</div></div>
+            <div class="bar-col"><div class="bar bar--past" style="height:24px;"></div><div class="bar-label">O</div></div>
+            <div class="bar-col"><div class="bar bar--past" style="height:25px;"></div><div class="bar-label">N</div></div>
+            <div class="bar-col"><div class="bar bar--past" style="height:27px;"></div><div class="bar-label">D</div></div>
+            <div class="bar-col"><div class="bar bar--past" style="height:32px;"></div><div class="bar-label">J</div></div>
+            <div class="bar-col"><div class="bar bar--past" style="height:37px;"></div><div class="bar-label">F</div></div>
+            <div class="bar-col"><div class="bar bar--past" style="height:40px;"></div><div class="bar-label">M</div></div>
+            <div class="bar-col"><div class="bar bar--past" style="height:42px;"></div><div class="bar-label">A</div></div>
+            <div class="bar-col"><div class="bar bar--past" style="height:43px;"></div><div class="bar-label">M</div></div>
+            <div class="bar-col"><div class="bar bar--current" style="height:50px;"></div><div class="bar-label bar-label--current">J</div></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);margin-top:var(--sp-3);border-top:1px solid var(--border);padding-top:var(--sp-2);">
+            <span>Jul '25 <strong style="color:var(--text-secondary);">₹45.2L</strong></span>
+            <span>Jun '26 <strong style="color:var(--primary);">₹52.3L</strong></span>
+            <span class="delta delta--pos" style="height:auto;font-size:10px;">▲ +₹7.1L (+15.7%)</span>
+          </div>
+        </div>
+
+        <!-- 3-Year view -->
+        <div class="view-3y" id="view-3y" style="display:none;">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:var(--sp-3);">Last 3 Years · Net Worth (₹ Lakh)</div>
+          <div class="bar-chart">
+            <div class="bar-col"><div class="bar bar--past" style="height:16px;"></div><div class="bar-label">FY24</div></div>
+            <div class="bar-col"><div class="bar bar--past" style="height:28px;"></div><div class="bar-label">FY25</div></div>
+            <div class="bar-col"><div class="bar bar--current" style="height:50px;"></div><div class="bar-label bar-label--current">FY26</div></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);margin-top:var(--sp-3);border-top:1px solid var(--border);padding-top:var(--sp-2);">
+            <span>FY24 <strong style="color:var(--text-secondary);">₹32.1L</strong></span>
+            <span>FY26 <strong style="color:var(--primary);">₹52.3L</strong></span>
+            <span class="delta delta--pos" style="height:auto;font-size:10px;">▲ +₹20.2L (+62.9%)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Insight Card -->
+    <div class="insight-card">
+      <div class="insight-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <div class="insight-text">
+        <div class="insight-title">At this growth rate, your goal of ₹1 Crore net worth is 18 months away.</div>
+        <div class="insight-body">Your CAGR of 16.3% over 3 years puts you on track. Consider increasing SIP by ₹5,000/mo to hit ₹1Cr by Dec 2027.</div>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  function setTrendView(v) {
+    ['6m','1y','3y'].forEach(id => {
+      const el = document.getElementById('view-' + id);
+      const tab = document.getElementById('tab-' + id);
+      if (el)  el.style.display = (id === v) ? 'block' : 'none';
+      if (tab) tab.classList.toggle('active', id === v);
+    });
+    // Ensure 6m always visible for state that doesn't have its own element
+    if (v === '6m') document.getElementById('view-6m').style.display = 'block';
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Count up hero
+    const heroEl = document.getElementById('nw-hero-amount');
+    AG.countUp(heroEl, 5234000 * 100, 900);
+
+    // Init trend tabs — show 6m by default
+    setTrendView('6m');
+
+    AG.initDemoBar({
+      'current': () => {
+        // Already the default state
+        document.getElementById('nw-hero-delta').textContent = '▲ +₹1,24,000 (+2.4%) this month';
+        document.getElementById('nw-hero-delta').className   = 'delta delta--pos';
+        AG.countUp(heroEl, 5234000 * 100, 700);
+        setTrendView('6m');
+      },
+      '1y-trend': () => {
+        setTrendView('1y');
+        AG.showToast('Showing 1-year net worth trend', 'info');
+      }
+    });
+  });
+</script>
+</body>
+</html>

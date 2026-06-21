@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Step 2: Income Sources</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .section-heading {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .section-sub {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+    }
+    .income-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-xl);
+      padding: 16px;
+      animation: card-in var(--dur-med) var(--ease-out) both;
+      position: relative;
+    }
+    .income-card + .income-card { margin-top: 12px; }
+    .income-card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .income-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--r-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .income-card-name {
+      flex: 1;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .income-card-actions { display: flex; gap: 4px; }
+    .icon-action {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--r-full);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      transition: all var(--dur-fast);
+    }
+    .icon-action:hover { background: var(--surface-raised); color: var(--text-primary); }
+    .income-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 0;
+    }
+    .income-row + .income-row { border-top: 1px solid var(--border); }
+    .income-label { font-size: 12px; color: var(--text-secondary); }
+    .income-value { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    .income-amount {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--success);
+      margin: 8px 0 4px;
+    }
+    .total-bar {
+      background: var(--primary-xlight);
+      border: 1.5px solid var(--glass-border);
+      border-radius: var(--r-xl);
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 16px;
+      animation: card-in var(--dur-med) var(--ease-out) 0.2s both;
+    }
+    .total-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .total-amount {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- Demo Bar -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">State</span>
+    <button class="demo-btn" data-state="one">One Source</button>
+    <button class="demo-btn active" data-state="multiple">Multiple</button>
+  </div>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <a href="step-01-family.html" class="top-bar__back">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+    </a>
+    <div class="top-bar__title">Setup (Step 2 of 8)</div>
+    <button class="icon-btn" data-theme-toggle><span data-theme-icon>🌙</span></button>
+  </div>
+
+  <!-- Page Content -->
+  <div class="page-content" style="padding-bottom:100px;">
+
+    <!-- Step Indicator -->
+    <div class="step-indicator" style="padding: 4px 0 16px;">
+      <div class="step-dot done"></div>
+      <div class="step-line done"></div>
+      <div class="step-dot current"></div>
+      <div class="step-line"></div>
+      <div class="step-dot"></div>
+      <div class="step-line"></div>
+      <div class="step-dot"></div>
+      <div class="step-line"></div>
+      <div class="step-dot"></div>
+      <div class="step-line"></div>
+      <div class="step-dot"></div>
+      <div class="step-line"></div>
+      <div class="step-dot"></div>
+      <div class="step-line"></div>
+      <div class="step-dot"></div>
+    </div>
+
+    <div class="section-heading">Your income sources</div>
+    <div class="section-sub">Add all regular income that comes in each month.</div>
+
+    <!-- Income cards -->
+    <div id="income-list">
+
+      <!-- Salary -->
+      <div class="income-card">
+        <div class="income-card-header">
+          <div class="income-icon" style="background:var(--grad-primary);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="7" width="20" height="14" rx="2"/>
+              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+            </svg>
+          </div>
+          <div style="flex:1;">
+            <div class="income-card-name">Vikas Sharma</div>
+            <span class="chip chip--locked" style="margin-top:4px;">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/></svg>
+              SALARY
+            </span>
+          </div>
+          <div class="income-card-actions">
+            <button class="icon-action" onclick="AG.showToast('Edit income', 'info')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="income-amount">₹1,80,000</div>
+        <div class="income-row">
+          <span class="income-label">Per month</span>
+          <span class="income-value">₹1,80,000</span>
+        </div>
+        <div class="income-row">
+          <span class="income-label">Credited on</span>
+          <span class="income-value">1st of month</span>
+        </div>
+        <div class="income-row">
+          <span class="income-label">Bank account</span>
+          <span class="income-value">SBI xxxx 4521</span>
+        </div>
+      </div>
+
+      <!-- Rental -->
+      <div class="income-card" id="rental-card">
+        <div class="income-card-header">
+          <div class="income-icon" style="background:linear-gradient(135deg,#7C3AED,#9F67FF);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+          </div>
+          <div style="flex:1;">
+            <div class="income-card-name">Property, Pune</div>
+            <span class="chip chip--info" style="margin-top:4px;">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+              RENTAL
+            </span>
+          </div>
+          <div class="income-card-actions">
+            <button class="icon-action" onclick="AG.showToast('Edit income', 'info')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+            </button>
+            <button class="icon-action" style="color:var(--error);" onclick="AG.showToast('Income removed', 'info')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="income-amount">₹25,000</div>
+        <div class="income-row">
+          <span class="income-label">Per month</span>
+          <span class="income-value">₹25,000</span>
+        </div>
+        <div class="income-row">
+          <span class="income-label">Credited on</span>
+          <span class="income-value">5th of month</span>
+        </div>
+        <div class="income-row">
+          <span class="income-label">Bank account</span>
+          <span class="income-value">HDFC xxxx 8912</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add income -->
+    <button class="btn btn--secondary btn--full" style="margin-top:14px;" onclick="AG.showToast('Add income source sheet', 'info')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Add Income Source
+    </button>
+
+    <!-- Total bar -->
+    <div class="total-bar" id="total-bar">
+      <div>
+        <div class="total-label">Monthly Total</div>
+        <div style="font-size:12px;color:var(--primary);margin-top:2px;opacity:0.8;">2 active sources</div>
+      </div>
+      <div class="total-amount" id="total-amount">₹2,05,000</div>
+    </div>
+
+  </div>
+
+  <!-- Sticky Footer -->
+  <div style="position:sticky;bottom:0;background:var(--surface);border-top:1px solid var(--border);padding:12px 16px;display:flex;gap:12px;z-index:30;">
+    <button class="btn btn--ghost" onclick="history.back()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+      Back
+    </button>
+    <a href="step-03-banks.html" class="btn btn--primary" style="flex:1;text-decoration:none;">
+      Continue
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 12h14M12 5l7 7-7 7"/>
+      </svg>
+    </a>
+  </div>
+
+</div>
+</div>
+<script src="../assets/nav.js"></script>
+<script>
+AG.initDemoBar({
+  'one': () => {
+    document.getElementById('rental-card').style.display = 'none';
+    document.getElementById('total-amount').textContent = '₹1,80,000';
+    document.querySelector('.total-bar div div:last-child').textContent = '1 active source';
+  },
+  'multiple': () => {
+    document.getElementById('rental-card').style.display = 'block';
+    document.getElementById('total-amount').textContent = '₹2,05,000';
+    document.querySelector('.total-bar div div:last-child').textContent = '2 active sources';
+  }
+});
+</script>
+</body>
+</html>

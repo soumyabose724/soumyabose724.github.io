@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* ── Notification badge ── */
+    .notif-wrap { position: relative; }
+    .notif-badge {
+      position: absolute; top: 4px; right: 4px;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--error); color: #fff;
+      font-size: 9px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid var(--surface);
+      pointer-events: none;
+    }
+
+    /* ── Avatar ── */
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--grad-primary); color: #fff;
+      font-size: 13px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* ── Hero card internals ── */
+    .hero-label {
+      font-size: 11px; font-weight: 600; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--text-secondary);
+      margin-bottom: var(--sp-2);
+    }
+    .hero-assets-row {
+      font-size: 12px; color: var(--text-muted);
+      margin-top: var(--sp-3);
+    }
+    .hero-assets-row span { color: var(--text-secondary); font-weight: 500; }
+    .sparkline {
+      height: 36px; margin-top: var(--sp-4); position: relative; overflow: hidden;
+      border-radius: var(--r-sm);
+    }
+    .sparkline svg { width: 100%; height: 100%; }
+
+    /* ── Bento tile labels ── */
+    .tile-label {
+      font-size: 10px; font-weight: 600; letter-spacing: .07em;
+      text-transform: uppercase; color: var(--text-muted);
+      margin-bottom: var(--sp-2);
+    }
+    .tile-amount {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+      font-size: 22px; font-weight: 700; color: var(--text-primary);
+      line-height: 1.1;
+    }
+    .tile-amount--expense { color: var(--error); }
+
+    /* ── Budget segmented bar ── */
+    .budget-bar-wrap { margin: var(--sp-3) 0; }
+    .budget-bar-track {
+      height: 10px; border-radius: var(--r-full);
+      background: var(--border); overflow: hidden;
+      display: flex; gap: 2px;
+    }
+    .budget-seg {
+      height: 100%; border-radius: var(--r-full);
+      transition: width var(--dur-med) var(--ease-out);
+    }
+    .budget-seg--housing  { background: var(--primary); }
+    .budget-seg--food     { background: #14B8A6; }
+    .budget-seg--transport{ background: #F59E0B; }
+    .budget-seg--other    { background: #C4B5FD; }
+    .budget-envelopes {
+      display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: var(--sp-3);
+    }
+    .budget-env-item {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 11px; color: var(--text-secondary);
+    }
+    .budget-env-dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    }
+
+    /* ── Debt progress ── */
+    .debt-item { margin-bottom: var(--sp-3); }
+    .debt-item:last-of-type { margin-bottom: 0; }
+    .debt-row {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: var(--sp-2);
+    }
+    .debt-name { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+    .debt-amt  { font-size: 12px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+
+    /* ── Investment chips ── */
+    .invest-chips {
+      display: flex; flex-wrap: wrap; gap: 5px; margin-top: var(--sp-3);
+    }
+    .invest-chip {
+      font-size: 10px; padding: 2px 7px; border-radius: var(--r-full);
+      background: var(--primary-xlight); color: var(--primary);
+      font-weight: 500; border: 1px solid var(--primary-light);
+    }
+
+    /* ── CIBIL gauge ── */
+    .cibil-gauge {
+      margin-top: var(--sp-3); position: relative;
+      height: 56px; overflow: hidden;
+    }
+    .cibil-arc-wrap { display: flex; justify-content: center; }
+    .cibil-gauge svg { overflow: visible; }
+    .cibil-score-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 28px; font-weight: 700; color: var(--primary);
+      line-height: 1;
+    }
+    .cibil-label-row {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      margin-top: var(--sp-1);
+    }
+
+    /* ── Quick actions scroll ── */
+    .quick-actions {
+      display: flex; gap: var(--sp-2); overflow-x: auto;
+      -webkit-overflow-scrolling: touch; padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+    .quick-actions::-webkit-scrollbar { display: none; }
+    .quick-pill {
+      flex-shrink: 0; height: 38px; padding: 0 var(--sp-4);
+      border-radius: var(--r-full);
+      background: var(--surface); border: 1.5px solid var(--primary);
+      color: var(--primary); font-size: 13px; font-weight: 600;
+      display: flex; align-items: center; gap: var(--sp-2);
+      cursor: pointer; white-space: nowrap;
+      transition: background var(--dur-fast), color var(--dur-fast), transform var(--dur-fast);
+    }
+    .quick-pill:hover { background: var(--primary); color: #fff; }
+    .quick-pill:active { transform: scale(0.97); }
+
+    /* ── Section header with link ── */
+    .section-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: var(--sp-3);
+    }
+    .section-header h2 {
+      font-size: 15px; font-weight: 600;
+      color: var(--text-secondary); letter-spacing: .03em; text-transform: uppercase;
+    }
+    .see-all { font-size: 13px; color: var(--primary); font-weight: 500; }
+
+    /* ── Warning banner ── */
+    .warning-banner {
+      background: var(--error-light); border: 1px solid rgba(233,69,96,.3);
+      border-radius: var(--r-lg); padding: var(--sp-3) var(--sp-4);
+      font-size: 13px; font-weight: 500; color: var(--error);
+      display: none; align-items: center; gap: var(--sp-3);
+      margin-bottom: var(--sp-4);
+      animation: card-in var(--dur-med) var(--ease-out) both;
+    }
+    .warning-banner.visible { display: flex; }
+
+    /* ── Scheduled chip (teal variant) ── */
+    .chip--scheduled {
+      background: var(--primary-light); color: var(--primary);
+      border-color: var(--primary);
+    }
+
+    /* ── Transaction icon variants ── */
+    .list-row__icon--food     { background: linear-gradient(135deg,#F59E0B,#FBBF24); }
+    .list-row__icon--finance  { background: linear-gradient(135deg,#3B82F6,#60A5FA); }
+    .list-row__icon--income   { background: var(--grad-success); }
+    .list-row__icon--grocery  { background: linear-gradient(135deg,#8B5CF6,#A78BFA); }
+    .list-row__icon--emi      { background: var(--grad-primary); }
+    .list-row__icon--sip      { background: linear-gradient(135deg,#0EA5E9,#38BDF8); }
+    .list-row__icon--electric { background: linear-gradient(135deg,#F59E0B,#FBBF24); }
+
+    /* ── Trend line ── */
+    .sparkline-mini {
+      width: 100%; height: 32px; display: block;
+    }
+
+    /* ── Demo bar spacer ── */
+    .screen { padding-top: 0; }
+    .page-content { padding-top: calc(var(--top-bar-h) + var(--demo-bar-h) + var(--sp-4)); }
+
+    /* ── Tile delta row ── */
+    .tile-delta { margin-top: var(--sp-2); }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- Demo Bar -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">State</span>
+    <button class="demo-btn" data-state="overview">Overview (default)</button>
+    <button class="demo-btn" data-state="month-end">Month End</button>
+    <button class="demo-btn" data-state="alert-mode">Alert Mode</button>
+  </div>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="flex-1">
+      <div id="greeting" class="top-bar__title" style="font-size:16px; font-weight:600;">Good morning, Vikas 👋</div>
+    </div>
+    <div class="top-bar__actions">
+      <button class="top-bar__action notif-wrap" onclick="AG.showToast('3 new alerts', 'info')" aria-label="Notifications">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+        <span class="notif-badge">3</span>
+      </button>
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- Page Content -->
+  <div class="page-content">
+
+    <!-- Warning Banner (Alert Mode only) -->
+    <div class="warning-banner" id="warning-banner">
+      <span style="font-size:18px; flex-shrink:0;">⚠</span>
+      <span>3 upcoming payments this week. <strong>₹60,000 required.</strong></span>
+    </div>
+
+    <!-- Hero Net Worth Card -->
+    <div class="glass-card glass-card--hero" style="margin-bottom: var(--sp-3);" onclick="window.location.href='net-worth.html'">
+      <div class="hero-label">Net Worth</div>
+      <div class="amount-text--display gradient-text" id="hero-networth" style="font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums;">₹52,34,000</div>
+      <div style="margin-top: var(--sp-2);">
+        <span class="delta delta--pos" id="hero-delta">▲ +₹1,24,000 (+2.4%) this month</span>
+      </div>
+      <div class="hero-assets-row">
+        Assets <span id="hero-assets">₹1,03,74,000</span> &nbsp;·&nbsp; Liabilities <span style="color: var(--error);" id="hero-liabilities">₹51,40,000</span>
+      </div>
+      <div class="sparkline">
+        <svg class="sparkline-mini" viewBox="0 0 300 36" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="sparkGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#0D9488; stop-opacity:0.5"/>
+              <stop offset="100%" style="stop-color:#14B8A6; stop-opacity:1"/>
+            </linearGradient>
+            <linearGradient id="sparkFillGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color:#0D9488; stop-opacity:0.15"/>
+              <stop offset="100%" style="stop-color:#0D9488; stop-opacity:0"/>
+            </linearGradient>
+          </defs>
+          <path d="M0,28 C30,26 60,24 90,22 C120,20 150,18 180,15 C210,12 240,10 270,8 C285,7 295,6 300,5"
+                fill="none" stroke="url(#sparkGrad)" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M0,28 C30,26 60,24 90,22 C120,20 150,18 180,15 C210,12 240,10 270,8 C285,7 295,6 300,5 L300,36 L0,36 Z"
+                fill="url(#sparkFillGrad)"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Bento Grid -->
+    <div class="bento-grid" style="margin-bottom: var(--sp-3);">
+
+      <!-- Income Tile -->
+      <div class="glass-card glass-card--compact">
+        <div class="tile-label">Income</div>
+        <div class="tile-amount">₹2,05,000</div>
+        <div class="tile-delta">
+          <span class="delta delta--neu">▲ Same as last month</span>
+        </div>
+      </div>
+
+      <!-- Expenses Tile -->
+      <div class="glass-card glass-card--compact" id="expenses-tile">
+        <div class="tile-label">Expenses</div>
+        <div class="tile-amount tile-amount--expense" id="expenses-amount">₹1,18,000</div>
+        <div class="tile-delta">
+          <span class="delta" id="expenses-delta" style="background:rgba(245,158,11,.12); color:var(--warning);">▲ +₹12,000 vs last month</span>
+        </div>
+      </div>
+
+      <!-- Budget Status (col-span-2) -->
+      <div class="glass-card glass-card--compact col-span-2">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp-3);">
+          <div class="tile-label" style="margin-bottom:0;">Budget Status</div>
+          <span class="chip" id="budget-chip" style="">UNALLOCATED</span>
+        </div>
+        <div class="budget-bar-wrap">
+          <div class="budget-bar-track" id="budget-bar">
+            <div class="budget-seg budget-seg--housing" id="seg-housing" style="width:33%;" title="Housing 100%"></div>
+            <div class="budget-seg budget-seg--food" id="seg-food" style="width:20%;" title="Food 68%"></div>
+            <div class="budget-seg budget-seg--transport" id="seg-transport" style="width:13%;" title="Transport 45%"></div>
+            <div class="budget-seg budget-seg--other" id="seg-other" style="width:10%;" title="Other"></div>
+          </div>
+        </div>
+        <div class="budget-envelopes">
+          <div class="budget-env-item">
+            <div class="budget-env-dot" style="background:var(--primary);"></div>
+            Housing 100%
+          </div>
+          <div class="budget-env-item">
+            <div class="budget-env-dot" style="background:#14B8A6;"></div>
+            Food 68%
+          </div>
+          <div class="budget-env-item">
+            <div class="budget-env-dot" style="background:#F59E0B;"></div>
+            Transport 45%
+          </div>
+          <div class="budget-env-item">
+            <div class="budget-env-dot" style="background:#C4B5FD;"></div>
+            Other
+          </div>
+        </div>
+        <div style="font-size:12px; color:var(--text-muted); margin-top:var(--sp-3);" id="budget-caption">
+          <span style="color:var(--warning); font-weight:600;">₹83,520 unallocated</span> across all envelopes
+        </div>
+      </div>
+
+      <!-- Debt Payoff (col-span-2) -->
+      <div class="glass-card glass-card--compact col-span-2">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp-4);">
+          <div class="tile-label" style="margin-bottom:0;">Debt Payoff</div>
+          <a href="#" style="font-size:12px; color:var(--primary); font-weight:500;">Avalanche Plan →</a>
+        </div>
+        <div class="debt-item">
+          <div class="debt-row">
+            <span class="debt-name">Home Loan (HDFC)</span>
+            <span class="debt-amt">₹45L / ₹60L</span>
+          </div>
+          <div class="progress-bar progress-bar--thick">
+            <div class="progress-bar__fill" style="width:75%;"></div>
+          </div>
+          <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">75% outstanding · ₹52,480/mo EMI</div>
+        </div>
+        <div class="debt-item" style="margin-top:var(--sp-4);">
+          <div class="debt-row">
+            <span class="debt-name">Car Loan (Axis)</span>
+            <span class="debt-amt">₹6.4L / ₹8L</span>
+          </div>
+          <div class="progress-bar progress-bar--thick">
+            <div class="progress-bar__fill progress-bar__fill--warning" style="width:80%;"></div>
+          </div>
+          <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">80% outstanding · ₹14,200/mo EMI</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:var(--sp-2); margin-top:var(--sp-4); padding-top:var(--sp-3); border-top:1px solid var(--border);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+          <span style="font-size:12px; color:var(--text-muted);">Debt free est. <strong style="color:var(--text-secondary);">Dec 2031</strong></span>
+        </div>
+      </div>
+
+      <!-- Investments Tile -->
+      <div class="glass-card glass-card--compact">
+        <div class="tile-label">Investments</div>
+        <div class="tile-amount" style="font-size:18px;">₹3,71,100</div>
+        <div class="tile-delta">
+          <span class="delta delta--pos">▲ +18.4% XIRR</span>
+        </div>
+        <div class="invest-chips" id="invest-chips">
+          <span class="invest-chip">3 SIPs</span>
+          <span class="invest-chip">Equity</span>
+          <span class="invest-chip">PPF</span>
+        </div>
+      </div>
+
+      <!-- CIBIL Score Tile -->
+      <div class="glass-card glass-card--compact">
+        <div class="tile-label">Credit Score</div>
+        <div style="display:flex; align-items:center; gap:var(--sp-2); margin-bottom:var(--sp-2);">
+          <div class="cibil-score-num">762</div>
+          <span class="chip chip--balanced">GOOD</span>
+        </div>
+        <!-- CSS arc gauge -->
+        <div style="position:relative; height:52px; overflow:hidden;">
+          <svg width="100%" height="104" viewBox="0 0 160 104" style="margin-top:-4px;">
+            <defs>
+              <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#E94560"/>
+                <stop offset="40%" style="stop-color:#F59E0B"/>
+                <stop offset="70%" style="stop-color:#22C55E"/>
+                <stop offset="100%" style="stop-color:#0D9488"/>
+              </linearGradient>
+            </defs>
+            <!-- Track -->
+            <path d="M 16,96 A 64,64 0 0,1 144,96" fill="none" stroke="var(--border)" stroke-width="10" stroke-linecap="round"/>
+            <!-- Colored fill (762/900 ≈ 84.7% of 180deg) -->
+            <path d="M 16,96 A 64,64 0 0,1 144,96" fill="none" stroke="url(#gaugeGrad)" stroke-width="10" stroke-linecap="round"
+                  stroke-dasharray="201" stroke-dashoffset="31"/>
+            <!-- Needle dot at 762/900 -->
+            <circle cx="133" cy="42" r="6" fill="var(--primary)" stroke="#fff" stroke-width="2"/>
+          </svg>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-muted); margin-top:-8px;">
+          <span>300</span><span style="color:var(--primary); font-weight:500;">762</span><span>900</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Quick Actions -->
+    <div style="margin-bottom:var(--sp-5);">
+      <div class="section-header"><h2>Quick Actions</h2></div>
+      <div class="quick-actions">
+        <button class="quick-pill" onclick="AG.showToast('Add Transaction', 'info')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Transaction
+        </button>
+        <button class="quick-pill" onclick="AG.showToast('Pay EMI recorded', 'success')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          Pay EMI
+        </button>
+        <button class="quick-pill" onclick="AG.showToast('SIP recorded', 'success')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Record SIP
+        </button>
+        <button class="quick-pill" onclick="AG.showToast('Opening reports…', 'info')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          View Reports
+        </button>
+      </div>
+    </div>
+
+    <!-- Upcoming This Week -->
+    <div style="margin-bottom:var(--sp-5);">
+      <div class="section-header"><h2>Upcoming This Week</h2></div>
+
+      <div class="list-row">
+        <div class="list-row__icon list-row__icon--emi">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+        </div>
+        <div class="list-row__info">
+          <div class="list-row__label">HDFC Home Loan EMI</div>
+          <div class="list-row__meta">Due 1 Jul 2026</div>
+        </div>
+        <div class="list-row__actions">
+          <span class="chip chip--scheduled">SCHEDULED</span>
+        </div>
+        <div class="list-row__amount-row">
+          <div class="list-row__amount list-row__amount--expense">₹52,480</div>
+          <div class="list-row__amount-caption">Auto-debit from HDFC Savings</div>
+        </div>
+      </div>
+
+      <div class="list-row">
+        <div class="list-row__icon list-row__icon--sip">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+        </div>
+        <div class="list-row__info">
+          <div class="list-row__label">Axis Bluechip SIP</div>
+          <div class="list-row__meta">Auto-debit 5 Jul 2026</div>
+        </div>
+        <div class="list-row__actions">
+          <span class="chip chip--scheduled">SCHEDULED</span>
+        </div>
+        <div class="list-row__amount-row">
+          <div class="list-row__amount list-row__amount--expense">₹5,000</div>
+          <div class="list-row__amount-caption">Axis Bluechip Fund — Direct Growth</div>
+        </div>
+      </div>
+
+      <div class="list-row">
+        <div class="list-row__icon list-row__icon--electric">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+          </svg>
+        </div>
+        <div class="list-row__info">
+          <div class="list-row__label">Electricity Bill</div>
+          <div class="list-row__meta">Due 7 Jul 2026</div>
+        </div>
+        <div class="list-row__actions">
+          <span class="chip chip--overdue">OVERDUE</span>
+        </div>
+        <div class="list-row__amount-row">
+          <div class="list-row__amount list-row__amount--expense">₹3,240</div>
+          <div class="list-row__amount-caption">BESCOM — Meter #7348291</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div style="margin-bottom:var(--sp-4);">
+      <div class="section-header">
+        <h2>Recent Transactions</h2>
+        <a href="#" class="see-all">See all →</a>
+      </div>
+
+      <div class="list-row">
+        <div class="list-row__icon list-row__icon--food">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>
+            <line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/>
+          </svg>
+        </div>
+        <div class="list-row__info">
+          <div class="list-row__label">Swiggy</div>
+          <div class="list-row__meta">Food &amp; Dining · 20 Jun</div>
+        </div>
+        <div class="list-row__actions"></div>
+        <div class="list-row__amount-row">
+          <div class="list-row__amount list-row__amount--expense">−₹680</div>
+          <div class="list-row__amount-caption">UPI · Deducted from HDFC</div>
+        </div>
+      </div>
+
+      <div class="list-row">
+        <div class="list-row__icon list-row__icon--finance">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+            <line x1="1" y1="10" x2="23" y2="10"/>
+          </svg>
+        </div>
+        <div class="list-row__info">
+          <div class="list-row__label">HDFC Credit Card Payment</div>
+          <div class="list-row__meta">Finance · 19 Jun</div>
+        </div>
+        <div class="list-row__actions"></div>
+        <div class="list-row__amount-row">
+          <div class="list-row__amount list-row__amount--expense">−₹45,000</div>
+          <div class="list-row__amount-caption">Full bill payment</div>
+        </div>
+      </div>
+
+      <div class="list-row">
+        <div class="list-row__icon list-row__icon--income">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="1" x2="12" y2="23"/>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+        </div>
+        <div class="list-row__info">
+          <div class="list-row__label">Salary Credit</div>
+          <div class="list-row__meta">Income · 1 Jun</div>
+        </div>
+        <div class="list-row__actions"></div>
+        <div class="list-row__amount-row">
+          <div class="list-row__amount list-row__amount--income">+₹1,80,000</div>
+          <div class="list-row__amount-caption">TechCorp Pvt Ltd · HDFC NEFT</div>
+        </div>
+      </div>
+
+      <div class="list-row">
+        <div class="list-row__icon list-row__icon--grocery">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <path d="M16 10a4 4 0 0 1-8 0"/>
+          </svg>
+        </div>
+        <div class="list-row__info">
+          <div class="list-row__label">Big Basket</div>
+          <div class="list-row__meta">Groceries · 18 Jun</div>
+        </div>
+        <div class="list-row__actions"></div>
+        <div class="list-row__amount-row">
+          <div class="list-row__amount list-row__amount--expense">−₹2,340</div>
+          <div class="list-row__amount-caption">UPI · BigBasket cart</div>
+        </div>
+      </div>
+
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- FAB -->
+  <button class="fab" onclick="AG.showToast('Add Transaction', 'info')" aria-label="Add transaction">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+  </button>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <div class="nav-fab-slot">
+      <!-- FAB floats above -->
+    </div>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    AG.initBottomNav('dashboard');
+
+    // Count-up animation for hero net worth
+    const heroEl = document.getElementById('hero-networth');
+    AG.countUp(heroEl, 5234000 * 100, 900);
+
+    // Demo state definitions
+    AG.initDemoBar({
+      'overview': () => {
+        // Net worth
+        AG.countUp(heroEl, 5234000 * 100, 700);
+        document.getElementById('hero-delta').textContent     = '▲ +₹1,24,000 (+2.4%) this month';
+        document.getElementById('hero-delta').className       = 'delta delta--pos';
+        document.getElementById('hero-assets').textContent    = '₹1,03,74,000';
+        document.getElementById('hero-liabilities').textContent = '₹51,40,000';
+
+        // Expenses
+        document.getElementById('expenses-amount').textContent = '₹1,18,000';
+        document.getElementById('expenses-delta').textContent  = '▲ +₹12,000 vs last month';
+        document.getElementById('expenses-delta').style.cssText = 'background:rgba(245,158,11,.12); color:var(--warning);';
+
+        // Budget chip
+        const chip = document.getElementById('budget-chip');
+        chip.className   = 'chip chip--unallocated';
+        chip.textContent = 'UNALLOCATED';
+        document.getElementById('budget-caption').innerHTML =
+          '<span style="color:var(--warning);font-weight:600;">₹83,520 unallocated</span> across all envelopes';
+
+        // Segments (normal)
+        document.getElementById('seg-housing').style.width   = '33%';
+        document.getElementById('seg-food').style.width      = '20%';
+        document.getElementById('seg-transport').style.width = '13%';
+        document.getElementById('seg-other').style.width     = '10%';
+
+        // Hide warning banner
+        document.getElementById('warning-banner').classList.remove('visible');
+      },
+
+      'month-end': () => {
+        AG.countUp(heroEl, 5358000 * 100, 700);
+        document.getElementById('hero-delta').textContent  = '▲ +₹1,24,000 (+2.4%) this month';
+        document.getElementById('hero-delta').className    = 'delta delta--pos';
+        document.getElementById('hero-assets').textContent = '₹1,04,98,000';
+
+        document.getElementById('expenses-amount').textContent = '₹1,18,000';
+        document.getElementById('expenses-delta').textContent  = '▲ +₹12,000 vs last month';
+        document.getElementById('expenses-delta').style.cssText = 'background:rgba(245,158,11,.12); color:var(--warning);';
+
+        // Budget chip — BALANCED
+        const chip = document.getElementById('budget-chip');
+        chip.className   = 'chip chip--balanced';
+        chip.textContent = 'BALANCED';
+        document.getElementById('budget-caption').innerHTML =
+          '<span style="color:var(--success);font-weight:600;">All envelopes on track</span> — great month!';
+
+        // Segments full
+        document.getElementById('seg-housing').style.width   = '35%';
+        document.getElementById('seg-food').style.width      = '28%';
+        document.getElementById('seg-transport').style.width = '18%';
+        document.getElementById('seg-other').style.width     = '14%';
+
+        document.getElementById('warning-banner').classList.remove('visible');
+        AG.showToast('Month closed successfully — ₹1,24,000 net gain', 'success');
+      },
+
+      'alert-mode': () => {
+        AG.countUp(heroEl, 5234000 * 100, 700);
+        document.getElementById('hero-delta').textContent  = '▼ −₹42,000 this week';
+        document.getElementById('hero-delta').className    = 'delta delta--neg';
+
+        document.getElementById('expenses-amount').textContent = '₹1,98,000';
+        document.getElementById('expenses-amount').style.color = 'var(--error)';
+        document.getElementById('expenses-delta').textContent  = '▲ +₹80,000 vs last month — OVER BUDGET';
+        document.getElementById('expenses-delta').style.cssText = 'background:var(--error-light); color:var(--error);';
+
+        // Budget chip — OVER
+        const chip = document.getElementById('budget-chip');
+        chip.className   = 'chip chip--over';
+        chip.textContent = 'OVER-ALLOCATED';
+        document.getElementById('budget-caption').innerHTML =
+          '<span style="color:var(--error);font-weight:600;">₹80,000 over budget</span> — review envelopes now';
+
+        // Segments overflowing (simulate)
+        document.getElementById('seg-housing').style.width   = '38%';
+        document.getElementById('seg-food').style.width      = '26%';
+        document.getElementById('seg-transport').style.width = '22%';
+        document.getElementById('seg-other').style.width     = '14%';
+
+        document.getElementById('warning-banner').classList.add('visible');
+        AG.showToast('3 payments due this week — ₹60,720 required', 'warning');
+      }
+    });
+  });
+</script>
+</body>
+</html>

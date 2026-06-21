@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Forgot Password</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .auth-screen {
+      display: flex;
+      flex-direction: column;
+      min-height: 100dvh;
+      background: var(--bg);
+      position: relative;
+      overflow: hidden;
+    }
+    .auth-screen::before {
+      content: '';
+      position: absolute;
+      top: -100px; right: -80px;
+      width: 280px; height: 280px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(13,148,136,0.10) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* Top bar (back button) */
+    .auth-top-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+      padding: var(--sp-4) var(--sp-5);
+      position: relative;
+      z-index: 1;
+    }
+    .auth-back-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--r-full);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-primary);
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: background var(--dur-fast);
+    }
+    .auth-back-btn:hover { background: var(--surface-raised); }
+
+    .auth-body {
+      flex: 1;
+      padding: var(--sp-4) var(--sp-6) var(--sp-10);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Progress steps */
+    .steps-header {
+      margin-bottom: var(--sp-8);
+    }
+    .step-indicator {
+      padding: 0;
+      margin-bottom: var(--sp-4);
+    }
+
+    /* Step panels — only current is shown */
+    .step-panel {
+      display: none;
+      flex-direction: column;
+      gap: 0;
+      animation: card-in var(--dur-med) var(--ease-out) both;
+    }
+    .step-panel.active { display: flex; }
+
+    .step-heading {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: var(--sp-2);
+      letter-spacing: -0.01em;
+    }
+    .step-subheading {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: var(--sp-6);
+      line-height: 1.5;
+    }
+
+    /* Phone prefix */
+    .phone-input-wrap {
+      position: relative;
+    }
+    .phone-prefix {
+      position: absolute;
+      left: var(--sp-4);
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      color: var(--text-secondary);
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 500;
+      pointer-events: none;
+    }
+    .phone-input-wrap .form-input {
+      padding-left: calc(var(--sp-4) + 38px);
+    }
+
+    /* OTP boxes — 6 digits */
+    .otp-row {
+      display: flex;
+      gap: var(--sp-2);
+      justify-content: center;
+      margin-bottom: var(--sp-5);
+    }
+    .otp-box {
+      width: 48px;
+      height: 58px;
+      border-radius: var(--r-lg);
+      border: 2px solid var(--border-strong);
+      background: var(--surface);
+      text-align: center;
+      font-size: 22px;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: var(--text-primary);
+      transition: border-color var(--dur-fast), box-shadow var(--dur-fast), transform var(--dur-fast) var(--ease-spring);
+    }
+    .otp-box:focus {
+      border-color: var(--primary);
+      box-shadow: var(--ring);
+      outline: none;
+      transform: scale(1.05);
+    }
+    .otp-box.filled { border-color: var(--primary); background: var(--primary-xlight); }
+
+    /* Timer / resend */
+    .otp-resend {
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: var(--sp-6);
+    }
+    .otp-resend span.timer { font-weight: 600; color: var(--primary); font-family: 'JetBrains Mono', monospace; }
+    .otp-resend a { color: var(--primary); font-weight: 500; display: none; cursor: pointer; }
+    .otp-resend a:hover { text-decoration: underline; }
+
+    /* PIN creation — stacked groups */
+    .pin-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-3);
+      margin-bottom: var(--sp-6);
+    }
+    .pin-group__label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: var(--sp-2);
+    }
+
+    /* Success state */
+    .success-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: var(--sp-6) 0;
+    }
+    .success-icon-wrap {
+      width: 96px;
+      height: 96px;
+      border-radius: var(--r-full);
+      background: var(--success-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--success);
+      margin-bottom: var(--sp-6);
+      animation: check-pop 0.6s var(--ease-spring) 0.1s both;
+    }
+    .success-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: var(--sp-2);
+      letter-spacing: -0.01em;
+    }
+    .success-caption {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: var(--sp-8);
+    }
+    .success-detail {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+      background: var(--warning-light);
+      border: 1px solid rgba(245,158,11,0.25);
+      border-radius: var(--r-lg);
+      padding: var(--sp-3) var(--sp-4);
+      font-size: 13px;
+      color: var(--warning);
+      margin-bottom: var(--sp-6);
+      text-align: left;
+    }
+
+    /* Check SVG animation */
+    .check-circle-svg {
+      width: 48px;
+      height: 48px;
+    }
+    .check-path {
+      stroke: var(--success);
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+      stroke-dasharray: 60;
+      stroke-dashoffset: 60;
+      animation: draw-check 0.5s var(--ease-out) 0.4s forwards;
+    }
+    @keyframes draw-check {
+      to { stroke-dashoffset: 0; }
+    }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- Demo bar -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">Step</span>
+    <button class="demo-btn" data-state="step1">1 — Enter Phone</button>
+    <button class="demo-btn" data-state="step2">2 — OTP</button>
+    <button class="demo-btn" data-state="step3">3 — New PIN</button>
+    <button class="demo-btn" data-state="step4">4 — Success</button>
+  </div>
+
+  <div class="auth-screen">
+    <!-- Top bar -->
+    <div class="auth-top-bar">
+      <button class="auth-back-btn" onclick="history.back()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M12 5l-7 7 7 7"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="auth-body">
+      <!-- Progress indicator -->
+      <div class="steps-header">
+        <div class="step-indicator" id="step-indicator">
+          <div class="step-dot done"    id="sdot-1"></div>
+          <div class="step-line"        id="sline-1"></div>
+          <div class="step-dot"         id="sdot-2"></div>
+          <div class="step-line"        id="sline-2"></div>
+          <div class="step-dot"         id="sdot-3"></div>
+          <div class="step-line"        id="sline-3"></div>
+          <div class="step-dot"         id="sdot-4"></div>
+        </div>
+      </div>
+
+      <!-- STEP 1: Enter Phone -->
+      <div class="step-panel" id="panel-step1">
+        <div class="step-heading">Verify your phone</div>
+        <div class="step-subheading">We'll send a 6-digit OTP to your registered mobile number to reset your PIN.</div>
+
+        <div class="form-group">
+          <label class="form-label" for="forgot-phone">Mobile Number</label>
+          <div class="phone-input-wrap">
+            <span class="phone-prefix">+91</span>
+            <input id="forgot-phone" class="form-input" type="tel" placeholder="98765 43210" inputmode="numeric" maxlength="15" value="98765 43210">
+          </div>
+          <span class="form-helper">OTP will be sent via SMS</span>
+        </div>
+
+        <button class="btn btn--primary btn--full btn--lg" style="margin-top:var(--sp-6)">
+          Send OTP
+        </button>
+      </div>
+
+      <!-- STEP 2: OTP -->
+      <div class="step-panel" id="panel-step2">
+        <div class="step-heading">Enter OTP</div>
+        <div class="step-subheading">We sent a 6-digit code to<br><strong>+91 98765 43210</strong></div>
+
+        <div class="otp-row" id="otp-row">
+          <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+          <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+          <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+          <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+          <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+          <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+        </div>
+
+        <div class="otp-resend">
+          Resend in <span class="timer" id="otp-timer">47s</span>
+          <a id="resend-link">Resend OTP</a>
+        </div>
+
+        <button class="btn btn--primary btn--full btn--lg">Verify OTP</button>
+      </div>
+
+      <!-- STEP 3: New PIN -->
+      <div class="step-panel" id="panel-step3">
+        <div class="step-heading">Create new PIN</div>
+        <div class="step-subheading">Choose a 6-digit PIN to secure your ArthaGrid account.</div>
+
+        <div class="pin-group">
+          <div>
+            <div class="pin-group__label">New PIN</div>
+            <div class="pin-row" id="new-pin-row">
+              <input class="pin-box" type="password" maxlength="1" inputmode="numeric">
+              <input class="pin-box" type="password" maxlength="1" inputmode="numeric">
+              <input class="pin-box" type="password" maxlength="1" inputmode="numeric">
+              <input class="pin-box" type="password" maxlength="1" inputmode="numeric">
+              <input class="pin-box" type="password" maxlength="1" inputmode="numeric">
+              <input class="pin-box" type="password" maxlength="1" inputmode="numeric">
+            </div>
+          </div>
+          <div style="margin-top:var(--sp-4)">
+            <div class="pin-group__label">Confirm PIN</div>
+            <div class="pin-row" id="confirm-pin-row">
+              <input class="pin-box" type="password" maxlength="1" inputmode="numeric">
+              <input class="pin-box" type="password" maxlength="1" inputmode="numeric">
+              <input class="pin-box" type="password" maxlength="1" inputmode="numeric">
+              <input class="pin-box" type="password" maxlength="1" inputmode="numeric">
+              <input class="pin-box" type="password" maxlength="1" inputmode="numeric">
+              <input class="pin-box" type="password" maxlength="1" inputmode="numeric">
+            </div>
+          </div>
+        </div>
+
+        <div class="surface-card" style="margin-bottom:var(--sp-5); gap:var(--sp-2); display:flex; flex-direction:column;">
+          <div class="t-caption text-secondary">PIN requirements:</div>
+          <div class="t-caption" style="display:flex; align-items:center; gap:6px; color:var(--success)">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Exactly 6 digits
+          </div>
+          <div class="t-caption" style="display:flex; align-items:center; gap:6px; color:var(--text-muted)">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/></svg>
+            No repeated digits (e.g. 111111)
+          </div>
+        </div>
+
+        <button class="btn btn--primary btn--full btn--lg">Set PIN</button>
+      </div>
+
+      <!-- STEP 4: Success -->
+      <div class="step-panel" id="panel-step4">
+        <div class="success-container">
+          <div class="success-icon-wrap">
+            <svg class="check-circle-svg" viewBox="0 0 48 48">
+              <path class="check-path" d="M 10 24 L 21 35 L 38 14"/>
+            </svg>
+          </div>
+          <div class="success-title">PIN Updated Successfully!</div>
+          <div class="success-caption">Your new PIN has been set.<br>You can now sign in with it.</div>
+          <div class="success-detail" style="width:100%">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            All devices have been signed out for security. Please sign in again.
+          </div>
+          <a href="login.html" class="btn btn--primary btn--full btn--lg">Back to Login</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</div>
+<script src="../assets/nav.js"></script>
+<script>
+  let otpTimerInterval = null;
+
+  // OTP box auto-advance
+  function initOtpBoxes() {
+    const boxes = document.querySelectorAll('.otp-box');
+    boxes.forEach((box, i) => {
+      box.addEventListener('input', () => {
+        box.value = box.value.replace(/\D/g, '').slice(-1);
+        box.classList.toggle('filled', box.value.length > 0);
+        if (box.value && boxes[i + 1]) boxes[i + 1].focus();
+      });
+      box.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !box.value && boxes[i - 1]) {
+          boxes[i - 1].focus();
+          boxes[i - 1].value = '';
+          boxes[i - 1].classList.remove('filled');
+        }
+      });
+    });
+  }
+
+  // Countdown timer
+  function startOtpTimer(seconds) {
+    clearInterval(otpTimerInterval);
+    const timerEl   = document.getElementById('otp-timer');
+    const resendLink = document.getElementById('resend-link');
+    let remaining = seconds;
+
+    function tick() {
+      if (remaining <= 0) {
+        clearInterval(otpTimerInterval);
+        timerEl.parentElement.innerHTML = '<a id="resend-link" style="color:var(--primary);font-weight:500;cursor:pointer">Resend OTP</a>';
+        return;
+      }
+      timerEl.textContent = remaining + 's';
+      remaining--;
+    }
+    tick();
+    otpTimerInterval = setInterval(tick, 1000);
+  }
+
+  // Update step indicator dots + lines
+  function setStep(n) {
+    for (let i = 1; i <= 4; i++) {
+      const dot  = document.getElementById('sdot-' + i);
+      const line = document.getElementById('sline-' + i);
+      dot.className  = 'step-dot' + (i < n ? ' done' : i === n ? ' current' : '');
+      if (line) line.className = 'step-line' + (i < n ? ' done' : '');
+
+      document.getElementById('panel-step' + i).classList.toggle('active', i === n);
+    }
+  }
+
+  initOtpBoxes();
+
+  AG.initDemoBar({
+    'step1': () => {
+      clearInterval(otpTimerInterval);
+      setStep(1);
+    },
+    'step2': () => {
+      setStep(2);
+      startOtpTimer(47);
+      // Pre-fill 3 digits for visual interest
+      const boxes = document.querySelectorAll('.otp-box');
+      boxes.forEach((b, i) => {
+        b.value = i < 3 ? String(i + 4) : '';
+        b.classList.toggle('filled', i < 3);
+      });
+    },
+    'step3': () => {
+      clearInterval(otpTimerInterval);
+      setStep(3);
+      // Pre-fill new PIN boxes
+      const newPins = document.querySelectorAll('#new-pin-row .pin-box');
+      newPins.forEach(b => { b.value = '•'; b.classList.add('filled'); });
+      const confirmPins = document.querySelectorAll('#confirm-pin-row .pin-box');
+      confirmPins.forEach((b, i) => {
+        b.value = i < 4 ? '•' : '';
+        b.classList.toggle('filled', i < 4);
+      });
+    },
+    'step4': () => {
+      clearInterval(otpTimerInterval);
+      setStep(4);
+    },
+  });
+</script>
+</body>
+</html>
