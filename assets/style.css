@@ -1474,3 +1474,88 @@ textarea:focus-visible {
   .chip.interactive:hover,
   .theme-toggle:hover { transform: none; }
 }
+
+/* ── 40. LIST ROW (amount-first, overflow-proof) ───────────────
+   Canonical row for any "icon + title/meta + amount + actions"
+   list item (accounts, loans, cards, holdings, transactions…).
+   The amount lives on its own full-width row so a long value can
+   NEVER squeeze the title/meta into many wrapped lines. Use this
+   everywhere instead of bespoke per-screen row CSS.
+─────────────────────────────────────────────────────────────── */
+.data-row {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) auto;
+  grid-template-areas:
+    "icon info   actions"
+    "icon amount amount";
+  column-gap: var(--sp-3); row-gap: var(--sp-3);
+  align-items: start;
+  padding: var(--sp-4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  margin-bottom: var(--sp-3);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.40), rgba(255,255,255,0)),
+    var(--glass-bg);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 1px 2px rgba(28,25,23,0.04), 0 6px 18px rgba(28,25,23,0.05);
+  transition: transform var(--t-base) var(--ease-out),
+              box-shadow var(--t-base), border-color var(--t-base);
+}
+.data-row:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(28,25,23,0.05), 0 16px 34px rgba(13,148,136,0.13);
+  border-color: var(--glass-border);
+}
+.data-row__icon {
+  grid-area: icon; align-self: start;
+  width: 46px; height: 46px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(145deg, var(--primary-light), var(--primary-xlight));
+  color: var(--primary-dark);
+  box-shadow: inset 0 0 0 1px rgba(13,148,136,0.14), 0 4px 10px rgba(13,148,136,0.10);
+}
+.data-row__icon svg { width: 20px; height: 20px; }
+.data-row__info { grid-area: info; align-self: start; min-width: 0; }
+.data-row__label {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+  font-weight: 700; font-size: 15px; color: var(--text-primary);
+  line-height: 1.3; letter-spacing: -0.01em;
+}
+.data-row__meta { font-size: 12px; color: var(--text-secondary); margin-top: 4px; line-height: 1.5; }
+
+/* Amount — large hero figure on its own row with a hairline divider */
+.data-row__amount,
+.data-row__right {
+  grid-area: amount; width: 100%;
+  border-top: 1px solid var(--border); padding-top: var(--sp-3);
+}
+.data-row__amount {
+  text-align: left; white-space: nowrap;
+  font-family: var(--font-mono); font-weight: 700; font-size: 19px;
+  color: var(--text-primary); letter-spacing: -0.02em; font-variant-numeric: tabular-nums;
+}
+.data-row__right {
+  display: flex; flex-direction: row; align-items: baseline;
+  gap: 6px 10px; flex-wrap: wrap;
+}
+.data-row__right .data-row__amount { width: auto; border-top: none; padding-top: 0; }
+.data-row__caption,
+.data-row__emi,
+.data-row__premium {
+  font-size: 12px; color: var(--text-secondary);
+  font-family: var(--font-mono); font-weight: 500;
+}
+.data-row__actions {
+  grid-area: actions; align-self: start; justify-self: end;
+  display: flex; gap: 2px;
+}
+.data-row__actions .btn { width: 32px; height: 32px; padding: 0; border-radius: 9px; color: var(--text-muted); }
+.data-row__actions .btn:hover { background: var(--surface-raised); color: var(--text-primary); }
+
+@media (max-width: 480px) {
+  .data-row__amount, .data-row__right .data-row__amount { font-size: 18px; }
+}
+@media (max-width: 360px) {
+  .data-row__amount, .data-row__right .data-row__amount { font-size: 17px; }
+}

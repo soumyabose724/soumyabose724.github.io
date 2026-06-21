@@ -339,6 +339,58 @@
       .data-row__amount, .data-row__right .data-row__amount { font-size: 15px; }
     }
 
+  
+    /* ═══════════════════════════════════════════════════════════
+       v4 — amount on its own full-width row (no info squeeze)
+       Fixes dense cards (loans/insurance) where the side amount
+       column crushed the title/meta into many wrapped lines.
+       ═══════════════════════════════════════════════════════════ */
+    .data-row {
+      display: grid;
+      grid-template-columns: 46px minmax(0, 1fr) auto;
+      grid-template-areas:
+        "icon info   actions"
+        "icon amount amount";
+      column-gap: 14px; row-gap: 10px;
+      align-items: start;
+    }
+    .data-row__icon    { grid-area: icon;    align-self: start; }
+    .data-row__info    { grid-area: info;    align-self: start; min-width: 0; }
+    .data-row__actions {
+      grid-area: actions; align-self: start; justify-self: end;
+      display: flex; gap: 2px; margin-top: 0;
+    }
+
+    /* Amount — large hero figure on its own row, with a hairline divider */
+    .data-row__amount,
+    .data-row__right {
+      grid-area: amount; width: 100%; justify-self: stretch;
+      border-top: 1px solid var(--border); padding-top: 10px;
+    }
+    .data-row__amount {
+      text-align: left; align-self: center; white-space: nowrap;
+      font-family: var(--font-mono); font-weight: 700; font-size: 19px;
+      color: var(--text-primary); letter-spacing: -0.02em; font-variant-numeric: tabular-nums;
+    }
+    .data-row__right {
+      display: flex; flex-direction: row; align-items: baseline;
+      gap: 6px 10px; flex-wrap: wrap; text-align: left;
+    }
+    .data-row__right .data-row__amount {
+      width: auto; border-top: none; padding-top: 0;
+      font-size: 19px;
+    }
+    .data-row__emi, .data-row__premium {
+      font-size: 12px; color: var(--text-secondary); font-family: var(--font-mono); font-weight: 500;
+    }
+
+    @media (max-width: 480px) {
+      .data-row__amount, .data-row__right .data-row__amount { font-size: 18px; }
+    }
+    @media (max-width: 360px) {
+      .data-row__amount, .data-row__right .data-row__amount { font-size: 17px; }
+    }
+
   </style>
 </head>
 <body style="background:var(--bg);min-height:100vh;display:flex;flex-direction:column;padding-bottom:52px;">
