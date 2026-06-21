@@ -128,6 +128,123 @@
     }
     .toggle-switch.on::after { left: 23px; }
     .inline-form-actions { display: flex; gap: 10px; margin-top: 16px; justify-content: flex-end; }
+  
+    /* ═══════════════════════════════════════════════════════════
+       UI POLISH v2 — modern glassmorphism, mobile-first fixes
+       (appended; later rules win over earlier local styles)
+       ═══════════════════════════════════════════════════════════ */
+
+    /* Ambient depth on the canvas */
+    body {
+      background:
+        radial-gradient(1100px 560px at 100% -6%, rgba(13,148,136,0.07), transparent 60%),
+        radial-gradient(820px 460px at -8% 8%, rgba(20,184,166,0.05), transparent 55%),
+        var(--bg) !important;
+    }
+
+    /* Frosted header + progress */
+    .wiz-header {
+      background: var(--glass-bg);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--glass-border);
+    }
+    .wiz-progress-wrap {
+      background: var(--glass-bg);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--glass-border);
+    }
+    .wiz-brand-icon { background: var(--grad-primary); box-shadow: 0 4px 12px rgba(13,148,136,0.30); }
+    .wiz-progress-bar-fill { background: var(--grad-primary) !important; box-shadow: 0 0 8px rgba(13,148,136,0.35); }
+    .wiz-dot--done { background: var(--grad-primary) !important; border-color: transparent !important; }
+    .wiz-dot--current { box-shadow: 0 0 0 4px var(--primary-xlight); }
+
+    /* Hero card — premium surface */
+    .wiz-card {
+      position: relative;
+      border-radius: var(--r-2xl);
+      box-shadow: var(--sh-lg);
+      animation: slideUp 0.5s var(--ease-out) both;
+      overflow: hidden;
+    }
+    .wiz-card::before {
+      content: ""; position: absolute; inset: 0 0 auto 0; height: 3px;
+      background: var(--grad-primary); opacity: 0.85;
+    }
+
+    /* ── DATA ROW — robust grid (fixes wrap/overflow on mobile) ── */
+    .data-row {
+      display: grid;
+      grid-template-columns: 44px 1fr auto;
+      column-gap: 12px; row-gap: 10px;
+      align-items: center;
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-xl);
+      margin-bottom: 10px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      box-shadow: var(--sh-sm);
+      transition: transform var(--t-base) var(--ease-out),
+                  box-shadow var(--t-base), border-color var(--t-base);
+    }
+    .data-row:hover { transform: translateY(-2px); box-shadow: var(--sh-md); border-color: var(--glass-border); }
+    .data-row__icon {
+      grid-column: 1; grid-row: 1 / 3; align-self: center;
+      width: 44px; height: 44px; border-radius: var(--r-lg);
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, var(--primary-light), var(--primary-xlight));
+      color: var(--primary);
+    }
+    .data-row__info { grid-column: 2; grid-row: 1; min-width: 0; }
+    .data-row__label {
+      display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+      font-weight: 600; font-size: 14.5px; color: var(--text-primary); line-height: 1.3;
+    }
+    .data-row__meta { font-size: 12px; color: var(--text-secondary); margin-top: 3px; line-height: 1.45; }
+    .data-row__actions { grid-column: 3; grid-row: 1; align-self: start; display: flex; gap: 4px; }
+    .data-row__amount {
+      grid-column: 2 / 4; grid-row: 2; justify-self: start;
+      font-family: var(--font-mono); font-weight: 700; font-size: 15px; color: var(--text-primary);
+    }
+    .data-row__right {
+      grid-column: 2 / 4; grid-row: 2; justify-self: start;
+      display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+    }
+    .data-row__right .data-row__amount { grid-column: auto; grid-row: auto; font-size: 15px; }
+    .data-row__emi, .data-row__premium { font-size: 11.5px; color: var(--text-muted); font-family: var(--font-mono); }
+
+    /* Badges never overlap */
+    .acct-type-badge, .renewal-badge, .loan-type-badge, .type-badge { flex: 0 0 auto; white-space: nowrap; }
+
+    /* Compact square icon actions */
+    .data-row__actions .btn { width: 34px; height: 34px; padding: 0; border-radius: var(--r-md); }
+    .data-row__actions .btn:hover { background: var(--surface-raised); }
+
+    /* Inline forms / sub-cards */
+    .inline-form, .asset-class-row { border-radius: var(--r-xl); }
+    .asset-class-row { overflow: hidden; transition: box-shadow var(--t-base), border-color var(--t-base); }
+    .asset-class-row:hover { box-shadow: var(--sh-sm); border-color: var(--glass-border); }
+
+    /* ── FOOTER — frosted + no overflow on phones ── */
+    .wiz-footer {
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border-top: 1px solid var(--glass-border);
+      gap: 8px;
+    }
+    @media (max-width: 480px) {
+      .wiz-footer { padding: 10px 12px; gap: 6px; }
+      .wiz-footer .btn { padding: 0 14px; font-size: 13px; height: 44px; }
+      .wiz-footer .btn svg { display: none; }   /* drop arrows to fit */
+      .wiz-main { padding: 22px 14px 104px; }
+      .wiz-card { padding: 22px 18px; border-radius: var(--r-xl); }
+      .data-row { padding: 12px; }
+    }
+    @media (max-width: 360px) {
+      .wiz-footer { gap: 4px; padding: 10px 8px; }
+      .wiz-footer .btn { padding: 0 8px; font-size: 11.5px; }
+    }
+
   </style>
 </head>
 <body style="background:var(--bg);min-height:100vh;display:flex;flex-direction:column;padding-bottom:52px;">
@@ -402,13 +519,18 @@
   }
 
   function showState(state) {
+    // Always clear error styling first so switching states resets cleanly
+    document.querySelectorAll('.form-input--error').forEach(i => i.classList.remove('form-input--error'));
     if (state === 'empty') {
       document.querySelectorAll('.member-card--filled').forEach(c => c.classList.remove('member-card--filled'));
       AG.showToast('Showing empty state', 'info');
     } else if (state === 'filled') {
       AG.showToast('Showing filled state (Card 1 already filled)', 'info');
     } else if (state === 'error') {
-      document.querySelectorAll('.form-input').forEach(i => i.classList.add('form-input--error'));
+      // Open the spouse form so the validation styling shows in context
+      var form = document.getElementById('form-spouse');
+      if (form) form.classList.remove('hidden');
+      document.querySelectorAll('#form-spouse .form-input:not([readonly])').forEach(i => i.classList.add('form-input--error'));
       AG.showToast('Validation error: Please fill all required fields', 'error');
     }
   }
