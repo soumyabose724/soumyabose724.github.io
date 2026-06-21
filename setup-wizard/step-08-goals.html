@@ -219,7 +219,7 @@
       </div>
 
       <!-- Add Goal -->
-      <button class="btn btn--secondary btn--full" style="margin-top:14px;" onclick="AG.showToast('Add financial goal', 'info')">
+      <button class="btn btn--secondary btn--full" style="margin-top:14px;" onclick="AG.openSheet('add-goal')">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
@@ -248,6 +248,32 @@
 
 </div>
 </div>
+<!-- Add Goal Sheet -->
+<div class="sheet-backdrop" id="add-goal-backdrop">
+  <div class="sheet" id="add-goal">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <div class="sheet__title">Add Goal</div>
+      <button class="sheet__close" onclick="AG.closeSheet('add-goal')">✕</button>
+    </div>
+    <div class="sheet__body">
+      <div class="form-group">
+        <label class="form-label">Goal Name</label>
+        <input class="form-input" type="text" placeholder="e.g. Vacation, Car Down Payment">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Target Amount (₹)</label>
+        <input class="form-input" type="number" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Target Date</label>
+        <input class="form-input" type="text" placeholder="e.g. Dec 2027">
+      </div>
+      <button class="btn btn--primary btn--full" style="margin-top:16px;" onclick="AG.closeSheet('add-goal');AG.showToast('Goal added','success')">Save</button>
+    </div>
+  </div>
+</div>
+
 <script src="../assets/nav.js"></script>
 <script>
 function animateRings() {

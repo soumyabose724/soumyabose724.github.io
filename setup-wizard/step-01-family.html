@@ -260,13 +260,13 @@
           <div style="font-size:14px;font-weight:600;color:var(--text-primary);">Aarav Sharma</div>
           <div style="font-size:12px;color:var(--text-secondary);">Age 5 · Son</div>
         </div>
-        <button class="remove-btn" onclick="AG.showToast('Child removed', 'info')">×</button>
+        <button class="remove-btn" onclick="this.closest('.child-card').remove();AG.showToast('Child removed','info')">×</button>
       </div>
     </div>
 
     <!-- Add family member button -->
     <div style="margin-top: 16px;" id="add-member-btn">
-      <button class="btn btn--secondary btn--full" onclick="AG.showToast('Add family member sheet coming soon', 'info')">
+      <button class="btn btn--secondary btn--full" onclick="AG.openSheet('add-member')">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
           <line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>
@@ -295,6 +295,39 @@
 
 </div>
 </div>
+<!-- Add Family Member Sheet -->
+<div class="sheet-backdrop" id="add-member-backdrop">
+  <div class="sheet" id="add-member">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <div class="sheet__title">Add Family Member</div>
+      <button class="sheet__close" onclick="AG.closeSheet('add-member')">✕</button>
+    </div>
+    <div class="sheet__body">
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input class="form-input" type="text" placeholder="e.g. Priya Sharma">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Relationship</label>
+        <select class="form-select">
+          <option value="">Select relationship</option>
+          <option>Spouse</option>
+          <option>Child</option>
+          <option>Parent</option>
+          <option>Sibling</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Date of Birth</label>
+        <input class="form-input" type="text" placeholder="DD MMM YYYY">
+      </div>
+      <button class="btn btn--primary btn--full" style="margin-top:16px;" onclick="AG.closeSheet('add-member');AG.showToast('Family member added','success')">Save</button>
+    </div>
+  </div>
+</div>
+
 <script src="../assets/nav.js"></script>
 <script>
 function setStatus(val) {

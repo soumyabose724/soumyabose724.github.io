@@ -123,13 +123,13 @@
           <div class="list-row__meta">HDFC Bank · xxxx 4211 · Due 5th</div>
         </div>
         <div class="list-row__actions">
-          <button class="list-row__action-btn" onclick="AG.showToast('Edit card', 'info')">
+          <button class="list-row__action-btn" onclick="AG.openSheet('edit-card-hdfc')">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
             </svg>
           </button>
-          <button class="list-row__action-btn">
+          <button class="list-row__action-btn" onclick="AG.openSheet('card-options-hdfc')">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/>
             </svg>
@@ -175,13 +175,13 @@
           <div class="list-row__meta">ICICI Bank · xxxx 8776 · Due 10th</div>
         </div>
         <div class="list-row__actions">
-          <button class="list-row__action-btn" onclick="AG.showToast('Edit card', 'info')">
+          <button class="list-row__action-btn" onclick="AG.openSheet('edit-card-icici')">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
             </svg>
           </button>
-          <button class="list-row__action-btn">
+          <button class="list-row__action-btn" onclick="AG.openSheet('card-options-icici')">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/>
             </svg>
@@ -212,7 +212,7 @@
       </div>
 
       <!-- Add Card -->
-      <button class="btn btn--secondary btn--full" style="margin-top:14px;" onclick="AG.showToast('Add credit card', 'info')">
+      <button class="btn btn--secondary btn--full" style="margin-top:14px;" onclick="AG.openSheet('add-card')">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
@@ -249,6 +249,126 @@
 
 </div>
 </div>
+<!-- Card Options — HDFC -->
+<div class="sheet-backdrop" id="card-options-hdfc-backdrop">
+  <div class="sheet" id="card-options-hdfc">
+    <div class="sheet__handle"></div>
+    <div class="sheet__body" style="padding-top:8px;">
+      <button class="sheet-option" onclick="AG.closeSheet('card-options-hdfc');AG.openSheet('edit-card-hdfc')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Edit
+      </button>
+      <button class="sheet-option" onclick="AG.closeSheet('card-options-hdfc');AG.showToast('Card archived','info')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+        Archive
+      </button>
+      <button class="sheet-option sheet-option--danger" onclick="AG.closeSheet('card-options-hdfc');AG.showToast('Card removed','success')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        Remove
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Card Options — ICICI -->
+<div class="sheet-backdrop" id="card-options-icici-backdrop">
+  <div class="sheet" id="card-options-icici">
+    <div class="sheet__handle"></div>
+    <div class="sheet__body" style="padding-top:8px;">
+      <button class="sheet-option" onclick="AG.closeSheet('card-options-icici');AG.openSheet('edit-card-icici')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Edit
+      </button>
+      <button class="sheet-option" onclick="AG.closeSheet('card-options-icici');AG.showToast('Card archived','info')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+        Archive
+      </button>
+      <button class="sheet-option sheet-option--danger" onclick="AG.closeSheet('card-options-icici');AG.showToast('Card removed','success')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        Remove
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Card — HDFC -->
+<div class="sheet-backdrop" id="edit-card-hdfc-backdrop">
+  <div class="sheet" id="edit-card-hdfc">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <div class="sheet__title">Edit Card</div>
+      <button class="sheet__close" onclick="AG.closeSheet('edit-card-hdfc')">✕</button>
+    </div>
+    <div class="sheet__body">
+      <div class="form-group">
+        <label class="form-label">Card Name</label>
+        <input class="form-input" type="text" value="HDFC Millennia">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Credit Limit (₹)</label>
+        <input class="form-input" type="number" value="200000">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Outstanding Balance (₹)</label>
+        <input class="form-input" type="number" value="45000">
+      </div>
+      <button class="btn btn--primary btn--full" style="margin-top:16px;" onclick="AG.closeSheet('edit-card-hdfc');AG.showToast('Card updated','success')">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Card — ICICI -->
+<div class="sheet-backdrop" id="edit-card-icici-backdrop">
+  <div class="sheet" id="edit-card-icici">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <div class="sheet__title">Edit Card</div>
+      <button class="sheet__close" onclick="AG.closeSheet('edit-card-icici')">✕</button>
+    </div>
+    <div class="sheet__body">
+      <div class="form-group">
+        <label class="form-label">Card Name</label>
+        <input class="form-input" type="text" value="ICICI Amazon Pay">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Credit Limit (₹)</label>
+        <input class="form-input" type="number" value="150000">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Outstanding Balance (₹)</label>
+        <input class="form-input" type="number" value="22000">
+      </div>
+      <button class="btn btn--primary btn--full" style="margin-top:16px;" onclick="AG.closeSheet('edit-card-icici');AG.showToast('Card updated','success')">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Card Sheet -->
+<div class="sheet-backdrop" id="add-card-backdrop">
+  <div class="sheet" id="add-card">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <div class="sheet__title">Add Card</div>
+      <button class="sheet__close" onclick="AG.closeSheet('add-card')">✕</button>
+    </div>
+    <div class="sheet__body">
+      <div class="form-group">
+        <label class="form-label">Card Name</label>
+        <input class="form-input" type="text" placeholder="e.g. SBI SimplyCLICK">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Credit Limit (₹)</label>
+        <input class="form-input" type="number" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Current Outstanding (₹)</label>
+        <input class="form-input" type="number" placeholder="0">
+      </div>
+      <button class="btn btn--primary btn--full" style="margin-top:16px;" onclick="AG.closeSheet('add-card');AG.showToast('Card added','success')">Save</button>
+    </div>
+  </div>
+</div>
+
 <script src="../assets/nav.js"></script>
 <script>
 AG.initDemoBar({

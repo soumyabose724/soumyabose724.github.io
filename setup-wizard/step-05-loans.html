@@ -126,13 +126,13 @@
           </div>
         </div>
         <div class="list-row__actions">
-          <button class="list-row__action-btn" onclick="AG.showToast('Edit loan', 'info')">
+          <button class="list-row__action-btn" onclick="AG.openSheet('edit-loan-home')">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
             </svg>
           </button>
-          <button class="list-row__action-btn">
+          <button class="list-row__action-btn" onclick="AG.openSheet('loan-options-home')">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/>
             </svg>
@@ -164,13 +164,13 @@
           </div>
         </div>
         <div class="list-row__actions">
-          <button class="list-row__action-btn" onclick="AG.showToast('Edit loan', 'info')">
+          <button class="list-row__action-btn" onclick="AG.openSheet('edit-loan-car')">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
             </svg>
           </button>
-          <button class="list-row__action-btn">
+          <button class="list-row__action-btn" onclick="AG.openSheet('loan-options-car')">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/>
             </svg>
@@ -183,7 +183,7 @@
       </div>
 
       <!-- Add Loan -->
-      <button class="btn btn--secondary btn--full" style="margin-top:14px;" onclick="AG.showToast('Add loan', 'info')">
+      <button class="btn btn--secondary btn--full" style="margin-top:14px;" onclick="AG.openSheet('add-loan')">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
@@ -221,6 +221,140 @@
 
 </div>
 </div>
+<!-- Loan Options — Home -->
+<div class="sheet-backdrop" id="loan-options-home-backdrop">
+  <div class="sheet" id="loan-options-home">
+    <div class="sheet__handle"></div>
+    <div class="sheet__body" style="padding-top:8px;">
+      <button class="sheet-option" onclick="AG.closeSheet('loan-options-home');AG.openSheet('edit-loan-home')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Edit
+      </button>
+      <button class="sheet-option" onclick="AG.closeSheet('loan-options-home');AG.showToast('Prepay options coming soon','info')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Prepay
+      </button>
+      <button class="sheet-option" onclick="AG.closeSheet('loan-options-home');AG.showToast('Loan archived','info')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+        Archive
+      </button>
+      <button class="sheet-option sheet-option--danger" onclick="AG.closeSheet('loan-options-home');AG.showToast('Loan removed','success')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        Remove
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Loan Options — Car -->
+<div class="sheet-backdrop" id="loan-options-car-backdrop">
+  <div class="sheet" id="loan-options-car">
+    <div class="sheet__handle"></div>
+    <div class="sheet__body" style="padding-top:8px;">
+      <button class="sheet-option" onclick="AG.closeSheet('loan-options-car');AG.openSheet('edit-loan-car')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Edit
+      </button>
+      <button class="sheet-option" onclick="AG.closeSheet('loan-options-car');AG.showToast('Prepay options coming soon','info')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Prepay
+      </button>
+      <button class="sheet-option" onclick="AG.closeSheet('loan-options-car');AG.showToast('Loan archived','info')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+        Archive
+      </button>
+      <button class="sheet-option sheet-option--danger" onclick="AG.closeSheet('loan-options-car');AG.showToast('Loan removed','success')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        Remove
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Loan — Home -->
+<div class="sheet-backdrop" id="edit-loan-home-backdrop">
+  <div class="sheet" id="edit-loan-home">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <div class="sheet__title">Edit Loan</div>
+      <button class="sheet__close" onclick="AG.closeSheet('edit-loan-home')">✕</button>
+    </div>
+    <div class="sheet__body">
+      <div class="form-group">
+        <label class="form-label">Lender Name</label>
+        <input class="form-input" type="text" value="HDFC Bank">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Outstanding Balance (₹)</label>
+        <input class="form-input" type="number" value="4500000">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Interest Rate (% p.a.)</label>
+        <input class="form-input" type="number" step="0.01" value="8.50">
+      </div>
+      <button class="btn btn--primary btn--full" style="margin-top:16px;" onclick="AG.closeSheet('edit-loan-home');AG.showToast('Loan updated','success')">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Loan — Car -->
+<div class="sheet-backdrop" id="edit-loan-car-backdrop">
+  <div class="sheet" id="edit-loan-car">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <div class="sheet__title">Edit Loan</div>
+      <button class="sheet__close" onclick="AG.closeSheet('edit-loan-car')">✕</button>
+    </div>
+    <div class="sheet__body">
+      <div class="form-group">
+        <label class="form-label">Lender Name</label>
+        <input class="form-input" type="text" value="HDFC Bank">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Outstanding Balance (₹)</label>
+        <input class="form-input" type="number" value="640000">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Interest Rate (% p.a.)</label>
+        <input class="form-input" type="number" step="0.01" value="10.50">
+      </div>
+      <button class="btn btn--primary btn--full" style="margin-top:16px;" onclick="AG.closeSheet('edit-loan-car');AG.showToast('Loan updated','success')">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Loan Sheet -->
+<div class="sheet-backdrop" id="add-loan-backdrop">
+  <div class="sheet" id="add-loan">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <div class="sheet__title">Add Loan</div>
+      <button class="sheet__close" onclick="AG.closeSheet('add-loan')">✕</button>
+    </div>
+    <div class="sheet__body">
+      <div class="form-group">
+        <label class="form-label">Lender Name</label>
+        <input class="form-input" type="text" placeholder="e.g. HDFC Bank">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Loan Type</label>
+        <select class="form-select">
+          <option>Home Loan</option>
+          <option>Car Loan</option>
+          <option>Personal Loan</option>
+          <option>Education Loan</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Outstanding Balance (₹)</label>
+        <input class="form-input" type="number" placeholder="0">
+      </div>
+      <button class="btn btn--primary btn--full" style="margin-top:16px;" onclick="AG.closeSheet('add-loan');AG.showToast('Loan added','success')">Save</button>
+    </div>
+  </div>
+</div>
+
 <script src="../assets/nav.js"></script>
 <script>
 AG.initDemoBar({

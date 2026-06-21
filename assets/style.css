@@ -773,6 +773,28 @@ ul,ol { list-style:none; }
 }
 .sheet__footer .btn { flex:1; }
 .sheet__footer .btn--primary { flex:2; }
+.sheet__close {
+  width:32px; height:32px; border-radius:var(--r-full);
+  display:flex; align-items:center; justify-content:center;
+  color:var(--text-muted); font-size:16px;
+  transition:background var(--dur-fast), color var(--dur-fast);
+}
+.sheet__close:hover { background:var(--surface-raised); color:var(--text-primary); }
+
+/* Sheet option rows (used in three-dot menu sheets) */
+.sheet-option {
+  width:100%; display:flex; align-items:center; gap:var(--sp-3);
+  padding:var(--sp-4) var(--sp-5);
+  font-size:15px; font-weight:500; color:var(--text-primary);
+  border-radius:var(--r-md);
+  transition:background var(--dur-fast);
+  text-align:left;
+}
+.sheet-option:hover { background:var(--surface-raised); }
+.sheet-option svg { color:var(--text-secondary); flex-shrink:0; }
+.sheet-option--danger { color:var(--error); }
+.sheet-option--danger svg { color:var(--error); }
+.sheet-option--danger:hover { background:var(--error-light); }
 
 /* ─────────────────────────────────────────────
    §18  DIALOG
