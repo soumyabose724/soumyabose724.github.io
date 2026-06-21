@@ -231,6 +231,114 @@
       .wiz-footer .btn { padding: 0 8px; font-size: 11.5px; }
     }
 
+  
+    /* ═══════════════════════════════════════════════════════════
+       PREMIUM v3 — amount-first cards · robust footer · holdings
+       (appended last; overrides earlier rules by source order)
+       ═══════════════════════════════════════════════════════════ */
+
+    /* Hero card depth */
+    .wiz-card {
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.5), rgba(255,255,255,0) 140px),
+        var(--surface);
+      box-shadow: 0 1px 2px rgba(28,25,23,0.04), 0 14px 36px rgba(13,148,136,0.08);
+    }
+
+    /* ── DATA ROW — amount is the hero, top-right ── */
+    .data-row {
+      display: grid;
+      grid-template-columns: 46px minmax(0, 1fr) auto;
+      grid-template-areas:
+        "icon info amount"
+        "icon info actions";
+      column-gap: 14px; row-gap: 2px;
+      align-items: start;
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-xl);
+      margin-bottom: 12px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.40), rgba(255,255,255,0)),
+        var(--glass-bg);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 1px 2px rgba(28,25,23,0.04), 0 6px 18px rgba(28,25,23,0.05);
+      transition: transform var(--t-base) var(--ease-out), box-shadow var(--t-base), border-color var(--t-base);
+    }
+    .data-row:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 2px 4px rgba(28,25,23,0.05), 0 16px 34px rgba(13,148,136,0.13);
+      border-color: var(--glass-border);
+    }
+    .data-row__icon {
+      grid-area: icon; align-self: start;
+      width: 46px; height: 46px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(145deg, var(--primary-light), var(--primary-xlight));
+      color: var(--primary-dark);
+      box-shadow: inset 0 0 0 1px rgba(13,148,136,0.14), 0 4px 10px rgba(13,148,136,0.10);
+    }
+    .data-row__icon svg { width: 20px; height: 20px; }
+    .data-row__info { grid-area: info; align-self: start; min-width: 0; }
+    .data-row__label {
+      display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+      font-weight: 700; font-size: 15px; color: var(--text-primary);
+      line-height: 1.3; letter-spacing: -0.01em;
+    }
+    .data-row__meta { font-size: 12px; color: var(--text-secondary); margin-top: 4px; line-height: 1.5; }
+
+    /* Amount — top-right hero figure */
+    .data-row__amount {
+      grid-area: amount; align-self: start; justify-self: end;
+      text-align: right; white-space: nowrap;
+      font-family: var(--font-mono); font-weight: 700; font-size: 17px;
+      color: var(--text-primary); letter-spacing: -0.02em; font-variant-numeric: tabular-nums;
+    }
+    .data-row__right {
+      grid-area: amount; align-self: start; justify-self: end;
+      display: flex; flex-direction: column; align-items: flex-end; gap: 1px; text-align: right;
+    }
+    .data-row__right .data-row__amount { font-size: 17px; }
+    .data-row__emi, .data-row__premium {
+      font-size: 11px; color: var(--text-muted); font-family: var(--font-mono);
+      white-space: nowrap; font-weight: 500;
+    }
+    .data-row__actions {
+      grid-area: actions; align-self: end; justify-self: end;
+      display: flex; gap: 2px; margin-top: 10px;
+    }
+    .data-row__actions .btn { width: 32px; height: 32px; padding: 0; border-radius: 9px; color: var(--text-muted); }
+    .data-row__actions .btn:hover { background: var(--surface-raised); color: var(--text-primary); }
+    .acct-type-badge, .renewal-badge, .loan-type-badge, .type-badge { flex: 0 0 auto; white-space: nowrap; }
+
+    /* ── HOLDING ROW (investments expanded) — graceful wrap ── */
+    .holding-row {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px;
+      padding: 12px 14px; border-radius: var(--r-lg);
+    }
+    .holding-row__symbol { order: 1; flex: 0 1 auto; min-width: 0 !important; font-weight: 700; font-size: 13px; color: var(--primary-dark); }
+    .holding-row__value  { order: 2; margin-left: auto; white-space: nowrap; font-weight: 700; font-family: var(--font-mono); font-size: 13px; color: var(--text-primary); }
+    .holding-row > .btn  { order: 3; width: 28px; height: 28px; padding: 0; }
+    .holding-row__info   { order: 4; flex: 1 0 100%; font-size: 12px; color: var(--text-secondary); }
+
+    /* ── ROBUST FOOTER — primary never clips, ghosts truncate ── */
+    .wiz-footer { display: flex; align-items: center; gap: 8px; overflow: hidden; }
+    .wiz-footer .btn { white-space: nowrap; }
+    .wiz-footer > .btn-ghost, .wiz-footer > a.btn-ghost { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+    .wiz-footer > .btn-primary, .wiz-footer > a.btn-primary { flex: 0 0 auto; margin-left: auto; }
+
+    @media (max-width: 480px) {
+      .data-row { padding: 14px; column-gap: 12px; }
+      .data-row__amount, .data-row__right .data-row__amount { font-size: 16px; }
+      .wiz-footer .btn svg { display: none; }
+      .wiz-footer .btn { font-size: 13px; height: 44px; padding: 0 14px; }
+    }
+    @media (max-width: 360px) {
+      .wiz-footer { gap: 6px; padding: 10px 10px; }
+      .wiz-footer .btn { font-size: 12px; padding: 0 10px; }
+      .data-row__amount, .data-row__right .data-row__amount { font-size: 15px; }
+    }
+
   </style>
 </head>
 <body style="background:var(--bg);min-height:100vh;display:flex;flex-direction:column;padding-bottom:52px;">
