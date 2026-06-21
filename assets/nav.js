@@ -326,6 +326,57 @@ window.AG = (function () {
     }
   }
 
+  /* ── THEME (light / dark) ──────────────────────────────────
+     Persists to localStorage, falls back to system preference.
+     Toggle any element with [data-theme-toggle] or call AG.toggleTheme().
+     Mirrors the Flutter Riverpod themeProvider + ThemeData.dark().
+  ────────────────────────────────────────────────────────── */
+  var THEME_KEY = 'ag-theme';
+
+  function getTheme() {
+    return document.documentElement.getAttribute('data-theme') || 'light';
+  }
+
+  function applyTheme(theme, animate) {
+    var root = document.documentElement;
+    if (animate) {
+      root.classList.add('theme-switching');
+      setTimeout(function () { root.classList.remove('theme-switching'); }, 320);
+    }
+    root.setAttribute('data-theme', theme);
+    try { localStorage.setItem(THEME_KEY, theme); } catch (e) { /* private mode */ }
+    document.querySelectorAll('[data-theme-toggle]').forEach(function (btn) {
+      btn.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
+    });
+  }
+
+  function toggleTheme() {
+    applyTheme(getTheme() === 'dark' ? 'light' : 'dark', true);
+  }
+
+  function initTheme() {
+    var saved = null;
+    try { saved = localStorage.getItem(THEME_KEY); } catch (e) { /* ignore */ }
+    var prefersDark = window.matchMedia &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches;
+    applyTheme(saved || (prefersDark ? 'dark' : 'light'), false);
+    document.querySelectorAll('[data-theme-toggle]').forEach(function (btn) {
+      btn.addEventListener('click', toggleTheme);
+    });
+  }
+
+  /* Apply theme attribute ASAP (reduces flash), wire toggles on DOM ready */
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem(THEME_KEY); } catch (e) { /* ignore */ }
+    if (saved) document.documentElement.setAttribute('data-theme', saved);
+  }());
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTheme);
+  } else {
+    initTheme();
+  }
+
   /* Public API */
   return {
     formatINR:          formatINR,
@@ -340,6 +391,10 @@ window.AG = (function () {
     initDemoBar:        initDemoBar,
     showToast:          showToast,
     passwordStrength:   passwordStrength,
-    updateStrengthMeter: updateStrengthMeter
+    updateStrengthMeter: updateStrengthMeter,
+    getTheme:           getTheme,
+    applyTheme:         applyTheme,
+    toggleTheme:        toggleTheme,
+    initTheme:          initTheme
   };
 }());

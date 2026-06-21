@@ -83,6 +83,79 @@
   --z-modal:    400;
   --z-toast:    500;
   --z-demo-bar: 600;
+
+  /* Gradients (enhanced) */
+  --grad-primary:      linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+  --grad-primary-deep: linear-gradient(135deg, #0f766e 0%, #0d9488 100%);
+  --grad-surface:      linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.62));
+  --grad-hero:         radial-gradient(125% 125% at 0% 0%, rgba(13,148,136,0.12), transparent 58%);
+  --grad-success:      linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+  --grad-danger:       linear-gradient(135deg, #d63654 0%, #e94560 100%);
+
+  /* Motion easing (enhanced) */
+  --ease-out:    cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* Focus rings (enhanced) */
+  --ring:        0 0 0 3px rgba(13,148,136,0.30);
+  --ring-danger: 0 0 0 3px rgba(233,69,96,0.25);
+}
+
+/* ── 1b. DARK THEME ────────────────────────────────────────────
+   Activated via <html data-theme="dark">. All component rules read
+   these tokens, so the entire UI flips with no per-component edits.
+   Mirrors Flutter ThemeData.dark() built from the same seed.
+─────────────────────────────────────────────────────────────── */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Brand light-tints become translucent washes on dark surfaces */
+  --primary-light:    rgba(13, 148, 136, 0.22);
+  --primary-xlight:   rgba(13, 148, 136, 0.10);
+
+  /* Warm dark canvas & surfaces (inverse of warm off-white) */
+  --bg:               #1a1816;
+  --surface:          #242120;
+  --surface-raised:   #2d2a27;
+
+  --border:           #38332f;
+  --border-strong:    #4a443f;
+  --overlay:          rgba(0, 0, 0, 0.66);
+
+  /* Semantic solids stay vivid; light variants become dark washes */
+  --danger-light:     rgba(233, 69, 96, 0.18);
+  --warning-light:    rgba(245, 158, 11, 0.16);
+  --success-light:    rgba(34, 197, 94, 0.16);
+  --info-light:       rgba(59, 130, 246, 0.16);
+
+  /* Warm off-white text on dark */
+  --text-primary:     #f5f1ec;
+  --text-secondary:   #b8afa6;
+  --text-muted:       #837b73;
+
+  /* Glass + elevation tuned for dark */
+  --glass-bg:         rgba(36, 33, 32, 0.74);
+  --glass-border:     rgba(13, 148, 136, 0.30);
+  --glass-shadow:     0 8px 32px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.35);
+  --sh-sm:            0 1px 2px rgba(0,0,0,0.40);
+  --sh-md:            0 4px 14px rgba(0,0,0,0.45);
+  --sh-lg:            0 8px 26px rgba(0,0,0,0.50);
+  --sh-xl:            0 18px 50px rgba(0,0,0,0.60);
+
+  --grad-surface:     linear-gradient(180deg, rgba(45,42,39,0.92), rgba(36,33,32,0.62));
+  --grad-hero:        radial-gradient(125% 125% at 0% 0%, rgba(13,148,136,0.18), transparent 58%);
+}
+
+/* Dark-only structural fixes (hardcoded light backdrops) */
+[data-theme="dark"] .top-bar { background: rgba(36, 33, 32, 0.86); }
+[data-theme="dark"] a:not(.btn):not(.top-nav__link):not(.bottom-nav__item) { color: #2dd4bf; }
+
+/* Smooth, jank-free theme switch: transition only while .theme-switching
+   is briefly present on <html> (set/cleared by AG.toggleTheme). */
+.theme-switching, .theme-switching * {
+  transition: background-color 0.3s ease, border-color 0.3s ease,
+              color 0.3s ease, fill 0.3s ease, box-shadow 0.3s ease !important;
 }
 
 /* ── 2. RESET & BASE ───────────────────────────────────────── */
@@ -1293,3 +1366,111 @@ img { max-width: 100%; display: block; }
 .step-dot.active{ border-color: var(--primary); color: var(--primary); }
 .step-line { flex: 1; height: 2px; background: var(--border); max-width: 40px; }
 .step-line.done { background: var(--primary); }
+
+/* ── 39. VISUAL POLISH (enhanced) ──────────────────────────────
+   Additive refinements layered over base components. Cascade order
+   ensures these win where they intentionally override earlier rules.
+─────────────────────────────────────────────────────────────── */
+
+/* Crisper, consistent focus ring across all interactive elements */
+a:focus-visible,
+button:focus-visible,
+.btn:focus-visible,
+[tabindex]:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: var(--r-md);
+}
+
+/* Primary button — subtle gradient idle + spring press */
+.btn-primary {
+  background-image: var(--grad-primary);
+  box-shadow: var(--sh-sm);
+}
+.btn-primary:hover { box-shadow: var(--sh-md); transform: translateY(-1px); }
+.btn-primary:active { transform: translateY(0); }
+.btn { transition: background var(--t-fast), color var(--t-fast),
+                   border-color var(--t-fast), box-shadow var(--t-base),
+                   transform var(--t-fast); }
+
+/* Glass hero — layered gradient wash + accent hairline */
+.glass-card--hero {
+  background-image: var(--grad-hero);
+  position: relative;
+  overflow: hidden;
+}
+.glass-card--hero::before {
+  content: "";
+  position: absolute; inset: 0 0 auto 0; height: 3px;
+  background: var(--grad-primary);
+  opacity: 0.9;
+}
+
+/* Card hover lift (opt-in via .lift, or any .glass-card) */
+.glass-card { transition: transform var(--t-base) var(--ease-out), box-shadow var(--t-base); }
+.glass-card.lift:hover,
+.glass-card--hero:hover { transform: translateY(-2px); box-shadow: var(--sh-lg); }
+
+/* Gradient numeric display (hero figures) */
+.gradient-text {
+  background: var(--grad-primary);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Chips — slightly softer, with subtle press feedback */
+.chip { transition: transform var(--t-fast), box-shadow var(--t-fast); }
+.chip.interactive { cursor: pointer; }
+.chip.interactive:hover { transform: translateY(-1px); box-shadow: var(--sh-sm); }
+
+/* Inputs — calmer idle border, teal focus glow via ring token */
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  border-color: var(--border-focus);
+  box-shadow: var(--ring);
+  outline: none;
+}
+
+/* ── 39b. THEME TOGGLE BUTTON ──────────────────────────────── */
+.theme-toggle {
+  width: 40px; height: 40px;
+  border-radius: var(--r-full);
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background var(--t-fast), color var(--t-fast),
+              border-color var(--t-fast), transform var(--t-fast);
+}
+.theme-toggle:hover { color: var(--primary); border-color: var(--primary); transform: rotate(-12deg); }
+.theme-toggle svg { width: 18px; height: 18px; }
+.theme-toggle .icon-sun  { display: none; }
+.theme-toggle .icon-moon { display: block; }
+[data-theme="dark"] .theme-toggle .icon-sun  { display: block; }
+[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+
+/* Floating variant for prototype pages without a nav bar */
+.theme-toggle--float {
+  position: fixed;
+  top: calc(var(--sp-4) + 36px); /* clears demo bar */
+  right: var(--sp-4);
+  z-index: var(--z-sticky);
+  box-shadow: var(--sh-md);
+  background: var(--surface);
+}
+
+/* Respect reduced-motion for all the above transforms */
+@media (prefers-reduced-motion: reduce) {
+  .btn-primary:hover,
+  .glass-card.lift:hover,
+  .glass-card--hero:hover,
+  .chip.interactive:hover,
+  .theme-toggle:hover { transform: none; }
+}

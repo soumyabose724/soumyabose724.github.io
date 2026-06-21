@@ -68,6 +68,10 @@
       <a href="#" class="top-nav__link active">Design System</a>
     </div>
     <div class="top-nav__actions">
+      <button class="theme-toggle" data-theme-toggle aria-label="Toggle dark mode" aria-pressed="false">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      </button>
       <button class="icon-btn" aria-label="Notifications">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
         <span class="notif-badge">3</span>
@@ -84,6 +88,10 @@
     <span class="top-bar__title">Design System</span>
     <div class="top-bar__spacer"></div>
     <div class="top-bar__actions">
+      <button class="theme-toggle" data-theme-toggle aria-label="Toggle dark mode" aria-pressed="false">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      </button>
       <button class="icon-btn" aria-label="Notifications">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
         <span class="notif-badge">3</span>
@@ -682,6 +690,57 @@
       </div>
     </section>
 
+    <!-- ── 13b. THEMING & ELEVATION ─────────────────────────── -->
+    <section class="ds-section" id="theming">
+      <div class="ds-section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
+        Theming &amp; Elevation
+      </div>
+      <div class="ds-note">Toggle dark mode with the <strong>moon/sun button</strong> in the top bar (or call <code style="font-family:var(--font-mono)">AG.toggleTheme()</code>). Theme persists in <code style="font-family:var(--font-mono)">localStorage</code> and respects the OS preference on first visit. Every component reads design tokens, so the whole UI flips with zero per-component changes — mirroring Flutter's <code style="font-family:var(--font-mono)">ThemeData.dark()</code>.</div>
+
+      <div class="ds-subsection">
+        <div class="ds-subsection-title">Gradients</div>
+        <div class="ds-row">
+          <div style="width:160px;height:64px;border-radius:var(--r-lg);background:var(--grad-primary);"></div>
+          <div style="width:160px;height:64px;border-radius:var(--r-lg);background:var(--grad-primary-deep);"></div>
+          <div style="width:160px;height:64px;border-radius:var(--r-lg);background:var(--grad-success);"></div>
+          <div style="width:160px;height:64px;border-radius:var(--r-lg);background:var(--grad-danger);"></div>
+        </div>
+        <div class="ds-row" style="margin-top:var(--sp-3);">
+          <span class="ds-label">--grad-primary</span>
+          <span class="ds-label" style="margin-left:90px;">--grad-primary-deep</span>
+          <span class="ds-label" style="margin-left:70px;">--grad-success</span>
+          <span class="ds-label" style="margin-left:90px;">--grad-danger</span>
+        </div>
+        <div style="margin-top:var(--sp-4);">
+          <span class="gradient-text text-display">₹1,23,45,678</span>
+          <div class="ds-label">.gradient-text — hero figures</div>
+        </div>
+      </div>
+
+      <div class="ds-subsection" style="margin-top:var(--sp-6);">
+        <div class="ds-subsection-title">Elevation</div>
+        <div class="ds-row" style="gap:var(--sp-6);flex-wrap:wrap;">
+          <div style="width:120px;height:80px;border-radius:var(--r-lg);background:var(--surface);box-shadow:var(--sh-sm);display:flex;align-items:flex-end;justify-content:center;padding:6px;"><span class="ds-label">--sh-sm</span></div>
+          <div style="width:120px;height:80px;border-radius:var(--r-lg);background:var(--surface);box-shadow:var(--sh-md);display:flex;align-items:flex-end;justify-content:center;padding:6px;"><span class="ds-label">--sh-md</span></div>
+          <div style="width:120px;height:80px;border-radius:var(--r-lg);background:var(--surface);box-shadow:var(--sh-lg);display:flex;align-items:flex-end;justify-content:center;padding:6px;"><span class="ds-label">--sh-lg</span></div>
+          <div style="width:120px;height:80px;border-radius:var(--r-lg);background:var(--surface);box-shadow:var(--sh-xl);display:flex;align-items:flex-end;justify-content:center;padding:6px;"><span class="ds-label">--sh-xl</span></div>
+        </div>
+      </div>
+
+      <div class="ds-subsection" style="margin-top:var(--sp-6);">
+        <div class="ds-subsection-title">Motion easing</div>
+        <div class="ds-row">
+          <span class="chip chip-info">--ease-out · cubic-bezier(0.22, 1, 0.36, 1)</span>
+          <span class="chip chip-info">--ease-spring · cubic-bezier(0.34, 1.56, 0.64, 1)</span>
+          <span class="chip chip-info">--ease-in-out · cubic-bezier(0.65, 0, 0.35, 1)</span>
+        </div>
+        <div style="margin-top:var(--sp-4);">
+          <button class="btn btn-primary btn-md">Hover me — spring lift</button>
+        </div>
+      </div>
+    </section>
+
     <!-- ── 14. FLUTTER MAPPING ──────────────────────────────── -->
     <section class="ds-section" id="flutter">
       <div class="ds-section-title">
@@ -720,6 +779,11 @@
             <tr><td>Charts (sparkline, bar)</td><td>custom SVG</td><td><code>fl_chart</code> package — <code>LineChart</code>, <code>BarChart</code></td></tr>
             <tr><td>Lucide icons</td><td>inline SVG</td><td><code>lucide_icons</code> Flutter package (pub.dev)</td></tr>
             <tr><td>INR amount text</td><td><code>.text-mono</code></td><td><code>shared/widgets/amount_text.dart</code> — always <code>formatINR(paise)</code></td></tr>
+            <tr><td>Dark / light theme</td><td><code>[data-theme]</code></td><td><code>ThemeData</code> light + <code>ThemeData.dark()</code> from one seed; <code>themeProvider</code> (Riverpod) + persisted to <code>shared_preferences</code></td></tr>
+            <tr><td>Theme toggle</td><td><code>.theme-toggle</code> / <code>AG.toggleTheme()</code></td><td>Settings switch → <code>ref.read(themeProvider.notifier).toggle()</code></td></tr>
+            <tr><td>Gradients</td><td><code>--grad-*</code></td><td><code>LinearGradient</code> / <code>RadialGradient</code> in <code>BoxDecoration</code></td></tr>
+            <tr><td>Elevation</td><td><code>--sh-*</code></td><td><code>BoxShadow</code> list constants in <code>app/theme.dart</code></td></tr>
+            <tr><td>Motion easing</td><td><code>--ease-*</code></td><td><code>Curves.easeOutCubic</code>, <code>Curves.elasticOut</code> for spring</td></tr>
           </tbody>
         </table>
       </div>
