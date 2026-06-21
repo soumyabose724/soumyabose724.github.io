@@ -312,6 +312,23 @@
         <input class="form-input" type="text" value="SBI Savings">
       </div>
       <div class="form-group">
+        <label class="form-label">Bank Name</label>
+        <input class="form-input" type="text" value="SBI">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Account Number (last 4)</label>
+        <input class="form-input" type="text" value="4521">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Account Type</label>
+        <select class="form-select">
+          <option selected>Savings</option>
+          <option>Current</option>
+          <option>Fixed Deposit</option>
+          <option>Recurring Deposit</option>
+        </select>
+      </div>
+      <div class="form-group">
         <label class="form-label">Current Balance (₹)</label>
         <input class="form-input" type="number" value="450000">
       </div>
@@ -332,6 +349,23 @@
       <div class="form-group">
         <label class="form-label">Account Name</label>
         <input class="form-input" type="text" value="HDFC Current">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Bank Name</label>
+        <input class="form-input" type="text" value="HDFC">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Account Number (last 4)</label>
+        <input class="form-input" type="text" value="8912">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Account Type</label>
+        <select class="form-select">
+          <option>Savings</option>
+          <option selected>Current</option>
+          <option>Fixed Deposit</option>
+          <option>Recurring Deposit</option>
+        </select>
       </div>
       <div class="form-group">
         <label class="form-label">Current Balance (₹)</label>
@@ -356,8 +390,20 @@
         <input class="form-input" type="text" value="Axis FD">
       </div>
       <div class="form-group">
+        <label class="form-label">Bank Name</label>
+        <input class="form-input" type="text" value="Axis Bank">
+      </div>
+      <div class="form-group">
         <label class="form-label">Maturity Amount (₹)</label>
         <input class="form-input" type="number" value="1050000">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Maturity Date</label>
+        <input class="form-input" type="text" value="15 Mar 2027">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Interest Rate (% p.a.)</label>
+        <input class="form-input" type="number" step="0.01" value="7.25">
       </div>
       <button class="btn btn--primary btn--full" style="margin-top:16px;" onclick="AG.closeSheet('edit-account-axis');AG.showToast('Account updated','success')">Save</button>
     </div>
@@ -374,8 +420,16 @@
     </div>
     <div class="sheet__body">
       <div class="form-group">
+        <label class="form-label">Account Nickname</label>
+        <input class="form-input" type="text" placeholder="e.g. SBI Savings">
+      </div>
+      <div class="form-group">
         <label class="form-label">Bank Name</label>
         <input class="form-input" type="text" placeholder="e.g. SBI, HDFC Bank">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Account Number (last 4)</label>
+        <input class="form-input" type="text" placeholder="e.g. 4521" maxlength="4">
       </div>
       <div class="form-group">
         <label class="form-label">Account Type</label>

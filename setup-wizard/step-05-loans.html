@@ -289,8 +289,27 @@
         <input class="form-input" type="number" value="4500000">
       </div>
       <div class="form-group">
+        <label class="form-label">Original Loan Amount (₹)</label>
+        <input class="form-input" type="number" value="6000000">
+      </div>
+      <div class="form-group">
         <label class="form-label">Interest Rate (% p.a.)</label>
         <input class="form-input" type="number" step="0.01" value="8.50">
+      </div>
+      <div class="form-group">
+        <label class="form-label">EMI Amount (₹/mo)</label>
+        <input class="form-input" type="number" value="52480">
+      </div>
+      <div class="form-group">
+        <label class="form-label">EMIs Remaining</label>
+        <input class="form-input" type="number" value="204">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Repayment Method</label>
+        <select class="form-select">
+          <option selected>Reducing balance</option>
+          <option>Flat rate</option>
+        </select>
       </div>
       <button class="btn btn--primary btn--full" style="margin-top:16px;" onclick="AG.closeSheet('edit-loan-home');AG.showToast('Loan updated','success')">Save</button>
     </div>
@@ -315,8 +334,27 @@
         <input class="form-input" type="number" value="640000">
       </div>
       <div class="form-group">
+        <label class="form-label">Original Loan Amount (₹)</label>
+        <input class="form-input" type="number" value="800000">
+      </div>
+      <div class="form-group">
         <label class="form-label">Interest Rate (% p.a.)</label>
         <input class="form-input" type="number" step="0.01" value="10.50">
+      </div>
+      <div class="form-group">
+        <label class="form-label">EMI Amount (₹/mo)</label>
+        <input class="form-input" type="number" value="12500">
+      </div>
+      <div class="form-group">
+        <label class="form-label">EMIs Remaining</label>
+        <input class="form-input" type="number" value="58">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Repayment Method</label>
+        <select class="form-select">
+          <option selected>Reducing balance</option>
+          <option>Flat rate</option>
+        </select>
       </div>
       <button class="btn btn--primary btn--full" style="margin-top:16px;" onclick="AG.closeSheet('edit-loan-car');AG.showToast('Loan updated','success')">Save</button>
     </div>
@@ -348,6 +386,22 @@
       </div>
       <div class="form-group">
         <label class="form-label">Outstanding Balance (₹)</label>
+        <input class="form-input" type="number" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Original Loan Amount (₹)</label>
+        <input class="form-input" type="number" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Interest Rate (% p.a.)</label>
+        <input class="form-input" type="number" step="0.01" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label class="form-label">EMI Amount (₹/mo)</label>
+        <input class="form-input" type="number" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tenure (months)</label>
         <input class="form-input" type="number" placeholder="0">
       </div>
       <button class="btn btn--primary btn--full" style="margin-top:16px;" onclick="AG.closeSheet('add-loan');AG.showToast('Loan added','success')">Save</button>
