@@ -106,23 +106,6 @@
       font-weight: 500; border: 1px solid var(--primary-light);
     }
 
-    /* ── CIBIL gauge ── */
-    .cibil-gauge {
-      margin-top: var(--sp-3); position: relative;
-      height: 56px; overflow: hidden;
-    }
-    .cibil-arc-wrap { display: flex; justify-content: center; }
-    .cibil-gauge svg { overflow: visible; }
-    .cibil-score-num {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 28px; font-weight: 700; color: var(--primary);
-      line-height: 1;
-    }
-    .cibil-label-row {
-      display: flex; justify-content: space-between; align-items: flex-end;
-      margin-top: var(--sp-1);
-    }
-
     /* ── Quick actions scroll ── */
     .quick-actions {
       display: flex; gap: var(--sp-2); overflow-x: auto;
@@ -355,50 +338,23 @@
         </div>
       </div>
 
-      <!-- Investments Tile -->
-      <div class="glass-card glass-card--compact">
-        <div class="tile-label">Investments</div>
-        <div class="tile-amount" style="font-size:18px;">₹3,71,100</div>
-        <div class="tile-delta">
+      <!-- Investments Tile (full width) -->
+      <div class="glass-card glass-card--compact col-span-2">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-3);">
+          <div class="tile-label" style="margin-bottom:0;">Investments</div>
+          <a href="#" style="font-size:12px;color:var(--primary);font-weight:500;">View Portfolio →</a>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:var(--sp-3);margin-bottom:var(--sp-2);">
+          <div class="tile-amount" id="invest-total" style="font-size:22px;">₹3,71,100</div>
           <span class="delta delta--pos">▲ +18.4% XIRR</span>
         </div>
         <div class="invest-chips" id="invest-chips">
           <span class="invest-chip">3 SIPs</span>
-          <span class="invest-chip">Equity</span>
-          <span class="invest-chip">PPF</span>
+          <span class="invest-chip">Axis Bluechip</span>
+          <span class="invest-chip">Parag Parikh</span>
+          <span class="invest-chip">HDFC Nifty 50</span>
         </div>
-      </div>
-
-      <!-- CIBIL Score Tile -->
-      <div class="glass-card glass-card--compact">
-        <div class="tile-label">Credit Score</div>
-        <div style="display:flex; align-items:center; gap:var(--sp-2); margin-bottom:var(--sp-2);">
-          <div class="cibil-score-num">762</div>
-          <span class="chip chip--balanced">GOOD</span>
-        </div>
-        <!-- CSS arc gauge -->
-        <div style="position:relative; height:52px; overflow:hidden;">
-          <svg width="100%" height="104" viewBox="0 0 160 104" style="margin-top:-4px;">
-            <defs>
-              <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" style="stop-color:#E94560"/>
-                <stop offset="40%" style="stop-color:#F59E0B"/>
-                <stop offset="70%" style="stop-color:#22C55E"/>
-                <stop offset="100%" style="stop-color:#0D9488"/>
-              </linearGradient>
-            </defs>
-            <!-- Track -->
-            <path d="M 16,96 A 64,64 0 0,1 144,96" fill="none" stroke="var(--border)" stroke-width="10" stroke-linecap="round"/>
-            <!-- Colored fill (762/900 ≈ 84.7% of 180deg) -->
-            <path d="M 16,96 A 64,64 0 0,1 144,96" fill="none" stroke="url(#gaugeGrad)" stroke-width="10" stroke-linecap="round"
-                  stroke-dasharray="201" stroke-dashoffset="31"/>
-            <!-- Needle dot at 762/900 -->
-            <circle cx="133" cy="42" r="6" fill="var(--primary)" stroke="#fff" stroke-width="2"/>
-          </svg>
-        </div>
-        <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-muted); margin-top:-8px;">
-          <span>300</span><span style="color:var(--primary); font-weight:500;">762</span><span>900</span>
-        </div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:var(--sp-2);">₹18,000/mo combined SIP · Invested ₹3,04,000</div>
       </div>
 
     </div>
@@ -596,9 +552,6 @@
       </svg>
       <span>Budget</span>
     </a>
-    <div class="nav-fab-slot">
-      <!-- FAB floats above -->
-    </div>
     <a href="#" class="nav-tab" data-tab="invest">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>

@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Setup Complete</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .complete-screen {
+      display: flex;
+      flex-direction: column;
+      min-height: 100dvh;
+      background: var(--bg);
+      position: relative;
+      overflow: hidden;
+    }
+    /* Celebration gradient bg */
+    .complete-screen::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 45%;
+      background: linear-gradient(160deg, rgba(13,148,136,0.12) 0%, rgba(13,148,136,0.04) 60%, transparent 100%);
+      pointer-events: none;
+    }
+    .confetti-dot {
+      position: absolute;
+      border-radius: 50%;
+      animation: confetti-fall linear infinite;
+      pointer-events: none;
+    }
+    @keyframes confetti-fall {
+      0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+    /* Success ring */
+    .success-ring-wrap {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 24px;
+    }
+    .success-ring-wrap svg {
+      width: 120px;
+      height: 120px;
+      transform: rotate(-90deg);
+    }
+    .success-check {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: check-pop 0.5s var(--ease-spring) 0.8s both;
+    }
+    .success-check-circle {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--grad-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      box-shadow: 0 8px 24px rgba(13,148,136,0.36);
+    }
+    @keyframes ring-draw {
+      from { stroke-dashoffset: 345; }
+      to   { stroke-dashoffset: 0; }
+    }
+    .ring-animate {
+      animation: ring-draw 0.9s var(--ease-out) 0.2s both;
+    }
+    /* Score card */
+    .score-card {
+      position: relative;
+      overflow: hidden;
+    }
+    .score-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--grad-hero);
+      pointer-events: none;
+    }
+    .score-ring-wrap {
+      position: relative;
+      width: 80px;
+      height: 80px;
+      flex-shrink: 0;
+    }
+    .score-ring-wrap svg { width: 80px; height: 80px; transform: rotate(-90deg); }
+    .score-ring-label {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .score-number {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1;
+    }
+    .score-denom {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    /* Checklist */
+    .check-list { display: flex; flex-direction: column; gap: 8px; }
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: var(--r-lg);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      animation: item-in var(--dur-med) var(--ease-out) both;
+    }
+    .check-item--done { background: var(--success-light); border-color: rgba(34,197,94,0.2); }
+    .check-item--amber { background: var(--warning-light); border-color: rgba(245,158,11,0.2); }
+    .check-icon {
+      width: 28px; height: 28px;
+      border-radius: var(--r-full);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      font-size: 14px;
+    }
+    .check-icon--done { background: var(--success); color: #fff; }
+    .check-icon--amber { background: var(--warning-light); color: var(--warning); border: 1.5px solid var(--warning); }
+    .check-label { flex: 1; font-size: 13px; font-weight: 500; color: var(--text-primary); }
+    .check-pts {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .check-pts--done { color: var(--success); }
+    .check-pts--amber { color: var(--warning); }
+    /* Page scroll area */
+    .complete-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 40px 20px 140px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .theme-toggle-top {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+<div class="complete-screen">
+
+  <!-- Confetti (pure CSS) -->
+  <div class="confetti-dot" style="width:8px;height:8px;background:#0D9488;left:15%;animation-duration:3.2s;animation-delay:0.1s;top:-10px;"></div>
+  <div class="confetti-dot" style="width:6px;height:6px;background:#F59E0B;left:30%;animation-duration:2.8s;animation-delay:0.4s;top:-10px;"></div>
+  <div class="confetti-dot" style="width:10px;height:10px;background:#22C55E;left:50%;animation-duration:3.5s;animation-delay:0s;top:-10px;"></div>
+  <div class="confetti-dot" style="width:7px;height:7px;background:#E94560;left:68%;animation-duration:2.6s;animation-delay:0.7s;top:-10px;"></div>
+  <div class="confetti-dot" style="width:9px;height:9px;background:#3B82F6;left:82%;animation-duration:3.0s;animation-delay:0.2s;top:-10px;"></div>
+  <div class="confetti-dot" style="width:6px;height:6px;background:#14B8A6;left:42%;animation-duration:4.0s;animation-delay:1.0s;top:-10px;"></div>
+  <div class="confetti-dot" style="width:8px;height:8px;background:#F59E0B;left:60%;animation-duration:3.3s;animation-delay:0.5s;top:-10px;"></div>
+
+  <button class="icon-btn theme-toggle-top" data-theme-toggle><span data-theme-icon>🌙</span></button>
+
+  <div class="complete-body">
+
+    <!-- Success Ring -->
+    <div class="success-ring-wrap" style="animation: card-in 0.6s var(--ease-spring) 0.1s both;">
+      <svg viewBox="0 0 120 120">
+        <circle cx="60" cy="60" r="55" fill="none" stroke="var(--primary-light)" stroke-width="8"/>
+        <circle class="ring-animate" cx="60" cy="60" r="55"
+          fill="none" stroke="var(--primary)" stroke-width="8"
+          stroke-dasharray="345" stroke-dashoffset="0"
+          stroke-linecap="round"/>
+      </svg>
+      <div class="success-check">
+        <div class="success-check-circle">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Headline -->
+    <div class="t-display" style="text-align:center;margin-bottom:6px;animation:card-in 0.5s var(--ease-out) 0.5s both;">
+      You're all set, Vikas!
+    </div>
+    <div style="text-align:center;font-size:15px;color:var(--text-secondary);margin-bottom:28px;animation:card-in 0.5s var(--ease-out) 0.6s both;">
+      Your financial picture is ready. Here's your setup score.
+    </div>
+
+    <!-- Score Card -->
+    <div class="glass-card glass-card--hero score-card" style="margin-bottom:20px;animation:card-in 0.5s var(--ease-out) 0.65s both;">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div class="score-ring-wrap">
+          <svg viewBox="0 0 80 80">
+            <circle cx="40" cy="40" r="32" fill="none" stroke="var(--primary-light)" stroke-width="7"/>
+            <circle id="score-ring" cx="40" cy="40" r="32"
+              fill="none" stroke="var(--primary)" stroke-width="7"
+              stroke-dasharray="201.06" stroke-dashoffset="30.16"
+              stroke-linecap="round"/>
+          </svg>
+          <div class="score-ring-label">
+            <span class="score-number">85</span>
+            <span class="score-denom">/ 100</span>
+          </div>
+        </div>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:var(--text-secondary);margin-bottom:4px;">Setup Score</div>
+          <div class="t-h1 gradient-text">Excellent!</div>
+          <div style="font-size:13px;color:var(--text-secondary);margin-top:4px;">
+            Add goals to reach 95+
+          </div>
+          <div class="delta delta--pos" style="margin-top:8px;display:inline-flex;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+            +10 pts available
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Checklist -->
+    <div style="font-size:13px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:var(--text-secondary);margin-bottom:10px;animation:card-in 0.4s var(--ease-out) 0.7s both;">
+      What's connected
+    </div>
+    <div class="check-list">
+
+      <div class="check-item check-item--done" style="animation-delay:0ms;">
+        <div class="check-icon check-icon--done">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="check-label">Family Profile</div>
+        <div class="check-pts check-pts--done">+10 pts</div>
+      </div>
+
+      <div class="check-item check-item--done" style="animation-delay:50ms;">
+        <div class="check-icon check-icon--done">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="check-label">Income Sources</div>
+        <div class="check-pts check-pts--done">+15 pts</div>
+      </div>
+
+      <div class="check-item check-item--done" style="animation-delay:100ms;">
+        <div class="check-icon check-icon--done">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="check-label">Bank Accounts (3)</div>
+        <div class="check-pts check-pts--done">+15 pts</div>
+      </div>
+
+      <div class="check-item check-item--done" style="animation-delay:150ms;">
+        <div class="check-icon check-icon--done">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="check-label">Credit Cards (2)</div>
+        <div class="check-pts check-pts--done">+10 pts</div>
+      </div>
+
+      <div class="check-item check-item--done" style="animation-delay:200ms;">
+        <div class="check-icon check-icon--done">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="check-label">Loans &amp; EMIs (2)</div>
+        <div class="check-pts check-pts--done">+10 pts</div>
+      </div>
+
+      <div class="check-item check-item--done" style="animation-delay:250ms;">
+        <div class="check-icon check-icon--done">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="check-label">Budget Envelopes (7)</div>
+        <div class="check-pts check-pts--done">+15 pts</div>
+      </div>
+
+      <div class="check-item check-item--done" style="animation-delay:300ms;">
+        <div class="check-icon check-icon--done">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="check-label">Investments · 3 SIPs</div>
+        <div class="check-pts check-pts--done">+10 pts</div>
+      </div>
+
+      <div class="check-item check-item--amber" style="animation-delay:350ms;">
+        <div class="check-icon check-icon--amber">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </div>
+        <div class="check-label">Goals</div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
+          <span class="check-pts check-pts--amber">0/10 pts</span>
+          <span style="font-size:10px;color:var(--warning);">not set</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- CTA Buttons -->
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:24px;animation:card-in 0.5s var(--ease-out) 1.0s both;">
+      <a href="../dashboard/index.html" class="btn btn--primary btn--lg btn--full" style="text-decoration:none;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+        Go to Dashboard
+      </a>
+      <a href="step-08-goals.html" class="btn btn--secondary btn--full" style="text-decoration:none;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
+        </svg>
+        Add Goals (+10 pts)
+      </a>
+    </div>
+
+  </div><!-- /complete-body -->
+</div><!-- /complete-screen -->
+</div>
+</div>
+<script src="../assets/nav.js"></script>
+<script>
+// Animate score ring on load
+window.addEventListener('DOMContentLoaded', () => {
+  const ring = document.getElementById('score-ring');
+  if (ring) {
+    const full = 201.06;
+    const target = full * (1 - 85/100); // 85%
+    ring.style.strokeDashoffset = full;
+    setTimeout(() => {
+      ring.style.transition = 'stroke-dashoffset 1.2s cubic-bezier(0.22,1,0.36,1)';
+      ring.style.strokeDashoffset = target;
+    }, 700);
+  }
+});
+</script>
+</body>
+</html>

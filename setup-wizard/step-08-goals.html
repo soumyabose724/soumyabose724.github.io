@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Step 8: Goals</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .section-heading { font-size:22px; font-weight:700; letter-spacing:-0.01em; color:var(--text-primary); margin-bottom:4px; }
+    .section-sub { font-size:14px; color:var(--text-secondary); margin-bottom:20px; }
+    .goal-card {
+      background: var(--glass-fill);
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      border: 1px solid var(--glass-border);
+      border-radius: var(--r-xl);
+      padding: 16px;
+      animation: card-in var(--dur-med) var(--ease-out) both;
+    }
+    .goal-card + .goal-card { margin-top: 12px; }
+    .goal-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .goal-ring-wrap {
+      position: relative;
+      width: 64px;
+      height: 64px;
+      flex-shrink: 0;
+    }
+    .goal-ring-wrap svg {
+      width: 64px;
+      height: 64px;
+      transform: rotate(-90deg);
+    }
+    .goal-ring-label {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .goal-info { flex: 1; min-width: 0; }
+    .goal-name { font-size: 15px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+    .goal-target { font-size: 12px; color: var(--text-secondary); }
+    .goal-amounts {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 8px;
+    }
+    .goal-current {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .goal-target-amt {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- Demo Bar -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">State</span>
+    <button class="demo-btn" data-state="no-goals">No Goals</button>
+    <button class="demo-btn active" data-state="goals">Goals Added</button>
+  </div>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <a href="step-07-investments.html" class="top-bar__back">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+    </a>
+    <div class="top-bar__title">Setup (Step 8 of 8)</div>
+    <button class="icon-btn" data-theme-toggle><span data-theme-icon>🌙</span></button>
+  </div>
+
+  <!-- Page Content -->
+  <div class="page-content" style="padding-bottom:100px;">
+
+    <!-- Step Indicator -->
+    <div class="step-indicator" style="padding:4px 0 16px;">
+      <div class="step-dot done"></div>
+      <div class="step-line done"></div>
+      <div class="step-dot done"></div>
+      <div class="step-line done"></div>
+      <div class="step-dot done"></div>
+      <div class="step-line done"></div>
+      <div class="step-dot done"></div>
+      <div class="step-line done"></div>
+      <div class="step-dot done"></div>
+      <div class="step-line done"></div>
+      <div class="step-dot done"></div>
+      <div class="step-line done"></div>
+      <div class="step-dot done"></div>
+      <div class="step-line done"></div>
+      <div class="step-dot current"></div>
+    </div>
+
+    <div class="section-heading">Set your financial goals</div>
+    <div class="section-sub">What are you working toward? We'll track your progress.</div>
+
+    <!-- Empty State -->
+    <div id="empty-state" style="display:none;">
+      <div class="empty-state">
+        <div class="empty-state__icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
+          </svg>
+        </div>
+        <div class="empty-state__title">No goals set yet</div>
+        <div class="empty-state__body">Goals help you stay focused. Add an emergency fund, a home, or your dream vacation.</div>
+        <button class="btn btn--primary" onclick="document.querySelector('[data-state=goals]').click()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Add First Goal
+        </button>
+      </div>
+    </div>
+
+    <!-- Goals State -->
+    <div id="goals-state">
+
+      <!-- Emergency Fund -->
+      <div class="goal-card glass-card--danger">
+        <div class="goal-header">
+          <div class="goal-ring-wrap">
+            <svg viewBox="0 0 64 64">
+              <circle class="progress-ring__track" cx="32" cy="32" r="26" stroke-width="6"/>
+              <circle class="progress-ring__fill" id="ring-emergency" cx="32" cy="32" r="26"
+                stroke-width="6" stroke="var(--error)"
+                stroke-dasharray="163.36"
+                stroke-dashoffset="131.5"
+                stroke-linecap="round"/>
+            </svg>
+            <div class="goal-ring-label">19.5%</div>
+          </div>
+          <div class="goal-info">
+            <div class="goal-name">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px;">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+              Emergency Fund
+            </div>
+            <div class="goal-target">Target: 3× monthly income</div>
+            <div style="margin-top:6px;">
+              <span class="chip chip--at-risk">AT RISK</span>
+            </div>
+          </div>
+        </div>
+        <div class="goal-amounts">
+          <div class="goal-current">₹1,20,000</div>
+          <div class="goal-target-amt">of ₹6,15,000</div>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-bar__fill progress-bar__fill--danger" style="width:19.5%;"></div>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:var(--text-secondary);">
+          Need ₹4,95,000 more · At ₹10,000/mo → 50 months
+        </div>
+      </div>
+
+      <!-- Home Down Payment -->
+      <div class="goal-card glass-card--warning">
+        <div class="goal-header">
+          <div class="goal-ring-wrap">
+            <svg viewBox="0 0 64 64">
+              <circle class="progress-ring__track" cx="32" cy="32" r="26" stroke-width="6"/>
+              <circle class="progress-ring__fill" id="ring-home" cx="32" cy="32" r="26"
+                stroke-width="6" stroke="var(--warning)"
+                stroke-dasharray="163.36"
+                stroke-dashoffset="93.9"
+                stroke-linecap="round"/>
+            </svg>
+            <div class="goal-ring-label">42.5%</div>
+          </div>
+          <div class="goal-info">
+            <div class="goal-name">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px;">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <polyline points="9 22 9 12 15 12 15 22"/>
+              </svg>
+              Home Down Payment
+            </div>
+            <div class="goal-target">Target: Dec 2027</div>
+            <div style="margin-top:6px;">
+              <span class="chip chip--behind">SLIGHTLY BEHIND</span>
+            </div>
+          </div>
+        </div>
+        <div class="goal-amounts">
+          <div class="goal-current">₹8,50,000</div>
+          <div class="goal-target-amt">of ₹20,00,000</div>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-bar__fill progress-bar__fill--warning" style="width:42.5%;"></div>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:var(--text-secondary);">
+          Need ₹11,50,000 more · On track needs ₹47,917/mo
+        </div>
+      </div>
+
+      <!-- Add Goal -->
+      <button class="btn btn--secondary btn--full" style="margin-top:14px;" onclick="AG.showToast('Add financial goal', 'info')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Add Goal
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- Sticky Footer -->
+  <div style="position:sticky;bottom:0;background:var(--surface);border-top:1px solid var(--border);padding:12px 16px;display:flex;gap:12px;z-index:30;">
+    <button class="btn btn--ghost" onclick="history.back()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+      Back
+    </button>
+    <a href="complete.html" class="btn btn--primary" style="flex:1;text-decoration:none;">
+      Complete Setup
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 12h14M12 5l7 7-7 7"/>
+      </svg>
+    </a>
+  </div>
+
+</div>
+</div>
+<script src="../assets/nav.js"></script>
+<script>
+function animateRings() {
+  // Rings are pre-set via stroke-dashoffset in HTML for SSR accuracy
+  // Add CSS transition on load for animation
+  setTimeout(() => {
+    ['ring-emergency','ring-home'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        const final = el.getAttribute('stroke-dashoffset');
+        el.setAttribute('stroke-dashoffset', el.getAttribute('stroke-dasharray'));
+        requestAnimationFrame(() => {
+          el.style.transition = 'stroke-dashoffset 0.8s cubic-bezier(0.22,1,0.36,1)';
+          el.setAttribute('stroke-dashoffset', final);
+        });
+      }
+    });
+  }, 200);
+}
+
+AG.initDemoBar({
+  'no-goals': () => {
+    document.getElementById('empty-state').style.display = 'flex';
+    document.getElementById('goals-state').style.display = 'none';
+  },
+  'goals': () => {
+    document.getElementById('empty-state').style.display = 'none';
+    document.getElementById('goals-state').style.display = 'block';
+    animateRings();
+  }
+});
+</script>
+</body>
+</html>
