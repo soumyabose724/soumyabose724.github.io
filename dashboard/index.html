@@ -59,6 +59,8 @@
       line-height: 1.1;
     }
     .tile-amount--expense { color: var(--error); }
+    .tile-delta { margin-top: var(--sp-2); }
+    .tile-delta-sub { font-size: 10px; color: var(--text-muted); margin-top: 4px; font-weight: 500; }
 
     /* ── Budget segmented bar ── */
     .budget-bar-wrap { margin: var(--sp-3) 0; }
@@ -282,7 +284,8 @@
         <div class="tile-label">Income</div>
         <div class="tile-amount">₹2,05,000</div>
         <div class="tile-delta">
-          <span class="delta delta--neu">▲ Same as last month</span>
+          <span class="delta delta--neu">— Same</span>
+          <div class="tile-delta-sub">vs last month</div>
         </div>
       </div>
 
@@ -291,7 +294,8 @@
         <div class="tile-label">Expenses</div>
         <div class="tile-amount tile-amount--expense" id="expenses-amount">₹1,18,000</div>
         <div class="tile-delta">
-          <span class="delta" id="expenses-delta" style="background:rgba(245,158,11,.12); color:var(--warning);">▲ +₹12,000 vs last month</span>
+          <span class="delta" id="expenses-delta" style="background:rgba(245,158,11,.12); color:var(--warning);">▲ +₹12K</span>
+          <div class="tile-delta-sub" id="expenses-delta-sub">vs last month</div>
         </div>
       </div>
 
@@ -601,8 +605,10 @@
 
         // Expenses
         document.getElementById('expenses-amount').textContent = '₹1,18,000';
-        document.getElementById('expenses-delta').textContent  = '▲ +₹12,000 vs last month';
+        document.getElementById('expenses-delta').textContent  = '▲ +₹12K';
         document.getElementById('expenses-delta').style.cssText = 'background:rgba(245,158,11,.12); color:var(--warning);';
+        document.getElementById('expenses-delta-sub').textContent = 'vs last month';
+        document.getElementById('expenses-delta-sub').style.cssText = '';
 
         // Budget chip
         const chip = document.getElementById('budget-chip');
@@ -628,8 +634,10 @@
         document.getElementById('hero-assets').textContent = '₹1,04,98,000';
 
         document.getElementById('expenses-amount').textContent = '₹1,18,000';
-        document.getElementById('expenses-delta').textContent  = '▲ +₹12,000 vs last month';
+        document.getElementById('expenses-delta').textContent  = '▲ +₹12K';
         document.getElementById('expenses-delta').style.cssText = 'background:rgba(245,158,11,.12); color:var(--warning);';
+        document.getElementById('expenses-delta-sub').textContent = 'vs last month';
+        document.getElementById('expenses-delta-sub').style.cssText = '';
 
         // Budget chip — BALANCED
         const chip = document.getElementById('budget-chip');
@@ -655,8 +663,10 @@
 
         document.getElementById('expenses-amount').textContent = '₹1,98,000';
         document.getElementById('expenses-amount').style.color = 'var(--error)';
-        document.getElementById('expenses-delta').textContent  = '▲ +₹80,000 vs last month — OVER BUDGET';
+        document.getElementById('expenses-delta').textContent  = '▲ +₹80K';
         document.getElementById('expenses-delta').style.cssText = 'background:var(--error-light); color:var(--error);';
+        document.getElementById('expenses-delta-sub').textContent = 'OVER BUDGET';
+        document.getElementById('expenses-delta-sub').style.cssText = 'color:var(--error); font-weight:600;';
 
         // Budget chip — OVER
         const chip = document.getElementById('budget-chip');
