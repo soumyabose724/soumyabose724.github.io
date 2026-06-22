@@ -101,7 +101,7 @@
   --ring-danger: 0 0 0 3px rgba(233,69,96,0.24);
 
   /* Z-index */
-  --z-fab:   60; --z-sheet:100; --z-modal:200; --z-toast:300; --z-demo:400;
+  --z-fab:   60; --z-sheet:100; --z-modal:200; --z-demo:400; --z-toast:500;
 
   /* Layout */
   --top-bar-h:   56px;
@@ -845,7 +845,7 @@ ul,ol { list-style:none; }
    §19  TOAST
 ───────────────────────────────────────────── */
 .toast-container {
-  position:fixed; top:var(--sp-5); left:50%; transform:translateX(-50%);
+  position:fixed; top:calc(var(--demo-bar-h) + var(--top-bar-h) + var(--sp-2)); left:50%; transform:translateX(-50%);
   z-index:var(--z-toast); display:flex; flex-direction:column; gap:var(--sp-2);
   pointer-events:none; width:calc(100% - var(--sp-10)); max-width:380px;
 }
