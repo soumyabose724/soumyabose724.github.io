@@ -357,9 +357,13 @@
         <polyline points="15 18 9 12 15 6"/>
       </svg>
     </a>
-    <span class="top-bar__title">June 2026 Budget</span>
-    <div class="top-bar__actions" id="top-bar-actions">
-      <!-- Injected by JS per state -->
+    <span class="top-bar__title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">June 2026 Budget</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <div id="top-bar-page-actions" style="display:flex;gap:4px;align-items:center;"></div>
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
     </div>
   </div>
 
@@ -1135,7 +1139,7 @@ function applyState(stateKey) {
   document.getElementById('alloc-text').innerHTML = state.allocBar.text;
 
   // Top bar actions
-  document.getElementById('top-bar-actions').innerHTML = state.topBarActions;
+  document.getElementById('top-bar-page-actions').innerHTML = state.topBarActions;
 
   // Wire up unlock / lock / sweep buttons after injection
   const unlockBtn = document.getElementById('unlock-btn');
