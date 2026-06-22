@@ -240,7 +240,7 @@ ul,ol { list-style:none; }
 ───────────────────────────────────────────── */
 .top-bar {
   position:fixed;
-  top:0; left:50%;
+  top:var(--demo-bar-h); left:50%;
   transform: translateX(-50%);
   width:100%; max-width:var(--page-max);
   height:var(--top-bar-h);
@@ -429,7 +429,7 @@ ul,ol { list-style:none; }
   grid-template-columns:46px 1fr auto;
   grid-template-areas:
     "icon info  actions"
-    "amount amount amount";
+    "icon amount amount";
   column-gap:var(--sp-3);
   row-gap:var(--sp-2);
   align-items:start;
