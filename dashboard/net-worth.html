@@ -136,19 +136,26 @@
     }
     .bar-label--current { color: var(--primary); font-weight: 600; }
 
-    /* ── Trend selector pills ── */
+    /* ── Trend selector — segmented control ── */
     .trend-tabs {
-      display: flex; gap: var(--sp-2); margin-bottom: var(--sp-4);
+      display: inline-flex;
+      background: var(--border);
+      border-radius: var(--r-full);
+      padding: 3px;
+      gap: 2px;
     }
     .trend-tab {
-      flex: 1; height: 32px; border-radius: var(--r-full);
+      height: 28px; padding: 0 14px;
+      border-radius: var(--r-full);
       font-size: 12px; font-weight: 600;
-      background: var(--surface); border: 1.5px solid var(--border);
+      background: transparent; border: none;
       color: var(--text-muted); cursor: pointer;
-      transition: background var(--dur-fast), color var(--dur-fast), border-color var(--dur-fast);
+      transition: background var(--dur-fast), color var(--dur-fast), box-shadow var(--dur-fast);
+      white-space: nowrap;
     }
     .trend-tab.active {
-      background: var(--primary); color: #fff; border-color: var(--primary);
+      background: var(--primary); color: #fff;
+      box-shadow: 0 1px 6px rgba(13,148,136,.35);
     }
 
     /* ── Insight card ── */
@@ -531,13 +538,12 @@
     <!-- Trend Section -->
     <div class="trend-section">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--sp-3);">
-        <div style="font-size:15px;font-weight:600;color:var(--text-secondary);letter-spacing:.03em;text-transform:uppercase;">
-          Trend
-        </div>
-        <div class="trend-tabs" style="flex-direction:row;gap:var(--sp-1);margin-bottom:0;">
-          <button class="trend-tab active" id="tab-6m" onclick="setTrendView('6m')">6M</button>
-          <button class="trend-tab"        id="tab-1y" onclick="setTrendView('1y')">1Y</button>
-          <button class="trend-tab"        id="tab-3y" onclick="setTrendView('3y')">3Y</button>
+        <div style="font-size:15px;font-weight:600;color:var(--text-secondary);letter-spacing:.03em;text-transform:uppercase;">Trend</div>
+        <div class="trend-tabs">
+          <button class="trend-tab active" id="tab-6m"  onclick="setTrendView('6m')">6M</button>
+          <button class="trend-tab"        id="tab-1y"  onclick="setTrendView('1y')">1Y</button>
+          <button class="trend-tab"        id="tab-3y"  onclick="setTrendView('3y')">3Y</button>
+          <button class="trend-tab"        id="tab-all" onclick="setTrendView('all')">All</button>
         </div>
       </div>
 
@@ -615,8 +621,25 @@
           </div>
           <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);margin-top:var(--sp-3);border-top:1px solid var(--border);padding-top:var(--sp-2);">
             <span>FY24 <strong style="color:var(--text-secondary);">₹32.1L</strong></span>
-            <span>FY26 <strong style="color:var(--primary);">₹52.3L</strong></span>
-            <span class="delta delta--pos" style="height:auto;font-size:10px;">▲ +₹20.2L (+62.9%)</span>
+            <span>FY26 <strong style="color:var(--primary);">₹54.6L</strong></span>
+            <span class="delta delta--pos" style="height:auto;font-size:10px;">▲ +₹22.5L (+70.1%)</span>
+          </div>
+        </div>
+
+        <!-- All-time view -->
+        <div class="view-all" id="view-all" style="display:none;">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:var(--sp-3);">All Time · Net Worth (₹ Lakh)</div>
+          <div class="bar-chart">
+            <div class="bar-col"><div class="bar bar--past" style="height:10px;"></div><div class="bar-label">FY22</div></div>
+            <div class="bar-col"><div class="bar bar--past" style="height:16px;"></div><div class="bar-label">FY23</div></div>
+            <div class="bar-col"><div class="bar bar--past" style="height:24px;"></div><div class="bar-label">FY24</div></div>
+            <div class="bar-col"><div class="bar bar--past" style="height:36px;"></div><div class="bar-label">FY25</div></div>
+            <div class="bar-col"><div class="bar bar--current" style="height:50px;"></div><div class="bar-label bar-label--current">FY26</div></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);margin-top:var(--sp-3);border-top:1px solid var(--border);padding-top:var(--sp-2);">
+            <span>FY22 <strong style="color:var(--text-secondary);">₹18.4L</strong></span>
+            <span>FY26 <strong style="color:var(--primary);">₹54.6L</strong></span>
+            <span class="delta delta--pos" style="height:auto;font-size:10px;">▲ +₹36.2L (+196.7%)</span>
           </div>
         </div>
       </div>
@@ -643,14 +666,12 @@
 <script src="../assets/nav.js"></script>
 <script>
   function setTrendView(v) {
-    ['6m','1y','3y'].forEach(id => {
+    ['6m','1y','3y','all'].forEach(id => {
       const el = document.getElementById('view-' + id);
       const tab = document.getElementById('tab-' + id);
       if (el)  el.style.display = (id === v) ? 'block' : 'none';
       if (tab) tab.classList.toggle('active', id === v);
     });
-    // Ensure 6m always visible for state that doesn't have its own element
-    if (v === '6m') document.getElementById('view-6m').style.display = 'block';
   }
 
   document.addEventListener('DOMContentLoaded', () => {
