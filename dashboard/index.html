@@ -169,6 +169,41 @@
 
     /* ── Tile delta row ── */
     .tile-delta { margin-top: var(--sp-2); }
+
+    /* ── Compact row ── */
+    .compact-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .compact-row:last-child { border-bottom: none; }
+    .compact-row__icon {
+      width: 36px; height: 36px; border-radius: var(--r-md);
+      background: var(--primary-xlight); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .compact-row__body { flex: 1; min-width: 0; }
+    .compact-row__label {
+      font-size: 13px; font-weight: 500; color: var(--text-primary);
+      display: flex; align-items: center; gap: 5px;
+      overflow: hidden;
+    }
+    .compact-row__label-text {
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .compact-row__meta {
+      font-size: 11px; color: var(--text-muted); margin-top: 2px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .compact-row__amount {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+      font-size: 14px; font-weight: 600;
+      flex-shrink: 0; color: var(--text-primary);
+    }
+    .compact-row__amount--expense { color: var(--error); }
+    .compact-row__amount--income  { color: var(--success); }
   </style>
 </head>
 <body>
@@ -382,62 +417,53 @@
     <div style="margin-bottom:var(--sp-5);">
       <div class="section-header"><h2>Upcoming This Week</h2></div>
 
-      <div class="list-row">
-        <div class="list-row__icon list-row__icon--emi">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <div class="compact-row">
+        <div class="compact-row__icon list-row__icon--emi">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
             <polyline points="9 22 9 12 15 12 15 22"/>
           </svg>
         </div>
-        <div class="list-row__info">
-          <div class="list-row__label">HDFC Home Loan EMI</div>
-          <div class="list-row__meta">Due 1 Jul 2026</div>
+        <div class="compact-row__body">
+          <div class="compact-row__label">
+            <span class="compact-row__label-text">HDFC Home Loan EMI</span>
+            <span class="chip chip--scheduled" style="font-size:9px;height:16px;padding:0 5px;flex-shrink:0;">SCHEDULED</span>
+          </div>
+          <div class="compact-row__meta">Due 1 Jul · Auto-debit HDFC Savings</div>
         </div>
-        <div class="list-row__actions">
-          <span class="chip chip--scheduled">SCHEDULED</span>
-        </div>
-        <div class="list-row__amount-row">
-          <div class="list-row__amount list-row__amount--expense">₹52,480</div>
-          <div class="list-row__amount-caption">Auto-debit from HDFC Savings</div>
-        </div>
+        <div class="compact-row__amount compact-row__amount--expense">₹52,480</div>
       </div>
 
-      <div class="list-row">
-        <div class="list-row__icon list-row__icon--sip">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <div class="compact-row">
+        <div class="compact-row__icon list-row__icon--sip">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
           </svg>
         </div>
-        <div class="list-row__info">
-          <div class="list-row__label">Axis Bluechip SIP</div>
-          <div class="list-row__meta">Auto-debit 5 Jul 2026</div>
+        <div class="compact-row__body">
+          <div class="compact-row__label">
+            <span class="compact-row__label-text">Axis Bluechip SIP</span>
+            <span class="chip chip--scheduled" style="font-size:9px;height:16px;padding:0 5px;flex-shrink:0;">SCHEDULED</span>
+          </div>
+          <div class="compact-row__meta">Auto-debit 5 Jul · Direct Growth</div>
         </div>
-        <div class="list-row__actions">
-          <span class="chip chip--scheduled">SCHEDULED</span>
-        </div>
-        <div class="list-row__amount-row">
-          <div class="list-row__amount list-row__amount--expense">₹5,000</div>
-          <div class="list-row__amount-caption">Axis Bluechip Fund — Direct Growth</div>
-        </div>
+        <div class="compact-row__amount compact-row__amount--expense">₹5,000</div>
       </div>
 
-      <div class="list-row">
-        <div class="list-row__icon list-row__icon--electric">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <div class="compact-row">
+        <div class="compact-row__icon list-row__icon--electric">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
           </svg>
         </div>
-        <div class="list-row__info">
-          <div class="list-row__label">Electricity Bill</div>
-          <div class="list-row__meta">Due 7 Jul 2026</div>
+        <div class="compact-row__body">
+          <div class="compact-row__label">
+            <span class="compact-row__label-text">Electricity Bill</span>
+            <span class="chip chip--overdue" style="font-size:9px;height:16px;padding:0 5px;flex-shrink:0;">OVERDUE</span>
+          </div>
+          <div class="compact-row__meta">Due 7 Jul · BESCOM #7348291</div>
         </div>
-        <div class="list-row__actions">
-          <span class="chip chip--overdue">OVERDUE</span>
-        </div>
-        <div class="list-row__amount-row">
-          <div class="list-row__amount list-row__amount--expense">₹3,240</div>
-          <div class="list-row__amount-caption">BESCOM — Meter #7348291</div>
-        </div>
+        <div class="compact-row__amount compact-row__amount--expense">₹3,240</div>
       </div>
     </div>
 
@@ -448,77 +474,61 @@
         <a href="#" class="see-all">See all →</a>
       </div>
 
-      <div class="list-row">
-        <div class="list-row__icon list-row__icon--food">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <div class="compact-row">
+        <div class="compact-row__icon list-row__icon--food">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>
             <line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/>
           </svg>
         </div>
-        <div class="list-row__info">
-          <div class="list-row__label">Swiggy</div>
-          <div class="list-row__meta">Food &amp; Dining · 20 Jun</div>
+        <div class="compact-row__body">
+          <div class="compact-row__label"><span class="compact-row__label-text">Swiggy</span></div>
+          <div class="compact-row__meta">Food &amp; Dining · 20 Jun · UPI</div>
         </div>
-        <div class="list-row__actions"></div>
-        <div class="list-row__amount-row">
-          <div class="list-row__amount list-row__amount--expense">−₹680</div>
-          <div class="list-row__amount-caption">UPI · Deducted from HDFC</div>
-        </div>
+        <div class="compact-row__amount compact-row__amount--expense">−₹680</div>
       </div>
 
-      <div class="list-row">
-        <div class="list-row__icon list-row__icon--finance">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <div class="compact-row">
+        <div class="compact-row__icon list-row__icon--finance">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
             <line x1="1" y1="10" x2="23" y2="10"/>
           </svg>
         </div>
-        <div class="list-row__info">
-          <div class="list-row__label">HDFC Credit Card Payment</div>
-          <div class="list-row__meta">Finance · 19 Jun</div>
+        <div class="compact-row__body">
+          <div class="compact-row__label"><span class="compact-row__label-text">HDFC Credit Card</span></div>
+          <div class="compact-row__meta">Finance · 19 Jun · Full payment</div>
         </div>
-        <div class="list-row__actions"></div>
-        <div class="list-row__amount-row">
-          <div class="list-row__amount list-row__amount--expense">−₹45,000</div>
-          <div class="list-row__amount-caption">Full bill payment</div>
-        </div>
+        <div class="compact-row__amount compact-row__amount--expense">−₹45,000</div>
       </div>
 
-      <div class="list-row">
-        <div class="list-row__icon list-row__icon--income">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <div class="compact-row">
+        <div class="compact-row__icon list-row__icon--income">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <line x1="12" y1="1" x2="12" y2="23"/>
             <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
           </svg>
         </div>
-        <div class="list-row__info">
-          <div class="list-row__label">Salary Credit</div>
-          <div class="list-row__meta">Income · 1 Jun</div>
+        <div class="compact-row__body">
+          <div class="compact-row__label"><span class="compact-row__label-text">Salary Credit</span></div>
+          <div class="compact-row__meta">Income · 1 Jun · NEFT from TechCorp</div>
         </div>
-        <div class="list-row__actions"></div>
-        <div class="list-row__amount-row">
-          <div class="list-row__amount list-row__amount--income">+₹1,80,000</div>
-          <div class="list-row__amount-caption">TechCorp Pvt Ltd · HDFC NEFT</div>
-        </div>
+        <div class="compact-row__amount compact-row__amount--income">+₹1,80,000</div>
       </div>
 
-      <div class="list-row">
-        <div class="list-row__icon list-row__icon--grocery">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <div class="compact-row">
+        <div class="compact-row__icon list-row__icon--grocery">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
             <line x1="3" y1="6" x2="21" y2="6"/>
             <path d="M16 10a4 4 0 0 1-8 0"/>
           </svg>
         </div>
-        <div class="list-row__info">
-          <div class="list-row__label">Big Basket</div>
-          <div class="list-row__meta">Groceries · 18 Jun</div>
+        <div class="compact-row__body">
+          <div class="compact-row__label"><span class="compact-row__label-text">Big Basket</span></div>
+          <div class="compact-row__meta">Groceries · 18 Jun · UPI</div>
         </div>
-        <div class="list-row__actions"></div>
-        <div class="list-row__amount-row">
-          <div class="list-row__amount list-row__amount--expense">−₹2,340</div>
-          <div class="list-row__amount-caption">UPI · BigBasket cart</div>
-        </div>
+        <div class="compact-row__amount compact-row__amount--expense">−₹2,340</div>
       </div>
 
     </div>
