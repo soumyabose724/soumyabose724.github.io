@@ -188,7 +188,7 @@
   <!-- Demo Bar -->
   <div class="demo-bar">
     <span class="demo-bar__label">View</span>
-    <button class="demo-btn" data-state="current">Current</button>
+    <button class="demo-btn active" data-state="current">Current</button>
     <button class="demo-btn" data-state="1y-trend">1 Year Trend</button>
   </div>
 
@@ -226,18 +226,19 @@
         FY 2026-27
       </div>
       <div class="nw-hero-label">Net Worth</div>
-      <div class="nw-amount-xl gradient-text" id="nw-hero-amount">₹52,34,000</div>
+      <div class="nw-amount-xl gradient-text" id="nw-hero-amount">₹54,64,100</div>
       <div style="margin-top:var(--sp-3);">
         <span class="delta delta--pos" id="nw-hero-delta">▲ +₹1,24,000 (+2.4%) this month</span>
       </div>
-      <div class="nw-equation">
-        <span>Assets</span>
-        <span class="nw-eq-val" style="color:var(--success);" id="nw-assets-total">₹1,03,74,000</span>
-        <span style="color:var(--text-muted);">−</span>
-        <span>Liabilities</span>
-        <span class="nw-eq-val" style="color:var(--error);" id="nw-liab-total">₹51,40,000</span>
-        <span style="color:var(--text-muted);">=</span>
-        <span class="nw-eq-val" style="color:var(--primary);">₹52,34,000</span>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3);margin-top:var(--sp-4);">
+        <div style="background:rgba(22,163,74,.08);border-radius:var(--r-md);padding:var(--sp-3) var(--sp-3);">
+          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--success);opacity:.8;margin-bottom:3px;">Assets</div>
+          <div id="nw-assets-total" style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--success);">₹1,06,71,100</div>
+        </div>
+        <div style="background:rgba(233,69,96,.08);border-radius:var(--r-md);padding:var(--sp-3) var(--sp-3);">
+          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--error);opacity:.8;margin-bottom:3px;">Liabilities</div>
+          <div id="nw-liab-total" style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--error);">₹52,07,000</div>
+        </div>
       </div>
 
       <!-- Mini sparkline -->
@@ -271,7 +272,7 @@
       <div class="breakdown-header">
         <div style="width:8px;height:8px;border-radius:50%;background:var(--success);flex-shrink:0;"></div>
         <span class="breakdown-title" style="color:var(--success);">Assets</span>
-        <span class="breakdown-pill breakdown-pill--asset" id="assets-total-pill">₹1,03,74,000</span>
+        <span class="breakdown-pill breakdown-pill--asset" id="assets-total-pill">₹1,06,71,100</span>
       </div>
 
       <!-- Bank Accounts -->
@@ -417,7 +418,7 @@
       <div class="breakdown-header">
         <div style="width:8px;height:8px;border-radius:50%;background:var(--error);flex-shrink:0;"></div>
         <span class="breakdown-title" style="color:var(--error);">Liabilities</span>
-        <span class="breakdown-pill breakdown-pill--liability" id="liab-total-pill">₹51,40,000</span>
+        <span class="breakdown-pill breakdown-pill--liability" id="liab-total-pill">₹52,07,000</span>
       </div>
 
       <!-- Home Loan -->
@@ -524,7 +525,7 @@
         <div style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--primary);opacity:.7;margin-bottom:2px;">Net Worth</div>
         <div style="font-size:12px;color:var(--primary);opacity:.7;">Assets − Liabilities</div>
       </div>
-      <div class="nw-summary-amount">₹52,34,000</div>
+      <div class="nw-summary-amount">₹54,64,100</div>
     </div>
 
     <!-- Trend Section -->
@@ -655,17 +656,18 @@
   document.addEventListener('DOMContentLoaded', () => {
     // Count up hero
     const heroEl = document.getElementById('nw-hero-amount');
-    AG.countUp(heroEl, 5234000 * 100, 900);
+    AG.countUp(heroEl, 5464100 * 100, 900);
 
     // Init trend tabs — show 6m by default
     setTrendView('6m');
 
     AG.initDemoBar({
       'current': () => {
-        // Already the default state
         document.getElementById('nw-hero-delta').textContent = '▲ +₹1,24,000 (+2.4%) this month';
         document.getElementById('nw-hero-delta').className   = 'delta delta--pos';
-        AG.countUp(heroEl, 5234000 * 100, 700);
+        document.getElementById('nw-assets-total').textContent = '₹1,06,71,100';
+        document.getElementById('nw-liab-total').textContent   = '₹52,07,000';
+        AG.countUp(heroEl, 5464100 * 100, 700);
         setTrendView('6m');
       },
       '1y-trend': () => {
