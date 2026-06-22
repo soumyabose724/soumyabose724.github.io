@@ -699,6 +699,15 @@ ul,ol { list-style:none; }
 .progress-bar--thick { height:12px; }
 .progress-bar--slim  { height:4px; }
 
+/* Utility bar (used on cards, loans, investments) */
+.util-bar-wrap { margin-top:6px; }
+.util-label-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
+.util-label { font-size:11px; color:var(--text-muted); }
+.util-pct { font-size:11px; font-weight:600; }
+.util-pct--safe   { color:var(--success); }
+.util-pct--warn   { color:var(--warning); }
+.util-pct--danger { color:var(--error); }
+
 /* Circular ring */
 .progress-ring { position:relative; display:inline-flex; align-items:center; justify-content:center; }
 .progress-ring svg { transform:rotate(-90deg); }
