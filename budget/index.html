@@ -195,7 +195,7 @@
       background: linear-gradient(135deg, #0B7A70 0%, #0D9488 55%, #0EA5A0 100%);
       border-top: none;
       padding: var(--sp-5) var(--sp-5);
-      margin: var(--sp-3) var(--sp-4) var(--sp-4);
+      margin: 0 var(--sp-4) var(--sp-2);
       border-radius: 20px;
       box-shadow: 0 6px 24px rgba(13,148,136,.28), 0 2px 8px rgba(13,148,136,.18);
     }
@@ -537,6 +537,36 @@
       </div>
     </div>
 
+    <!-- ── Budget Summary Card ── -->
+    <div class="total-footer">
+      <div class="total-footer__heading">Budget Summary · June 2026</div>
+      <div class="total-footer__stats">
+        <div class="total-footer__stat">
+          <span class="total-footer__stat-val" id="total-alloc-val">₹1,20,000</span>
+          <span class="total-footer__stat-label">Allocated</span>
+        </div>
+        <div class="total-footer__stat-sep"></div>
+        <div class="total-footer__stat">
+          <span class="total-footer__stat-val" id="total-spent-val">₹78,950</span>
+          <span class="total-footer__stat-label">Spent</span>
+        </div>
+        <div class="total-footer__stat-sep"></div>
+        <div class="total-footer__stat">
+          <span class="total-footer__stat-val" id="total-remaining-val">₹41,050</span>
+          <span class="total-footer__stat-label">Remaining</span>
+        </div>
+      </div>
+      <div class="total-footer__bar-wrap">
+        <div class="total-footer__bar-track">
+          <div class="total-footer__bar-fill" id="total-bar-fill" style="width:65.8%;"></div>
+        </div>
+        <div class="total-footer__bar-label">
+          <span id="total-bar-pct">65.8% spent</span>
+          <span id="total-bar-days">Jun 1 – Jun 23</span>
+        </div>
+      </div>
+    </div>
+
     <!-- ── SECTION: Committed ── -->
     <div class="env-section" id="section-committed">
       <div class="env-section__heading">Committed</div>
@@ -852,35 +882,6 @@
       </div>
     </div>
 
-    <!-- ── Total Footer ── -->
-    <div class="total-footer">
-      <div class="total-footer__heading">Budget Summary · June 2026</div>
-      <div class="total-footer__stats">
-        <div class="total-footer__stat">
-          <span class="total-footer__stat-val" id="total-alloc-val">₹1,20,000</span>
-          <span class="total-footer__stat-label">Allocated</span>
-        </div>
-        <div class="total-footer__stat-sep"></div>
-        <div class="total-footer__stat">
-          <span class="total-footer__stat-val" id="total-spent-val">₹78,950</span>
-          <span class="total-footer__stat-label">Spent</span>
-        </div>
-        <div class="total-footer__stat-sep"></div>
-        <div class="total-footer__stat">
-          <span class="total-footer__stat-val" id="total-remaining-val">₹41,050</span>
-          <span class="total-footer__stat-label">Remaining</span>
-        </div>
-      </div>
-      <div class="total-footer__bar-wrap">
-        <div class="total-footer__bar-track">
-          <div class="total-footer__bar-fill" id="total-bar-fill" style="width:65.8%;"></div>
-        </div>
-        <div class="total-footer__bar-label">
-          <span id="total-bar-pct">65.8% spent</span>
-          <span id="total-bar-days">Jun 1 – Jun 23</span>
-        </div>
-      </div>
-    </div>
 
   </div>
   <!-- /page-content -->
