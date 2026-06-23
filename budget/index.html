@@ -413,6 +413,22 @@
       box-shadow: 0 0 0 3px var(--primary-xlight, rgba(13,148,136,.12));
     }
     .ae-field__input::placeholder { color: var(--text-muted); }
+
+    /* ── Section picker chips ── */
+    .ae-section-picker {
+      display: flex; gap: var(--sp-2); flex-wrap: wrap;
+    }
+    .ae-section-btn {
+      height: 32px; padding: 0 var(--sp-3); border-radius: var(--r-full);
+      background: var(--surface-raised); border: 1.5px solid var(--border);
+      font-size: 12px; font-weight: 600; color: var(--text-secondary);
+      cursor: pointer; white-space: nowrap;
+      transition: background var(--dur-fast), color var(--dur-fast), border-color var(--dur-fast);
+    }
+    .ae-section-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .ae-section-btn.selected {
+      background: var(--primary); color: #fff; border-color: var(--primary);
+    }
   </style>
 </head>
 <body>
@@ -479,7 +495,7 @@
     </div>
 
     <!-- ── SECTION: Committed ── -->
-    <div class="env-section">
+    <div class="env-section" id="section-committed">
       <div class="env-section__heading">Committed</div>
 
       <!-- Housing EMI -->
@@ -534,7 +550,7 @@
     </div>
 
     <!-- ── SECTION: Living Expenses ── -->
-    <div class="env-section">
+    <div class="env-section" id="section-living">
       <div class="env-section__heading">Living Expenses</div>
 
       <!-- Groceries -->
@@ -689,7 +705,7 @@
     </div>
 
     <!-- ── SECTION: Goals & Savings ── -->
-    <div class="env-section">
+    <div class="env-section" id="section-savings">
       <div class="env-section__heading">Goals &amp; Savings</div>
 
       <!-- SIP Investments -->
@@ -993,6 +1009,14 @@
           <button class="icon-picker__btn" data-icon="🎁" data-bg="#FFE4E6" style="background:#FFE4E6;">🎁</button>
           <button class="icon-picker__btn" data-icon="🏋️" data-bg="#E0E7FF" style="background:#E0E7FF;">🏋️</button>
           <button class="icon-picker__btn" data-icon="🎵" data-bg="#FEF9C3" style="background:#FEF9C3;">🎵</button>
+        </div>
+      </div>
+      <div class="ae-field">
+        <span class="ae-field__label">Section</span>
+        <div class="ae-section-picker" id="ae-section-picker">
+          <button class="ae-section-btn selected" data-section="living">Living Expenses</button>
+          <button class="ae-section-btn" data-section="savings">Goals &amp; Savings</button>
+          <button class="ae-section-btn" data-section="committed">Committed</button>
         </div>
       </div>
       <div class="ae-field">
@@ -1695,13 +1719,18 @@ document.getElementById('edit-alloc-backdrop').addEventListener('click', closeEd
 let customEnvCount = 0;
 let selectedIcon = '📦';
 let selectedIconBg = '#F1F5F9';
+let selectedSection = 'living';
 
 function openAddEnvelopeSheet() {
   document.getElementById('ae-name-input').value = '';
   document.getElementById('ae-amount-input').value = '';
   selectedIcon = '📦'; selectedIconBg = '#F1F5F9';
+  selectedSection = 'living';
   document.querySelectorAll('.icon-picker__btn').forEach(b => {
     b.classList.toggle('selected', b.dataset.icon === '📦');
+  });
+  document.querySelectorAll('.ae-section-btn').forEach(b => {
+    b.classList.toggle('selected', b.dataset.section === 'living');
   });
   document.getElementById('add-env-backdrop').classList.add('open');
   document.getElementById('add-env-sheet').classList.add('open');
@@ -1741,8 +1770,12 @@ function confirmAddEnvelope() {
     txns: [{ date: '—', payee: 'No transactions this month', amount: '', ml: null }]
   };
 
-  // Inject row before total-footer
-  document.querySelector('.total-footer').insertAdjacentHTML('beforebegin', `
+  // Inject row into the chosen section (fallback: before total-footer)
+  const targetSection = document.getElementById('section-' + selectedSection)
+                     || document.querySelector('.total-footer').previousElementSibling;
+  const insertTarget = targetSection || document.querySelector('.total-footer');
+  const insertPos = targetSection ? 'beforeend' : 'beforebegin';
+  insertTarget.insertAdjacentHTML(insertPos, `
     <div class="env-row" id="row-${key}" onclick="openSheet('${key}')">
       <div class="env-row__top">
         <div class="env-row__icon" style="background:${selectedIconBg};">${selectedIcon}</div>
@@ -1789,6 +1822,15 @@ document.getElementById('icon-picker').addEventListener('click', function(e) {
   btn.classList.add('selected');
   selectedIcon = btn.dataset.icon;
   selectedIconBg = btn.dataset.bg;
+});
+
+// Section picker selection
+document.getElementById('ae-section-picker').addEventListener('click', function(e) {
+  const btn = e.target.closest('.ae-section-btn');
+  if (!btn) return;
+  document.querySelectorAll('.ae-section-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedSection = btn.dataset.section;
 });
 
 document.getElementById('ae-close').addEventListener('click', closeAddEnvelopeSheet);
