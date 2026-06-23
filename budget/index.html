@@ -329,6 +329,50 @@
       cursor: pointer;
     }
     .icon-btn:hover { background: var(--surface-raised); color: var(--text-primary); }
+
+    /* ── Edit Alloc Sheet ── */
+    .ea-display {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+      font-size: 40px; font-weight: 700; letter-spacing: -1px;
+      text-align: center; color: var(--text-primary);
+      padding: var(--sp-3) 0 var(--sp-1);
+      min-height: 60px;
+    }
+    .ea-preview {
+      text-align: center; font-size: 13px; font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: var(--sp-4); min-height: 20px;
+    }
+    .ea-preview--balanced { color: var(--success); font-weight: 600; }
+    .ea-preview--over     { color: var(--error);   font-weight: 600; }
+
+    .numpad {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: var(--sp-2); margin-bottom: var(--sp-2);
+    }
+    .numpad__key {
+      height: 52px; border-radius: var(--r-lg);
+      background: var(--surface-raised); border: 1px solid var(--border);
+      font-size: 20px; font-weight: 600; color: var(--text-primary);
+      cursor: pointer; user-select: none;
+      display: flex; align-items: center; justify-content: center;
+      transition: background var(--dur-fast), color var(--dur-fast);
+    }
+    .numpad__key:hover  { background: var(--primary-light); color: var(--primary); }
+    .numpad__key:active { background: var(--primary); color: #fff; }
+    .numpad__key--action { font-size: 16px; color: var(--text-secondary); }
+    .numpad__key--action:hover { background: var(--error-light); color: var(--error); }
+
+    /* Error chip (over-allocated) */
+    .chip--error {
+      background: var(--error-light);
+      color: var(--error);
+      border: 1.5px solid rgba(233,69,96,.25);
+    }
+
+    /* Tap-to-edit cursor hint in draft mode */
+    .env-row__alloc--editable { cursor: pointer; }
   </style>
 </head>
 <body>
@@ -884,6 +928,41 @@
   </div>
 
   <!-- ═══════════════════════════════════════════
+       EDIT ALLOCATION SHEET
+  ═══════════════════════════════════════════ -->
+  <div class="sheet-backdrop" id="edit-alloc-backdrop"></div>
+  <div class="sheet" id="edit-alloc-sheet">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <div class="sheet-env-icon" id="ea-icon"></div>
+      <span class="sheet__title" id="ea-name">Edit Allocation</span>
+      <button class="sheet__close" id="ea-close" aria-label="Close">✕</button>
+    </div>
+    <div class="sheet__body" style="padding-bottom:0; overflow:hidden;">
+      <div class="ea-display" id="ea-display">₹0</div>
+      <div class="ea-preview" id="ea-preview"></div>
+      <div class="numpad">
+        <button class="numpad__key" onclick="numpadPress('7')">7</button>
+        <button class="numpad__key" onclick="numpadPress('8')">8</button>
+        <button class="numpad__key" onclick="numpadPress('9')">9</button>
+        <button class="numpad__key" onclick="numpadPress('4')">4</button>
+        <button class="numpad__key" onclick="numpadPress('5')">5</button>
+        <button class="numpad__key" onclick="numpadPress('6')">6</button>
+        <button class="numpad__key" onclick="numpadPress('1')">1</button>
+        <button class="numpad__key" onclick="numpadPress('2')">2</button>
+        <button class="numpad__key" onclick="numpadPress('3')">3</button>
+        <button class="numpad__key numpad__key--action" onclick="numpadClear()">C</button>
+        <button class="numpad__key" onclick="numpadPress('0')">0</button>
+        <button class="numpad__key numpad__key--action" onclick="numpadBackspace()">⌫</button>
+      </div>
+    </div>
+    <div class="sheet__footer">
+      <button class="btn btn--ghost" id="ea-cancel">Cancel</button>
+      <button class="btn btn--primary" id="ea-confirm">Confirm</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
        TOAST CONTAINER
   ═══════════════════════════════════════════ -->
   <div class="toast-container" id="toast-container"></div>
@@ -1129,6 +1208,8 @@ const SHEET_DATA = {
 function applyState(stateKey) {
   const state = STATES[stateKey];
   if (!state) return;
+  currentStateKey = stateKey;
+  if (stateKey === 'draft') initAllocState();
 
   // Alloc bar
   const allocBar = document.getElementById('alloc-bar');
@@ -1153,9 +1234,7 @@ function applyState(stateKey) {
   }
   const lockBtn = document.getElementById('lock-btn');
   if (lockBtn) {
-    lockBtn.addEventListener('click', () => {
-      // disabled — no action in unallocated state
-    });
+    lockBtn.addEventListener('click', openLockModal);
   }
   const sweepBtn = document.getElementById('sweep-btn');
   if (sweepBtn) {
@@ -1396,6 +1475,156 @@ document.getElementById('sweep-confirm').addEventListener('click', () => {
 document.getElementById('fab').addEventListener('click', () => {
   AG.showToast('Add envelope — coming soon', 'info');
 });
+
+/* ─────────────────────────────────────────────
+   EDIT ALLOCATION
+───────────────────────────────────────────── */
+const INCOME_PAISE = 12000000; // ₹1,20,000
+const ENV_KEYS = ['housing','insurance','groceries','dining','utilities','mobile','fuel','health','sip','education','emergency','vacation'];
+let allocState = {};
+let currentEditKey = null;
+let editBuffer = '0';
+let currentStateKey = 'locked';
+
+function parsePaise(str) {
+  return Math.round(parseFloat(str.replace(/[₹,\s]/g, '')) * 100);
+}
+
+function fmtINR(paise) {
+  const r = Math.round(Math.abs(paise) / 100);
+  return '₹' + r.toLocaleString('en-IN');
+}
+
+function initAllocState() {
+  const env = STATES.draft.envelopes;
+  ENV_KEYS.forEach(k => {
+    if (env[k]) allocState[k] = parsePaise(env[k].alloc);
+  });
+}
+
+function totalAllocPaise(excludeKey) {
+  return ENV_KEYS.filter(k => k !== excludeKey).reduce((s, k) => s + (allocState[k] || 0), 0);
+}
+
+function openEditAlloc(key) {
+  const sd = SHEET_DATA[key];
+  if (!sd) return;
+  currentEditKey = key;
+  editBuffer = String(Math.round((allocState[key] || 0) / 100));
+
+  const iconEl = document.getElementById('ea-icon');
+  iconEl.textContent = sd.icon;
+  iconEl.style.background = sd.iconBg;
+  document.getElementById('ea-name').textContent = sd.name;
+  updateEditDisplay();
+
+  document.getElementById('edit-alloc-backdrop').classList.add('open');
+  document.getElementById('edit-alloc-sheet').classList.add('open');
+}
+
+function closeEditAllocSheet() {
+  document.getElementById('edit-alloc-backdrop').classList.remove('open');
+  document.getElementById('edit-alloc-sheet').classList.remove('open');
+  currentEditKey = null;
+  editBuffer = '0';
+}
+
+function numpadPress(d) {
+  if (editBuffer === '0') {
+    editBuffer = d;
+  } else if (editBuffer.length < 8) {
+    editBuffer += d;
+  }
+  updateEditDisplay();
+}
+
+function numpadBackspace() {
+  editBuffer = editBuffer.length > 1 ? editBuffer.slice(0, -1) : '0';
+  updateEditDisplay();
+}
+
+function numpadClear() {
+  editBuffer = '0';
+  updateEditDisplay();
+}
+
+function updateEditDisplay() {
+  const rupees = parseInt(editBuffer || '0', 10);
+  const paise = rupees * 100;
+  document.getElementById('ea-display').textContent = '₹' + rupees.toLocaleString('en-IN');
+
+  const unalloc = INCOME_PAISE - totalAllocPaise(currentEditKey) - paise;
+  const previewEl = document.getElementById('ea-preview');
+  if (unalloc > 0) {
+    previewEl.textContent = fmtINR(unalloc) + ' remaining to allocate';
+    previewEl.className = 'ea-preview';
+  } else if (unalloc === 0) {
+    previewEl.textContent = '✓ Budget will be balanced';
+    previewEl.className = 'ea-preview ea-preview--balanced';
+  } else {
+    previewEl.textContent = fmtINR(unalloc) + ' over-allocated';
+    previewEl.className = 'ea-preview ea-preview--over';
+  }
+}
+
+function confirmEditAlloc() {
+  if (!currentEditKey) return;
+  const rupees = parseInt(editBuffer || '0', 10);
+  const newPaise = rupees * 100;
+  allocState[currentEditKey] = newPaise;
+
+  const allocEl = document.getElementById('alloc-' + currentEditKey);
+  if (allocEl) allocEl.textContent = '₹' + rupees.toLocaleString('en-IN');
+
+  const totalAlloc = ENV_KEYS.reduce((s, k) => s + (allocState[k] || 0), 0);
+  const unalloc = INCOME_PAISE - totalAlloc;
+
+  const allocBar  = document.getElementById('alloc-bar');
+  const chip      = document.getElementById('alloc-chip');
+  const allocText = document.getElementById('alloc-text');
+  const lockBtn   = document.getElementById('lock-btn');
+
+  if (unalloc > 0) {
+    allocBar.className = 'alloc-bar alloc-bar--unallocated';
+    chip.className = 'chip chip--unallocated';
+    chip.textContent = '⚠ UNALLOCATED';
+    allocText.innerHTML = `<strong>${fmtINR(unalloc)}</strong> remaining to allocate`;
+    if (lockBtn) { lockBtn.disabled = true; lockBtn.style.opacity = '.4'; lockBtn.style.cursor = 'not-allowed'; }
+  } else if (unalloc === 0) {
+    allocBar.className = 'alloc-bar alloc-bar--balanced';
+    chip.className = 'chip chip--balanced';
+    chip.textContent = '✓ BALANCED';
+    allocText.innerHTML = 'Unallocated: <strong>₹0</strong> · of <strong>₹1,20,000</strong> income';
+    if (lockBtn) { lockBtn.disabled = false; lockBtn.style.opacity = ''; lockBtn.style.cursor = ''; }
+  } else {
+    allocBar.className = 'alloc-bar alloc-bar--over';
+    chip.className = 'chip chip--error';
+    chip.textContent = '✗ OVER';
+    allocText.innerHTML = `<strong>${fmtINR(-unalloc)}</strong> over-allocated`;
+    if (lockBtn) { lockBtn.disabled = true; lockBtn.style.opacity = '.4'; lockBtn.style.cursor = 'not-allowed'; }
+  }
+
+  closeEditAllocSheet();
+  AG.showToast('Allocation updated', 'success');
+}
+
+// Wire up alloc click handlers once (checks currentStateKey at runtime)
+ENV_KEYS.forEach(key => {
+  const el = document.getElementById('alloc-' + key);
+  if (el) {
+    el.addEventListener('click', function(e) {
+      if (currentStateKey !== 'draft') return;
+      e.stopPropagation();
+      openEditAlloc(key);
+    });
+  }
+});
+
+// Edit alloc sheet events
+document.getElementById('ea-close').addEventListener('click', closeEditAllocSheet);
+document.getElementById('ea-cancel').addEventListener('click', closeEditAllocSheet);
+document.getElementById('ea-confirm').addEventListener('click', confirmEditAlloc);
+document.getElementById('edit-alloc-backdrop').addEventListener('click', closeEditAllocSheet);
 
 /* ─────────────────────────────────────────────
    DEMO BAR REGISTRATION
