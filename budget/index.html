@@ -59,20 +59,30 @@
 
     /* ── Income strip ── */
     .income-strip {
-      background: var(--surface-raised);
-      border-bottom: 1px solid var(--border);
-      padding: var(--sp-3) var(--sp-4);
+      background: linear-gradient(135deg, rgba(13,148,136,.07), rgba(20,184,166,.03));
+      border-bottom: 1px solid rgba(13,148,136,.18);
+      padding: var(--sp-4) var(--sp-4);
       display: flex; align-items: center; justify-content: space-between;
       margin-bottom: var(--sp-2);
     }
+    .income-strip__left { display: flex; flex-direction: column; gap: 2px; }
     .income-strip__label {
-      font-size: 12px; font-weight: 600; letter-spacing: .04em;
+      font-size: 11px; font-weight: 700; letter-spacing: .08em;
       text-transform: uppercase; color: var(--text-muted);
+    }
+    .income-strip__sublabel {
+      font-size: 11px; color: var(--text-muted); font-weight: 400;
+    }
+    .income-strip__right { display: flex; align-items: center; gap: var(--sp-2); }
+    .income-strip__badge {
+      background: var(--primary-light); color: var(--primary);
+      font-size: 10px; font-weight: 700; letter-spacing: .05em;
+      padding: 2px 7px; border-radius: var(--r-full); text-transform: uppercase;
     }
     .income-strip__amount {
       font-family: 'JetBrains Mono', monospace;
       font-variant-numeric: tabular-nums;
-      font-size: 15px; font-weight: 700; color: var(--text-primary);
+      font-size: 18px; font-weight: 700; color: var(--primary);
     }
 
     /* ── Section heading ── */
@@ -81,6 +91,11 @@
       font-size: 11px; font-weight: 700; letter-spacing: .08em;
       text-transform: uppercase; color: var(--text-muted);
       padding: var(--sp-4) var(--sp-4) var(--sp-2);
+      display: flex; align-items: center; gap: var(--sp-2);
+    }
+    .env-section__heading::before {
+      content: ''; width: 3px; height: 12px; border-radius: 2px;
+      background: var(--primary); flex-shrink: 0;
     }
 
     /* ── Envelope row ── */
@@ -175,29 +190,51 @@
       color: var(--error); font-weight: 600;
     }
 
-    /* ── Total footer row ── */
+    /* ── Total footer card ── */
     .total-footer {
-      background: var(--surface-raised);
-      border-top: 2px solid var(--border);
-      padding: var(--sp-4) var(--sp-4);
-      display: flex; justify-content: space-between; align-items: center;
+      background: linear-gradient(135deg, #0B7A70 0%, #0D9488 55%, #0EA5A0 100%);
+      border-top: none;
+      padding: var(--sp-5) var(--sp-5);
+      margin: var(--sp-3) var(--sp-4) var(--sp-4);
+      border-radius: 20px;
+      box-shadow: 0 6px 24px rgba(13,148,136,.28), 0 2px 8px rgba(13,148,136,.18);
     }
-    .total-footer__label {
-      font-size: 13px; font-weight: 700; color: var(--text-secondary);
-      text-transform: uppercase; letter-spacing: .04em;
+    .total-footer__heading {
+      font-size: 11px; font-weight: 700; letter-spacing: .09em;
+      text-transform: uppercase; color: rgba(255,255,255,.65);
+      margin-bottom: var(--sp-4);
     }
-    .total-footer__amounts {
-      display: flex; flex-direction: column; align-items: flex-end; gap: 2px;
+    .total-footer__stats {
+      display: flex; align-items: stretch;
+      margin-bottom: var(--sp-4);
     }
-    .total-footer__alloc {
-      font-family: 'JetBrains Mono', monospace;
-      font-variant-numeric: tabular-nums;
-      font-size: 16px; font-weight: 700; color: var(--text-primary);
+    .total-footer__stat { flex: 1; text-align: center; }
+    .total-footer__stat-sep {
+      width: 1px; background: rgba(255,255,255,.18); flex-shrink: 0; margin: 2px 0;
     }
-    .total-footer__meta {
-      font-size: 12px; color: var(--text-secondary);
-      font-family: 'JetBrains Mono', monospace;
-      font-variant-numeric: tabular-nums;
+    .total-footer__stat-val {
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+      font-size: 15px; font-weight: 700; color: #fff;
+      margin-bottom: 4px; display: block;
+    }
+    .total-footer__stat-label {
+      font-size: 10px; font-weight: 600; color: rgba(255,255,255,.6);
+      text-transform: uppercase; letter-spacing: .06em; display: block;
+    }
+    .total-footer__bar-wrap { margin-bottom: var(--sp-2); }
+    .total-footer__bar-track {
+      height: 5px; background: rgba(255,255,255,.2);
+      border-radius: 99px; overflow: hidden;
+    }
+    .total-footer__bar-fill {
+      height: 100%; border-radius: 99px;
+      background: rgba(255,255,255,.88);
+      transition: width var(--dur-med) var(--ease-out);
+    }
+    .total-footer__bar-label {
+      display: flex; justify-content: space-between;
+      font-size: 11px; color: rgba(255,255,255,.55); font-weight: 500;
+      margin-top: var(--sp-1);
     }
 
     /* ── Top bar inline actions ── */
@@ -490,8 +527,14 @@
 
     <!-- Income Strip -->
     <div class="income-strip">
-      <span class="income-strip__label">Expected Income · Jun 2026</span>
-      <span class="income-strip__amount" id="income-amount">₹1,20,000</span>
+      <div class="income-strip__left">
+        <span class="income-strip__label">Expected Income</span>
+        <span class="income-strip__sublabel">June 2026</span>
+      </div>
+      <div class="income-strip__right">
+        <span class="income-strip__badge">Salary</span>
+        <span class="income-strip__amount" id="income-amount">₹1,20,000</span>
+      </div>
     </div>
 
     <!-- ── SECTION: Committed ── -->
@@ -811,10 +854,31 @@
 
     <!-- ── Total Footer ── -->
     <div class="total-footer">
-      <span class="total-footer__label">Total</span>
-      <div class="total-footer__amounts">
-        <span class="total-footer__alloc" id="total-alloc">₹1,20,000 allocated</span>
-        <span class="total-footer__meta" id="total-meta">₹78,950 spent · ₹41,050 remaining</span>
+      <div class="total-footer__heading">Budget Summary · June 2026</div>
+      <div class="total-footer__stats">
+        <div class="total-footer__stat">
+          <span class="total-footer__stat-val" id="total-alloc-val">₹1,20,000</span>
+          <span class="total-footer__stat-label">Allocated</span>
+        </div>
+        <div class="total-footer__stat-sep"></div>
+        <div class="total-footer__stat">
+          <span class="total-footer__stat-val" id="total-spent-val">₹78,950</span>
+          <span class="total-footer__stat-label">Spent</span>
+        </div>
+        <div class="total-footer__stat-sep"></div>
+        <div class="total-footer__stat">
+          <span class="total-footer__stat-val" id="total-remaining-val">₹41,050</span>
+          <span class="total-footer__stat-label">Remaining</span>
+        </div>
+      </div>
+      <div class="total-footer__bar-wrap">
+        <div class="total-footer__bar-track">
+          <div class="total-footer__bar-fill" id="total-bar-fill" style="width:65.8%;"></div>
+        </div>
+        <div class="total-footer__bar-label">
+          <span id="total-bar-pct">65.8% spent</span>
+          <span id="total-bar-days">Jun 1 – Jun 23</span>
+        </div>
       </div>
     </div>
 
@@ -1117,8 +1181,7 @@ const STATES = {
     `,
     warning: false,
     fab: false,
-    totalAlloc: '₹1,20,000 allocated',
-    totalMeta: '₹78,950 spent · ₹41,050 remaining',
+    totalAllocVal: '₹1,20,000', totalSpentVal: '₹78,950', totalRemainingVal: '₹41,050', totalSpentPct: 65.8,
     envelopes: {
       housing:   { alloc: '₹38,500', pct: '100%', barW: '100', barCls: 'env-progress__fill--done', spent: '₹38,500 spent', remaining: '₹0 remaining', remainingColor: 'var(--success)', badge: 'done', editable: false, footerOver: false },
       insurance: { alloc: '₹2,500',  pct: '0%',   barW: '0',   barCls: 'env-progress__fill--normal', spent: '₹0 spent',    remaining: '₹2,500 remaining', remainingColor: '', badge: 'none', editable: false, footerOver: false },
@@ -1142,8 +1205,7 @@ const STATES = {
     `,
     warning: false,
     fab: true,
-    totalAlloc: '₹1,11,800 allocated',
-    totalMeta: '₹78,950 spent · ₹32,850 remaining',
+    totalAllocVal: '₹1,11,800', totalSpentVal: '₹78,950', totalRemainingVal: '₹32,850', totalSpentPct: 70.6,
     envelopes: {
       housing:   { alloc: '₹38,500', pct: '100%', barW: '100', barCls: 'env-progress__fill--done',   spent: '₹38,500 spent', remaining: '₹0 remaining',      remainingColor: 'var(--success)', badge: 'done', editable: false, footerOver: false },
       insurance: { alloc: '₹2,500',  pct: '0%',   barW: '0',   barCls: 'env-progress__fill--normal', spent: '₹0 spent',      remaining: '₹2,500 remaining',  remainingColor: '', badge: 'none', editable: false, footerOver: false },
@@ -1166,8 +1228,7 @@ const STATES = {
     `,
     warning: true,
     fab: false,
-    totalAlloc: '₹1,20,000 allocated',
-    totalMeta: '₹1,01,650 spent · ₹18,350 remaining',
+    totalAllocVal: '₹1,20,000', totalSpentVal: '₹1,01,650', totalRemainingVal: '₹18,350', totalSpentPct: 84.7,
     envelopes: {
       housing:   { alloc: '₹38,500', pct: '100%',  barW: '100', barCls: 'env-progress__fill--done',   spent: '₹38,500 spent', remaining: '₹0 remaining',      remainingColor: 'var(--success)', badge: 'done', editable: false, footerOver: false, rowOver: false },
       insurance: { alloc: '₹2,500',  pct: '0%',    barW: '0',   barCls: 'env-progress__fill--normal', spent: '₹0 spent',      remaining: '₹2,500 remaining',  remainingColor: '', badge: 'none', editable: false, footerOver: false, rowOver: false },
@@ -1358,9 +1419,12 @@ function applyState(stateKey) {
   const fab = document.getElementById('fab');
   fab.classList.toggle('visible', !!state.fab);
 
-  // Total footer
-  document.getElementById('total-alloc').textContent = state.totalAlloc;
-  document.getElementById('total-meta').textContent  = state.totalMeta;
+  // Total footer card
+  document.getElementById('total-alloc-val').textContent     = state.totalAllocVal;
+  document.getElementById('total-spent-val').textContent     = state.totalSpentVal;
+  document.getElementById('total-remaining-val').textContent = state.totalRemainingVal;
+  document.getElementById('total-bar-fill').style.width      = state.totalSpentPct + '%';
+  document.getElementById('total-bar-pct').textContent       = state.totalSpentPct + '% spent';
 
   // Per-envelope updates
   const envKeys = ['housing','insurance','groceries','dining','utilities','mobile','fuel','health','sip','education','emergency','vacation'];
