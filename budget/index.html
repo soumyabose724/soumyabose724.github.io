@@ -373,6 +373,46 @@
 
     /* Tap-to-edit cursor hint in draft mode */
     .env-row__alloc--editable { cursor: pointer; }
+
+    /* ── Add Envelope Sheet ── */
+    .icon-picker {
+      display: flex; gap: var(--sp-2); overflow-x: auto;
+      padding-bottom: var(--sp-1); margin-bottom: var(--sp-4);
+      scrollbar-width: none;
+    }
+    .icon-picker::-webkit-scrollbar { display: none; }
+    .icon-picker__btn {
+      width: 44px; height: 44px; border-radius: var(--r-md); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; cursor: pointer;
+      border: 2px solid transparent;
+      transition: border-color var(--dur-fast), transform var(--dur-fast);
+    }
+    .icon-picker__btn.selected {
+      border-color: var(--primary);
+      transform: scale(1.1);
+    }
+
+    .ae-field { margin-bottom: var(--sp-4); }
+    .ae-field__label {
+      display: block; font-size: 11px; font-weight: 700;
+      letter-spacing: .07em; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: var(--sp-2);
+    }
+    .ae-field__input {
+      width: 100%; box-sizing: border-box; height: 44px;
+      background: var(--surface-raised); border: 1.5px solid var(--border);
+      border-radius: var(--r-lg); padding: 0 var(--sp-3);
+      font-size: 15px; font-weight: 500; color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      transition: border-color var(--dur-fast), box-shadow var(--dur-fast);
+    }
+    .ae-field__input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-xlight, rgba(13,148,136,.12));
+    }
+    .ae-field__input::placeholder { color: var(--text-muted); }
   </style>
 </head>
 <body>
@@ -928,6 +968,51 @@
   </div>
 
   <!-- ═══════════════════════════════════════════
+       ADD ENVELOPE SHEET
+  ═══════════════════════════════════════════ -->
+  <div class="sheet-backdrop" id="add-env-backdrop"></div>
+  <div class="sheet" id="add-env-sheet">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <span class="sheet__title">New Envelope</span>
+      <button class="sheet__close" id="ae-close" aria-label="Close">✕</button>
+    </div>
+    <div class="sheet__body">
+      <div class="ae-field">
+        <span class="ae-field__label">Icon</span>
+        <div class="icon-picker" id="icon-picker">
+          <button class="icon-picker__btn selected" data-icon="📦" data-bg="#F1F5F9" style="background:#F1F5F9;">📦</button>
+          <button class="icon-picker__btn" data-icon="🎮" data-bg="#EDE9FE" style="background:#EDE9FE;">🎮</button>
+          <button class="icon-picker__btn" data-icon="🎬" data-bg="#FEE2E2" style="background:#FEE2E2;">🎬</button>
+          <button class="icon-picker__btn" data-icon="✈️" data-bg="#DBEAFE" style="background:#DBEAFE;">✈️</button>
+          <button class="icon-picker__btn" data-icon="🍕" data-bg="#FEF3C7" style="background:#FEF3C7;">🍕</button>
+          <button class="icon-picker__btn" data-icon="☕" data-bg="#CCFBF1" style="background:#CCFBF1;">☕</button>
+          <button class="icon-picker__btn" data-icon="👗" data-bg="#FCE7F3" style="background:#FCE7F3;">👗</button>
+          <button class="icon-picker__btn" data-icon="🐾" data-bg="#D1FAE5" style="background:#D1FAE5;">🐾</button>
+          <button class="icon-picker__btn" data-icon="💊" data-bg="#CCFBF1" style="background:#CCFBF1;">💊</button>
+          <button class="icon-picker__btn" data-icon="🎁" data-bg="#FFE4E6" style="background:#FFE4E6;">🎁</button>
+          <button class="icon-picker__btn" data-icon="🏋️" data-bg="#E0E7FF" style="background:#E0E7FF;">🏋️</button>
+          <button class="icon-picker__btn" data-icon="🎵" data-bg="#FEF9C3" style="background:#FEF9C3;">🎵</button>
+        </div>
+      </div>
+      <div class="ae-field">
+        <label class="ae-field__label" for="ae-name-input">Name</label>
+        <input class="ae-field__input" id="ae-name-input" type="text"
+               placeholder="e.g. Entertainment, Travel" maxlength="40" autocomplete="off">
+      </div>
+      <div class="ae-field">
+        <label class="ae-field__label" for="ae-amount-input">Allocation (₹)</label>
+        <input class="ae-field__input" id="ae-amount-input" type="text" inputmode="numeric"
+               placeholder="e.g. 5000" maxlength="10" autocomplete="off">
+      </div>
+    </div>
+    <div class="sheet__footer">
+      <button class="btn btn--ghost" id="ae-cancel">Cancel</button>
+      <button class="btn btn--primary" id="ae-confirm">Add Envelope</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
        EDIT ALLOCATION SHEET
   ═══════════════════════════════════════════ -->
   <div class="sheet-backdrop" id="edit-alloc-backdrop"></div>
@@ -1472,12 +1557,10 @@ document.getElementById('sweep-confirm').addEventListener('click', () => {
 });
 
 // FAB
-document.getElementById('fab').addEventListener('click', () => {
-  AG.showToast('Add envelope — coming soon', 'info');
-});
+document.getElementById('fab').addEventListener('click', openAddEnvelopeSheet);
 
 /* ─────────────────────────────────────────────
-   EDIT ALLOCATION
+   EDIT / ADD ALLOCATION — shared state
 ───────────────────────────────────────────── */
 const INCOME_PAISE = 12000000; // ₹1,20,000
 const ENV_KEYS = ['housing','insurance','groceries','dining','utilities','mobile','fuel','health','sip','education','emergency','vacation'];
@@ -1489,96 +1572,21 @@ let currentStateKey = 'locked';
 function parsePaise(str) {
   return Math.round(parseFloat(str.replace(/[₹,\s]/g, '')) * 100);
 }
-
 function fmtINR(paise) {
-  const r = Math.round(Math.abs(paise) / 100);
-  return '₹' + r.toLocaleString('en-IN');
+  return '₹' + Math.round(Math.abs(paise) / 100).toLocaleString('en-IN');
 }
-
 function initAllocState() {
   const env = STATES.draft.envelopes;
-  ENV_KEYS.forEach(k => {
-    if (env[k]) allocState[k] = parsePaise(env[k].alloc);
-  });
+  ENV_KEYS.filter(k => env[k]).forEach(k => { allocState[k] = parsePaise(env[k].alloc); });
 }
-
 function totalAllocPaise(excludeKey) {
   return ENV_KEYS.filter(k => k !== excludeKey).reduce((s, k) => s + (allocState[k] || 0), 0);
 }
 
-function openEditAlloc(key) {
-  const sd = SHEET_DATA[key];
-  if (!sd) return;
-  currentEditKey = key;
-  editBuffer = String(Math.round((allocState[key] || 0) / 100));
-
-  const iconEl = document.getElementById('ea-icon');
-  iconEl.textContent = sd.icon;
-  iconEl.style.background = sd.iconBg;
-  document.getElementById('ea-name').textContent = sd.name;
-  updateEditDisplay();
-
-  document.getElementById('edit-alloc-backdrop').classList.add('open');
-  document.getElementById('edit-alloc-sheet').classList.add('open');
-}
-
-function closeEditAllocSheet() {
-  document.getElementById('edit-alloc-backdrop').classList.remove('open');
-  document.getElementById('edit-alloc-sheet').classList.remove('open');
-  currentEditKey = null;
-  editBuffer = '0';
-}
-
-function numpadPress(d) {
-  if (editBuffer === '0') {
-    editBuffer = d;
-  } else if (editBuffer.length < 8) {
-    editBuffer += d;
-  }
-  updateEditDisplay();
-}
-
-function numpadBackspace() {
-  editBuffer = editBuffer.length > 1 ? editBuffer.slice(0, -1) : '0';
-  updateEditDisplay();
-}
-
-function numpadClear() {
-  editBuffer = '0';
-  updateEditDisplay();
-}
-
-function updateEditDisplay() {
-  const rupees = parseInt(editBuffer || '0', 10);
-  const paise = rupees * 100;
-  document.getElementById('ea-display').textContent = '₹' + rupees.toLocaleString('en-IN');
-
-  const unalloc = INCOME_PAISE - totalAllocPaise(currentEditKey) - paise;
-  const previewEl = document.getElementById('ea-preview');
-  if (unalloc > 0) {
-    previewEl.textContent = fmtINR(unalloc) + ' remaining to allocate';
-    previewEl.className = 'ea-preview';
-  } else if (unalloc === 0) {
-    previewEl.textContent = '✓ Budget will be balanced';
-    previewEl.className = 'ea-preview ea-preview--balanced';
-  } else {
-    previewEl.textContent = fmtINR(unalloc) + ' over-allocated';
-    previewEl.className = 'ea-preview ea-preview--over';
-  }
-}
-
-function confirmEditAlloc() {
-  if (!currentEditKey) return;
-  const rupees = parseInt(editBuffer || '0', 10);
-  const newPaise = rupees * 100;
-  allocState[currentEditKey] = newPaise;
-
-  const allocEl = document.getElementById('alloc-' + currentEditKey);
-  if (allocEl) allocEl.textContent = '₹' + rupees.toLocaleString('en-IN');
-
+// Shared: update alloc bar + lock button after any allocation change
+function recalcAllocBar() {
   const totalAlloc = ENV_KEYS.reduce((s, k) => s + (allocState[k] || 0), 0);
   const unalloc = INCOME_PAISE - totalAlloc;
-
   const allocBar  = document.getElementById('alloc-bar');
   const chip      = document.getElementById('alloc-chip');
   const allocText = document.getElementById('alloc-text');
@@ -1603,28 +1611,190 @@ function confirmEditAlloc() {
     allocText.innerHTML = `<strong>${fmtINR(-unalloc)}</strong> over-allocated`;
     if (lockBtn) { lockBtn.disabled = true; lockBtn.style.opacity = '.4'; lockBtn.style.cursor = 'not-allowed'; }
   }
+}
 
+/* ─────────────────────────────────────────────
+   EDIT ALLOC (numpad sheet)
+───────────────────────────────────────────── */
+function openEditAlloc(key) {
+  const sd = SHEET_DATA[key];
+  if (!sd) return;
+  currentEditKey = key;
+  editBuffer = String(Math.round((allocState[key] || 0) / 100));
+  const iconEl = document.getElementById('ea-icon');
+  iconEl.textContent = sd.icon;
+  iconEl.style.background = sd.iconBg;
+  document.getElementById('ea-name').textContent = sd.name;
+  updateEditDisplay();
+  document.getElementById('edit-alloc-backdrop').classList.add('open');
+  document.getElementById('edit-alloc-sheet').classList.add('open');
+}
+function closeEditAllocSheet() {
+  document.getElementById('edit-alloc-backdrop').classList.remove('open');
+  document.getElementById('edit-alloc-sheet').classList.remove('open');
+  currentEditKey = null;
+  editBuffer = '0';
+}
+function numpadPress(d) {
+  if (editBuffer === '0') { editBuffer = d; }
+  else if (editBuffer.length < 8) { editBuffer += d; }
+  updateEditDisplay();
+}
+function numpadBackspace() {
+  editBuffer = editBuffer.length > 1 ? editBuffer.slice(0, -1) : '0';
+  updateEditDisplay();
+}
+function numpadClear() { editBuffer = '0'; updateEditDisplay(); }
+
+function updateEditDisplay() {
+  const rupees = parseInt(editBuffer || '0', 10);
+  const paise = rupees * 100;
+  document.getElementById('ea-display').textContent = '₹' + rupees.toLocaleString('en-IN');
+  const unalloc = INCOME_PAISE - totalAllocPaise(currentEditKey) - paise;
+  const el = document.getElementById('ea-preview');
+  if (unalloc > 0) {
+    el.textContent = fmtINR(unalloc) + ' remaining to allocate';
+    el.className = 'ea-preview';
+  } else if (unalloc === 0) {
+    el.textContent = '✓ Budget will be balanced';
+    el.className = 'ea-preview ea-preview--balanced';
+  } else {
+    el.textContent = fmtINR(unalloc) + ' over-allocated';
+    el.className = 'ea-preview ea-preview--over';
+  }
+}
+function confirmEditAlloc() {
+  if (!currentEditKey) return;
+  const newPaise = parseInt(editBuffer || '0', 10) * 100;
+  allocState[currentEditKey] = newPaise;
+  const allocEl = document.getElementById('alloc-' + currentEditKey);
+  if (allocEl) allocEl.textContent = fmtINR(newPaise);
+  recalcAllocBar();
   closeEditAllocSheet();
   AG.showToast('Allocation updated', 'success');
 }
 
-// Wire up alloc click handlers once (checks currentStateKey at runtime)
+// Wire alloc click handlers on existing envelopes (checks state at runtime)
 ENV_KEYS.forEach(key => {
   const el = document.getElementById('alloc-' + key);
-  if (el) {
-    el.addEventListener('click', function(e) {
-      if (currentStateKey !== 'draft') return;
-      e.stopPropagation();
-      openEditAlloc(key);
-    });
-  }
+  if (el) el.addEventListener('click', function(e) {
+    if (currentStateKey !== 'draft') return;
+    e.stopPropagation();
+    openEditAlloc(key);
+  });
 });
 
-// Edit alloc sheet events
 document.getElementById('ea-close').addEventListener('click', closeEditAllocSheet);
 document.getElementById('ea-cancel').addEventListener('click', closeEditAllocSheet);
 document.getElementById('ea-confirm').addEventListener('click', confirmEditAlloc);
 document.getElementById('edit-alloc-backdrop').addEventListener('click', closeEditAllocSheet);
+
+/* ─────────────────────────────────────────────
+   ADD ENVELOPE
+───────────────────────────────────────────── */
+let customEnvCount = 0;
+let selectedIcon = '📦';
+let selectedIconBg = '#F1F5F9';
+
+function openAddEnvelopeSheet() {
+  document.getElementById('ae-name-input').value = '';
+  document.getElementById('ae-amount-input').value = '';
+  selectedIcon = '📦'; selectedIconBg = '#F1F5F9';
+  document.querySelectorAll('.icon-picker__btn').forEach(b => {
+    b.classList.toggle('selected', b.dataset.icon === '📦');
+  });
+  document.getElementById('add-env-backdrop').classList.add('open');
+  document.getElementById('add-env-sheet').classList.add('open');
+  setTimeout(() => document.getElementById('ae-name-input').focus(), 320);
+}
+function closeAddEnvelopeSheet() {
+  document.getElementById('add-env-backdrop').classList.remove('open');
+  document.getElementById('add-env-sheet').classList.remove('open');
+}
+function confirmAddEnvelope() {
+  const name = document.getElementById('ae-name-input').value.trim();
+  const amtRupees = parseInt(document.getElementById('ae-amount-input').value.replace(/,/g, '') || '0', 10);
+  if (!name) {
+    document.getElementById('ae-name-input').focus();
+    AG.showToast('Please enter a name', 'error'); return;
+  }
+  if (amtRupees <= 0) {
+    document.getElementById('ae-amount-input').focus();
+    AG.showToast('Please enter an allocation amount', 'error'); return;
+  }
+
+  const allocPaise = amtRupees * 100;
+  const allocStr = fmtINR(allocPaise);
+  customEnvCount++;
+  const key = 'custom-' + customEnvCount;
+
+  // Register in allocState and ENV_KEYS
+  allocState[key] = allocPaise;
+  ENV_KEYS.push(key);
+
+  // Register in SHEET_DATA so detail sheet works
+  SHEET_DATA[key] = {
+    icon: selectedIcon, iconBg: selectedIconBg, name,
+    alloc: allocStr, spent: '₹0', remaining: allocStr,
+    remainingColor: 'var(--text-secondary)', barW: 0, barCls: '',
+    chartHeights: [0, 0, 0, 0, 0, 0],
+    txns: [{ date: '—', payee: 'No transactions this month', amount: '', ml: null }]
+  };
+
+  // Inject row before total-footer
+  document.querySelector('.total-footer').insertAdjacentHTML('beforebegin', `
+    <div class="env-row" id="row-${key}" onclick="openSheet('${key}')">
+      <div class="env-row__top">
+        <div class="env-row__icon" style="background:${selectedIconBg};">${selectedIcon}</div>
+        <div class="env-row__info">
+          <div class="env-row__name">${name}</div>
+          <div class="env-row__sublabel">
+            <span class="env-row__pct" id="pct-${key}">0%</span>
+            <span>of allocated</span>
+          </div>
+        </div>
+        <div class="env-row__alloc-wrap">
+          <span class="env-row__alloc env-row__alloc--editable" id="alloc-${key}">${allocStr}</span>
+          <span class="env-row__badge env-row__badge--empty" id="badge-${key}"></span>
+        </div>
+      </div>
+      <div class="env-progress">
+        <div class="env-progress__fill env-progress__fill--normal" id="bar-${key}" style="width:0%"></div>
+      </div>
+      <div class="env-row__footer">
+        <span class="t-mono" id="spent-${key}">₹0 spent</span>
+        <span class="t-mono" id="remaining-${key}">${allocStr} remaining</span>
+      </div>
+    </div>
+  `);
+
+  // Wire alloc click on the new row
+  const newAllocEl = document.getElementById('alloc-' + key);
+  if (newAllocEl) newAllocEl.addEventListener('click', function(e) {
+    if (currentStateKey !== 'draft') return;
+    e.stopPropagation();
+    openEditAlloc(key);
+  });
+
+  recalcAllocBar();
+  closeAddEnvelopeSheet();
+  AG.showToast(`"${name}" added`, 'success');
+}
+
+// Icon picker selection
+document.getElementById('icon-picker').addEventListener('click', function(e) {
+  const btn = e.target.closest('.icon-picker__btn');
+  if (!btn) return;
+  document.querySelectorAll('.icon-picker__btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedIcon = btn.dataset.icon;
+  selectedIconBg = btn.dataset.bg;
+});
+
+document.getElementById('ae-close').addEventListener('click', closeAddEnvelopeSheet);
+document.getElementById('ae-cancel').addEventListener('click', closeAddEnvelopeSheet);
+document.getElementById('ae-confirm').addEventListener('click', confirmAddEnvelope);
+document.getElementById('add-env-backdrop').addEventListener('click', closeAddEnvelopeSheet);
 
 /* ─────────────────────────────────────────────
    DEMO BAR REGISTRATION
