@@ -3,469 +3,267 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ArthaGrid — Budget · June 2026</title>
+  <title>ArthaGrid — Budget Periods</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/style.css">
   <style>
-    /* ── Allocation status bar ── */
-    .alloc-bar {
-      position: fixed;
-      top: calc(var(--demo-bar-h) + var(--top-bar-h));
-      left: 50%; transform: translateX(-50%);
-      width: 100%; max-width: var(--page-max);
-      height: 52px;
-      display: flex; align-items: center; gap: var(--sp-3);
-      padding: 0 var(--sp-4);
-      z-index: 45;
-      border-bottom: 1px solid var(--border);
-      transition: background var(--dur-base) var(--ease-out),
-                  border-color var(--dur-base) var(--ease-out);
-    }
-    .alloc-bar--balanced    { background: rgba(22,163,74,.08); }
-    .alloc-bar--unallocated { background: rgba(245,158,11,.08); }
-    .alloc-bar--over        { background: rgba(233,69,96,.08); }
-    .alloc-bar__text {
-      flex: 1; font-size: 13px; color: var(--text-secondary);
-      font-weight: 500; min-width: 0; overflow: hidden;
-      text-overflow: ellipsis; white-space: nowrap;
-    }
-    .alloc-bar__text strong {
-      font-family: 'JetBrains Mono', monospace;
-      font-variant-numeric: tabular-nums;
-      color: var(--text-primary);
-    }
 
-    /* ── Page content override — extra top padding for alloc bar ── */
-    .page-content--budget {
+    /* ── Page content ── */
+    .page-content--period-list {
       padding: 0;
-      padding-top: calc(var(--top-bar-h) + 52px + var(--sp-4));
+      padding-top: calc(var(--top-bar-h) + var(--sp-4));
       padding-bottom: calc(var(--bottom-nav-h) + var(--sp-10));
       overflow-y: auto;
     }
 
-    /* ── Warning banner ── */
-    .warning-banner {
-      background: var(--error-light);
-      border: 1px solid rgba(233,69,96,.28);
-      border-radius: var(--r-lg);
-      padding: var(--sp-3) var(--sp-4);
-      font-size: 13px; font-weight: 500; color: var(--error);
-      display: none; align-items: center; gap: var(--sp-3);
-      margin: 0 var(--sp-4) var(--sp-3);
-      animation: card-in var(--dur-med) var(--ease-out) both;
-    }
-    .warning-banner.visible { display: flex; }
-
-    /* ── Income strip ── */
-    .income-strip {
-      background: linear-gradient(135deg, rgba(13,148,136,.07), rgba(20,184,166,.03));
-      border-bottom: 1px solid rgba(13,148,136,.18);
-      padding: var(--sp-4) var(--sp-4);
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: var(--sp-2);
-    }
-    .income-strip__left { display: flex; flex-direction: column; gap: 2px; }
-    .income-strip__label {
+    /* ── Section labels ── */
+    .period-section-label {
       font-size: 11px; font-weight: 700; letter-spacing: .08em;
       text-transform: uppercase; color: var(--text-muted);
-    }
-    .income-strip__sublabel {
-      font-size: 11px; color: var(--text-muted); font-weight: 400;
-    }
-    .income-strip__right { display: flex; align-items: center; gap: var(--sp-2); }
-    .income-strip__badge {
-      background: var(--primary-light); color: var(--primary);
-      font-size: 10px; font-weight: 700; letter-spacing: .05em;
-      padding: 2px 7px; border-radius: var(--r-full); text-transform: uppercase;
-    }
-    .income-strip__amount {
-      font-family: 'JetBrains Mono', monospace;
-      font-variant-numeric: tabular-nums;
-      font-size: 18px; font-weight: 700; color: var(--primary);
-    }
-
-    /* ── Section heading ── */
-    .env-section { margin-bottom: var(--sp-2); }
-    .env-section__heading {
-      font-size: 11px; font-weight: 700; letter-spacing: .08em;
-      text-transform: uppercase; color: var(--text-muted);
-      padding: var(--sp-4) var(--sp-4) var(--sp-2);
+      padding: var(--sp-5) var(--sp-4) var(--sp-3);
       display: flex; align-items: center; gap: var(--sp-2);
     }
-    .env-section__heading::before {
+    .period-section-label::before {
       content: ''; width: 3px; height: 12px; border-radius: 2px;
       background: var(--primary); flex-shrink: 0;
     }
 
-    /* ── Envelope row ── */
-    .env-row {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: var(--sp-3) var(--sp-4) var(--sp-3);
-      cursor: pointer;
-      transition: background var(--dur-fast);
+    /* ── Active period hero card ── */
+    .active-period-card {
+      margin: var(--sp-1) var(--sp-4) var(--sp-3);
+      border-radius: var(--r-xl);
+      background: linear-gradient(135deg, #0B7A70 0%, #0D9488 55%, #0EA5A0 100%);
+      box-shadow: 0 6px 28px rgba(13,148,136,.32);
+      padding: var(--sp-5);
       position: relative;
+      overflow: hidden;
     }
-    .env-row:hover { background: var(--primary-xlight); }
-    .env-row:active { background: var(--primary-light); }
-    .env-row--over  { background: rgba(233,69,96,.03); }
-    .env-row--over:hover { background: rgba(233,69,96,.07); }
-
-    .env-row__top {
-      display: flex; align-items: center; gap: var(--sp-3);
-      margin-bottom: var(--sp-2);
+    .active-period-card::before {
+      content: '';
+      position: absolute;
+      top: -32px; right: -32px;
+      width: 110px; height: 110px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.07);
     }
-    .env-row__icon {
-      width: 36px; height: 36px; border-radius: var(--r-md);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px; flex-shrink: 0;
+    .active-period-card::after {
+      content: '';
+      position: absolute;
+      bottom: -24px; left: 30%;
+      width: 160px; height: 80px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.04);
     }
-    .env-row__info { flex: 1; min-width: 0; }
-    .env-row__name {
-      font-size: 14px; font-weight: 600; color: var(--text-primary);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .env-row__sublabel {
-      font-size: 12px; color: var(--text-secondary); margin-top: 1px;
+    .apc-header {
       display: flex; align-items: center; gap: var(--sp-2);
+      margin-bottom: var(--sp-4);
     }
-    .env-row__pct {
+    .apc-current-badge {
+      font-size: 9px; font-weight: 800; letter-spacing: .1em;
+      text-transform: uppercase;
+      background: rgba(255,255,255,.22);
+      color: rgba(255,255,255,.95);
+      padding: 3px 9px;
+      border-radius: var(--r-full);
+    }
+    .apc-status-chip {
+      font-size: 9px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase;
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.3);
+      color: rgba(255,255,255,.9);
+      padding: 3px 9px;
+      border-radius: var(--r-full);
+    }
+    .apc-month {
+      font-size: 22px; font-weight: 700; color: #fff;
+      margin-bottom: var(--sp-2);
+      line-height: 1.15;
+    }
+    .apc-remaining-label {
+      font-size: 12px; color: rgba(255,255,255,.65);
+      margin-bottom: var(--sp-1);
+    }
+    .apc-remaining-amount {
       font-family: 'JetBrains Mono', monospace;
       font-variant-numeric: tabular-nums;
+      font-size: 28px; font-weight: 700; color: #fff;
+      margin-bottom: var(--sp-4);
+      line-height: 1;
     }
+    .apc-remaining-of {
+      font-size: 13px; color: rgba(255,255,255,.6);
+      font-weight: 400; margin-left: var(--sp-1);
+    }
+    .apc-progress {
+      margin-bottom: var(--sp-4);
+    }
+    .apc-bar-track {
+      height: 6px;
+      background: rgba(255,255,255,.2);
+      border-radius: 99px;
+      overflow: hidden;
+      margin-bottom: var(--sp-2);
+    }
+    .apc-bar-fill {
+      height: 100%;
+      background: rgba(255,255,255,.85);
+      border-radius: 99px;
+      transition: width .5s ease;
+    }
+    .apc-bar-labels {
+      display: flex; justify-content: space-between;
+      font-size: 11px; color: rgba(255,255,255,.6);
+    }
+    .apc-footer {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .apc-close-date {
+      font-size: 12px; color: rgba(255,255,255,.6);
+    }
+    .apc-open-btn {
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,.18);
+      border: 1.5px solid rgba(255,255,255,.32);
+      color: #fff;
+      padding: 0 var(--sp-4);
+      height: 36px;
+      border-radius: var(--r-full);
+      font-size: 14px; font-weight: 600;
+      cursor: pointer;
+      transition: background var(--dur-fast);
+      text-decoration: none;
+    }
+    .apc-open-btn:hover { background: rgba(255,255,255,.26); }
 
-    .env-row__alloc-wrap {
+    /* ── Period row card (upcoming/past) ── */
+    .period-row {
+      display: flex; align-items: center;
+      padding: var(--sp-4) var(--sp-4);
+      margin: 0 var(--sp-3) var(--sp-2);
+      background: var(--surface-raised);
+      border-radius: var(--r-xl);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: background var(--dur-fast), box-shadow var(--dur-fast);
+      text-decoration: none;
+      color: var(--text-primary);
+      animation: card-in var(--dur-med) var(--ease-out) both;
+    }
+    .period-row:hover { box-shadow: var(--sh-md); background: var(--surface); }
+    .period-row__info { flex: 1; min-width: 0; }
+    .period-row__month { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+    .period-row__sub {
+      font-size: 12px; color: var(--text-muted); margin-top: 2px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .period-row__right {
       display: flex; align-items: center; gap: var(--sp-2);
       flex-shrink: 0;
     }
-    .env-row__alloc {
-      font-family: 'JetBrains Mono', monospace;
-      font-variant-numeric: tabular-nums;
-      font-size: 15px; font-weight: 700; color: var(--text-primary);
-    }
-    .env-row__alloc--editable {
-      border: 1.5px solid var(--primary);
-      border-radius: var(--r-sm);
-      padding: 2px 8px;
+    .period-row__action {
+      display: flex; align-items: center; gap: 5px;
       background: var(--primary-light);
       color: var(--primary);
-    }
-    .env-row__badge {
-      width: 20px; height: 20px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 11px; flex-shrink: 0;
-    }
-    .env-row__badge--done    { background: var(--success-light); }
-    .env-row__badge--warn    { background: var(--warning-light); }
-    .env-row__badge--over    { background: var(--error-light); }
-    .env-row__badge--empty   { display: none; }
-
-    /* ── Progress bar (6px) ── */
-    .env-progress {
-      height: 6px; background: var(--border);
-      border-radius: var(--r-full); overflow: hidden;
-      margin-bottom: var(--sp-2);
-    }
-    .env-progress__fill {
-      height: 100%; border-radius: var(--r-full);
-      transition: width var(--dur-med) var(--ease-out),
-                  background var(--dur-base) var(--ease-out);
-    }
-    .env-progress__fill--normal  { background: var(--grad-primary); }
-    .env-progress__fill--warn    { background: linear-gradient(135deg,#D97706,#F59E0B); }
-    .env-progress__fill--done    { background: var(--grad-success); }
-    .env-progress__fill--over    { background: var(--grad-danger); }
-
-    /* ── Spent / Remaining footer ── */
-    .env-row__footer {
-      display: flex; justify-content: space-between;
-      font-size: 12px; color: var(--text-muted);
-    }
-    .env-row__footer .t-mono {
-      font-family: 'JetBrains Mono', monospace;
-      font-variant-numeric: tabular-nums;
-    }
-    .env-row__footer--over {
-      color: var(--error); font-weight: 600;
-    }
-
-    /* ── Total footer card ── */
-    .total-footer {
-      background: linear-gradient(135deg, #0B7A70 0%, #0D9488 55%, #0EA5A0 100%);
-      border-top: none;
-      padding: var(--sp-5) var(--sp-5);
-      margin: 0 var(--sp-4) var(--sp-2);
-      border-radius: 20px;
-      box-shadow: 0 6px 24px rgba(13,148,136,.28), 0 2px 8px rgba(13,148,136,.18);
-    }
-    .total-footer__heading {
-      font-size: 11px; font-weight: 700; letter-spacing: .09em;
-      text-transform: uppercase; color: rgba(255,255,255,.65);
-      margin-bottom: var(--sp-4);
-    }
-    .total-footer__stats {
-      display: flex; align-items: stretch;
-      margin-bottom: var(--sp-4);
-    }
-    .total-footer__stat { flex: 1; text-align: center; }
-    .total-footer__stat-sep {
-      width: 1px; background: rgba(255,255,255,.18); flex-shrink: 0; margin: 2px 0;
-    }
-    .total-footer__stat-val {
-      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
-      font-size: 15px; font-weight: 700; color: #fff;
-      margin-bottom: 4px; display: block;
-    }
-    .total-footer__stat-label {
-      font-size: 10px; font-weight: 600; color: rgba(255,255,255,.6);
-      text-transform: uppercase; letter-spacing: .06em; display: block;
-    }
-    .total-footer__bar-wrap { margin-bottom: var(--sp-2); }
-    .total-footer__bar-track {
-      height: 5px; background: rgba(255,255,255,.2);
-      border-radius: 99px; overflow: hidden;
-    }
-    .total-footer__bar-fill {
-      height: 100%; border-radius: 99px;
-      background: rgba(255,255,255,.88);
-      transition: width var(--dur-med) var(--ease-out);
-    }
-    .total-footer__bar-label {
-      display: flex; justify-content: space-between;
-      font-size: 11px; color: rgba(255,255,255,.55); font-weight: 500;
-      margin-top: var(--sp-1);
-    }
-
-    /* ── Top bar inline actions ── */
-    .btn--sm-ghost {
-      height: 28px; padding: 0 var(--sp-3); border-radius: var(--r-md);
-      font-size: 12px; font-weight: 600; color: var(--primary);
-      background: transparent; border: 1.5px solid var(--primary);
-      display: flex; align-items: center; gap: 4px;
-      transition: background var(--dur-fast), color var(--dur-fast);
-      white-space: nowrap;
-    }
-    .btn--sm-ghost:hover { background: var(--primary); color: #fff; }
-    .btn--sm-ghost:disabled { opacity: .4; cursor: not-allowed; }
-
-    /* ── Sheet summary grid ── */
-    .sheet-summary-grid {
-      display: grid; grid-template-columns: 1fr 1fr 1fr;
-      gap: var(--sp-3); margin-bottom: var(--sp-5);
-    }
-    .sheet-summary-cell {
-      background: var(--surface-raised);
-      border-radius: var(--r-lg);
-      padding: var(--sp-3) var(--sp-3);
-      text-align: center;
-    }
-    .sheet-summary-cell__label {
-      font-size: 10px; font-weight: 600; letter-spacing: .07em;
-      text-transform: uppercase; color: var(--text-muted);
-      margin-bottom: var(--sp-1);
-    }
-    .sheet-summary-cell__value {
-      font-family: 'JetBrains Mono', monospace;
-      font-variant-numeric: tabular-nums;
-      font-size: 15px; font-weight: 700;
-    }
-
-    /* ── Mini bar chart ── */
-    .mini-chart {
-      position: relative; margin-bottom: var(--sp-5);
-    }
-    .mini-chart__label {
-      font-size: 11px; font-weight: 600; letter-spacing: .04em;
-      text-transform: uppercase; color: var(--text-muted);
-      margin-bottom: var(--sp-3);
-    }
-    .mini-chart__svg-wrap {
-      position: relative;
-    }
-    .mini-chart svg {
-      width: 100%; display: block;
-    }
-
-    /* ── Recent transactions in sheet ── */
-    .txn-list-title {
-      font-size: 12px; font-weight: 700; letter-spacing: .06em;
-      text-transform: uppercase; color: var(--text-muted);
-      margin-bottom: var(--sp-3);
-    }
-    .txn-compact-row {
-      display: flex; align-items: center; gap: var(--sp-3);
-      padding: var(--sp-2) 0;
-      border-bottom: 1px solid var(--border);
-    }
-    .txn-compact-row:last-child { border-bottom: none; }
-    .txn-compact-row__body { flex: 1; min-width: 0; }
-    .txn-compact-row__payee {
-      font-size: 13px; font-weight: 500; color: var(--text-primary);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      display: flex; align-items: center; gap: 5px; flex-wrap: wrap;
-    }
-    .txn-compact-row__date {
-      font-size: 11px; color: var(--text-muted); margin-top: 2px;
-    }
-    .txn-compact-row__amount {
-      font-family: 'JetBrains Mono', monospace;
-      font-variant-numeric: tabular-nums;
-      font-size: 14px; font-weight: 600; color: var(--error); flex-shrink: 0;
-    }
-    .ml-chip {
-      font-size: 10px;
-      background: var(--surface-raised);
-      color: var(--text-muted);
-      padding: 1px 5px;
-      border-radius: var(--r-sm);
-      border: 1px solid var(--border);
-      white-space: nowrap;
-    }
-
-    /* ── Sweep table ── */
-    .sweep-table { width: 100%; border-collapse: collapse; margin-bottom: var(--sp-4); }
-    .sweep-table td {
-      padding: var(--sp-2) var(--sp-2);
-      font-size: 13px; vertical-align: middle;
-      border-bottom: 1px solid var(--border);
-    }
-    .sweep-table tr:last-child td { border-bottom: none; }
-    .sweep-table .rule-arrow { color: var(--primary); font-weight: 700; padding: 0 var(--sp-1); }
-    .sweep-table .rule-amount {
-      font-family: 'JetBrains Mono', monospace;
-      font-variant-numeric: tabular-nums;
-      font-weight: 700; color: var(--primary); text-align: right;
-    }
-    .sweep-result {
-      background: var(--success-light);
-      border-radius: var(--r-lg);
-      padding: var(--sp-3) var(--sp-4);
-      display: flex; align-items: center; gap: var(--sp-3);
-      font-size: 13px; font-weight: 600; color: var(--success);
-      margin-bottom: var(--sp-4);
-    }
-
-    /* ── FAB visibility ── */
-    .fab { display: none; }
-    .fab.visible { display: flex; }
-
-    /* ── Sheet envelope icon header ── */
-    .sheet-env-icon {
-      width: 44px; height: 44px; border-radius: var(--r-lg);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 22px; flex-shrink: 0;
-    }
-
-    /* ── Theme toggle ── */
-    .icon-btn {
-      width: 40px; height: 40px; border-radius: var(--r-full);
-      display: flex; align-items: center; justify-content: center;
-      color: var(--text-secondary);
-      transition: background var(--dur-fast), color var(--dur-fast);
+      padding: 0 var(--sp-3);
+      height: 32px;
+      border-radius: var(--r-full);
+      font-size: 12px; font-weight: 700;
+      border: 1.5px solid rgba(13,148,136,.25);
       cursor: pointer;
+      transition: background var(--dur-fast), box-shadow var(--dur-fast);
+      text-decoration: none;
+      white-space: nowrap;
     }
-    .icon-btn:hover { background: var(--surface-raised); color: var(--text-primary); }
-
-    /* ── Edit Alloc Sheet ── */
-    .ea-display {
-      font-family: 'JetBrains Mono', monospace;
-      font-variant-numeric: tabular-nums;
-      font-size: 40px; font-weight: 700; letter-spacing: -1px;
-      text-align: center; color: var(--text-primary);
-      padding: var(--sp-3) 0 var(--sp-1);
-      min-height: 60px;
-    }
-    .ea-preview {
-      text-align: center; font-size: 13px; font-weight: 500;
+    .period-row__action:hover { background: rgba(13,148,136,.18); box-shadow: 0 2px 8px rgba(13,148,136,.2); }
+    .period-row__action--muted {
+      background: var(--surface);
       color: var(--text-secondary);
-      margin-bottom: var(--sp-4); min-height: 20px;
+      border-color: var(--border);
     }
-    .ea-preview--balanced { color: var(--success); font-weight: 600; }
-    .ea-preview--over     { color: var(--error);   font-weight: 600; }
+    .period-row__action--muted:hover { background: var(--surface-raised); box-shadow: none; }
 
-    .numpad {
-      display: grid; grid-template-columns: repeat(3, 1fr);
-      gap: var(--sp-2); margin-bottom: var(--sp-2);
+    /* ── Surplus / deficit badge ── */
+    .period-result {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 12px; font-weight: 600;
+      padding: 3px 9px; border-radius: var(--r-full);
     }
-    .numpad__key {
-      height: 52px; border-radius: var(--r-lg);
-      background: var(--surface-raised); border: 1px solid var(--border);
-      font-size: 20px; font-weight: 600; color: var(--text-primary);
-      cursor: pointer; user-select: none;
-      display: flex; align-items: center; justify-content: center;
-      transition: background var(--dur-fast), color var(--dur-fast);
+    .period-result--surplus {
+      background: var(--success-light);
+      color: var(--success);
     }
-    .numpad__key:hover  { background: var(--primary-light); color: var(--primary); }
-    .numpad__key:active { background: var(--primary); color: #fff; }
-    .numpad__key--action { font-size: 16px; color: var(--text-secondary); }
-    .numpad__key--action:hover { background: var(--error-light); color: var(--error); }
-
-    /* Error chip (over-allocated) */
-    .chip--error {
+    .period-result--deficit {
       background: var(--error-light);
       color: var(--error);
-      border: 1.5px solid rgba(233,69,96,.25);
     }
 
-    /* Tap-to-edit cursor hint in draft mode */
-    .env-row__alloc--editable { cursor: pointer; }
+    /* ── Past periods section (collapsible) ── */
+    .past-section-toggle {
+      width: 100%;
+      display: flex; align-items: center; gap: var(--sp-2);
+      background: none; border: none; cursor: pointer;
+      padding: var(--sp-4) var(--sp-4) var(--sp-3);
+      color: var(--text-secondary);
+      font-size: 13px; font-weight: 600;
+      text-align: left;
+      transition: color var(--dur-fast);
+    }
+    .past-section-toggle:hover { color: var(--primary); }
+    .past-section-toggle__icon {
+      font-size: 16px;
+      transition: transform var(--dur-base) var(--ease-out);
+      display: inline-block;
+    }
+    .past-section-toggle__icon.open { transform: rotate(180deg); }
+    .past-section-toggle__count {
+      margin-left: auto;
+      background: var(--surface-raised);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 11px; font-weight: 700;
+      padding: 1px 8px; border-radius: var(--r-full);
+    }
+    .past-periods-list {
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height .35s var(--ease-out);
+    }
+    .past-periods-list.open { max-height: 600px; }
 
-    /* ── Add Envelope Sheet ── */
-    .icon-picker {
-      display: flex; gap: var(--sp-2); overflow-x: auto;
-      padding-bottom: var(--sp-1); margin-bottom: var(--sp-4);
-      scrollbar-width: none;
+    /* ── Empty state ── */
+    .empty-state {
+      display: flex; flex-direction: column; align-items: center;
+      padding: var(--sp-10) var(--sp-6) var(--sp-6);
+      text-align: center;
     }
-    .icon-picker::-webkit-scrollbar { display: none; }
-    .icon-picker__btn {
-      width: 44px; height: 44px; border-radius: var(--r-md); flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 22px; cursor: pointer;
-      border: 2px solid transparent;
-      transition: border-color var(--dur-fast), transform var(--dur-fast);
+    .empty-state__icon {
+      font-size: 48px; margin-bottom: var(--sp-4);
+      filter: grayscale(.2);
     }
-    .icon-picker__btn.selected {
-      border-color: var(--primary);
-      transform: scale(1.1);
+    .empty-state__title {
+      font-size: 18px; font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: var(--sp-2);
+    }
+    .empty-state__sub {
+      font-size: 14px; color: var(--text-muted);
+      line-height: 1.55; margin-bottom: var(--sp-6);
     }
 
-    .ae-field { margin-bottom: var(--sp-4); }
-    .ae-field__label {
-      display: block; font-size: 11px; font-weight: 700;
-      letter-spacing: .07em; text-transform: uppercase;
-      color: var(--text-muted); margin-bottom: var(--sp-2);
+    /* ── Top bar "new period" button ── */
+    .btn--sm-primary {
+      height: 32px; padding: 0 var(--sp-3);
+      background: var(--primary); color: #fff;
+      border: none; border-radius: var(--r-md);
+      font-size: 13px; font-weight: 600;
+      cursor: pointer; display: flex; align-items: center; gap: 5px;
+      transition: box-shadow var(--dur-fast), background var(--dur-fast);
+      white-space: nowrap;
     }
-    .ae-field__input {
-      width: 100%; box-sizing: border-box; height: 44px;
-      background: var(--surface-raised); border: 1.5px solid var(--border);
-      border-radius: var(--r-lg); padding: 0 var(--sp-3);
-      font-size: 15px; font-weight: 500; color: var(--text-primary);
-      font-family: 'Inter', sans-serif;
-      transition: border-color var(--dur-fast), box-shadow var(--dur-fast);
-    }
-    .ae-field__input:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px var(--primary-xlight, rgba(13,148,136,.12));
-    }
-    .ae-field__input::placeholder { color: var(--text-muted); }
+    .btn--sm-primary:hover { box-shadow: 0 4px 14px rgba(13,148,136,.35); }
 
-    /* ── Section picker chips ── */
-    .ae-section-picker {
-      display: flex; gap: var(--sp-2); flex-wrap: wrap;
-    }
-    .ae-section-btn {
-      height: 32px; padding: 0 var(--sp-3); border-radius: var(--r-full);
-      background: var(--surface-raised); border: 1.5px solid var(--border);
-      font-size: 12px; font-weight: 600; color: var(--text-secondary);
-      cursor: pointer; white-space: nowrap;
-      transition: background var(--dur-fast), color var(--dur-fast), border-color var(--dur-fast);
-    }
-    .ae-section-btn:hover { border-color: var(--primary); color: var(--primary); }
-    .ae-section-btn.selected {
-      background: var(--primary); color: #fff; border-color: var(--primary);
-    }
   </style>
 </head>
 <body>
@@ -477,9 +275,8 @@
   ═══════════════════════════════════════════ -->
   <div class="demo-bar">
     <span class="demo-bar__label">State</span>
-    <button class="demo-btn active" data-state="locked">Locked (Balanced)</button>
-    <button class="demo-btn" data-state="draft">Draft (Unallocated)</button>
-    <button class="demo-btn" data-state="over">Over Budget</button>
+    <button class="demo-btn active" data-state="active">Active Period</button>
+    <button class="demo-btn" data-state="empty">First Use</button>
     <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
       <span id="theme-icon" style="font-size:18px;">🌙</span>
     </button>
@@ -494,9 +291,12 @@
         <polyline points="15 18 9 12 15 6"/>
       </svg>
     </a>
-    <span class="top-bar__title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">June 2026 Budget</span>
+    <span class="top-bar__title">Budget</span>
     <div class="top-bar__actions" style="gap:4px;">
-      <div id="top-bar-page-actions" style="display:flex;gap:4px;align-items:center;"></div>
+      <button class="btn--sm-primary" id="new-period-btn" onclick="toast('Create Period — BUD-04 coming soon')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Period
+      </button>
       <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
         <span data-theme-icon style="font-size:18px;">🌙</span>
       </button>
@@ -505,1412 +305,285 @@
   </div>
 
   <!-- ═══════════════════════════════════════════
-       ALLOCATION STATUS BAR
-  ═══════════════════════════════════════════ -->
-  <div class="alloc-bar alloc-bar--balanced" id="alloc-bar">
-    <span class="chip chip--balanced" id="alloc-chip">✓ BALANCED</span>
-    <span class="alloc-bar__text" id="alloc-text">
-      Unallocated: <strong>₹0</strong> · of <strong>₹1,20,000</strong> income
-    </span>
-  </div>
-
-  <!-- ═══════════════════════════════════════════
        PAGE CONTENT
   ═══════════════════════════════════════════ -->
-  <div class="page-content page-content--budget">
+  <div class="page-content page-content--period-list" id="page-content">
 
-    <!-- Warning Banner -->
-    <div class="warning-banner" id="warning-banner">
-      <span style="font-size:18px; flex-shrink:0;">⚠️</span>
-      <span>2 envelopes over budget. Review your spending.</span>
-    </div>
+    <!-- ── Active State ── -->
+    <div id="view-active">
 
-    <!-- Income Strip -->
-    <div class="income-strip">
-      <div class="income-strip__left">
-        <span class="income-strip__label">Expected Income</span>
-        <span class="income-strip__sublabel">June 2026</span>
-      </div>
-      <div class="income-strip__right">
-        <span class="income-strip__badge">Salary</span>
-        <span class="income-strip__amount" id="income-amount">₹1,20,000</span>
-      </div>
-    </div>
-
-    <!-- ── Budget Summary Card ── -->
-    <div class="total-footer">
-      <div class="total-footer__heading">Budget Summary · June 2026</div>
-      <div class="total-footer__stats">
-        <div class="total-footer__stat">
-          <span class="total-footer__stat-val" id="total-alloc-val">₹1,20,000</span>
-          <span class="total-footer__stat-label">Allocated</span>
+      <!-- Active Period Hero Card -->
+      <div class="period-section-label">Active Period</div>
+      <div class="active-period-card">
+        <div class="apc-header">
+          <span class="apc-current-badge">Current</span>
+          <span class="apc-status-chip" id="apc-status-chip">Locked</span>
         </div>
-        <div class="total-footer__stat-sep"></div>
-        <div class="total-footer__stat">
-          <span class="total-footer__stat-val" id="total-spent-val">₹78,950</span>
-          <span class="total-footer__stat-label">Spent</span>
+        <div class="apc-month" id="apc-month">June 2026</div>
+        <div class="apc-remaining-label">Remaining this month</div>
+        <div class="apc-remaining-amount">
+          <span id="apc-remaining">₹50,650</span>
+          <span class="apc-remaining-of">of ₹1,20,000</span>
         </div>
-        <div class="total-footer__stat-sep"></div>
-        <div class="total-footer__stat">
-          <span class="total-footer__stat-val" id="total-remaining-val">₹41,050</span>
-          <span class="total-footer__stat-label">Remaining</span>
-        </div>
-      </div>
-      <div class="total-footer__bar-wrap">
-        <div class="total-footer__bar-track">
-          <div class="total-footer__bar-fill" id="total-bar-fill" style="width:65.8%;"></div>
-        </div>
-        <div class="total-footer__bar-label">
-          <span id="total-bar-pct">65.8% spent</span>
-          <span id="total-bar-days">Jun 1 – Jun 23</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── SECTION: Committed ── -->
-    <div class="env-section" id="section-committed">
-      <div class="env-section__heading">Committed</div>
-
-      <!-- Housing EMI -->
-      <div class="env-row" id="row-housing" onclick="openSheet('housing')">
-        <div class="env-row__top">
-          <div class="env-row__icon" style="background:#DBEAFE;">🏠</div>
-          <div class="env-row__info">
-            <div class="env-row__name">Housing EMI</div>
-            <div class="env-row__sublabel">
-              <span class="env-row__pct" id="pct-housing">100%</span>
-              <span>of allocated</span>
-            </div>
+        <div class="apc-progress">
+          <div class="apc-bar-track">
+            <div class="apc-bar-fill" id="apc-bar-fill" style="width:57.8%;"></div>
           </div>
-          <div class="env-row__alloc-wrap">
-            <span class="env-row__alloc" id="alloc-housing">₹38,500</span>
-            <span class="env-row__badge env-row__badge--done" id="badge-housing">✓</span>
+          <div class="apc-bar-labels">
+            <span id="apc-bar-pct">57.8% remaining</span>
+            <span id="apc-bar-days">Jun 1 – Jun 30</span>
           </div>
         </div>
-        <div class="env-progress">
-          <div class="env-progress__fill env-progress__fill--done" id="bar-housing" style="width:100%"></div>
-        </div>
-        <div class="env-row__footer">
-          <span class="t-mono" id="spent-housing">₹38,500 spent</span>
-          <span class="t-mono" id="remaining-housing" style="color:var(--success);">₹0 remaining</span>
+        <div class="apc-footer">
+          <span class="apc-close-date" id="apc-close-date">Closes 30 Jun 2026</span>
+          <a href="period.html" class="apc-open-btn">
+            Open
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
         </div>
       </div>
 
-      <!-- Insurance -->
-      <div class="env-row" id="row-insurance" onclick="openSheet('insurance')">
-        <div class="env-row__top">
-          <div class="env-row__icon" style="background:#FEE2E2;">🛡️</div>
-          <div class="env-row__info">
-            <div class="env-row__name">Insurance</div>
-            <div class="env-row__sublabel">
-              <span class="env-row__pct" id="pct-insurance">0%</span>
-              <span>of allocated</span>
-            </div>
-          </div>
-          <div class="env-row__alloc-wrap">
-            <span class="env-row__alloc" id="alloc-insurance">₹2,500</span>
-            <span class="env-row__badge env-row__badge--empty" id="badge-insurance"></span>
-          </div>
-        </div>
-        <div class="env-progress">
-          <div class="env-progress__fill env-progress__fill--normal" id="bar-insurance" style="width:0%"></div>
-        </div>
-        <div class="env-row__footer">
-          <span class="t-mono" id="spent-insurance">₹0 spent</span>
-          <span class="t-mono" id="remaining-insurance">₹2,500 remaining</span>
-        </div>
-      </div>
-    </div>
+      <!-- Upcoming Periods -->
+      <div class="period-section-label">Upcoming</div>
 
-    <!-- ── SECTION: Living Expenses ── -->
-    <div class="env-section" id="section-living">
-      <div class="env-section__heading">Living Expenses</div>
-
-      <!-- Groceries -->
-      <div class="env-row" id="row-groceries" onclick="openSheet('groceries')">
-        <div class="env-row__top">
-          <div class="env-row__icon" style="background:#D1FAE5;">🛒</div>
-          <div class="env-row__info">
-            <div class="env-row__name">Groceries</div>
-            <div class="env-row__sublabel">
-              <span class="env-row__pct" id="pct-groceries">68%</span>
-              <span>of allocated</span>
-            </div>
-          </div>
-          <div class="env-row__alloc-wrap">
-            <span class="env-row__alloc" id="alloc-groceries">₹12,000</span>
-            <span class="env-row__badge env-row__badge--empty" id="badge-groceries"></span>
-          </div>
+      <!-- July 2026 — Draft -->
+      <div class="period-row">
+        <div class="period-row__info">
+          <div class="period-row__month">July 2026</div>
+          <div class="period-row__sub">Draft · ₹0 of ₹1,20,000 allocated</div>
         </div>
-        <div class="env-progress">
-          <div class="env-progress__fill env-progress__fill--normal" id="bar-groceries" style="width:68%"></div>
-        </div>
-        <div class="env-row__footer" id="footer-groceries">
-          <span class="t-mono" id="spent-groceries">₹8,200 spent</span>
-          <span class="t-mono" id="remaining-groceries">₹3,800 remaining</span>
+        <div class="period-row__right">
+          <span class="chip chip--closed" style="font-size:10px;">Draft</span>
+          <a href="period.html" class="period-row__action">
+            Open
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
         </div>
       </div>
 
-      <!-- Dining Out -->
-      <div class="env-row" id="row-dining" onclick="openSheet('dining')">
-        <div class="env-row__top">
-          <div class="env-row__icon" style="background:#FEF3C7;">🍽️</div>
-          <div class="env-row__info">
-            <div class="env-row__name">Dining Out</div>
-            <div class="env-row__sublabel">
-              <span class="env-row__pct" id="pct-dining">75%</span>
-              <span>of allocated</span>
-            </div>
-          </div>
-          <div class="env-row__alloc-wrap">
-            <span class="env-row__alloc" id="alloc-dining">₹6,000</span>
-            <span class="env-row__badge env-row__badge--empty" id="badge-dining"></span>
-          </div>
+      <!-- August 2026 — Not created -->
+      <div class="period-row">
+        <div class="period-row__info">
+          <div class="period-row__month">August 2026</div>
+          <div class="period-row__sub">Not created yet</div>
         </div>
-        <div class="env-progress">
-          <div class="env-progress__fill env-progress__fill--normal" id="bar-dining" style="width:75%"></div>
-        </div>
-        <div class="env-row__footer" id="footer-dining">
-          <span class="t-mono" id="spent-dining">₹4,500 spent</span>
-          <span class="t-mono" id="remaining-dining">₹1,500 remaining</span>
+        <div class="period-row__right">
+          <button class="period-row__action period-row__action--muted" onclick="toast('Create Period — BUD-04 coming soon')">
+            Create
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
         </div>
       </div>
 
-      <!-- Utilities -->
-      <div class="env-row" id="row-utilities" onclick="openSheet('utilities')">
-        <div class="env-row__top">
-          <div class="env-row__icon" style="background:#E0E7FF;">⚡</div>
-          <div class="env-row__info">
-            <div class="env-row__name">Utilities</div>
-            <div class="env-row__sublabel">
-              <span class="env-row__pct" id="pct-utilities">56%</span>
-              <span>of allocated</span>
-            </div>
-          </div>
-          <div class="env-row__alloc-wrap">
-            <span class="env-row__alloc" id="alloc-utilities">₹5,000</span>
-            <span class="env-row__badge env-row__badge--empty" id="badge-utilities"></span>
-          </div>
-        </div>
-        <div class="env-progress">
-          <div class="env-progress__fill env-progress__fill--normal" id="bar-utilities" style="width:56%"></div>
-        </div>
-        <div class="env-row__footer">
-          <span class="t-mono" id="spent-utilities">₹2,800 spent</span>
-          <span class="t-mono" id="remaining-utilities">₹2,200 remaining</span>
-        </div>
-      </div>
+      <!-- Past Periods (collapsible) -->
+      <button class="past-section-toggle" id="past-toggle" onclick="togglePast()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 12 3 21 6"/><polyline points="3 12 12 9 21 12"/><polyline points="3 18 12 15 21 18"/></svg>
+        Past Periods
+        <span class="past-section-toggle__count">3</span>
+        <span class="past-section-toggle__icon" id="past-icon">▾</span>
+      </button>
 
-      <!-- Mobile & Internet -->
-      <div class="env-row" id="row-mobile" onclick="openSheet('mobile')">
-        <div class="env-row__top">
-          <div class="env-row__icon" style="background:#FCE7F3;">📱</div>
-          <div class="env-row__info">
-            <div class="env-row__name">Mobile &amp; Internet</div>
-            <div class="env-row__sublabel">
-              <span class="env-row__pct" id="pct-mobile">93%</span>
-              <span>of allocated</span>
-            </div>
-          </div>
-          <div class="env-row__alloc-wrap">
-            <span class="env-row__alloc" id="alloc-mobile">₹2,000</span>
-            <span class="env-row__badge env-row__badge--warn" id="badge-mobile">⚠</span>
-          </div>
-        </div>
-        <div class="env-progress">
-          <div class="env-progress__fill env-progress__fill--warn" id="bar-mobile" style="width:93%"></div>
-        </div>
-        <div class="env-row__footer">
-          <span class="t-mono" id="spent-mobile">₹1,850 spent</span>
-          <span class="t-mono" id="remaining-mobile">₹150 remaining</span>
-        </div>
-      </div>
+      <div class="past-periods-list" id="past-list">
 
-      <!-- Fuel & Transport -->
-      <div class="env-row" id="row-fuel" onclick="openSheet('fuel')">
-        <div class="env-row__top">
-          <div class="env-row__icon" style="background:#F1F5F9;">🚗</div>
-          <div class="env-row__info">
-            <div class="env-row__name">Fuel &amp; Transport</div>
-            <div class="env-row__sublabel">
-              <span class="env-row__pct" id="pct-fuel">78%</span>
-              <span>of allocated</span>
-            </div>
+        <!-- May 2026 — Surplus -->
+        <div class="period-row" style="animation-delay:40ms;">
+          <div class="period-row__info">
+            <div class="period-row__month">May 2026</div>
+            <div class="period-row__sub">Closed · May 1 – May 31</div>
           </div>
-          <div class="env-row__alloc-wrap">
-            <span class="env-row__alloc" id="alloc-fuel">₹4,000</span>
-            <span class="env-row__badge env-row__badge--empty" id="badge-fuel"></span>
+          <div class="period-row__right">
+            <span class="period-result period-result--surplus">+₹8,200</span>
+            <a href="period.html" class="period-row__action">
+              View
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
           </div>
         </div>
-        <div class="env-progress">
-          <div class="env-progress__fill env-progress__fill--normal" id="bar-fuel" style="width:78%"></div>
-        </div>
-        <div class="env-row__footer">
-          <span class="t-mono" id="spent-fuel">₹3,100 spent</span>
-          <span class="t-mono" id="remaining-fuel">₹900 remaining</span>
-        </div>
-      </div>
 
-      <!-- Healthcare -->
-      <div class="env-row" id="row-health" onclick="openSheet('health')">
-        <div class="env-row__top">
-          <div class="env-row__icon" style="background:#CCFBF1;">🏥</div>
-          <div class="env-row__info">
-            <div class="env-row__name">Healthcare</div>
-            <div class="env-row__sublabel">
-              <span class="env-row__pct" id="pct-health">0%</span>
-              <span>of allocated</span>
-            </div>
+        <!-- April 2026 — Surplus -->
+        <div class="period-row" style="animation-delay:80ms;">
+          <div class="period-row__info">
+            <div class="period-row__month">April 2026</div>
+            <div class="period-row__sub">Closed · Apr 1 – Apr 30</div>
           </div>
-          <div class="env-row__alloc-wrap">
-            <span class="env-row__alloc" id="alloc-health">₹3,000</span>
-            <span class="env-row__badge env-row__badge--empty" id="badge-health"></span>
+          <div class="period-row__right">
+            <span class="period-result period-result--surplus">+₹2,500</span>
+            <a href="period.html" class="period-row__action">
+              View
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
           </div>
         </div>
-        <div class="env-progress">
-          <div class="env-progress__fill env-progress__fill--normal" id="bar-health" style="width:0%"></div>
+
+        <!-- March 2026 — Deficit -->
+        <div class="period-row" style="animation-delay:120ms;">
+          <div class="period-row__info">
+            <div class="period-row__month">March 2026</div>
+            <div class="period-row__sub">Closed · Mar 1 – Mar 31</div>
+          </div>
+          <div class="period-row__right">
+            <span class="period-result period-result--deficit">-₹4,100</span>
+            <a href="period.html" class="period-row__action">
+              View
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
+          </div>
         </div>
-        <div class="env-row__footer">
-          <span class="t-mono" id="spent-health">₹0 spent</span>
-          <span class="t-mono" id="remaining-health">₹3,000 remaining</span>
-        </div>
+
+      </div><!-- /past-periods-list -->
+    </div><!-- /view-active -->
+
+    <!-- ── Empty / First Use State ── -->
+    <div id="view-empty" style="display:none;">
+      <div class="empty-state">
+        <div class="empty-state__icon">📋</div>
+        <div class="empty-state__title">No Budget Periods Yet</div>
+        <div class="empty-state__sub">Create your first monthly budget to start allocating your income across envelopes.</div>
+        <button class="btn btn--primary" style="min-width:180px;" onclick="toast('Create Period — BUD-04 coming soon')">
+          + Create First Budget
+        </button>
       </div>
     </div>
 
-    <!-- ── SECTION: Goals & Savings ── -->
-    <div class="env-section" id="section-savings">
-      <div class="env-section__heading">Goals &amp; Savings</div>
+  </div><!-- /page-content -->
 
-      <!-- SIP Investments -->
-      <div class="env-row" id="row-sip" onclick="openSheet('sip')">
-        <div class="env-row__top">
-          <div class="env-row__icon" style="background:#D1FAE5;">💰</div>
-          <div class="env-row__info">
-            <div class="env-row__name">SIP Investments</div>
-            <div class="env-row__sublabel">
-              <span class="env-row__pct" id="pct-sip">100%</span>
-              <span>of allocated</span>
-            </div>
-          </div>
-          <div class="env-row__alloc-wrap">
-            <span class="env-row__alloc" id="alloc-sip">₹20,000</span>
-            <span class="env-row__badge env-row__badge--done" id="badge-sip">✓</span>
-          </div>
-        </div>
-        <div class="env-progress">
-          <div class="env-progress__fill env-progress__fill--done" id="bar-sip" style="width:100%"></div>
-        </div>
-        <div class="env-row__footer">
-          <span class="t-mono" id="spent-sip">₹20,000 spent</span>
-          <span class="t-mono" id="remaining-sip" style="color:var(--success);">₹0 remaining</span>
-        </div>
-      </div>
-
-      <!-- Education -->
-      <div class="env-row" id="row-education" onclick="openSheet('education')">
-        <div class="env-row__top">
-          <div class="env-row__icon" style="background:#EDE9FE;">📚</div>
-          <div class="env-row__info">
-            <div class="env-row__name">Education</div>
-            <div class="env-row__sublabel">
-              <span class="env-row__pct" id="pct-education">0%</span>
-              <span>of allocated</span>
-            </div>
-          </div>
-          <div class="env-row__alloc-wrap">
-            <span class="env-row__alloc" id="alloc-education">₹15,000</span>
-            <span class="env-row__badge env-row__badge--empty" id="badge-education"></span>
-          </div>
-        </div>
-        <div class="env-progress">
-          <div class="env-progress__fill env-progress__fill--normal" id="bar-education" style="width:0%"></div>
-        </div>
-        <div class="env-row__footer">
-          <span class="t-mono" id="spent-education">₹0 spent</span>
-          <span class="t-mono" id="remaining-education">₹15,000 remaining</span>
-        </div>
-      </div>
-
-      <!-- Emergency Fund -->
-      <div class="env-row" id="row-emergency" onclick="openSheet('emergency')">
-        <div class="env-row__top">
-          <div class="env-row__icon" style="background:#FEF9C3;">💸</div>
-          <div class="env-row__info">
-            <div class="env-row__name">Emergency Fund</div>
-            <div class="env-row__sublabel">
-              <span class="env-row__pct" id="pct-emergency">0%</span>
-              <span>of allocated</span>
-            </div>
-          </div>
-          <div class="env-row__alloc-wrap">
-            <span class="env-row__alloc" id="alloc-emergency">₹10,000</span>
-            <span class="env-row__badge env-row__badge--empty" id="badge-emergency"></span>
-          </div>
-        </div>
-        <div class="env-progress">
-          <div class="env-progress__fill env-progress__fill--normal" id="bar-emergency" style="width:0%"></div>
-        </div>
-        <div class="env-row__footer">
-          <span class="t-mono" id="spent-emergency">₹0 spent</span>
-          <span class="t-mono" id="remaining-emergency">₹10,000 remaining</span>
-        </div>
-      </div>
-
-      <!-- Vacation Fund -->
-      <div class="env-row" id="row-vacation" onclick="openSheet('vacation')">
-        <div class="env-row__top">
-          <div class="env-row__icon" style="background:#FFE4E6;">🎉</div>
-          <div class="env-row__info">
-            <div class="env-row__name">Vacation Fund</div>
-            <div class="env-row__sublabel">
-              <span class="env-row__pct" id="pct-vacation">0%</span>
-              <span>of allocated</span>
-            </div>
-          </div>
-          <div class="env-row__alloc-wrap">
-            <span class="env-row__alloc" id="alloc-vacation">₹2,000</span>
-            <span class="env-row__badge env-row__badge--empty" id="badge-vacation"></span>
-          </div>
-        </div>
-        <div class="env-progress">
-          <div class="env-progress__fill env-progress__fill--normal" id="bar-vacation" style="width:0%"></div>
-        </div>
-        <div class="env-row__footer">
-          <span class="t-mono" id="spent-vacation">₹0 spent</span>
-          <span class="t-mono" id="remaining-vacation">₹2,000 remaining</span>
-        </div>
-      </div>
-    </div>
-
-
-  </div>
-  <!-- /page-content -->
+  <!-- ── Toast ── -->
+  <div class="toast" id="toast"></div>
 
   <!-- ═══════════════════════════════════════════
-       FAB (Draft state only)
-  ═══════════════════════════════════════════ -->
-  <button class="fab" id="fab" aria-label="Add envelope">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-    </svg>
-  </button>
-
-  <!-- ═══════════════════════════════════════════
-       BOTTOM NAVIGATION
+       BOTTOM NAV
   ═══════════════════════════════════════════ -->
   <nav class="bottom-nav">
     <a href="../dashboard/index.html" class="nav-tab" aria-label="Dashboard">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-        <polyline points="9 22 9 12 15 12 15 22"/>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+        <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
       </svg>
       <span>Dashboard</span>
     </a>
-    <a href="index.html" class="nav-tab active" aria-label="Budget">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="2" y="7" width="20" height="14" rx="2"/>
-        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
-      </svg>
-      <span>Budget</span>
-    </a>
-    <a href="#" class="nav-tab" aria-label="Transactions">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="8" y1="6" x2="21" y2="6"/>
-        <line x1="8" y1="12" x2="21" y2="12"/>
-        <line x1="8" y1="18" x2="21" y2="18"/>
-        <line x1="3" y1="6" x2="3.01" y2="6"/>
-        <line x1="3" y1="12" x2="3.01" y2="12"/>
-        <line x1="3" y1="18" x2="3.01" y2="18"/>
+    <a href="../transactions/index.html" class="nav-tab" aria-label="Transactions">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 1 0 0 7h5a3.5 3.5 0 1 1 0 7H6"/>
       </svg>
       <span>Transactions</span>
     </a>
-    <a href="#" class="nav-tab" aria-label="Invest">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <a href="index.html" class="nav-tab active" aria-label="Budget">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../investments/index.html" class="nav-tab" aria-label="Invest">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
       </svg>
       <span>Invest</span>
     </a>
-    <a href="#" class="nav-tab" aria-label="Profile">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-        <circle cx="12" cy="7" r="4"/>
+    <a href="../settings/index.html" class="nav-tab" aria-label="More">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
       </svg>
-      <span>Profile</span>
+      <span>More</span>
     </a>
   </nav>
-
-  <!-- ═══════════════════════════════════════════
-       ENVELOPE DETAIL SHEET (BUD-03)
-  ═══════════════════════════════════════════ -->
-  <div class="sheet-backdrop" id="sheet-backdrop"></div>
-  <div class="sheet" id="env-sheet">
-    <div class="sheet__handle"></div>
-    <div class="sheet__header">
-      <div class="sheet-env-icon" id="sheet-env-icon"></div>
-      <span class="sheet__title" id="sheet-env-title">Envelope</span>
-      <button class="sheet__close" id="sheet-close" aria-label="Close">✕</button>
-    </div>
-    <div class="sheet__body">
-
-      <!-- Summary Grid -->
-      <div class="sheet-summary-grid">
-        <div class="sheet-summary-cell">
-          <div class="sheet-summary-cell__label">Allocated</div>
-          <div class="sheet-summary-cell__value" id="sheet-alloc-val" style="color:var(--primary);">₹12,000</div>
-        </div>
-        <div class="sheet-summary-cell">
-          <div class="sheet-summary-cell__label">Spent</div>
-          <div class="sheet-summary-cell__value" id="sheet-spent-val" style="color:var(--text-primary);">₹8,200</div>
-        </div>
-        <div class="sheet-summary-cell">
-          <div class="sheet-summary-cell__label">Remaining</div>
-          <div class="sheet-summary-cell__value" id="sheet-remaining-val" style="color:var(--success);">₹3,800</div>
-        </div>
-      </div>
-
-      <!-- Progress bar (10px) -->
-      <div class="progress-bar progress-bar--thick" style="margin-bottom: var(--sp-5);">
-        <div class="progress-bar__fill" id="sheet-progress-fill" style="width:68%;"></div>
-      </div>
-
-      <!-- Mini Bar Chart -->
-      <div class="mini-chart">
-        <div class="mini-chart__label">Spending · Last 6 Months</div>
-        <div class="mini-chart__svg-wrap">
-          <svg id="sheet-chart" viewBox="0 0 320 100" preserveAspectRatio="xMidYMid meet" style="height:110px;">
-            <!-- Bars rendered by JS -->
-          </svg>
-        </div>
-      </div>
-
-      <!-- Recent Transactions -->
-      <div class="txn-list-title">Recent Transactions</div>
-      <div id="sheet-txns"></div>
-
-    </div>
-    <!-- No footer needed on this sheet — close via X -->
-  </div>
-
-  <!-- ═══════════════════════════════════════════
-       LOCK CONFIRMATION MODAL
-  ═══════════════════════════════════════════ -->
-  <div class="dialog-backdrop" id="lock-modal">
-    <div class="dialog">
-      <div class="dialog__header">
-        <div class="dialog__title">Lock June 2026 Budget?</div>
-      </div>
-      <div class="dialog__body">
-        Once locked, allocated amounts are fixed. Transactions continue recording. You can unlock anytime to adjust.
-      </div>
-      <div class="dialog__footer">
-        <button class="btn btn--ghost btn--sm" id="lock-cancel">Cancel</button>
-        <button class="btn btn--primary btn--sm" id="lock-confirm">Lock Budget</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════════════════════
-       SWEEP PREVIEW SHEET
-  ═══════════════════════════════════════════ -->
-  <div class="sheet-backdrop" id="sweep-backdrop"></div>
-  <div class="sheet" id="sweep-sheet">
-    <div class="sheet__handle"></div>
-    <div class="sheet__header">
-      <span class="sheet__title">Suggested Sweep ✨</span>
-      <button class="sheet__close" id="sweep-close" aria-label="Close">✕</button>
-    </div>
-    <div class="sheet__body">
-      <p style="font-size:13px; color:var(--text-secondary); margin-bottom:var(--sp-4);">
-        Based on your past patterns — review and confirm
-      </p>
-      <table class="sweep-table">
-        <tr>
-          <td><span style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:.06em;">Rule 1</span></td>
-          <td>Top-up Groceries to ₹12,000</td>
-          <td class="rule-arrow">→</td>
-          <td class="rule-amount">+₹8,200</td>
-        </tr>
-        <tr>
-          <td><span style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:.06em;">Rule 2</span></td>
-          <td>Remainder → Emergency Fund</td>
-          <td class="rule-arrow">→</td>
-          <td class="rule-amount">₹0</td>
-        </tr>
-      </table>
-      <div class="sweep-result">
-        <span>✓</span>
-        <span>BALANCED · Unallocated ₹0</span>
-      </div>
-    </div>
-    <div class="sheet__footer">
-      <button class="btn btn--ghost" id="sweep-cancel">Cancel</button>
-      <button class="btn btn--primary" id="sweep-confirm">Apply Sweep</button>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════════════════════
-       ADD ENVELOPE SHEET
-  ═══════════════════════════════════════════ -->
-  <div class="sheet-backdrop" id="add-env-backdrop"></div>
-  <div class="sheet" id="add-env-sheet">
-    <div class="sheet__handle"></div>
-    <div class="sheet__header">
-      <span class="sheet__title">New Envelope</span>
-      <button class="sheet__close" id="ae-close" aria-label="Close">✕</button>
-    </div>
-    <div class="sheet__body">
-      <div class="ae-field">
-        <span class="ae-field__label">Icon</span>
-        <div class="icon-picker" id="icon-picker">
-          <button class="icon-picker__btn selected" data-icon="📦" data-bg="#F1F5F9" style="background:#F1F5F9;">📦</button>
-          <button class="icon-picker__btn" data-icon="🎮" data-bg="#EDE9FE" style="background:#EDE9FE;">🎮</button>
-          <button class="icon-picker__btn" data-icon="🎬" data-bg="#FEE2E2" style="background:#FEE2E2;">🎬</button>
-          <button class="icon-picker__btn" data-icon="✈️" data-bg="#DBEAFE" style="background:#DBEAFE;">✈️</button>
-          <button class="icon-picker__btn" data-icon="🍕" data-bg="#FEF3C7" style="background:#FEF3C7;">🍕</button>
-          <button class="icon-picker__btn" data-icon="☕" data-bg="#CCFBF1" style="background:#CCFBF1;">☕</button>
-          <button class="icon-picker__btn" data-icon="👗" data-bg="#FCE7F3" style="background:#FCE7F3;">👗</button>
-          <button class="icon-picker__btn" data-icon="🐾" data-bg="#D1FAE5" style="background:#D1FAE5;">🐾</button>
-          <button class="icon-picker__btn" data-icon="💊" data-bg="#CCFBF1" style="background:#CCFBF1;">💊</button>
-          <button class="icon-picker__btn" data-icon="🎁" data-bg="#FFE4E6" style="background:#FFE4E6;">🎁</button>
-          <button class="icon-picker__btn" data-icon="🏋️" data-bg="#E0E7FF" style="background:#E0E7FF;">🏋️</button>
-          <button class="icon-picker__btn" data-icon="🎵" data-bg="#FEF9C3" style="background:#FEF9C3;">🎵</button>
-        </div>
-      </div>
-      <div class="ae-field">
-        <span class="ae-field__label">Section</span>
-        <div class="ae-section-picker" id="ae-section-picker">
-          <button class="ae-section-btn selected" data-section="living">Living Expenses</button>
-          <button class="ae-section-btn" data-section="savings">Goals &amp; Savings</button>
-          <button class="ae-section-btn" data-section="committed">Committed</button>
-        </div>
-      </div>
-      <div class="ae-field">
-        <label class="ae-field__label" for="ae-name-input">Name</label>
-        <input class="ae-field__input" id="ae-name-input" type="text"
-               placeholder="e.g. Entertainment, Travel" maxlength="40" autocomplete="off">
-      </div>
-      <div class="ae-field">
-        <label class="ae-field__label" for="ae-amount-input">Allocation (₹)</label>
-        <input class="ae-field__input" id="ae-amount-input" type="text" inputmode="numeric"
-               placeholder="e.g. 5000" maxlength="10" autocomplete="off">
-      </div>
-    </div>
-    <div class="sheet__footer">
-      <button class="btn btn--ghost" id="ae-cancel">Cancel</button>
-      <button class="btn btn--primary" id="ae-confirm">Add Envelope</button>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════════════════════
-       EDIT ALLOCATION SHEET
-  ═══════════════════════════════════════════ -->
-  <div class="sheet-backdrop" id="edit-alloc-backdrop"></div>
-  <div class="sheet" id="edit-alloc-sheet">
-    <div class="sheet__handle"></div>
-    <div class="sheet__header">
-      <div class="sheet-env-icon" id="ea-icon"></div>
-      <span class="sheet__title" id="ea-name">Edit Allocation</span>
-      <button class="sheet__close" id="ea-close" aria-label="Close">✕</button>
-    </div>
-    <div class="sheet__body" style="padding-bottom:0; overflow:hidden;">
-      <div class="ea-display" id="ea-display">₹0</div>
-      <div class="ea-preview" id="ea-preview"></div>
-      <div class="numpad">
-        <button class="numpad__key" onclick="numpadPress('7')">7</button>
-        <button class="numpad__key" onclick="numpadPress('8')">8</button>
-        <button class="numpad__key" onclick="numpadPress('9')">9</button>
-        <button class="numpad__key" onclick="numpadPress('4')">4</button>
-        <button class="numpad__key" onclick="numpadPress('5')">5</button>
-        <button class="numpad__key" onclick="numpadPress('6')">6</button>
-        <button class="numpad__key" onclick="numpadPress('1')">1</button>
-        <button class="numpad__key" onclick="numpadPress('2')">2</button>
-        <button class="numpad__key" onclick="numpadPress('3')">3</button>
-        <button class="numpad__key numpad__key--action" onclick="numpadClear()">C</button>
-        <button class="numpad__key" onclick="numpadPress('0')">0</button>
-        <button class="numpad__key numpad__key--action" onclick="numpadBackspace()">⌫</button>
-      </div>
-    </div>
-    <div class="sheet__footer">
-      <button class="btn btn--ghost" id="ea-cancel">Cancel</button>
-      <button class="btn btn--primary" id="ea-confirm">Confirm</button>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════════════════════
-       TOAST CONTAINER
-  ═══════════════════════════════════════════ -->
-  <div class="toast-container" id="toast-container"></div>
 
 </div><!-- /screen -->
 </div><!-- /phone-frame -->
 
 <script>
-/* ─────────────────────────────────────────────
-   AG SHARED OBJECT
-───────────────────────────────────────────── */
-const AG = {
-  showToast(msg, type = 'info') {
-    const c = document.getElementById('toast-container');
-    const t = document.createElement('div');
-    t.className = `toast toast--${type}`;
-    t.textContent = msg;
-    c.appendChild(t);
-    setTimeout(() => t.remove(), 3500);
-  },
-  registerDemoBar(states) {
-    document.querySelectorAll('.demo-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.demo-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const fn = states[btn.dataset.state];
-        if (fn) fn();
+  /* ── Theme ── */
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+
+  /* Also wire data-theme-toggle buttons */
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => {
+        el.textContent = next === 'dark' ? '☀️' : '🌙';
       });
     });
-    const first = document.querySelector('.demo-btn.active');
-    if (first && states[first.dataset.state]) states[first.dataset.state]();
-  }
-};
-
-/* ─────────────────────────────────────────────
-   ENVELOPE DATA (per state)
-───────────────────────────────────────────── */
-const STATES = {
-  locked: {
-    allocBar: { cls: 'alloc-bar--balanced', chipCls: 'chip--balanced', chipText: '✓ BALANCED', text: 'Unallocated: <strong>₹0</strong> · of <strong>₹1,20,000</strong> income' },
-    topBarActions: `
-      <button class="btn--sm-ghost" id="unlock-btn">Unlock</button>
-    `,
-    warning: false,
-    fab: false,
-    totalAllocVal: '₹1,20,000', totalSpentVal: '₹78,950', totalRemainingVal: '₹41,050', totalSpentPct: 65.8,
-    envelopes: {
-      housing:   { alloc: '₹38,500', pct: '100%', barW: '100', barCls: 'env-progress__fill--done', spent: '₹38,500 spent', remaining: '₹0 remaining', remainingColor: 'var(--success)', badge: 'done', editable: false, footerOver: false },
-      insurance: { alloc: '₹2,500',  pct: '0%',   barW: '0',   barCls: 'env-progress__fill--normal', spent: '₹0 spent',    remaining: '₹2,500 remaining', remainingColor: '', badge: 'none', editable: false, footerOver: false },
-      groceries: { alloc: '₹12,000', pct: '68%',  barW: '68',  barCls: 'env-progress__fill--normal', spent: '₹8,200 spent', remaining: '₹3,800 remaining', remainingColor: '', badge: 'none', editable: false, footerOver: false },
-      dining:    { alloc: '₹6,000',  pct: '75%',  barW: '75',  barCls: 'env-progress__fill--normal', spent: '₹4,500 spent', remaining: '₹1,500 remaining', remainingColor: '', badge: 'none', editable: false, footerOver: false },
-      utilities: { alloc: '₹5,000',  pct: '56%',  barW: '56',  barCls: 'env-progress__fill--normal', spent: '₹2,800 spent', remaining: '₹2,200 remaining', remainingColor: '', badge: 'none', editable: false, footerOver: false },
-      mobile:    { alloc: '₹2,000',  pct: '93%',  barW: '93',  barCls: 'env-progress__fill--warn',   spent: '₹1,850 spent', remaining: '₹150 remaining',  remainingColor: '', badge: 'warn', editable: false, footerOver: false },
-      fuel:      { alloc: '₹4,000',  pct: '78%',  barW: '78',  barCls: 'env-progress__fill--normal', spent: '₹3,100 spent', remaining: '₹900 remaining',   remainingColor: '', badge: 'none', editable: false, footerOver: false },
-      health:    { alloc: '₹3,000',  pct: '0%',   barW: '0',   barCls: 'env-progress__fill--normal', spent: '₹0 spent',     remaining: '₹3,000 remaining', remainingColor: '', badge: 'none', editable: false, footerOver: false },
-      sip:       { alloc: '₹20,000', pct: '100%', barW: '100', barCls: 'env-progress__fill--done',   spent: '₹20,000 spent',remaining: '₹0 remaining',     remainingColor: 'var(--success)', badge: 'done', editable: false, footerOver: false },
-      education: { alloc: '₹15,000', pct: '0%',   barW: '0',   barCls: 'env-progress__fill--normal', spent: '₹0 spent',     remaining: '₹15,000 remaining',remainingColor: '', badge: 'none', editable: false, footerOver: false },
-      emergency: { alloc: '₹10,000', pct: '0%',   barW: '0',   barCls: 'env-progress__fill--normal', spent: '₹0 spent',     remaining: '₹10,000 remaining',remainingColor: '', badge: 'none', editable: false, footerOver: false },
-      vacation:  { alloc: '₹2,000',  pct: '0%',   barW: '0',   barCls: 'env-progress__fill--normal', spent: '₹0 spent',     remaining: '₹2,000 remaining', remainingColor: '', badge: 'none', editable: false, footerOver: false },
-    }
-  },
-  draft: {
-    allocBar: { cls: 'alloc-bar--unallocated', chipCls: 'chip--unallocated', chipText: '⚠ UNALLOCATED', text: '<strong>₹8,200</strong> remaining to allocate' },
-    topBarActions: `
-      <button class="btn--sm-ghost" id="sweep-btn" style="margin-right:4px;">Sweep ✨</button>
-      <button class="btn--sm-ghost" id="lock-btn" disabled style="opacity:.4; cursor:not-allowed;">Lock</button>
-    `,
-    warning: false,
-    fab: true,
-    totalAllocVal: '₹1,11,800', totalSpentVal: '₹78,950', totalRemainingVal: '₹32,850', totalSpentPct: 70.6,
-    envelopes: {
-      housing:   { alloc: '₹38,500', pct: '100%', barW: '100', barCls: 'env-progress__fill--done',   spent: '₹38,500 spent', remaining: '₹0 remaining',      remainingColor: 'var(--success)', badge: 'done', editable: false, footerOver: false },
-      insurance: { alloc: '₹2,500',  pct: '0%',   barW: '0',   barCls: 'env-progress__fill--normal', spent: '₹0 spent',      remaining: '₹2,500 remaining',  remainingColor: '', badge: 'none', editable: false, footerOver: false },
-      groceries: { alloc: '₹3,800',  pct: '216%', barW: '100', barCls: 'env-progress__fill--over',   spent: '₹8,200 spent',  remaining: '₹4,400 over budget',remainingColor: 'var(--error)',   badge: 'over', editable: true,  footerOver: true },
-      dining:    { alloc: '₹6,000',  pct: '75%',  barW: '75',  barCls: 'env-progress__fill--normal', spent: '₹4,500 spent',  remaining: '₹1,500 remaining',  remainingColor: '', badge: 'none', editable: false, footerOver: false },
-      utilities: { alloc: '₹5,000',  pct: '56%',  barW: '56',  barCls: 'env-progress__fill--normal', spent: '₹2,800 spent',  remaining: '₹2,200 remaining',  remainingColor: '', badge: 'none', editable: false, footerOver: false },
-      mobile:    { alloc: '₹2,000',  pct: '93%',  barW: '93',  barCls: 'env-progress__fill--warn',   spent: '₹1,850 spent',  remaining: '₹150 remaining',    remainingColor: '', badge: 'warn', editable: false, footerOver: false },
-      fuel:      { alloc: '₹4,000',  pct: '78%',  barW: '78',  barCls: 'env-progress__fill--normal', spent: '₹3,100 spent',  remaining: '₹900 remaining',    remainingColor: '', badge: 'none', editable: false, footerOver: false },
-      health:    { alloc: '₹3,000',  pct: '0%',   barW: '0',   barCls: 'env-progress__fill--normal', spent: '₹0 spent',      remaining: '₹3,000 remaining',  remainingColor: '', badge: 'none', editable: false, footerOver: false },
-      sip:       { alloc: '₹20,000', pct: '100%', barW: '100', barCls: 'env-progress__fill--done',   spent: '₹20,000 spent', remaining: '₹0 remaining',      remainingColor: 'var(--success)', badge: 'done', editable: false, footerOver: false },
-      education: { alloc: '₹6,800',  pct: '0%',   barW: '0',   barCls: 'env-progress__fill--normal', spent: '₹0 spent',      remaining: '₹6,800 remaining',  remainingColor: '', badge: 'none', editable: true,  footerOver: false },
-      emergency: { alloc: '₹10,000', pct: '0%',   barW: '0',   barCls: 'env-progress__fill--normal', spent: '₹0 spent',      remaining: '₹10,000 remaining', remainingColor: '', badge: 'none', editable: false, footerOver: false },
-      vacation:  { alloc: '₹2,000',  pct: '0%',   barW: '0',   barCls: 'env-progress__fill--normal', spent: '₹0 spent',      remaining: '₹2,000 remaining',  remainingColor: '', badge: 'none', editable: false, footerOver: false },
-    }
-  },
-  over: {
-    allocBar: { cls: 'alloc-bar--balanced', chipCls: 'chip--balanced', chipText: '✓ BALANCED', text: 'Unallocated: <strong>₹0</strong> · of <strong>₹1,20,000</strong> income' },
-    topBarActions: `
-      <button class="btn--sm-ghost" id="unlock-btn">Unlock</button>
-    `,
-    warning: true,
-    fab: false,
-    totalAllocVal: '₹1,20,000', totalSpentVal: '₹1,01,650', totalRemainingVal: '₹18,350', totalSpentPct: 84.7,
-    envelopes: {
-      housing:   { alloc: '₹38,500', pct: '100%',  barW: '100', barCls: 'env-progress__fill--done',   spent: '₹38,500 spent', remaining: '₹0 remaining',      remainingColor: 'var(--success)', badge: 'done', editable: false, footerOver: false, rowOver: false },
-      insurance: { alloc: '₹2,500',  pct: '0%',    barW: '0',   barCls: 'env-progress__fill--normal', spent: '₹0 spent',      remaining: '₹2,500 remaining',  remainingColor: '', badge: 'none', editable: false, footerOver: false, rowOver: false },
-      groceries: { alloc: '₹12,000', pct: '112%',  barW: '100', barCls: 'env-progress__fill--over',   spent: '₹13,500 spent', remaining: '₹1,500 over budget',remainingColor: 'var(--error)',   badge: 'over', editable: false, footerOver: true, rowOver: true },
-      dining:    { alloc: '₹6,000',  pct: '120%',  barW: '100', barCls: 'env-progress__fill--over',   spent: '₹7,200 spent',  remaining: '₹1,200 over budget',remainingColor: 'var(--error)',   badge: 'over', editable: false, footerOver: true, rowOver: true },
-      utilities: { alloc: '₹5,000',  pct: '56%',   barW: '56',  barCls: 'env-progress__fill--normal', spent: '₹2,800 spent',  remaining: '₹2,200 remaining',  remainingColor: '', badge: 'none', editable: false, footerOver: false, rowOver: false },
-      mobile:    { alloc: '₹2,000',  pct: '93%',   barW: '93',  barCls: 'env-progress__fill--warn',   spent: '₹1,850 spent',  remaining: '₹150 remaining',    remainingColor: '', badge: 'warn', editable: false, footerOver: false, rowOver: false },
-      fuel:      { alloc: '₹4,000',  pct: '78%',   barW: '78',  barCls: 'env-progress__fill--normal', spent: '₹3,100 spent',  remaining: '₹900 remaining',    remainingColor: '', badge: 'none', editable: false, footerOver: false, rowOver: false },
-      health:    { alloc: '₹3,000',  pct: '0%',    barW: '0',   barCls: 'env-progress__fill--normal', spent: '₹0 spent',      remaining: '₹3,000 remaining',  remainingColor: '', badge: 'none', editable: false, footerOver: false, rowOver: false },
-      sip:       { alloc: '₹20,000', pct: '100%',  barW: '100', barCls: 'env-progress__fill--done',   spent: '₹20,000 spent', remaining: '₹0 remaining',      remainingColor: 'var(--success)', badge: 'done', editable: false, footerOver: false, rowOver: false },
-      education: { alloc: '₹15,000', pct: '0%',    barW: '0',   barCls: 'env-progress__fill--normal', spent: '₹0 spent',      remaining: '₹15,000 remaining', remainingColor: '', badge: 'none', editable: false, footerOver: false, rowOver: false },
-      emergency: { alloc: '₹10,000', pct: '0%',    barW: '0',   barCls: 'env-progress__fill--normal', spent: '₹0 spent',      remaining: '₹10,000 remaining', remainingColor: '', badge: 'none', editable: false, footerOver: false, rowOver: false },
-      vacation:  { alloc: '₹2,000',  pct: '0%',    barW: '0',   barCls: 'env-progress__fill--normal', spent: '₹0 spent',      remaining: '₹2,000 remaining',  remainingColor: '', badge: 'none', editable: false, footerOver: false, rowOver: false },
-    }
-  }
-};
-
-/* ─────────────────────────────────────────────
-   ENVELOPE SHEET DATA
-───────────────────────────────────────────── */
-const SHEET_DATA = {
-  housing: {
-    icon: '🏠', iconBg: '#DBEAFE', name: 'Housing EMI',
-    alloc: '₹38,500', spent: '₹38,500', remaining: '₹0',
-    remainingColor: 'var(--success)', barW: 100, barCls: 'progress-bar__fill--success',
-    chartHeights: [72, 85, 90, 100, 100, 100],
-    txns: [
-      { date: '01 Jun', payee: 'HDFC Home Loan EMI', amount: '−₹38,500', ml: null }
-    ]
-  },
-  insurance: {
-    icon: '🛡️', iconBg: '#FEE2E2', name: 'Insurance',
-    alloc: '₹2,500', spent: '₹0', remaining: '₹2,500',
-    remainingColor: 'var(--text-secondary)', barW: 0, barCls: '',
-    chartHeights: [100, 100, 100, 100, 100, 0],
-    txns: [
-      { date: '—', payee: 'No transactions this month', amount: '', ml: null }
-    ]
-  },
-  groceries: {
-    icon: '🛒', iconBg: '#D1FAE5', name: 'Groceries',
-    alloc: '₹12,000', spent: '₹8,200', remaining: '₹3,800',
-    remainingColor: 'var(--success)', barW: 68, barCls: '',
-    chartHeights: [65, 72, 80, 90, 95, 68],
-    txns: [
-      { date: '14 Jun', payee: 'BigBasket Online',          amount: '−₹2,400', ml: null },
-      { date: '11 Jun', payee: 'D-Mart',                    amount: '−₹3,100', ml: 'ML: Groceries ✓' },
-      { date: '08 Jun', payee: 'Swiggy Instamart',          amount: '−₹1,450', ml: null },
-      { date: '03 Jun', payee: 'Kirana Store',              amount: '−₹1,250', ml: null }
-    ]
-  },
-  dining: {
-    icon: '🍽️', iconBg: '#FEF3C7', name: 'Dining Out',
-    alloc: '₹6,000', spent: '₹4,500', remaining: '₹1,500',
-    remainingColor: 'var(--success)', barW: 75, barCls: '',
-    chartHeights: [55, 60, 70, 80, 85, 75],
-    txns: [
-      { date: '18 Jun', payee: 'Barbeque Nation',           amount: '−₹1,800', ml: null },
-      { date: '13 Jun', payee: 'Swiggy Order',              amount: '−₹950',   ml: 'ML: Food Delivery ✓' },
-      { date: '09 Jun', payee: 'Chai Point',                amount: '−₹480',   ml: null },
-      { date: '05 Jun', payee: 'Zomato Order',              amount: '−₹1,270', ml: 'ML: Food Delivery ✓' }
-    ]
-  },
-  utilities: {
-    icon: '⚡', iconBg: '#E0E7FF', name: 'Utilities',
-    alloc: '₹5,000', spent: '₹2,800', remaining: '₹2,200',
-    remainingColor: 'var(--success)', barW: 56, barCls: '',
-    chartHeights: [48, 55, 60, 65, 58, 56],
-    txns: [
-      { date: '10 Jun', payee: 'MSEDCL Electricity Bill',   amount: '−₹1,850', ml: null },
-      { date: '07 Jun', payee: 'Piped Gas — Mahanagar',     amount: '−₹950',   ml: null }
-    ]
-  },
-  mobile: {
-    icon: '📱', iconBg: '#FCE7F3', name: 'Mobile & Internet',
-    alloc: '₹2,000', spent: '₹1,850', remaining: '₹150',
-    remainingColor: 'var(--warning)', barW: 93, barCls: 'progress-bar__fill--warning',
-    chartHeights: [90, 92, 95, 93, 95, 93],
-    txns: [
-      { date: '05 Jun', payee: 'Jio Recharge ₹999',         amount: '−₹999',   ml: null },
-      { date: '05 Jun', payee: 'Airtel Broadband',          amount: '−₹851',   ml: null }
-    ]
-  },
-  fuel: {
-    icon: '🚗', iconBg: '#F1F5F9', name: 'Fuel & Transport',
-    alloc: '₹4,000', spent: '₹3,100', remaining: '₹900',
-    remainingColor: 'var(--success)', barW: 78, barCls: '',
-    chartHeights: [60, 65, 72, 75, 80, 78],
-    txns: [
-      { date: '19 Jun', payee: 'HP Petrol Station',         amount: '−₹1,200', ml: null },
-      { date: '15 Jun', payee: 'Uber Rides',                amount: '−₹850',   ml: 'ML: Transport ✓' },
-      { date: '10 Jun', payee: 'IOC Petrol Station',        amount: '−₹1,050', ml: null }
-    ]
-  },
-  health: {
-    icon: '🏥', iconBg: '#CCFBF1', name: 'Healthcare',
-    alloc: '₹3,000', spent: '₹0', remaining: '₹3,000',
-    remainingColor: 'var(--text-secondary)', barW: 0, barCls: '',
-    chartHeights: [40, 0, 60, 30, 0, 0],
-    txns: [
-      { date: '—', payee: 'No transactions this month', amount: '', ml: null }
-    ]
-  },
-  sip: {
-    icon: '💰', iconBg: '#D1FAE5', name: 'SIP Investments',
-    alloc: '₹20,000', spent: '₹20,000', remaining: '₹0',
-    remainingColor: 'var(--success)', barW: 100, barCls: 'progress-bar__fill--success',
-    chartHeights: [100, 100, 100, 100, 100, 100],
-    txns: [
-      { date: '01 Jun', payee: 'Mirae Asset Flexi Cap',     amount: '−₹10,000', ml: null },
-      { date: '01 Jun', payee: 'Axis Bluechip Fund',        amount: '−₹5,000',  ml: null },
-      { date: '01 Jun', payee: 'SBI Nifty 50 Index',        amount: '−₹5,000',  ml: null }
-    ]
-  },
-  education: {
-    icon: '📚', iconBg: '#EDE9FE', name: 'Education',
-    alloc: '₹15,000', spent: '₹0', remaining: '₹15,000',
-    remainingColor: 'var(--text-secondary)', barW: 0, barCls: '',
-    chartHeights: [70, 75, 80, 0, 0, 0],
-    txns: [
-      { date: '—', payee: 'No transactions this month', amount: '', ml: null }
-    ]
-  },
-  emergency: {
-    icon: '💸', iconBg: '#FEF9C3', name: 'Emergency Fund',
-    alloc: '₹10,000', spent: '₹0', remaining: '₹10,000',
-    remainingColor: 'var(--text-secondary)', barW: 0, barCls: '',
-    chartHeights: [80, 100, 80, 100, 0, 0],
-    txns: [
-      { date: '—', payee: 'No transactions this month', amount: '', ml: null }
-    ]
-  },
-  vacation: {
-    icon: '🎉', iconBg: '#FFE4E6', name: 'Vacation Fund',
-    alloc: '₹2,000', spent: '₹0', remaining: '₹2,000',
-    remainingColor: 'var(--text-secondary)', barW: 0, barCls: '',
-    chartHeights: [45, 50, 60, 70, 0, 0],
-    txns: [
-      { date: '—', payee: 'No transactions this month', amount: '', ml: null }
-    ]
-  }
-};
-
-/* ─────────────────────────────────────────────
-   APPLY STATE
-───────────────────────────────────────────── */
-function applyState(stateKey) {
-  const state = STATES[stateKey];
-  if (!state) return;
-  currentStateKey = stateKey;
-  if (stateKey === 'draft') initAllocState();
-
-  // Alloc bar
-  const allocBar = document.getElementById('alloc-bar');
-  allocBar.className = 'alloc-bar ' + state.allocBar.cls;
-  const chip = document.getElementById('alloc-chip');
-  chip.className = 'chip ' + state.allocBar.chipCls;
-  chip.textContent = state.allocBar.chipText;
-  document.getElementById('alloc-text').innerHTML = state.allocBar.text;
-
-  // Top bar actions
-  document.getElementById('top-bar-page-actions').innerHTML = state.topBarActions;
-
-  // Wire up unlock / lock / sweep buttons after injection
-  const unlockBtn = document.getElementById('unlock-btn');
-  if (unlockBtn) {
-    unlockBtn.addEventListener('click', () => {
-      AG.showToast('Budget unlocked — you can now edit allocations', 'info');
-      document.querySelectorAll('.demo-btn').forEach(b => b.classList.remove('active'));
-      document.querySelector('[data-state="draft"]').classList.add('active');
-      applyState('draft');
-    });
-  }
-  const lockBtn = document.getElementById('lock-btn');
-  if (lockBtn) {
-    lockBtn.addEventListener('click', openLockModal);
-  }
-  const sweepBtn = document.getElementById('sweep-btn');
-  if (sweepBtn) {
-    sweepBtn.addEventListener('click', openSweepSheet);
-  }
-
-  // Warning banner
-  const banner = document.getElementById('warning-banner');
-  banner.classList.toggle('visible', !!state.warning);
-
-  // FAB
-  const fab = document.getElementById('fab');
-  fab.classList.toggle('visible', !!state.fab);
-
-  // Total footer card
-  document.getElementById('total-alloc-val').textContent     = state.totalAllocVal;
-  document.getElementById('total-spent-val').textContent     = state.totalSpentVal;
-  document.getElementById('total-remaining-val').textContent = state.totalRemainingVal;
-  document.getElementById('total-bar-fill').style.width      = state.totalSpentPct + '%';
-  document.getElementById('total-bar-pct').textContent       = state.totalSpentPct + '% spent';
-
-  // Per-envelope updates
-  const envKeys = ['housing','insurance','groceries','dining','utilities','mobile','fuel','health','sip','education','emergency','vacation'];
-  envKeys.forEach(key => {
-    const d = state.envelopes[key];
-    if (!d) return;
-
-    // Alloc
-    const allocEl = document.getElementById('alloc-' + key);
-    if (allocEl) {
-      allocEl.textContent = d.alloc;
-      allocEl.className = 'env-row__alloc' + (d.editable ? ' env-row__alloc--editable' : '');
-    }
-
-    // Pct
-    const pctEl = document.getElementById('pct-' + key);
-    if (pctEl) pctEl.textContent = d.pct;
-
-    // Progress bar
-    const barEl = document.getElementById('bar-' + key);
-    if (barEl) {
-      barEl.style.width = Math.min(100, parseInt(d.barW)) + '%';
-      barEl.className = 'env-progress__fill ' + d.barCls;
-    }
-
-    // Spent
-    const spentEl = document.getElementById('spent-' + key);
-    if (spentEl) spentEl.textContent = d.spent;
-
-    // Remaining
-    const remEl = document.getElementById('remaining-' + key);
-    if (remEl) {
-      remEl.textContent = d.remaining;
-      remEl.style.color = d.remainingColor || '';
-      remEl.style.fontWeight = d.footerOver ? '700' : '';
-    }
-
-    // Badge
-    const badgeEl = document.getElementById('badge-' + key);
-    if (badgeEl) {
-      badgeEl.className = 'env-row__badge';
-      if (d.badge === 'done') { badgeEl.className += ' env-row__badge--done'; badgeEl.textContent = '✓'; }
-      else if (d.badge === 'warn') { badgeEl.className += ' env-row__badge--warn'; badgeEl.textContent = '⚠'; }
-      else if (d.badge === 'over') { badgeEl.className += ' env-row__badge--over'; badgeEl.textContent = '🔥'; }
-      else { badgeEl.className += ' env-row__badge--empty'; badgeEl.textContent = ''; }
-    }
-
-    // Row background for over-budget
-    const rowEl = document.getElementById('row-' + key);
-    if (rowEl) {
-      rowEl.classList.toggle('env-row--over', !!(d.rowOver));
-    }
-  });
-}
-
-/* ─────────────────────────────────────────────
-   ENVELOPE DETAIL SHEET
-───────────────────────────────────────────── */
-function openSheet(envKey) {
-  const data = SHEET_DATA[envKey];
-  if (!data) return;
-
-  // Header
-  const iconEl = document.getElementById('sheet-env-icon');
-  iconEl.textContent = data.icon;
-  iconEl.style.background = data.iconBg;
-  document.getElementById('sheet-env-title').textContent = data.name;
-
-  // Summary grid
-  document.getElementById('sheet-alloc-val').textContent = data.alloc;
-  document.getElementById('sheet-spent-val').textContent = data.spent;
-  const remEl = document.getElementById('sheet-remaining-val');
-  remEl.textContent = data.remaining;
-  remEl.style.color = data.remainingColor || 'var(--success)';
-
-  // Progress bar
-  const fill = document.getElementById('sheet-progress-fill');
-  fill.style.width = Math.min(100, data.barW) + '%';
-  fill.className = 'progress-bar__fill ' + (data.barCls || '');
-
-  // Mini bar chart
-  renderMiniChart(data.chartHeights, data.barW);
-
-  // Transactions
-  renderTxns(data.txns);
-
-  // Open
-  document.getElementById('sheet-backdrop').classList.add('open');
-  document.getElementById('env-sheet').classList.add('open');
-}
-
-function closeSheet() {
-  document.getElementById('sheet-backdrop').classList.remove('open');
-  document.getElementById('env-sheet').classList.remove('open');
-}
-
-function renderMiniChart(heights, currentPct) {
-  const svg = document.getElementById('sheet-chart');
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-  const W = 320, H = 100;
-  const barW = 32, gap = (W - months.length * barW) / (months.length + 1);
-  const maxBarH = 72; // leave room for labels
-  const baseY = 88;   // bottom of chart area
-
-  let html = '';
-
-  // Dashed ceiling line at allocated (normalize to maxBarH)
-  const ceilY = baseY - maxBarH;
-  html += `<line x1="0" y1="${ceilY}" x2="${W}" y2="${ceilY}" stroke="var(--primary)" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.5"/>`;
-  html += `<text x="${W - 4}" y="${ceilY - 4}" text-anchor="end" font-size="9" fill="var(--primary)" font-family="Inter,sans-serif" opacity="0.7">Budget ceiling</text>`;
-
-  months.forEach((m, i) => {
-    const x = gap + i * (barW + gap);
-    const h = (heights[i] / 100) * maxBarH;
-    const y = baseY - h;
-    const isOver = heights[i] > 100;
-    const isCurrent = i === months.length - 1;
-    const fillStyle = isOver
-      ? 'fill:var(--error);'
-      : isCurrent
-        ? 'fill:url(#chartGrad);'
-        : 'fill:var(--border-strong);';
-
-    html += `<rect x="${x.toFixed(1)}" y="${Math.max(ceilY, y).toFixed(1)}" width="${barW}" height="${Math.min(h, maxBarH).toFixed(1)}" rx="4" style="${fillStyle}" opacity="${isCurrent ? 1 : 0.6}"/>`;
-    html += `<text x="${(x + barW/2).toFixed(1)}" y="${(baseY + 10).toFixed(1)}" text-anchor="middle" font-size="9" fill="var(--text-muted)" font-family="Inter,sans-serif">${m}</text>`;
   });
 
-  // Gradient def
-  html = `<defs>
-    <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#0D9488"/>
-      <stop offset="100%" stop-color="#14B8A6"/>
-    </linearGradient>
-  </defs>` + html;
-
-  svg.innerHTML = html;
-}
-
-function renderTxns(txns) {
-  const container = document.getElementById('sheet-txns');
-  container.innerHTML = txns.map(t => {
-    const mlChip = t.ml ? `<span class="ml-chip">${t.ml}</span>` : '';
-    const amountHtml = t.amount ? `<span class="txn-compact-row__amount">${t.amount}</span>` : '';
-    return `
-      <div class="txn-compact-row">
-        <div class="txn-compact-row__body">
-          <div class="txn-compact-row__payee">
-            <span>${t.payee}</span>
-            ${mlChip}
-          </div>
-          <div class="txn-compact-row__date">${t.date}</div>
-        </div>
-        ${amountHtml}
-      </div>
-    `;
-  }).join('');
-}
-
-/* ─────────────────────────────────────────────
-   LOCK MODAL
-───────────────────────────────────────────── */
-function openLockModal() {
-  document.getElementById('lock-modal').classList.add('open');
-}
-function closeLockModal() {
-  document.getElementById('lock-modal').classList.remove('open');
-}
-
-/* ─────────────────────────────────────────────
-   SWEEP SHEET
-───────────────────────────────────────────── */
-function openSweepSheet() {
-  document.getElementById('sweep-backdrop').classList.add('open');
-  document.getElementById('sweep-sheet').classList.add('open');
-}
-function closeSweepSheet() {
-  document.getElementById('sweep-backdrop').classList.remove('open');
-  document.getElementById('sweep-sheet').classList.remove('open');
-}
-
-/* ─────────────────────────────────────────────
-   THEME TOGGLE
-───────────────────────────────────────────── */
-document.getElementById('theme-toggle').addEventListener('click', () => {
-  const html = document.documentElement;
-  const isDark = html.getAttribute('data-theme') === 'dark';
-  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
-  document.getElementById('theme-icon').textContent = isDark ? '🌙' : '☀️';
-});
-
-/* ─────────────────────────────────────────────
-   EVENT WIRING
-───────────────────────────────────────────── */
-// Sheet close
-document.getElementById('sheet-close').addEventListener('click', closeSheet);
-document.getElementById('sheet-backdrop').addEventListener('click', closeSheet);
-
-// Lock modal
-document.getElementById('lock-cancel').addEventListener('click', closeLockModal);
-document.getElementById('lock-confirm').addEventListener('click', () => {
-  closeLockModal();
-  document.querySelectorAll('.demo-btn').forEach(b => b.classList.remove('active'));
-  document.querySelector('[data-state="locked"]').classList.add('active');
-  applyState('locked');
-  AG.showToast('Budget locked successfully', 'success');
-});
-
-// Sweep sheet
-document.getElementById('sweep-close').addEventListener('click', closeSweepSheet);
-document.getElementById('sweep-backdrop').addEventListener('click', closeSweepSheet);
-document.getElementById('sweep-cancel').addEventListener('click', closeSweepSheet);
-document.getElementById('sweep-confirm').addEventListener('click', () => {
-  closeSweepSheet();
-  document.querySelectorAll('.demo-btn').forEach(b => b.classList.remove('active'));
-  document.querySelector('[data-state="locked"]').classList.add('active');
-  applyState('locked');
-  AG.showToast('Sweep applied — budget is now balanced', 'success');
-});
-
-// FAB
-document.getElementById('fab').addEventListener('click', openAddEnvelopeSheet);
-
-/* ─────────────────────────────────────────────
-   EDIT / ADD ALLOCATION — shared state
-───────────────────────────────────────────── */
-const INCOME_PAISE = 12000000; // ₹1,20,000
-const ENV_KEYS = ['housing','insurance','groceries','dining','utilities','mobile','fuel','health','sip','education','emergency','vacation'];
-let allocState = {};
-let currentEditKey = null;
-let editBuffer = '0';
-let currentStateKey = 'locked';
-
-function parsePaise(str) {
-  return Math.round(parseFloat(str.replace(/[₹,\s]/g, '')) * 100);
-}
-function fmtINR(paise) {
-  return '₹' + Math.round(Math.abs(paise) / 100).toLocaleString('en-IN');
-}
-function initAllocState() {
-  const env = STATES.draft.envelopes;
-  ENV_KEYS.filter(k => env[k]).forEach(k => { allocState[k] = parsePaise(env[k].alloc); });
-}
-function totalAllocPaise(excludeKey) {
-  return ENV_KEYS.filter(k => k !== excludeKey).reduce((s, k) => s + (allocState[k] || 0), 0);
-}
-
-// Shared: update alloc bar + lock button after any allocation change
-function recalcAllocBar() {
-  const totalAlloc = ENV_KEYS.reduce((s, k) => s + (allocState[k] || 0), 0);
-  const unalloc = INCOME_PAISE - totalAlloc;
-  const allocBar  = document.getElementById('alloc-bar');
-  const chip      = document.getElementById('alloc-chip');
-  const allocText = document.getElementById('alloc-text');
-  const lockBtn   = document.getElementById('lock-btn');
-
-  if (unalloc > 0) {
-    allocBar.className = 'alloc-bar alloc-bar--unallocated';
-    chip.className = 'chip chip--unallocated';
-    chip.textContent = '⚠ UNALLOCATED';
-    allocText.innerHTML = `<strong>${fmtINR(unalloc)}</strong> remaining to allocate`;
-    if (lockBtn) { lockBtn.disabled = true; lockBtn.style.opacity = '.4'; lockBtn.style.cursor = 'not-allowed'; }
-  } else if (unalloc === 0) {
-    allocBar.className = 'alloc-bar alloc-bar--balanced';
-    chip.className = 'chip chip--balanced';
-    chip.textContent = '✓ BALANCED';
-    allocText.innerHTML = 'Unallocated: <strong>₹0</strong> · of <strong>₹1,20,000</strong> income';
-    if (lockBtn) { lockBtn.disabled = false; lockBtn.style.opacity = ''; lockBtn.style.cursor = ''; }
-  } else {
-    allocBar.className = 'alloc-bar alloc-bar--over';
-    chip.className = 'chip chip--error';
-    chip.textContent = '✗ OVER';
-    allocText.innerHTML = `<strong>${fmtINR(-unalloc)}</strong> over-allocated`;
-    if (lockBtn) { lockBtn.disabled = true; lockBtn.style.opacity = '.4'; lockBtn.style.cursor = 'not-allowed'; }
-  }
-}
-
-/* ─────────────────────────────────────────────
-   EDIT ALLOC (numpad sheet)
-───────────────────────────────────────────── */
-function openEditAlloc(key) {
-  const sd = SHEET_DATA[key];
-  if (!sd) return;
-  currentEditKey = key;
-  editBuffer = String(Math.round((allocState[key] || 0) / 100));
-  const iconEl = document.getElementById('ea-icon');
-  iconEl.textContent = sd.icon;
-  iconEl.style.background = sd.iconBg;
-  document.getElementById('ea-name').textContent = sd.name;
-  updateEditDisplay();
-  document.getElementById('edit-alloc-backdrop').classList.add('open');
-  document.getElementById('edit-alloc-sheet').classList.add('open');
-}
-function closeEditAllocSheet() {
-  document.getElementById('edit-alloc-backdrop').classList.remove('open');
-  document.getElementById('edit-alloc-sheet').classList.remove('open');
-  currentEditKey = null;
-  editBuffer = '0';
-}
-function numpadPress(d) {
-  if (editBuffer === '0') { editBuffer = d; }
-  else if (editBuffer.length < 8) { editBuffer += d; }
-  updateEditDisplay();
-}
-function numpadBackspace() {
-  editBuffer = editBuffer.length > 1 ? editBuffer.slice(0, -1) : '0';
-  updateEditDisplay();
-}
-function numpadClear() { editBuffer = '0'; updateEditDisplay(); }
-
-function updateEditDisplay() {
-  const rupees = parseInt(editBuffer || '0', 10);
-  const paise = rupees * 100;
-  document.getElementById('ea-display').textContent = '₹' + rupees.toLocaleString('en-IN');
-  const unalloc = INCOME_PAISE - totalAllocPaise(currentEditKey) - paise;
-  const el = document.getElementById('ea-preview');
-  if (unalloc > 0) {
-    el.textContent = fmtINR(unalloc) + ' remaining to allocate';
-    el.className = 'ea-preview';
-  } else if (unalloc === 0) {
-    el.textContent = '✓ Budget will be balanced';
-    el.className = 'ea-preview ea-preview--balanced';
-  } else {
-    el.textContent = fmtINR(unalloc) + ' over-allocated';
-    el.className = 'ea-preview ea-preview--over';
-  }
-}
-function confirmEditAlloc() {
-  if (!currentEditKey) return;
-  const newPaise = parseInt(editBuffer || '0', 10) * 100;
-  allocState[currentEditKey] = newPaise;
-  const allocEl = document.getElementById('alloc-' + currentEditKey);
-  if (allocEl) allocEl.textContent = fmtINR(newPaise);
-  recalcAllocBar();
-  closeEditAllocSheet();
-  AG.showToast('Allocation updated', 'success');
-}
-
-// Wire alloc click handlers on existing envelopes (checks state at runtime)
-ENV_KEYS.forEach(key => {
-  const el = document.getElementById('alloc-' + key);
-  if (el) el.addEventListener('click', function(e) {
-    if (currentStateKey !== 'draft') return;
-    e.stopPropagation();
-    openEditAlloc(key);
-  });
-});
-
-document.getElementById('ea-close').addEventListener('click', closeEditAllocSheet);
-document.getElementById('ea-cancel').addEventListener('click', closeEditAllocSheet);
-document.getElementById('ea-confirm').addEventListener('click', confirmEditAlloc);
-document.getElementById('edit-alloc-backdrop').addEventListener('click', closeEditAllocSheet);
-
-/* ─────────────────────────────────────────────
-   ADD ENVELOPE
-───────────────────────────────────────────── */
-let customEnvCount = 0;
-let selectedIcon = '📦';
-let selectedIconBg = '#F1F5F9';
-let selectedSection = 'living';
-
-function openAddEnvelopeSheet() {
-  document.getElementById('ae-name-input').value = '';
-  document.getElementById('ae-amount-input').value = '';
-  selectedIcon = '📦'; selectedIconBg = '#F1F5F9';
-  selectedSection = 'living';
-  document.querySelectorAll('.icon-picker__btn').forEach(b => {
-    b.classList.toggle('selected', b.dataset.icon === '📦');
-  });
-  document.querySelectorAll('.ae-section-btn').forEach(b => {
-    b.classList.toggle('selected', b.dataset.section === 'living');
-  });
-  document.getElementById('add-env-backdrop').classList.add('open');
-  document.getElementById('add-env-sheet').classList.add('open');
-  setTimeout(() => document.getElementById('ae-name-input').focus(), 320);
-}
-function closeAddEnvelopeSheet() {
-  document.getElementById('add-env-backdrop').classList.remove('open');
-  document.getElementById('add-env-sheet').classList.remove('open');
-}
-function confirmAddEnvelope() {
-  const name = document.getElementById('ae-name-input').value.trim();
-  const amtRupees = parseInt(document.getElementById('ae-amount-input').value.replace(/,/g, '') || '0', 10);
-  if (!name) {
-    document.getElementById('ae-name-input').focus();
-    AG.showToast('Please enter a name', 'error'); return;
-  }
-  if (amtRupees <= 0) {
-    document.getElementById('ae-amount-input').focus();
-    AG.showToast('Please enter an allocation amount', 'error'); return;
-  }
-
-  const allocPaise = amtRupees * 100;
-  const allocStr = fmtINR(allocPaise);
-  customEnvCount++;
-  const key = 'custom-' + customEnvCount;
-
-  // Register in allocState and ENV_KEYS
-  allocState[key] = allocPaise;
-  ENV_KEYS.push(key);
-
-  // Register in SHEET_DATA so detail sheet works
-  SHEET_DATA[key] = {
-    icon: selectedIcon, iconBg: selectedIconBg, name,
-    alloc: allocStr, spent: '₹0', remaining: allocStr,
-    remainingColor: 'var(--text-secondary)', barW: 0, barCls: '',
-    chartHeights: [0, 0, 0, 0, 0, 0],
-    txns: [{ date: '—', payee: 'No transactions this month', amount: '', ml: null }]
+  /* ── Demo bar ── */
+  const STATES = {
+    active: {
+      showActive: true,
+      apcStatus: 'Locked',
+      apcStatusColor: 'locked',
+      apcMonth: 'June 2026',
+      apcRemaining: '₹50,650',
+      apcBarPct: 57.8,
+      apcBarLabel: '57.8% remaining',
+      apcCloseDateLabel: 'Closes 30 Jun 2026',
+    },
+    empty: {
+      showActive: false,
+    },
   };
 
-  // Inject row into the chosen section (fallback: before total-footer)
-  const targetSection = document.getElementById('section-' + selectedSection)
-                     || document.querySelector('.total-footer').previousElementSibling;
-  const insertTarget = targetSection || document.querySelector('.total-footer');
-  const insertPos = targetSection ? 'beforeend' : 'beforebegin';
-  insertTarget.insertAdjacentHTML(insertPos, `
-    <div class="env-row" id="row-${key}" onclick="openSheet('${key}')">
-      <div class="env-row__top">
-        <div class="env-row__icon" style="background:${selectedIconBg};">${selectedIcon}</div>
-        <div class="env-row__info">
-          <div class="env-row__name">${name}</div>
-          <div class="env-row__sublabel">
-            <span class="env-row__pct" id="pct-${key}">0%</span>
-            <span>of allocated</span>
-          </div>
-        </div>
-        <div class="env-row__alloc-wrap">
-          <span class="env-row__alloc env-row__alloc--editable" id="alloc-${key}">${allocStr}</span>
-          <span class="env-row__badge env-row__badge--empty" id="badge-${key}"></span>
-        </div>
-      </div>
-      <div class="env-progress">
-        <div class="env-progress__fill env-progress__fill--normal" id="bar-${key}" style="width:0%"></div>
-      </div>
-      <div class="env-row__footer">
-        <span class="t-mono" id="spent-${key}">₹0 spent</span>
-        <span class="t-mono" id="remaining-${key}">${allocStr} remaining</span>
-      </div>
-    </div>
-  `);
+  function applyState(key) {
+    document.querySelectorAll('.demo-btn').forEach(b => b.classList.toggle('active', b.dataset.state === key));
+    const s = STATES[key];
 
-  // Wire alloc click on the new row
-  const newAllocEl = document.getElementById('alloc-' + key);
-  if (newAllocEl) newAllocEl.addEventListener('click', function(e) {
-    if (currentStateKey !== 'draft') return;
-    e.stopPropagation();
-    openEditAlloc(key);
+    const viewActive = document.getElementById('view-active');
+    const viewEmpty  = document.getElementById('view-empty');
+
+    if (s.showActive) {
+      viewActive.style.display = '';
+      viewEmpty.style.display  = 'none';
+
+      document.getElementById('apc-month').textContent        = s.apcMonth;
+      document.getElementById('apc-remaining').textContent    = s.apcRemaining;
+      document.getElementById('apc-bar-fill').style.width     = s.apcBarPct + '%';
+      document.getElementById('apc-bar-pct').textContent      = s.apcBarLabel;
+      document.getElementById('apc-close-date').textContent   = s.apcCloseDateLabel;
+
+      const chip = document.getElementById('apc-status-chip');
+      chip.textContent = s.apcStatus;
+    } else {
+      viewActive.style.display = 'none';
+      viewEmpty.style.display  = '';
+    }
+  }
+
+  document.querySelectorAll('.demo-btn').forEach(btn => {
+    btn.addEventListener('click', () => applyState(btn.dataset.state));
   });
 
-  recalcAllocBar();
-  closeAddEnvelopeSheet();
-  AG.showToast(`"${name}" added`, 'success');
-}
+  applyState('active');
 
-// Icon picker selection
-document.getElementById('icon-picker').addEventListener('click', function(e) {
-  const btn = e.target.closest('.icon-picker__btn');
-  if (!btn) return;
-  document.querySelectorAll('.icon-picker__btn').forEach(b => b.classList.remove('selected'));
-  btn.classList.add('selected');
-  selectedIcon = btn.dataset.icon;
-  selectedIconBg = btn.dataset.bg;
-});
+  /* ── Past periods toggle ── */
+  let pastOpen = false;
+  function togglePast() {
+    pastOpen = !pastOpen;
+    const list = document.getElementById('past-list');
+    const icon = document.getElementById('past-icon');
+    list.classList.toggle('open', pastOpen);
+    icon.classList.toggle('open', pastOpen);
+    icon.textContent = pastOpen ? '▾' : '▾';
+  }
 
-// Section picker selection
-document.getElementById('ae-section-picker').addEventListener('click', function(e) {
-  const btn = e.target.closest('.ae-section-btn');
-  if (!btn) return;
-  document.querySelectorAll('.ae-section-btn').forEach(b => b.classList.remove('selected'));
-  btn.classList.add('selected');
-  selectedSection = btn.dataset.section;
-});
-
-document.getElementById('ae-close').addEventListener('click', closeAddEnvelopeSheet);
-document.getElementById('ae-cancel').addEventListener('click', closeAddEnvelopeSheet);
-document.getElementById('ae-confirm').addEventListener('click', confirmAddEnvelope);
-document.getElementById('add-env-backdrop').addEventListener('click', closeAddEnvelopeSheet);
-
-/* ─────────────────────────────────────────────
-   DEMO BAR REGISTRATION
-───────────────────────────────────────────── */
-AG.registerDemoBar({
-  locked: () => applyState('locked'),
-  draft:  () => applyState('draft'),
-  over:   () => applyState('over'),
-});
+  /* ── Toast ── */
+  let toastTimer;
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('visible');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('visible'), 2800);
+  }
 </script>
 </body>
 </html>
