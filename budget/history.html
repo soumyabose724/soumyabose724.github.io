@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Budget History</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+
+    /* ── Page content ── */
+    .page-content--history {
+      padding: 0;
+      padding-top: calc(var(--top-bar-h) + var(--sp-4));
+      padding-bottom: calc(var(--bottom-nav-h) + var(--sp-10));
+      overflow-y: auto;
+    }
+
+    /* ── Section label ── */
+    .period-section-label {
+      font-size: 11px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--text-muted);
+      padding: var(--sp-5) var(--sp-4) var(--sp-3);
+      display: flex; align-items: center; gap: var(--sp-2);
+    }
+    .period-section-label::before {
+      content: ''; width: 3px; height: 12px; border-radius: 2px;
+      background: var(--primary); flex-shrink: 0;
+    }
+
+    /* ── History table card ── */
+    .history-card {
+      margin: 0 var(--sp-4) var(--sp-3);
+    }
+
+    /* ── Table header ── */
+    .hist-header {
+      display: grid;
+      grid-template-columns: 80px 1fr 1fr 1fr auto;
+      gap: var(--sp-2);
+      padding: var(--sp-3) var(--sp-4);
+      border-bottom: 2px solid var(--border);
+    }
+    .hist-header-cell {
+      font-size: 10px; font-weight: 700; letter-spacing: .07em;
+      text-transform: uppercase; color: var(--text-muted);
+    }
+    .hist-header-cell--right { text-align: right; }
+    .hist-header-cell--center { text-align: center; }
+
+    /* ── Rollup row ── */
+    .hist-row--rollup {
+      display: grid;
+      grid-template-columns: 80px 1fr 1fr 1fr auto;
+      gap: var(--sp-2);
+      padding: var(--sp-3) var(--sp-4);
+      align-items: center;
+      background: rgba(13,148,136,0.05);
+      border-top: 2px solid var(--primary);
+      border-bottom: 1px solid var(--border);
+    }
+    [data-theme="dark"] .hist-row--rollup {
+      background: rgba(13,148,136,0.10);
+    }
+
+    /* ── Monthly data rows ── */
+    .hist-row {
+      display: grid;
+      grid-template-columns: 80px 1fr 1fr 1fr auto;
+      gap: var(--sp-2);
+      padding: var(--sp-3) var(--sp-4);
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background var(--dur-fast);
+    }
+    .hist-row:hover { background: var(--primary-xlight); }
+    .hist-row:last-child { border-bottom: none; }
+
+    /* ── Row cells ── */
+    .hist-cell--period {
+      font-size: 14px; font-weight: 600; color: var(--text-primary);
+      white-space: nowrap;
+    }
+    .hist-cell--period--rollup {
+      font-size: 13px; font-weight: 700; color: var(--primary);
+    }
+    .hist-cell--money {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+      font-size: 12px; color: var(--text-secondary);
+      text-align: right;
+    }
+    .hist-cell--money--rollup {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+      font-size: 12px; font-weight: 600; color: var(--text-primary);
+      text-align: right;
+    }
+    .hist-cell--surplus {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+      font-size: 12px; font-weight: 700;
+      text-align: right;
+    }
+    .hist-cell--surplus--pos { color: var(--primary); }
+    .hist-cell--surplus--neg { color: var(--error); }
+
+    .hist-cell--status {
+      display: flex; align-items: center; justify-content: flex-end; gap: var(--sp-1);
+      white-space: nowrap;
+    }
+
+    /* ── Chart card ── */
+    .chart-card {
+      margin: 0 var(--sp-4) var(--sp-4);
+    }
+    .chart-card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: var(--sp-4);
+    }
+    .chart-card-title {
+      font-size: 14px; font-weight: 600; color: var(--text-primary);
+    }
+    .chart-subtitle {
+      font-size: 11px; color: var(--text-muted); margin-top: 2px;
+    }
+    .chart-legend {
+      display: flex; gap: var(--sp-3); align-items: center;
+      font-size: 11px; color: var(--text-muted); flex-shrink: 0;
+    }
+    .legend-dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    }
+    .legend-item { display: flex; align-items: center; gap: 4px; }
+
+    /* ── SVG chart wrapper ── */
+    .chart-svg-wrap {
+      width: 100%; position: relative;
+    }
+    .chart-svg-wrap svg {
+      width: 100%; display: block;
+    }
+
+    /* ── Chart footer note ── */
+    .chart-note {
+      margin-top: var(--sp-3);
+      font-size: 11px; color: var(--text-muted);
+      display: flex; align-items: center; gap: var(--sp-2);
+    }
+    .chart-note-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--primary); flex-shrink: 0;
+    }
+
+    /* ── Annual view: FY comparison table ── */
+    .fy-compare-card {
+      margin: 0 var(--sp-4) var(--sp-4);
+    }
+    .fy-compare-row {
+      display: grid;
+      grid-template-columns: 72px 1fr 1fr 1fr;
+      gap: var(--sp-2);
+      padding: var(--sp-3) var(--sp-4);
+      border-bottom: 1px solid var(--border);
+      align-items: center;
+    }
+    .fy-compare-row:last-child { border-bottom: none; }
+    .fy-compare-row--header {
+      background: var(--surface-raised);
+      border-radius: var(--r-md) var(--r-md) 0 0;
+    }
+    .fy-compare-cell {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+      font-size: 12px; color: var(--text-secondary); text-align: right;
+    }
+    .fy-compare-cell--label {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px; font-weight: 600; color: var(--text-primary); text-align: left;
+    }
+    .fy-compare-cell--header {
+      font-family: 'Inter', sans-serif;
+      font-size: 10px; font-weight: 700; letter-spacing: .06em;
+      text-transform: uppercase; color: var(--text-muted); text-align: right;
+    }
+    .fy-compare-cell--header:first-child { text-align: left; }
+    .fy-compare-cell--surplus-pos {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+      font-size: 12px; font-weight: 700;
+      color: var(--primary); text-align: right;
+    }
+    .fy-compare-cell--surplus-neg {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+      font-size: 12px; font-weight: 700;
+      color: var(--error); text-align: right;
+    }
+
+    /* ── Savings rate summary chips ── */
+    .savings-stats-row {
+      display: flex; gap: var(--sp-3); margin-bottom: var(--sp-4);
+    }
+    .savings-stat-chip {
+      flex: 1; background: var(--surface-raised);
+      border-radius: var(--r-lg); padding: var(--sp-3) var(--sp-3);
+      text-align: center;
+    }
+    .savings-stat-chip__val {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+      font-size: 16px; font-weight: 700;
+      display: block; margin-bottom: 4px;
+    }
+    .savings-stat-chip__val--pos { color: var(--primary); }
+    .savings-stat-chip__val--neg { color: var(--error); }
+    .savings-stat-chip__val--warn { color: var(--warning); }
+    .savings-stat-chip__label {
+      font-size: 10px; font-weight: 600; letter-spacing: .06em;
+      text-transform: uppercase; color: var(--text-muted);
+      display: block;
+    }
+
+  </style>
+</head>
+<body>
+<div class="phone-frame"><div class="screen">
+
+  <!-- DEMO BAR -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">View</span>
+    <button class="demo-btn active" data-state="monthly">Monthly</button>
+    <button class="demo-btn" data-state="annual">Annual View</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back to Budget Periods">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12.5 15L7.5 10L12.5 5"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Budget History</span>
+    <div class="top-bar__actions">
+      <button class="icon-btn" onclick="toast('Export — coming soon')" aria-label="Export">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 3v10M6 9l4 4 4-4M4 17h12"/>
+        </svg>
+      </button>
+      <div class="avatar">SB</div>
+    </div>
+  </div>
+
+  <!-- PAGE CONTENT -->
+  <main class="page-content--history" id="page-content">
+
+    <!-- ═══ MONTHLY VIEW ═══ -->
+    <div id="view-monthly">
+
+      <!-- Period History Table -->
+      <div class="period-section-label">FY 2025-26</div>
+
+      <div class="history-card glass-card" style="padding:0; overflow:hidden;">
+
+        <!-- Table header -->
+        <div class="hist-header">
+          <div class="hist-header-cell">Period</div>
+          <div class="hist-header-cell hist-header-cell--right">Income</div>
+          <div class="hist-header-cell hist-header-cell--right">Spent</div>
+          <div class="hist-header-cell hist-header-cell--right">Surplus / Deficit</div>
+          <div class="hist-header-cell hist-header-cell--center">Status</div>
+        </div>
+
+        <!-- Annual rollup row -->
+        <div class="hist-row--rollup">
+          <div class="hist-cell--period hist-cell--period--rollup">FY 2025-26</div>
+          <div class="hist-cell--money--rollup">₹14,45,000</div>
+          <div class="hist-cell--money--rollup">₹13,89,400</div>
+          <div class="hist-cell--surplus hist-cell--surplus--pos">+₹55,600</div>
+          <div class="hist-cell--status">
+            <span class="chip chip--info" style="font-size:10px;padding:3px 8px;font-weight:700;letter-spacing:.05em;">FY ROLLUP</span>
+          </div>
+        </div>
+
+        <!-- Jun 2026 — Open -->
+        <div class="hist-row" onclick="handleRowClick('open', 'Jun 2026')">
+          <div class="hist-cell--period">Jun 2026</div>
+          <div class="hist-cell--money">₹1,20,000</div>
+          <div class="hist-cell--money">₹1,11,800</div>
+          <div class="hist-cell--surplus hist-cell--surplus--pos">+₹8,200</div>
+          <div class="hist-cell--status">
+            <a href="period.html" class="chip chip--locked" style="font-size:11px;text-decoration:none;" onclick="event.stopPropagation()">Open →</a>
+          </div>
+        </div>
+
+        <!-- May 2026 — Closed -->
+        <div class="hist-row" onclick="handleRowClick('closed', 'May 2026')">
+          <div class="hist-cell--period">May 2026</div>
+          <div class="hist-cell--money">₹1,20,000</div>
+          <div class="hist-cell--money">₹1,17,500</div>
+          <div class="hist-cell--surplus hist-cell--surplus--pos">+₹2,500</div>
+          <div class="hist-cell--status">
+            <span class="chip chip--closed" style="font-size:11px;cursor:pointer;">Closed →</span>
+          </div>
+        </div>
+
+        <!-- Apr 2026 — Closed (deficit) -->
+        <div class="hist-row" onclick="handleRowClick('closed', 'Apr 2026')">
+          <div class="hist-cell--period">Apr 2026</div>
+          <div class="hist-cell--money">₹1,20,000</div>
+          <div class="hist-cell--money">₹1,22,100</div>
+          <div class="hist-cell--surplus hist-cell--surplus--neg">−₹2,100</div>
+          <div class="hist-cell--status">
+            <span class="chip chip--closed" style="font-size:11px;cursor:pointer;">Closed →</span>
+          </div>
+        </div>
+
+        <!-- Mar 2026 — Closed -->
+        <div class="hist-row" onclick="handleRowClick('closed', 'Mar 2026')">
+          <div class="hist-cell--period">Mar 2026</div>
+          <div class="hist-cell--money">₹85,000</div>
+          <div class="hist-cell--money">₹82,000</div>
+          <div class="hist-cell--surplus hist-cell--surplus--pos">+₹3,000</div>
+          <div class="hist-cell--status">
+            <span class="chip chip--closed" style="font-size:11px;cursor:pointer;">Closed →</span>
+          </div>
+        </div>
+
+        <!-- Feb 2026 — Closed -->
+        <div class="hist-row" onclick="handleRowClick('closed', 'Feb 2026')">
+          <div class="hist-cell--period">Feb 2026</div>
+          <div class="hist-cell--money">₹1,20,000</div>
+          <div class="hist-cell--money">₹1,08,500</div>
+          <div class="hist-cell--surplus hist-cell--surplus--pos">+₹11,500</div>
+          <div class="hist-cell--status">
+            <span class="chip chip--closed" style="font-size:11px;cursor:pointer;">Closed →</span>
+          </div>
+        </div>
+
+        <!-- Jan 2026 — Closed -->
+        <div class="hist-row" onclick="handleRowClick('closed', 'Jan 2026')">
+          <div class="hist-cell--period">Jan 2026</div>
+          <div class="hist-cell--money">₹1,20,000</div>
+          <div class="hist-cell--money">₹1,14,200</div>
+          <div class="hist-cell--surplus hist-cell--surplus--pos">+₹5,800</div>
+          <div class="hist-cell--status">
+            <span class="chip chip--closed" style="font-size:11px;cursor:pointer;">Closed →</span>
+          </div>
+        </div>
+
+      </div><!-- /history-card -->
+
+      <!-- Savings Rate Chart -->
+      <div class="period-section-label">Monthly Savings Rate — FY 2025-26</div>
+
+      <div class="chart-card glass-card">
+
+        <!-- Summary chips -->
+        <div class="savings-stats-row">
+          <div class="savings-stat-chip">
+            <span class="savings-stat-chip__val savings-stat-chip__val--pos">+3.8%</span>
+            <span class="savings-stat-chip__label">Avg YTD</span>
+          </div>
+          <div class="savings-stat-chip">
+            <span class="savings-stat-chip__val savings-stat-chip__val--warn">10%</span>
+            <span class="savings-stat-chip__label">Target</span>
+          </div>
+          <div class="savings-stat-chip">
+            <span class="savings-stat-chip__val savings-stat-chip__val--pos">+6.8%</span>
+            <span class="savings-stat-chip__label">This Month</span>
+          </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="chart-legend" style="margin-bottom:var(--sp-3);">
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#22C55E;"></div>
+            <span>Surplus</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#E94560;"></div>
+            <span>Deficit</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:var(--border-strong);border-radius:2px;width:14px;height:8px;"></div>
+            <span>No data</span>
+          </div>
+        </div>
+
+        <!-- SVG chart -->
+        <div class="chart-svg-wrap">
+          <svg id="savings-chart" viewBox="0 0 300 145" xmlns="http://www.w3.org/2000/svg"
+               aria-label="Monthly savings rate chart for FY 2025-26"></svg>
+        </div>
+
+        <!-- Footer note -->
+        <div class="chart-note" style="margin-top:var(--sp-3);">
+          <div class="chart-note-dot"></div>
+          <span>Target: 10% savings rate · Set in Settings</span>
+        </div>
+
+      </div><!-- /chart-card -->
+
+    </div><!-- /view-monthly -->
+
+    <!-- ═══ ANNUAL VIEW ═══ -->
+    <div id="view-annual" style="display:none;">
+
+      <div class="period-section-label">Financial Year Comparison</div>
+
+      <div class="fy-compare-card glass-card" style="padding:0;overflow:hidden;">
+        <div class="fy-compare-row fy-compare-row--header">
+          <div class="fy-compare-cell--header">FY</div>
+          <div class="fy-compare-cell--header">Income</div>
+          <div class="fy-compare-cell--header">Spent</div>
+          <div class="fy-compare-cell--header">Surplus</div>
+        </div>
+        <div class="fy-compare-row">
+          <div class="fy-compare-cell--label">2025-26 <span class="chip chip--locked" style="font-size:9px;padding:2px 6px;vertical-align:middle;">Current</span></div>
+          <div class="fy-compare-cell">₹14,45,000</div>
+          <div class="fy-compare-cell">₹13,89,400</div>
+          <div class="fy-compare-cell--surplus-pos">+₹55,600</div>
+        </div>
+        <div class="fy-compare-row">
+          <div class="fy-compare-cell--label">2024-25</div>
+          <div class="fy-compare-cell">₹13,80,000</div>
+          <div class="fy-compare-cell">₹13,12,400</div>
+          <div class="fy-compare-cell--surplus-pos">+₹67,600</div>
+        </div>
+        <div class="fy-compare-row">
+          <div class="fy-compare-cell--label">2023-24</div>
+          <div class="fy-compare-cell">₹12,00,000</div>
+          <div class="fy-compare-cell">₹12,18,500</div>
+          <div class="fy-compare-cell--surplus-neg">−₹18,500</div>
+        </div>
+      </div>
+
+      <div class="period-section-label">Year-on-Year Savings Rate</div>
+
+      <div class="glass-card" style="margin:0 var(--sp-4) var(--sp-4);">
+        <div class="savings-stats-row">
+          <div class="savings-stat-chip">
+            <span class="savings-stat-chip__val savings-stat-chip__val--pos">3.8%</span>
+            <span class="savings-stat-chip__label">FY 2025-26</span>
+          </div>
+          <div class="savings-stat-chip">
+            <span class="savings-stat-chip__val savings-stat-chip__val--pos">4.9%</span>
+            <span class="savings-stat-chip__label">FY 2024-25</span>
+          </div>
+          <div class="savings-stat-chip">
+            <span class="savings-stat-chip__val savings-stat-chip__val--neg">−1.5%</span>
+            <span class="savings-stat-chip__label">FY 2023-24</span>
+          </div>
+        </div>
+        <p style="font-size:12px;color:var(--text-muted);line-height:1.5;">
+          FY 2024-25 was your best savings year. FY 2025-26 is on track to close with a positive surplus — currently ₹55,600 ahead with June still open.
+        </p>
+      </div>
+
+    </div><!-- /view-annual -->
+
+  </main><!-- /page-content -->
+
+  <!-- TOAST -->
+  <div id="toast" class="toast"></div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+        <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="index.html" class="nav-tab active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+        <path d="M12 6v6l4 2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../investments/index.html" class="nav-tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="../more/index.html" class="nav-tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>
+      </svg>
+      <span>More</span>
+    </a>
+  </nav>
+
+</div></div><!-- /screen /phone-frame -->
+
+<script>
+  /* ── Theme ── */
+  (function() {
+    const stored = localStorage.getItem('ag-theme');
+    if (stored) document.documentElement.setAttribute('data-theme', stored);
+    const icon = document.getElementById('theme-icon');
+    const cur = document.documentElement.getAttribute('data-theme') || 'light';
+    icon.textContent = cur === 'dark' ? '☀️' : '🌙';
+  })();
+
+  document.getElementById('theme-toggle').addEventListener('click', function() {
+    const cur = document.documentElement.getAttribute('data-theme') || 'light';
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+    // Redraw chart with new theme colours
+    drawSavingsChart();
+  });
+
+  /* ── Toast ── */
+  let toastTimer;
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('visible');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function() { el.classList.remove('visible'); }, 2800);
+  }
+
+  /* ── Row click handler ── */
+  function handleRowClick(type, label) {
+    if (type === 'open') {
+      window.location.href = 'period.html';
+    } else {
+      toast('View closed period — ' + label);
+    }
+  }
+
+  /* ── Demo bar state switching ── */
+  const demoBtns = document.querySelectorAll('.demo-btn[data-state]');
+  demoBtns.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      demoBtns.forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      applyState(btn.dataset.state);
+    });
+  });
+
+  function applyState(key) {
+    const monthly = document.getElementById('view-monthly');
+    const annual  = document.getElementById('view-annual');
+    if (key === 'annual') {
+      monthly.style.display = 'none';
+      annual.style.display  = 'block';
+    } else {
+      monthly.style.display = 'block';
+      annual.style.display  = 'none';
+    }
+  }
+
+  /* ─────────────────────────────────────────────
+     drawSavingsChart()
+     SVG bar chart: viewBox="0 0 300 145"
+     X: 12 months Apr..Mar
+     Y: −5% to +15% visible range; 0% line is the baseline
+  ───────────────────────────────────────────── */
+  function drawSavingsChart() {
+    const svg = document.getElementById('savings-chart');
+    if (!svg) return;
+
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const textCol   = isDark ? '#B8AFA6' : '#78716C';
+    const axisCol   = isDark ? '#38332F' : '#E7E5E4';
+    const stubFill  = isDark ? '#2D2A27' : '#F5F5F0';
+    const stubStr   = isDark ? '#4A443F' : '#D6D3D1';
+    const targetCol = '#0D9488';
+
+    // Chart geometry
+    const W = 300, H = 145;
+    const padL = 30, padR = 8, padT = 10, padB = 30;
+    const chartW = W - padL - padR;
+    const chartH = H - padT - padB;
+
+    // Data: [label, savingsRatePct | null]
+    const months = [
+      { label:'Apr', rate: -1.75 },
+      { label:'May', rate:  2.08 },
+      { label:'Jun', rate:  6.83 },
+      { label:'Jul', rate: null  },
+      { label:'Aug', rate: null  },
+      { label:'Sep', rate: null  },
+      { label:'Oct', rate: null  },
+      { label:'Nov', rate: null  },
+      { label:'Dec', rate: null  },
+      { label:'Jan', rate: null  },
+      { label:'Feb', rate: null  },
+      { label:'Mar', rate: null  },
+    ];
+
+    const n = months.length;
+    const barW  = (chartW / n) * 0.52;
+    const gap   = chartW / n;
+
+    // Y-axis range: −5% to +15% (20% range)
+    const yMin = -5, yMax = 15;
+    const yRange = yMax - yMin;
+    const targetPct = 10;
+
+    function yPos(pct) {
+      // pct → pixel: top of chart = yMax, bottom = yMin
+      return padT + ((yMax - pct) / yRange) * chartH;
+    }
+
+    const zeroY  = yPos(0);
+    const targetY = yPos(targetPct);
+
+    let html = '';
+
+    // ── Y grid lines + labels ──
+    const yTicks = [0, 5, 10, 15]; // percent
+    yTicks.forEach(function(t) {
+      const y = yPos(t);
+      html += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}"
+        stroke="${axisCol}" stroke-width="${t === 0 ? 1.5 : 0.8}"
+        stroke-dasharray="${t === 0 ? '' : '3,3'}"/>`;
+      html += `<text x="${padL - 4}" y="${y + 4}" text-anchor="end"
+        font-family="JetBrains Mono,monospace" font-size="8"
+        fill="${textCol}">${t}%</text>`;
+    });
+
+    // −5% line
+    const yNeg5 = yPos(-5);
+    html += `<line x1="${padL}" y1="${yNeg5}" x2="${W - padR}" y2="${yNeg5}"
+      stroke="${axisCol}" stroke-width="0.8" stroke-dasharray="3,3"/>`;
+    html += `<text x="${padL - 4}" y="${yNeg5 + 4}" text-anchor="end"
+      font-family="JetBrains Mono,monospace" font-size="8"
+      fill="${textCol}">-5%</text>`;
+
+    // ── Target dashed line (10%) ──
+    html += `<line x1="${padL}" y1="${targetY}" x2="${W - padR}" y2="${targetY}"
+      stroke="${targetCol}" stroke-width="1.5" stroke-dasharray="5,4" opacity="0.7"/>`;
+    html += `<text x="${W - padR}" y="${targetY - 3}" text-anchor="end"
+      font-family="Inter,sans-serif" font-size="8" fill="${targetCol}" font-weight="600">Target</text>`;
+
+    // ── Bars ──
+    months.forEach(function(m, i) {
+      const cx = padL + (i + 0.5) * gap;
+      const bx = cx - barW / 2;
+
+      if (m.rate === null) {
+        // Stub bar — hatched / grey
+        const stubH = 10;
+        const stubY = zeroY - stubH / 2;
+        html += `<rect x="${bx}" y="${stubY}" width="${barW}" height="${stubH}"
+          fill="${stubFill}" stroke="${stubStr}" stroke-width="0.8" rx="2"/>`;
+      } else {
+        // Real bar
+        const isPos = m.rate >= 0;
+        const fill  = isPos ? '#22C55E' : '#E94560';
+        const barH  = Math.abs(m.rate) / yRange * chartH;
+
+        let barY;
+        if (isPos) {
+          barY = zeroY - barH;
+        } else {
+          barY = zeroY;
+        }
+
+        html += `<rect x="${bx}" y="${barY}" width="${barW}" height="${barH}"
+          fill="${fill}" rx="2" opacity="0.88"/>`;
+
+        // Value label
+        const labelY = isPos ? barY - 3 : barY + barH + 10;
+        const labelVal = (isPos ? '+' : '') + m.rate.toFixed(1) + '%';
+        const labelFill = isPos ? '#16A34A' : '#E94560';
+        html += `<text x="${cx}" y="${labelY}" text-anchor="middle"
+          font-family="JetBrains Mono,monospace" font-size="8" font-weight="600"
+          fill="${labelFill}">${labelVal}</text>`;
+      }
+
+      // X-axis month label
+      html += `<text x="${cx}" y="${H - 4}" text-anchor="middle"
+        font-family="Inter,sans-serif" font-size="8.5" fill="${textCol}">${m.label}</text>`;
+    });
+
+    // ── Zero axis (dark line) ──
+    html += `<line x1="${padL}" y1="${zeroY}" x2="${W - padR}" y2="${zeroY}"
+      stroke="${isDark ? '#837B73' : '#A8A29E'}" stroke-width="1.5"/>`;
+
+    svg.innerHTML = html;
+  }
+
+  /* ── Init ── */
+  drawSavingsChart();
+
+</script>
+</body>
+</html>

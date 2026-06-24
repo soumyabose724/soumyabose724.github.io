@@ -988,7 +988,10 @@
       <div id="sheet-txns"></div>
 
     </div>
-    <!-- No footer needed on this sheet — close via X -->
+    <div class="sheet__footer" style="justify-content:space-between;">
+      <button class="btn btn--ghost" id="sheet-close-btn">Close</button>
+      <a href="envelope.html" class="btn btn--primary" style="text-decoration:none;">Full Detail →</a>
+    </div>
   </div>
 
   <!-- ═══════════════════════════════════════════
@@ -1042,9 +1045,12 @@
         <span>BALANCED · Unallocated ₹0</span>
       </div>
     </div>
-    <div class="sheet__footer">
-      <button class="btn btn--ghost" id="sweep-cancel">Cancel</button>
-      <button class="btn btn--primary" id="sweep-confirm">Apply Sweep</button>
+    <div class="sheet__footer" style="justify-content:space-between; flex-wrap:wrap; gap:8px;">
+      <a href="sweep-rules.html" style="font-size:13px; color:var(--primary); font-weight:500; text-decoration:none; align-self:center;">Edit Rules →</a>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn--ghost" id="sweep-cancel">Cancel</button>
+        <button class="btn btn--primary" id="sweep-confirm">Apply Sweep</button>
+      </div>
     </div>
   </div>
 
@@ -1137,6 +1143,85 @@
   </div>
 
   <!-- ═══════════════════════════════════════════
+       CLOSE PERIOD SHEET (BUD-07)
+  ═══════════════════════════════════════════ -->
+  <div class="sheet-backdrop" id="close-period-backdrop"></div>
+  <div class="sheet" id="close-period-sheet">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <span class="sheet__title">Close June 2026</span>
+      <button class="sheet__close" id="close-period-x" aria-label="Close">✕</button>
+    </div>
+    <div class="sheet__body" style="padding-bottom:var(--sp-2);">
+
+      <!-- Period Summary -->
+      <div style="background:var(--surface-raised); border-radius:var(--r-lg); padding:var(--sp-4); margin-bottom:var(--sp-4); border:1px solid var(--border);">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-muted); margin-bottom:var(--sp-3);">Period Summary</div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:var(--sp-2);">
+          <span style="font-size:14px; color:var(--text-secondary);">Total Income</span>
+          <span style="font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:600;">₹1,20,000</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:var(--sp-2);">
+          <span style="font-size:14px; color:var(--text-secondary);">Total Spent</span>
+          <span style="font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:600;">₹1,11,800</span>
+        </div>
+        <div style="height:1px; background:var(--border); margin:var(--sp-2) 0;"></div>
+        <div style="display:flex; justify-content:space-between;">
+          <span style="font-size:14px; font-weight:700;">Surplus</span>
+          <span style="font-family:'JetBrains Mono',monospace; font-size:16px; font-weight:700; color:var(--primary);">+₹8,200</span>
+        </div>
+      </div>
+
+      <!-- Rollover option -->
+      <div style="margin-bottom:var(--sp-4);">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-muted); margin-bottom:var(--sp-3);">What to do with ₹8,200 surplus?</div>
+        <label style="display:flex; align-items:flex-start; gap:var(--sp-3); padding:var(--sp-3); border-radius:var(--r-lg); border:2px solid var(--primary); background:var(--primary-light); cursor:pointer; margin-bottom:var(--sp-2);">
+          <input type="radio" name="rollover" value="reset" checked style="margin-top:2px; accent-color:var(--primary);">
+          <div>
+            <div style="font-size:14px; font-weight:600;">Reset (Recommended)</div>
+            <div style="font-size:12px; color:var(--text-muted);">Close with surplus shown in history only. Use Sweep rules in next period to allocate.</div>
+          </div>
+        </label>
+        <label style="display:flex; align-items:flex-start; gap:var(--sp-3); padding:var(--sp-3); border-radius:var(--r-lg); border:1.5px solid var(--border); background:var(--surface-raised); cursor:pointer;">
+          <input type="radio" name="rollover" value="carry" style="margin-top:2px; accent-color:var(--primary);">
+          <div>
+            <div style="font-size:14px; font-weight:600;">Carry Forward</div>
+            <div style="font-size:12px; color:var(--text-muted);">Add ₹8,200 to July 2026's expected income.</div>
+          </div>
+        </label>
+      </div>
+
+      <!-- Unreconciled transactions warning -->
+      <div style="display:flex; align-items:flex-start; gap:var(--sp-3); background:var(--warning-light); border:1px solid rgba(245,158,11,.3); border-radius:var(--r-lg); padding:var(--sp-3); margin-bottom:var(--sp-4);">
+        <span style="font-size:16px; flex-shrink:0;">⚠️</span>
+        <div>
+          <div style="font-size:13px; font-weight:600; color:var(--warning);">2 unreconciled transactions</div>
+          <div style="font-size:12px; color:var(--text-secondary);">Closing will auto-accept them.</div>
+        </div>
+      </div>
+
+      <!-- Next period -->
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:var(--sp-3) var(--sp-4); background:var(--surface-raised); border-radius:var(--r-lg); border:1px solid var(--border);">
+        <div>
+          <div style="font-size:14px; font-weight:600;">Copy allocations to July?</div>
+          <div style="font-size:12px; color:var(--text-muted);">July 2026 will be created as Draft</div>
+        </div>
+        <label style="position:relative; display:inline-block; width:44px; height:24px; flex-shrink:0;">
+          <input type="checkbox" id="copy-alloc-toggle" checked style="opacity:0; width:0; height:0;">
+          <span id="toggle-track" style="position:absolute; cursor:pointer; inset:0; background:var(--primary); border-radius:12px; transition:.3s;">
+            <span style="position:absolute; left:22px; top:2px; width:20px; height:20px; background:#fff; border-radius:50%; transition:.3s;"></span>
+          </span>
+        </label>
+      </div>
+
+    </div>
+    <div class="sheet__footer">
+      <button class="btn btn--ghost" id="close-period-cancel">Cancel</button>
+      <button class="btn btn--primary" id="close-period-confirm" style="background:var(--error);">Close Period</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
        TOAST CONTAINER
   ═══════════════════════════════════════════ -->
   <div class="toast-container" id="toast-container"></div>
@@ -1178,6 +1263,8 @@ const STATES = {
   locked: {
     allocBar: { cls: 'alloc-bar--balanced', chipCls: 'chip--balanced', chipText: '✓ BALANCED', text: 'Unallocated: <strong>₹0</strong> · of <strong>₹1,20,000</strong> income' },
     topBarActions: `
+      <a href="burn-rate.html" class="btn--sm-ghost" style="text-decoration:none;">📊 Burn Rate</a>
+      <button class="btn--sm-ghost" id="close-period-btn">Close Period</button>
       <button class="btn--sm-ghost" id="unlock-btn">Unlock</button>
     `,
     warning: false,
@@ -1225,6 +1312,8 @@ const STATES = {
   over: {
     allocBar: { cls: 'alloc-bar--balanced', chipCls: 'chip--balanced', chipText: '✓ BALANCED', text: 'Unallocated: <strong>₹0</strong> · of <strong>₹1,20,000</strong> income' },
     topBarActions: `
+      <a href="burn-rate.html" class="btn--sm-ghost" style="text-decoration:none;">📊 Burn Rate</a>
+      <button class="btn--sm-ghost" id="close-period-btn">Close Period</button>
       <button class="btn--sm-ghost" id="unlock-btn">Unlock</button>
     `,
     warning: true,
@@ -1410,6 +1499,10 @@ function applyState(stateKey) {
   const sweepBtn = document.getElementById('sweep-btn');
   if (sweepBtn) {
     sweepBtn.addEventListener('click', openSweepSheet);
+  }
+  const closePeriodBtn = document.getElementById('close-period-btn');
+  if (closePeriodBtn) {
+    closePeriodBtn.addEventListener('click', openClosePeriodSheet);
   }
 
   // Warning banner
@@ -1607,6 +1700,18 @@ function closeSweepSheet() {
 }
 
 /* ─────────────────────────────────────────────
+   CLOSE PERIOD SHEET (BUD-07)
+───────────────────────────────────────────── */
+function openClosePeriodSheet() {
+  document.getElementById('close-period-backdrop').classList.add('open');
+  document.getElementById('close-period-sheet').classList.add('open');
+}
+function closeClosePeriodSheet() {
+  document.getElementById('close-period-backdrop').classList.remove('open');
+  document.getElementById('close-period-sheet').classList.remove('open');
+}
+
+/* ─────────────────────────────────────────────
    THEME TOGGLE
 ───────────────────────────────────────────── */
 document.getElementById('theme-toggle').addEventListener('click', () => {
@@ -1644,6 +1749,20 @@ document.getElementById('sweep-confirm').addEventListener('click', () => {
   applyState('locked');
   AG.showToast('Sweep applied — budget is now balanced', 'success');
 });
+
+// Close period sheet
+document.getElementById('close-period-x').addEventListener('click', closeClosePeriodSheet);
+document.getElementById('close-period-cancel').addEventListener('click', closeClosePeriodSheet);
+document.getElementById('close-period-backdrop').addEventListener('click', closeClosePeriodSheet);
+document.getElementById('close-period-confirm').addEventListener('click', () => {
+  closeClosePeriodSheet();
+  AG.showToast('June 2026 closed — Surplus ₹8,200 recorded in history', 'success');
+  setTimeout(() => { window.location.href = 'index.html'; }, 1400);
+});
+
+// Sheet close btn
+const sheetCloseBtn = document.getElementById('sheet-close-btn');
+if (sheetCloseBtn) sheetCloseBtn.addEventListener('click', closeSheet);
 
 // FAB
 document.getElementById('fab').addEventListener('click', openAddEnvelopeSheet);

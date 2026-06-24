@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Envelope Detail</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* ── Page content ── */
+    .page-content--envelope {
+      padding: 0;
+      padding-top: calc(var(--top-bar-h) + var(--sp-4));
+      padding-bottom: calc(var(--bottom-nav-h) + var(--sp-10));
+      overflow-y: auto;
+    }
+
+    /* ── Hero card (teal gradient) ── */
+    .env-hero {
+      margin: 0 var(--sp-4) var(--sp-4);
+      border-radius: 20px;
+      background: linear-gradient(135deg, #0B7A70 0%, #0D9488 55%, #0EA5A0 100%);
+      box-shadow: 0 6px 28px rgba(13,148,136,.32);
+      padding: var(--sp-5);
+      position: relative;
+      overflow: hidden;
+    }
+    .env-hero::before {
+      content: '';
+      position: absolute;
+      top: -36px; right: -28px;
+      width: 130px; height: 130px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.07);
+      pointer-events: none;
+    }
+    .env-hero::after {
+      content: '';
+      position: absolute;
+      bottom: -20px; left: 25%;
+      width: 180px; height: 80px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.04);
+      pointer-events: none;
+    }
+
+    /* Hero header row */
+    .env-hero__header {
+      display: flex; align-items: center; gap: var(--sp-3);
+      margin-bottom: var(--sp-4);
+      position: relative; z-index: 1;
+    }
+    .env-hero__icon {
+      width: 44px; height: 44px; border-radius: var(--r-lg);
+      background: rgba(255,255,255,.18);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; flex-shrink: 0;
+    }
+    .env-hero__meta { flex: 1; min-width: 0; }
+    .env-hero__name {
+      font-size: 18px; font-weight: 700; color: #fff;
+      line-height: 1.2;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .env-hero__cat-badge {
+      display: inline-flex; align-items: center;
+      margin-top: 4px;
+      font-size: 9px; font-weight: 800; letter-spacing: .1em;
+      text-transform: uppercase;
+      background: rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.28);
+      color: rgba(255,255,255,.9);
+      padding: 2px 8px; border-radius: var(--r-full);
+    }
+    .env-hero__status-badge {
+      flex-shrink: 0;
+    }
+    .env-hero__status-chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 11px; font-weight: 700; letter-spacing: .04em;
+      padding: 4px 10px; border-radius: var(--r-full);
+    }
+    .env-hero__status-chip--ok      { background: rgba(34,197,94,.18);  border: 1px solid rgba(34,197,94,.40);  color: #86EFAC; }
+    .env-hero__status-chip--warn     { background: rgba(245,158,11,.20); border: 1px solid rgba(245,158,11,.40); color: #FDE68A; }
+    .env-hero__status-chip--over     { background: rgba(233,69,96,.22);  border: 1px solid rgba(233,69,96,.45);  color: #FCA5A5; }
+
+    /* 3-stat row */
+    .env-hero__stats {
+      display: flex; align-items: stretch;
+      margin-bottom: var(--sp-4);
+      position: relative; z-index: 1;
+    }
+    .env-hero__stat { flex: 1; text-align: center; }
+    .env-hero__stat-sep {
+      width: 1px; background: rgba(255,255,255,.18); flex-shrink: 0; margin: 2px 0;
+    }
+    .env-hero__stat-val {
+      display: block;
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+      font-size: 15px; font-weight: 700; color: #fff;
+      margin-bottom: 3px;
+    }
+    .env-hero__stat-label {
+      display: block;
+      font-size: 10px; font-weight: 600; letter-spacing: .06em;
+      text-transform: uppercase; color: rgba(255,255,255,.6);
+    }
+
+    /* Progress bar inside hero */
+    .env-hero__bar-wrap { position: relative; z-index: 1; }
+    .env-hero__bar-track {
+      height: 6px; background: rgba(255,255,255,.2);
+      border-radius: 99px; overflow: visible; margin-bottom: var(--sp-2);
+      position: relative;
+    }
+    .env-hero__bar-fill {
+      height: 100%; border-radius: 99px;
+      background: rgba(255,255,255,.88);
+      transition: width var(--dur-med) var(--ease-out),
+                  background var(--dur-base) var(--ease-out);
+      max-width: 100%;
+    }
+    .env-hero__bar-fill--over { background: #FCA5A5; }
+    /* Hatch pattern for current partial month */
+    .env-hero__bar-fill--partial {
+      background: repeating-linear-gradient(
+        45deg,
+        rgba(255,255,255,.88),
+        rgba(255,255,255,.88) 3px,
+        rgba(255,255,255,.35) 3px,
+        rgba(255,255,255,.35) 6px
+      );
+    }
+    .env-hero__bar-caption {
+      font-size: 11px; color: rgba(255,255,255,.65); font-weight: 500;
+    }
+
+    /* ── Alert banners ── */
+    .env-alert {
+      margin: 0 var(--sp-4) var(--sp-3);
+      padding: var(--sp-3) var(--sp-4);
+      border-radius: var(--r-lg);
+      display: flex; align-items: center; gap: var(--sp-3);
+      font-size: 13px; font-weight: 500;
+    }
+    .env-alert__icon { font-size: 18px; flex-shrink: 0; line-height: 1; }
+    .env-alert--warn {
+      background: var(--warning-light);
+      border: 1px solid rgba(245,158,11,.30);
+      color: #92400E;
+    }
+    [data-theme="dark"] .env-alert--warn { color: #FDE68A; }
+    .env-alert--danger {
+      background: var(--error-light);
+      border: 1px solid rgba(233,69,96,.28);
+      color: var(--error);
+    }
+
+    /* ── Section heading with left accent ── */
+    .env-section-heading {
+      display: flex; align-items: center; gap: var(--sp-2);
+      font-size: 11px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--text-muted);
+      padding: var(--sp-1) var(--sp-4) var(--sp-3);
+    }
+    .env-section-heading::before {
+      content: ''; width: 3px; height: 12px; border-radius: 2px;
+      background: var(--primary); flex-shrink: 0;
+    }
+
+    /* ── Transaction list ── */
+    .txn-list {
+      margin: 0 var(--sp-4) var(--sp-2);
+      background: var(--surface);
+      border-radius: var(--r-xl);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .txn-item {
+      display: flex; align-items: flex-start; gap: var(--sp-3);
+      padding: var(--sp-3) var(--sp-4);
+      border-bottom: 1px solid var(--border);
+      transition: background var(--dur-fast);
+      cursor: default;
+    }
+    .txn-item:last-child { border-bottom: none; }
+    .txn-item:hover { background: var(--primary-xlight); }
+
+    .txn-item__date {
+      font-size: 11px; color: var(--text-muted); font-weight: 500;
+      white-space: nowrap; min-width: 42px; padding-top: 2px;
+    }
+    .txn-item__body { flex: 1; min-width: 0; }
+    .txn-item__payee {
+      font-size: 14px; font-weight: 500; color: var(--text-primary);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      margin-bottom: 4px;
+    }
+    .txn-item__chips {
+      display: flex; flex-wrap: wrap; gap: var(--sp-1);
+    }
+    .txn-member-chip {
+      display: inline-flex; align-items: center;
+      font-size: 10px; font-weight: 600; letter-spacing: .03em;
+      background: var(--surface-raised); color: var(--text-secondary);
+      border: 1px solid var(--border);
+      padding: 1px 7px; border-radius: var(--r-full);
+    }
+    .txn-ml-chip {
+      display: inline-flex; align-items: center;
+      font-size: 10px; font-weight: 500;
+      background: var(--primary-xlight); color: var(--primary);
+      border: 1px solid rgba(13,148,136,.20);
+      padding: 1px 7px; border-radius: var(--r-sm);
+    }
+    .txn-item__amount {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+      font-size: 14px; font-weight: 600;
+      color: var(--error); flex-shrink: 0; padding-top: 2px;
+    }
+
+    /* ── Trend chart section ── */
+    .trend-section {
+      margin: 0 var(--sp-4) var(--sp-4);
+      background: var(--surface);
+      border-radius: var(--r-xl);
+      border: 1px solid var(--border);
+      padding: var(--sp-4) var(--sp-4) var(--sp-3);
+    }
+    .trend-section__heading {
+      font-size: 12px; font-weight: 700; color: var(--text-muted);
+      letter-spacing: .07em; text-transform: uppercase;
+      margin-bottom: var(--sp-3);
+    }
+    .trend-section__svg {
+      width: 100%; display: block;
+      overflow: visible;
+    }
+
+    /* Chart bar default/over/current fills */
+    .bar-normal  { fill: rgba(13,148,136,.72); }
+    .bar-over    { fill: var(--error); }
+    .bar-current { fill: url(#hatch-current); }
+    .bar-hover   { opacity: .85; cursor: default; transition: opacity .12s; }
+    .bar-hover:hover { opacity: 1; }
+
+    /* ── Quick action row below chart ── */
+    .env-quick-actions {
+      display: flex; gap: var(--sp-2); flex-wrap: wrap;
+      padding: var(--sp-1) var(--sp-4) var(--sp-2);
+    }
+    .env-quick-btn {
+      display: flex; align-items: center; gap: 5px;
+      height: 32px; padding: 0 var(--sp-3);
+      border-radius: var(--r-full);
+      font-size: 12px; font-weight: 600;
+      background: var(--surface);
+      color: var(--text-secondary);
+      border: 1.5px solid var(--border);
+      transition: background var(--dur-fast), color var(--dur-fast),
+                  border-color var(--dur-fast), box-shadow var(--dur-fast);
+      white-space: nowrap;
+    }
+    .env-quick-btn:hover {
+      background: var(--primary-light); color: var(--primary);
+      border-color: rgba(13,148,136,.35);
+      box-shadow: 0 2px 8px rgba(13,148,136,.14);
+    }
+    .env-quick-btn--primary {
+      background: var(--primary); color: #fff; border-color: var(--primary);
+      box-shadow: 0 3px 10px rgba(13,148,136,.28);
+    }
+    .env-quick-btn--primary:hover {
+      background: var(--primary-dark); color: #fff; border-color: var(--primary-dark);
+    }
+
+    /* ── Section heading spacing ── */
+    .section-gap { margin-top: var(--sp-2); }
+
+    /* ── Tooltip on bars ── */
+    .chart-tooltip {
+      position: absolute;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      box-shadow: var(--sh-md);
+      padding: 4px 8px;
+      font-size: 11px; font-weight: 600;
+      color: var(--text-primary);
+      pointer-events: none;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity var(--dur-fast);
+    }
+    .chart-tooltip.visible { opacity: 1; }
+    .trend-svg-wrap { position: relative; }
+
+    /* ── Top bar ── */
+    .icon-btn {
+      width: 40px; height: 40px; border-radius: var(--r-full);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-secondary);
+      transition: background var(--dur-fast), color var(--dur-fast);
+      cursor: pointer;
+    }
+    .icon-btn:hover { background: var(--surface-raised); color: var(--text-primary); }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">State</span>
+    <button class="demo-btn active" data-state="on-track">On Track</button>
+    <button class="demo-btn" data-state="near-limit">Near Limit</button>
+    <button class="demo-btn" data-state="overspent">Overspent</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="period.html" class="top-bar__back" aria-label="Back to Budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title" id="top-bar-title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Groceries</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" id="more-btn" aria-label="More options" onclick="toast('Envelope options — coming soon')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/>
+        </svg>
+      </button>
+      <button class="icon-btn" id="theme-toggle-2" aria-label="Toggle theme">
+        <span id="theme-icon-2" style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content page-content--envelope">
+
+    <!-- ── HERO CARD ── -->
+    <div class="env-hero">
+      <div class="env-hero__header">
+        <div class="env-hero__icon" id="hero-icon">🛒</div>
+        <div class="env-hero__meta">
+          <div class="env-hero__name" id="hero-name">Groceries</div>
+          <span class="env-hero__cat-badge" id="hero-cat">EXPENSE</span>
+        </div>
+        <div class="env-hero__status-badge">
+          <span class="env-hero__status-chip env-hero__status-chip--ok" id="hero-status-chip">On Track</span>
+        </div>
+      </div>
+
+      <!-- 3-stat row -->
+      <div class="env-hero__stats">
+        <div class="env-hero__stat">
+          <span class="env-hero__stat-val" id="stat-allocated">₹12,000</span>
+          <span class="env-hero__stat-label">Allocated</span>
+        </div>
+        <div class="env-hero__stat-sep"></div>
+        <div class="env-hero__stat">
+          <span class="env-hero__stat-val" id="stat-spent">₹8,200</span>
+          <span class="env-hero__stat-label">Spent</span>
+        </div>
+        <div class="env-hero__stat-sep"></div>
+        <div class="env-hero__stat">
+          <span class="env-hero__stat-val" id="stat-remaining">₹3,800</span>
+          <span class="env-hero__stat-label">Remaining</span>
+        </div>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="env-hero__bar-wrap">
+        <div class="env-hero__bar-track">
+          <div class="env-hero__bar-fill env-hero__bar-fill--partial" id="hero-bar-fill" style="width:68.3%;"></div>
+        </div>
+        <div class="env-hero__bar-caption" id="hero-bar-caption">
+          Ceiling: ₹12,000 · 68% used
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ALERT BANNER (near-limit / overspent) ── -->
+    <div class="env-alert env-alert--warn" id="alert-warn" style="display:none;">
+      <span class="env-alert__icon">⚠️</span>
+      <span id="alert-warn-text">91% used — only ₹500 left this month</span>
+    </div>
+    <div class="env-alert env-alert--danger" id="alert-danger" style="display:none;">
+      <span class="env-alert__icon">🚨</span>
+      <span id="alert-danger-text">Over by ₹350 — envelope is overspent</span>
+    </div>
+
+    <!-- ── QUICK ACTIONS ── -->
+    <div class="env-quick-actions">
+      <button class="env-quick-btn env-quick-btn--primary" onclick="toast('Add Transaction — coming soon')">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Transaction
+      </button>
+      <button class="env-quick-btn" onclick="toast('Transfer funds — coming soon')">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+        Transfer
+      </button>
+      <button class="env-quick-btn" onclick="toast('Edit allocation — coming soon')">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Edit
+      </button>
+    </div>
+
+    <!-- ── THIS MONTH'S TRANSACTIONS ── -->
+    <div class="section-gap">
+      <div class="env-section-heading">This Month's Transactions</div>
+    </div>
+
+    <div class="txn-list" id="txn-list">
+      <!-- Populated by JS -->
+    </div>
+
+    <!-- ── 6-MONTH TREND ── -->
+    <div class="section-gap" style="margin-top: var(--sp-4);">
+      <div class="env-section-heading">6-Month Trend</div>
+    </div>
+
+    <div class="trend-section">
+      <div class="trend-section__heading" id="trend-heading">Jan – Jun 2026</div>
+      <div class="trend-svg-wrap">
+        <svg class="trend-section__svg" id="trend-svg"
+             viewBox="0 0 280 130"
+             preserveAspectRatio="xMidYMid meet"
+             style="height:130px; overflow:visible;">
+          <defs>
+            <!-- Hatch pattern for current partial month -->
+            <pattern id="hatch-current" x="0" y="0" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <rect width="3" height="6" fill="rgba(13,148,136,.72)"/>
+              <rect x="3" width="3" height="6" fill="rgba(13,148,136,.28)"/>
+            </pattern>
+          </defs>
+          <!-- Bars and labels rendered by JS -->
+        </svg>
+        <!-- Tooltip element -->
+        <div class="chart-tooltip" id="chart-tooltip"></div>
+      </div>
+    </div>
+
+  </div>
+  <!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       TOAST
+  ═══════════════════════════════════════════ -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" aria-label="Dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+           stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7" rx="1"/>
+        <rect x="14" y="3" width="7" height="7" rx="1"/>
+        <rect x="3" y="14" width="7" height="7" rx="1"/>
+        <rect x="14" y="14" width="7" height="7" rx="1"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="#" class="nav-tab" aria-label="Transactions"
+       onclick="toast('Transactions — coming soon'); return false;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+           stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="1" x2="12" y2="23"/>
+        <path d="M17 5H9.5a3.5 3.5 0 1 0 0 7h5a3.5 3.5 0 1 1 0 7H6"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="index.html" class="nav-tab active" aria-label="Budget">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+           stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="3" width="20" height="14" rx="2"/>
+        <line x1="8" y1="21" x2="16" y2="21"/>
+        <line x1="12" y1="17" x2="12" y2="21"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="#" class="nav-tab" aria-label="Invest"
+       onclick="toast('Invest — coming soon'); return false;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+           stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" aria-label="More"
+       onclick="toast('Settings — coming soon'); return false;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+           stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
+      </svg>
+      <span>More</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script>
+/* ─────────────────────────────────────────────
+   THEME
+───────────────────────────────────────────── */
+(function() {
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+})();
+
+function syncThemeIcons() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.getElementById('theme-icon').textContent  = isDark ? '☀️' : '🌙';
+  document.getElementById('theme-icon-2').textContent = isDark ? '☀️' : '🌙';
+}
+syncThemeIcons();
+
+function toggleTheme() {
+  const cur  = document.documentElement.getAttribute('data-theme');
+  const next = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('ag-theme', next);
+  syncThemeIcons();
+  // Re-render chart to pick up updated CSS vars
+  renderChart(currentState);
+}
+
+document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+document.getElementById('theme-toggle-2').addEventListener('click', toggleTheme);
+
+/* ─────────────────────────────────────────────
+   TOAST
+───────────────────────────────────────────── */
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('visible');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('visible'), 2800);
+}
+
+/* ─────────────────────────────────────────────
+   DEMO STATES
+───────────────────────────────────────────── */
+const STATES = {
+  'on-track': {
+    envName: 'Groceries',
+    envIcon: '🛒',
+    category: 'EXPENSE',
+    allocated: '₹12,000',
+    spent: '₹8,200',
+    remaining: '₹3,800',
+    remainingColor: '#fff',
+    pct: 68.3,
+    barFillCls: 'env-hero__bar-fill--partial',
+    statusChipText: 'On Track',
+    statusChipCls: 'env-hero__status-chip--ok',
+    alertWarn: false,
+    alertDanger: false,
+    captionText: 'Ceiling: ₹12,000 · 68% used',
+    txns: [
+      { date: '14 Jun', payee: 'Big Basket', amount: '−₹2,400', member: 'Vikas', ml: null },
+      { date: '11 Jun', payee: 'D-Mart', amount: '−₹3,100', member: 'Vikas', ml: 'ML: Groceries ✓' },
+      { date: '08 Jun', payee: 'Swiggy Instamart', amount: '−₹1,450', member: 'Priya', ml: null },
+      { date: '03 Jun', payee: 'Local Kirana', amount: '−₹1,250', member: 'Vikas', ml: null },
+    ],
+    trendData: [9800, 10200, 8900, 11500, 9200, 8200],
+    trendLabels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+    ceiling: 12000,
+    currentMonthIdx: 5,   // Jun is partial/current
+    trendPeriod: 'Jan – Jun 2026',
+  },
+  'near-limit': {
+    envName: 'Dining Out',
+    envIcon: '🍽',
+    category: 'EXPENSE',
+    allocated: '₹6,000',
+    spent: '₹5,500',
+    remaining: '₹500',
+    remainingColor: '#FDE68A',
+    pct: 91.7,
+    barFillCls: 'env-hero__bar-fill--partial',
+    statusChipText: 'Near Limit',
+    statusChipCls: 'env-hero__status-chip--warn',
+    alertWarn: true,
+    alertWarnText: '91% used — only ₹500 left this month',
+    alertDanger: false,
+    captionText: 'Ceiling: ₹6,000 · 92% used · ₹500 left',
+    txns: [
+      { date: '19 Jun', payee: 'Barbeque Nation', amount: '−₹1,800', member: 'Vikas', ml: null },
+      { date: '15 Jun', payee: 'Swiggy Order', amount: '−₹1,150', member: 'Priya', ml: 'ML: Food Delivery ✓' },
+      { date: '11 Jun', payee: 'Zomato Order', amount: '−₹1,270', member: 'Vikas', ml: 'ML: Food Delivery ✓' },
+      { date: '05 Jun', payee: 'Chai Point', amount: '−₹1,280', member: 'Priya', ml: null },
+    ],
+    trendData: [4200, 5600, 3900, 6200, 5100, 5500],
+    trendLabels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+    ceiling: 6000,
+    currentMonthIdx: 5,
+    trendPeriod: 'Jan – Jun 2026',
+  },
+  'overspent': {
+    envName: 'Mobile / Internet',
+    envIcon: '📱',
+    category: 'EXPENSE',
+    allocated: '₹2,000',
+    spent: '₹2,350',
+    remaining: '−₹350',
+    remainingColor: '#FCA5A5',
+    pct: 117.5,
+    barFillCls: 'env-hero__bar-fill--over',
+    statusChipText: 'Overspent',
+    statusChipCls: 'env-hero__status-chip--over',
+    alertWarn: false,
+    alertDanger: true,
+    alertDangerText: 'Over by ₹350 — envelope is overspent',
+    captionText: 'Ceiling: ₹2,000 · Over by ₹350 (117%)',
+    txns: [
+      { date: '05 Jun', payee: 'Jio Recharge ₹999', amount: '−₹999', member: 'Vikas', ml: null },
+      { date: '05 Jun', payee: 'Airtel Broadband', amount: '−₹851', member: 'Vikas', ml: null },
+      { date: '03 Jun', payee: 'Netflix Subscription', amount: '−₹499', member: 'Priya', ml: 'ML: Streaming ✓' },
+      { date: '01 Jun', payee: 'Google One Storage', amount: '−₹130', member: 'Vikas', ml: null },
+    ],
+    trendData: [2200, 1900, 2100, 1800, 2000, 2350],
+    trendLabels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+    ceiling: 2000,
+    currentMonthIdx: 5,
+    trendPeriod: 'Jan – Jun 2026',
+  },
+};
+
+/* ─────────────────────────────────────────────
+   RENDER STATE
+───────────────────────────────────────────── */
+let currentState = 'on-track';
+
+function applyState(key) {
+  currentState = key;
+  const s = STATES[key];
+
+  // Top bar title
+  document.getElementById('top-bar-title').textContent = s.envName;
+
+  // Hero
+  document.getElementById('hero-icon').textContent      = s.envIcon;
+  document.getElementById('hero-name').textContent      = s.envName;
+  document.getElementById('hero-cat').textContent       = s.category;
+  document.getElementById('stat-allocated').textContent = s.allocated;
+  document.getElementById('stat-spent').textContent     = s.spent;
+  document.getElementById('stat-remaining').textContent = s.remaining;
+  document.getElementById('stat-remaining').style.color = s.remainingColor;
+
+  const fill = document.getElementById('hero-bar-fill');
+  fill.className = 'env-hero__bar-fill ' + s.barFillCls;
+  // Cap visual bar at 100% but show overspent state via colour
+  fill.style.width = Math.min(s.pct, 100) + '%';
+
+  document.getElementById('hero-bar-caption').textContent = s.captionText;
+
+  const chip = document.getElementById('hero-status-chip');
+  chip.textContent  = s.statusChipText;
+  chip.className    = 'env-hero__status-chip ' + s.statusChipCls;
+
+  // Alerts
+  const alertWarn   = document.getElementById('alert-warn');
+  const alertDanger = document.getElementById('alert-danger');
+  alertWarn.style.display   = s.alertWarn   ? 'flex' : 'none';
+  alertDanger.style.display = s.alertDanger ? 'flex' : 'none';
+  if (s.alertWarn && s.alertWarnText) {
+    document.getElementById('alert-warn-text').textContent = s.alertWarnText;
+  }
+  if (s.alertDanger && s.alertDangerText) {
+    document.getElementById('alert-danger-text').textContent = s.alertDangerText;
+  }
+
+  // Transactions
+  renderTxns(s.txns);
+
+  // Chart
+  document.getElementById('trend-heading').textContent = s.trendPeriod;
+  renderChart(key);
+}
+
+/* ─────────────────────────────────────────────
+   RENDER TRANSACTIONS
+───────────────────────────────────────────── */
+function renderTxns(txns) {
+  const list = document.getElementById('txn-list');
+  list.innerHTML = '';
+  txns.forEach(t => {
+    const item = document.createElement('div');
+    item.className = 'txn-item';
+
+    const chips = [
+      `<span class="txn-member-chip">${t.member}</span>`,
+      t.ml ? `<span class="txn-ml-chip">${t.ml}</span>` : '',
+    ].join('');
+
+    item.innerHTML = `
+      <span class="txn-item__date">${t.date}</span>
+      <div class="txn-item__body">
+        <div class="txn-item__payee">${t.payee}</div>
+        <div class="txn-item__chips">${chips}</div>
+      </div>
+      <span class="txn-item__amount">${t.amount}</span>
+    `;
+    list.appendChild(item);
+  });
+}
+
+/* ─────────────────────────────────────────────
+   RENDER SVG BAR CHART
+───────────────────────────────────────────── */
+function renderChart(key) {
+  const s = STATES[key];
+  const data    = s.trendData;   // actual rupee values
+  const labels  = s.trendLabels;
+  const ceiling = s.ceiling;
+  const currentIdx = s.currentMonthIdx;
+
+  const svg = document.getElementById('trend-svg');
+
+  // Chart geometry
+  const W = 280, H = 130;
+  const paddingL = 4, paddingR = 4, paddingTop = 14, paddingBottom = 24;
+  const chartH = H - paddingTop - paddingBottom;  // 92px usable
+  const chartW = W - paddingL - paddingR;         // 272px usable
+
+  const n = data.length;
+  const barWidth = Math.floor(chartW / n * 0.55);
+  const barGap   = chartW / n;
+
+  // Max value = max(ceiling * 1.15, max(data) * 1.1) so ceiling line sits visibly
+  const dataMax = Math.max(...data);
+  const yMax    = Math.max(ceiling * 1.15, dataMax * 1.1);
+
+  function yPx(value) {
+    return paddingTop + chartH - (value / yMax) * chartH;
+  }
+  function barX(i) {
+    return paddingL + i * barGap + (barGap - barWidth) / 2;
+  }
+
+  // Build SVG content
+  let svgContent = '';
+
+  // Ceiling dashed line
+  const ceilingY = yPx(ceiling);
+  svgContent += `
+    <line x1="${paddingL}" y1="${ceilingY}" x2="${W - paddingR}" y2="${ceilingY}"
+          stroke="rgba(233,69,96,.50)" stroke-width="1" stroke-dasharray="4 3"/>
+    <text x="${W - paddingR - 2}" y="${ceilingY - 3}"
+          font-family="'JetBrains Mono',monospace" font-size="8" font-weight="600"
+          fill="rgba(233,69,96,.70)" text-anchor="end">ceiling</text>
+  `;
+
+  // Bars
+  data.forEach((val, i) => {
+    const x    = barX(i);
+    const yTop = yPx(val);
+    const barH = paddingTop + chartH - yTop;
+    const isOver    = val > ceiling;
+    const isCurrent = i === currentIdx;
+
+    let fillAttr;
+    if (isOver) {
+      fillAttr = `fill="var(--error)"`;
+    } else if (isCurrent) {
+      fillAttr = `fill="url(#hatch-current)"`;
+    } else {
+      fillAttr = `fill="rgba(13,148,136,.72)"`;
+    }
+
+    const label = formatINRCompact(val);
+    svgContent += `
+      <rect class="bar-hover" x="${x}" y="${yTop}" width="${barWidth}" height="${barH}"
+            ${fillAttr} rx="3">
+        <title>${labels[i]}: ₹${val.toLocaleString('en-IN')}</title>
+      </rect>
+    `;
+  });
+
+  // X-axis labels
+  labels.forEach((lbl, i) => {
+    const cx = barX(i) + barWidth / 2;
+    const isCurrent = i === currentIdx;
+    const fillColor = isCurrent ? 'var(--primary)' : 'var(--text-muted)';
+    const weight    = isCurrent ? '700' : '500';
+    svgContent += `
+      <text x="${cx}" y="${H - 4}"
+            font-family="'Inter',sans-serif" font-size="9" font-weight="${weight}"
+            fill="${fillColor}" text-anchor="middle">${lbl}</text>
+    `;
+  });
+
+  // Value labels on top of bars (only for bars with enough height)
+  data.forEach((val, i) => {
+    const x    = barX(i);
+    const cx   = x + barWidth / 2;
+    const yTop = yPx(val);
+    const barH = paddingTop + chartH - yTop;
+    if (barH >= 16) {
+      const isOver = val > ceiling;
+      const labelColor = isOver ? 'var(--error)' : 'rgba(13,148,136,.9)';
+      svgContent += `
+        <text x="${cx}" y="${yTop - 3}"
+              font-family="'JetBrains Mono',monospace" font-size="8" font-weight="600"
+              fill="${labelColor}" text-anchor="middle">${formatINRCompact(val)}</text>
+      `;
+    }
+  });
+
+  svg.innerHTML = `
+    <defs>
+      <pattern id="hatch-current" x="0" y="0" width="6" height="6"
+               patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+        <rect width="3" height="6" fill="rgba(13,148,136,.72)"/>
+        <rect x="3" width="3" height="6" fill="rgba(13,148,136,.28)"/>
+      </pattern>
+    </defs>
+    ${svgContent}
+  `;
+}
+
+/* ─────────────────────────────────────────────
+   HELPERS
+───────────────────────────────────────────── */
+function formatINRCompact(rupees) {
+  if (rupees >= 100000) return '₹' + (rupees / 100000).toFixed(1) + 'L';
+  if (rupees >= 1000)   return '₹' + (rupees / 1000).toFixed(1) + 'K';
+  return '₹' + rupees;
+}
+
+/* ─────────────────────────────────────────────
+   DEMO BAR WIRING
+───────────────────────────────────────────── */
+document.querySelectorAll('.demo-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.demo-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyState(btn.dataset.state);
+  });
+});
+
+/* ── Bootstrap on load ── */
+applyState('on-track');
+</script>
+</body>
+</html>

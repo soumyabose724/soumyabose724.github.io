@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Burn Rate · Jun 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* ── Page content ── */
+    .page-content--burn {
+      padding: 0;
+      padding-top: calc(var(--top-bar-h) + 68px + var(--sp-4));
+      padding-bottom: calc(var(--bottom-nav-h) + var(--sp-10));
+      overflow-y: auto;
+    }
+
+    /* ── Summary strip (fixed below top bar) ── */
+    .summary-strip {
+      position: fixed;
+      top: calc(var(--demo-bar-h) + var(--top-bar-h));
+      left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: var(--page-max);
+      background: var(--surface-raised);
+      border-bottom: 1px solid var(--border);
+      padding: var(--sp-3) var(--sp-4);
+      z-index: 45;
+      display: flex; align-items: center; gap: var(--sp-4);
+      flex-wrap: wrap;
+      transition: background var(--dur-base) var(--ease-out),
+                  border-color var(--dur-base) var(--ease-out);
+    }
+    .summary-strip__item {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; color: var(--text-secondary);
+    }
+    .summary-strip__item strong {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+      font-weight: 600; color: var(--text-primary);
+      font-size: 12px;
+    }
+    .summary-strip__dot {
+      width: 3px; height: 3px; border-radius: 50%;
+      background: var(--border-strong); flex-shrink: 0;
+    }
+
+    /* ── Warning banner ── */
+    .warning-banner {
+      display: none;
+      align-items: center; gap: var(--sp-3);
+      padding: var(--sp-3) var(--sp-4);
+      border-radius: var(--r-lg);
+      font-size: 13px; font-weight: 500;
+      margin: 0 var(--sp-4) var(--sp-3);
+      animation: card-in var(--dur-med) var(--ease-out) both;
+    }
+    .warning-banner.visible { display: flex; }
+    .warning-banner--amber {
+      background: var(--warning-light);
+      border: 1px solid rgba(245,158,11,.28);
+      color: #92400E;
+    }
+    [data-theme="dark"] .warning-banner--amber { color: var(--warning); }
+    .warning-banner--red {
+      background: var(--error-light);
+      border: 1px solid rgba(233,69,96,.28);
+      color: var(--error);
+    }
+    .warning-banner__icon { font-size: 18px; flex-shrink: 0; }
+
+    /* ── Section heading with accent bar ── */
+    .section-heading {
+      font-size: 11px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--text-muted);
+      padding: var(--sp-5) var(--sp-4) var(--sp-3);
+      display: flex; align-items: center; gap: var(--sp-2);
+    }
+    .section-heading::before {
+      content: ''; width: 3px; height: 12px; border-radius: 2px;
+      background: var(--primary); flex-shrink: 0;
+    }
+
+    /* ── Chart card ── */
+    .chart-card {
+      margin: 0 var(--sp-4) var(--sp-2);
+      background: var(--glass-fill);
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      border: 1px solid var(--glass-border);
+      border-radius: var(--r-xl);
+      box-shadow: var(--glass-shadow);
+      padding: var(--sp-4) var(--sp-3) var(--sp-3);
+      animation: card-in var(--dur-med) var(--ease-out) both;
+    }
+    .chart-card svg {
+      width: 100%;
+      display: block;
+    }
+
+    /* ── Chart legend ── */
+    .chart-legend {
+      display: flex; align-items: center; gap: var(--sp-4);
+      padding: var(--sp-3) var(--sp-1) 0;
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11px; color: var(--text-secondary); font-weight: 500;
+    }
+    .legend-swatch {
+      width: 22px; height: 3px; border-radius: 2px; flex-shrink: 0;
+    }
+    .legend-swatch--actual  { background: var(--primary); }
+    .legend-swatch--ceiling {
+      background: var(--border-strong);
+      background-image: repeating-linear-gradient(
+        90deg, var(--border-strong) 0 4px, transparent 4px 7px
+      );
+    }
+    .legend-swatch--expected {
+      background: var(--text-muted);
+      background-image: repeating-linear-gradient(
+        90deg, var(--text-muted) 0 4px, transparent 4px 7px
+      );
+    }
+
+    /* ── Envelope breakdown table ── */
+    .env-table-card {
+      margin: 0 var(--sp-4) var(--sp-4);
+      background: var(--glass-fill);
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      border: 1px solid var(--glass-border);
+      border-radius: var(--r-xl);
+      box-shadow: var(--glass-shadow);
+      overflow: hidden;
+      animation: card-in var(--dur-med) var(--ease-out) 60ms both;
+    }
+
+    /* Header row */
+    .env-table-header {
+      display: grid;
+      grid-template-columns: 1fr 72px 72px 58px 88px;
+      gap: 0;
+      padding: var(--sp-2) var(--sp-4);
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-raised);
+    }
+    .env-table-header span {
+      font-size: 10px; font-weight: 700; letter-spacing: .07em;
+      text-transform: uppercase; color: var(--text-muted);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .env-table-header span:not(:first-child) { text-align: right; }
+
+    /* Data row */
+    .env-table-row {
+      display: grid;
+      grid-template-columns: 1fr 72px 72px 58px 88px;
+      gap: 0;
+      padding: var(--sp-3) var(--sp-4);
+      border-bottom: 1px solid var(--border);
+      align-items: center;
+      transition: background var(--dur-fast);
+    }
+    .env-table-row:last-child { border-bottom: none; }
+    .env-table-row:hover { background: var(--primary-xlight); }
+    .env-table-row--over { background: rgba(233,69,96,.03); }
+    .env-table-row--over:hover { background: rgba(233,69,96,.07); }
+
+    .env-table-row__name {
+      display: flex; align-items: center; gap: var(--sp-2);
+      font-size: 13px; font-weight: 500; color: var(--text-primary);
+      min-width: 0;
+    }
+    .env-table-row__emoji { font-size: 16px; flex-shrink: 0; }
+    .env-table-row__label {
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      font-size: 12px;
+    }
+    .env-table-row__budget {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+      font-size: 11px; font-weight: 500;
+      color: var(--text-muted); text-align: right;
+    }
+    .env-table-row__spent {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+      font-size: 12px; font-weight: 600;
+      color: var(--text-primary); text-align: right;
+    }
+    .env-table-row__spent--over { color: var(--error); }
+    .env-table-row__pct {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+      font-size: 12px; font-weight: 600;
+      text-align: right;
+      padding-right: var(--sp-2);
+    }
+    .env-table-row__status { text-align: right; }
+    .env-table-row .chip {
+      font-size: 10px; height: 20px; padding: 0 6px;
+    }
+
+    /* ── Today marker tooltip style ── */
+    .chart-today-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px; font-weight: 700;
+      fill: var(--primary);
+    }
+
+    /* ── Y-axis / X-axis label style ── */
+    .chart-axis-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      fill: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">State</span>
+    <button class="demo-btn active" data-state="on-track">On Track</button>
+    <button class="demo-btn" data-state="ahead">Spending Ahead</button>
+    <button class="demo-btn" data-state="overspent">Overspent</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="period.html" class="top-bar__back" aria-label="Back to budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Burn Rate — Jun 2026</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SUMMARY STRIP (fixed below top bar)
+  ═══════════════════════════════════════════ -->
+  <div class="summary-strip" id="summary-strip">
+    <div class="summary-strip__item">
+      <span>14 of 30 days elapsed</span>
+      <strong>(47%)</strong>
+    </div>
+    <div class="summary-strip__dot"></div>
+    <div class="summary-strip__item">
+      <span id="strip-spent-label">₹68,450 of ₹1,20,000 spent</span>
+      <strong id="strip-spent-pct">(57%)</strong>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content page-content--burn">
+
+    <!-- Warning banner -->
+    <div class="warning-banner warning-banner--amber" id="warning-amber">
+      <span class="warning-banner__icon">⚠</span>
+      <span>Spending is 10% ahead of monthly pace</span>
+    </div>
+    <div class="warning-banner warning-banner--red" id="warning-red">
+      <span class="warning-banner__icon">🔥</span>
+      <span>Budget overspent — <strong>₹4,500 over limit</strong></span>
+    </div>
+
+    <!-- ── Spending Pace Chart ── -->
+    <div class="section-heading">Spending Pace</div>
+
+    <div class="chart-card">
+      <!-- SVG line chart — viewBox 300×160, chart area x:[30,290] y:[10,140] -->
+      <svg viewBox="0 0 300 160" preserveAspectRatio="xMidYMid meet" style="height:180px;" id="burn-chart" aria-label="Burn rate line chart">
+
+        <!-- ── Y-axis grid lines & labels ── -->
+        <!-- ₹0 → y=140, ₹30K → y=107.5, ₹60K → y=75, ₹90K → y=42.5, ₹1.2L → y=10 -->
+
+        <!-- Grid lines -->
+        <line x1="30" y1="140" x2="290" y2="140" stroke="var(--border)" stroke-width="1"/>
+        <line x1="30" y1="107.5" x2="290" y2="107.5" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="30" y1="75" x2="290" y2="75" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="30" y1="42.5" x2="290" y2="42.5" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="30" y1="10" x2="290" y2="10" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="3,3"/>
+
+        <!-- Y-axis labels -->
+        <text class="chart-axis-label" x="26" y="143" text-anchor="end">₹0</text>
+        <text class="chart-axis-label" x="26" y="110.5" text-anchor="end">₹30K</text>
+        <text class="chart-axis-label" x="26" y="78" text-anchor="end">₹60K</text>
+        <text class="chart-axis-label" x="26" y="45.5" text-anchor="end">₹90K</text>
+        <text class="chart-axis-label" x="26" y="13" text-anchor="end">₹1.2L</text>
+
+        <!-- X-axis labels (days 1,5,10,15,20,25,30) -->
+        <!-- x scale: day d → x = 30 + (d-1)/(29) * 260 -->
+        <!-- day 1→30, day 5→65.9, day 10→110.3, day 15→154.8, day 20→199.3, day 25→243.8, day 30→290 -->
+        <text class="chart-axis-label" x="30"    y="154" text-anchor="middle">1</text>
+        <text class="chart-axis-label" x="65.9"  y="154" text-anchor="middle">5</text>
+        <text class="chart-axis-label" x="110.3" y="154" text-anchor="middle">10</text>
+        <text class="chart-axis-label" x="154.8" y="154" text-anchor="middle">15</text>
+        <text class="chart-axis-label" x="199.3" y="154" text-anchor="middle">20</text>
+        <text class="chart-axis-label" x="243.8" y="154" text-anchor="middle">25</text>
+        <text class="chart-axis-label" x="290"   y="154" text-anchor="middle">30</text>
+
+        <!-- ── Budget ceiling: horizontal dashed line at y=10 (₹1,20,000) ── -->
+        <line x1="30" y1="10" x2="290" y2="10"
+              stroke="var(--border-strong)" stroke-width="1.5"
+              stroke-dasharray="5,4" opacity="0.7"/>
+
+        <!-- ── Expected pace: diagonal dashed from (30,140) to (290,10) ── -->
+        <line x1="30" y1="140" x2="290" y2="10"
+              stroke="var(--text-muted)" stroke-width="1.5"
+              stroke-dasharray="5,4" opacity="0.6"/>
+
+        <!-- ── Today marker: vertical dashed line at day 14 ── -->
+        <!-- day 14 → x = 30 + 13/29 * 260 = 30 + 116.6 = 146.6 -->
+        <line id="today-line" x1="146.6" y1="10" x2="146.6" y2="140"
+              stroke="var(--primary)" stroke-width="1"
+              stroke-dasharray="3,3" opacity="0.7"/>
+        <text class="chart-today-label" id="today-label" x="148.6" y="22">Day 14</text>
+
+        <!-- ── Actual spend polyline (updated by JS) ── -->
+        <polyline id="actual-line"
+          fill="none"
+          stroke="var(--primary)"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          points=""/>
+
+        <!-- ── Data point dots (last point = current day) ── -->
+        <circle id="actual-dot" cx="146.6" cy="0" r="4"
+                fill="var(--primary)" stroke="var(--surface)" stroke-width="2"/>
+
+      </svg>
+
+      <!-- Legend -->
+      <div class="chart-legend">
+        <div class="legend-item">
+          <div class="legend-swatch legend-swatch--actual"></div>
+          <span>Actual Spend</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-swatch legend-swatch--expected"></div>
+          <span>Expected Pace</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-swatch legend-swatch--ceiling"></div>
+          <span>Budget ₹1,20,000</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Envelope Breakdown ── -->
+    <div class="section-heading">Envelope Breakdown</div>
+
+    <div class="env-table-card">
+      <!-- Header -->
+      <div class="env-table-header">
+        <span>Envelope</span>
+        <span>Budget</span>
+        <span>Spent</span>
+        <span>Burn%</span>
+        <span>Status</span>
+      </div>
+
+      <!-- Rows rendered by JS into #env-table-body -->
+      <div id="env-table-body"></div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       TOAST
+  ═══════════════════════════════════════════ -->
+  <div class="toast" id="toast" style="position:fixed;bottom:calc(var(--bottom-nav-h)+var(--sp-5));left:50%;transform:translateX(-50%);min-width:220px;max-width:340px;text-align:center;z-index:var(--z-toast);pointer-events:none;opacity:0;transition:opacity var(--dur-base) var(--ease-out),transform var(--dur-base) var(--ease-out);">
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAVIGATION (Budget tab active)
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" aria-label="Dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="#" class="nav-tab" aria-label="Transactions">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/>
+        <line x1="8" y1="12" x2="21" y2="12"/>
+        <line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/>
+        <line x1="3" y1="12" x2="3.01" y2="12"/>
+        <line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="index.html" class="nav-tab active" aria-label="Budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="#" class="nav-tab" aria-label="Invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" aria-label="More">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>
+      </svg>
+      <span>More</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script>
+/* ─────────────────────────────────────────────
+   THEME TOGGLE
+───────────────────────────────────────────── */
+(function () {
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+
+  function syncIcons() {
+    const cur = document.documentElement.getAttribute('data-theme') || 'light';
+    const icon = cur === 'dark' ? '☀️' : '🌙';
+    document.getElementById('theme-icon').textContent = icon;
+    document.querySelectorAll('[data-theme-icon]').forEach(el => el.textContent = icon);
+  }
+  syncIcons();
+
+  function toggleTheme() {
+    const cur = document.documentElement.getAttribute('data-theme') || 'light';
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    syncIcons();
+  }
+
+  document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn =>
+    btn.addEventListener('click', toggleTheme)
+  );
+})();
+
+/* ─────────────────────────────────────────────
+   TOAST
+───────────────────────────────────────────── */
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.opacity = '1';
+  el.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateX(-50%) translateY(6px)';
+  }, 2800);
+}
+
+/* ─────────────────────────────────────────────
+   CHART HELPERS
+   Chart area: x from 30 to 290 (260px wide), y from 10 to 140 (130px tall)
+   X: day d (1–30) → x = 30 + (d-1)/29 * 260
+   Y: amount (0–120000) → y = 140 - (amount/120000) * 130
+───────────────────────────────────────────── */
+const CHART_X_MIN = 30, CHART_X_MAX = 290;
+const CHART_Y_MIN = 10, CHART_Y_MAX = 140;
+const BUDGET = 120000;
+const DAYS_TOTAL = 30;
+const DAYS_ELAPSED = 14;
+
+function dayToX(d) {
+  return CHART_X_MIN + ((d - 1) / (DAYS_TOTAL - 1)) * (CHART_X_MAX - CHART_X_MIN);
+}
+function amtToY(amount) {
+  const clamped = Math.min(amount, BUDGET * 1.1); // allow slight overshoot
+  return CHART_Y_MAX - (clamped / BUDGET) * (CHART_Y_MAX - CHART_Y_MIN);
+}
+
+/* ─────────────────────────────────────────────
+   STATE DATA
+───────────────────────────────────────────── */
+const STATES = {
+  'on-track': {
+    stripSpent:   '₹68,450 of ₹1,20,000 spent',
+    stripPct:     '(57%)',
+    warning:      null,
+    // Cumulative daily spend (paise in rupees) up to day 14
+    // Day 1: housing EMI 38500, then ~1500–2000/day
+    dailySpend: [
+      38500, 40200, 41800, 43500, 45100,
+      46800, 48400, 50100, 52200, 54300,
+      56400, 60100, 63800, 68450
+    ],
+    envelopes: [
+      { emoji:'🏠', name:'Housing EMI', budget:'₹38,500', budgetRaw:38500, spent:'₹38,500', spentRaw:38500, pct:'100%', pctRaw:100, chipCls:'chip--confirmed', chipTxt:'On Track', over:false },
+      { emoji:'🛒', name:'Groceries',   budget:'₹12,000', budgetRaw:12000, spent:'₹8,200',  spentRaw:8200,  pct:'68%',  pctRaw:68,  chipCls:'chip--info',      chipTxt:'On Track', over:false },
+      { emoji:'🍽',  name:'Dining Out',  budget:'₹6,000',  budgetRaw:6000,  spent:'₹4,500',  spentRaw:4500,  pct:'75%',  pctRaw:75,  chipCls:'chip--at-risk',   chipTxt:'⚠ Ahead',  over:false },
+      { emoji:'⚡', name:'Utilities',   budget:'₹5,000',  budgetRaw:5000,  spent:'₹2,800',  spentRaw:2800,  pct:'56%',  pctRaw:56,  chipCls:'chip--on-track',  chipTxt:'On Track', over:false },
+      { emoji:'🏥', name:'Healthcare',  budget:'₹3,000',  budgetRaw:3000,  spent:'₹0',       spentRaw:0,     pct:'0%',   pctRaw:0,   chipCls:'chip--closed',    chipTxt:'Untouched',over:false },
+      { emoji:'💰', name:'SIP',          budget:'₹20,000', budgetRaw:20000, spent:'₹20,000', spentRaw:20000, pct:'100%', pctRaw:100, chipCls:'chip--confirmed', chipTxt:'On Track', over:false },
+    ]
+  },
+  'ahead': {
+    stripSpent:   '₹85,200 of ₹1,20,000 spent',
+    stripPct:     '(71%)',
+    warning:      'amber',
+    // Steeper curve — day 14: 85200
+    dailySpend: [
+      38500, 42500, 46200, 50100, 54000,
+      57800, 61500, 65300, 69200, 73000,
+      76500, 79800, 82600, 85200
+    ],
+    envelopes: [
+      { emoji:'🏠', name:'Housing EMI', budget:'₹38,500', budgetRaw:38500, spent:'₹38,500', spentRaw:38500, pct:'100%', pctRaw:100, chipCls:'chip--confirmed', chipTxt:'On Track', over:false },
+      { emoji:'🛒', name:'Groceries',   budget:'₹12,000', budgetRaw:12000, spent:'₹10,800', spentRaw:10800, pct:'90%',  pctRaw:90,  chipCls:'chip--at-risk',   chipTxt:'⚠ Ahead',  over:false },
+      { emoji:'🍽',  name:'Dining Out',  budget:'₹6,000',  budgetRaw:6000,  spent:'₹5,800',  spentRaw:5800,  pct:'97%',  pctRaw:97,  chipCls:'chip--at-risk',   chipTxt:'⚠ Ahead',  over:false },
+      { emoji:'⚡', name:'Utilities',   budget:'₹5,000',  budgetRaw:5000,  spent:'₹3,600',  spentRaw:3600,  pct:'72%',  pctRaw:72,  chipCls:'chip--info',      chipTxt:'On Track', over:false },
+      { emoji:'🏥', name:'Healthcare',  budget:'₹3,000',  budgetRaw:3000,  spent:'₹0',       spentRaw:0,     pct:'0%',   pctRaw:0,   chipCls:'chip--closed',    chipTxt:'Untouched',over:false },
+      { emoji:'💰', name:'SIP',          budget:'₹20,000', budgetRaw:20000, spent:'₹20,000', spentRaw:20000, pct:'100%', pctRaw:100, chipCls:'chip--confirmed', chipTxt:'On Track', over:false },
+    ]
+  },
+  'overspent': {
+    stripSpent:   '₹1,26,000 of ₹1,20,000 spent',
+    stripPct:     '(105%)',
+    warning:      'red',
+    // Crosses ceiling — day 14: 126000
+    dailySpend: [
+      38500, 46000, 54000, 62000, 70000,
+      78000, 86000, 94000, 100000, 106000,
+      110000, 116000, 120500, 126000
+    ],
+    envelopes: [
+      { emoji:'🏠', name:'Housing EMI', budget:'₹38,500', budgetRaw:38500, spent:'₹38,500', spentRaw:38500, pct:'100%', pctRaw:100, chipCls:'chip--confirmed', chipTxt:'On Track', over:false },
+      { emoji:'🛒', name:'Groceries',   budget:'₹12,000', budgetRaw:12000, spent:'₹14,200', spentRaw:14200, pct:'118%', pctRaw:118, chipCls:'chip--over',      chipTxt:'🔥 Overspent', over:true },
+      { emoji:'🍽',  name:'Dining Out',  budget:'₹6,000',  budgetRaw:6000,  spent:'₹6,500',  spentRaw:6500,  pct:'108%', pctRaw:108, chipCls:'chip--over',      chipTxt:'🔥 Overspent', over:true },
+      { emoji:'⚡', name:'Utilities',   budget:'₹5,000',  budgetRaw:5000,  spent:'₹4,800',  spentRaw:4800,  pct:'96%',  pctRaw:96,  chipCls:'chip--at-risk',   chipTxt:'⚠ Ahead',  over:false },
+      { emoji:'🏥', name:'Healthcare',  budget:'₹3,000',  budgetRaw:3000,  spent:'₹2,000',  spentRaw:2000,  pct:'67%',  pctRaw:67,  chipCls:'chip--info',      chipTxt:'On Track', over:false },
+      { emoji:'💰', name:'SIP',          budget:'₹20,000', budgetRaw:20000, spent:'₹20,000', spentRaw:20000, pct:'100%', pctRaw:100, chipCls:'chip--confirmed', chipTxt:'On Track', over:false },
+    ]
+  }
+};
+
+/* ─────────────────────────────────────────────
+   DRAW CHART
+───────────────────────────────────────────── */
+function drawChart(key) {
+  const s = STATES[key];
+  const dailySpend = s.dailySpend;
+
+  // Build polyline points for actual spend (days 1 to 14)
+  const pts = dailySpend.map((amt, i) => {
+    const day = i + 1;
+    const x = dayToX(day);
+    const y = amtToY(amt);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  });
+
+  const line = document.getElementById('actual-line');
+  line.setAttribute('points', pts.join(' '));
+
+  // Move dot to last actual point
+  const lastAmt = dailySpend[dailySpend.length - 1];
+  const lastX = dayToX(DAYS_ELAPSED);
+  const lastY = amtToY(lastAmt);
+  const dot = document.getElementById('actual-dot');
+  dot.setAttribute('cx', lastX.toFixed(1));
+  dot.setAttribute('cy', lastY.toFixed(1));
+
+  // Color the actual line based on state
+  if (key === 'overspent') {
+    line.setAttribute('stroke', 'var(--error)');
+    dot.setAttribute('fill', 'var(--error)');
+  } else if (key === 'ahead') {
+    line.setAttribute('stroke', 'var(--warning)');
+    dot.setAttribute('fill', 'var(--warning)');
+  } else {
+    line.setAttribute('stroke', 'var(--primary)');
+    dot.setAttribute('fill', 'var(--primary)');
+  }
+}
+
+/* ─────────────────────────────────────────────
+   RENDER ENVELOPE TABLE
+───────────────────────────────────────────── */
+function renderTable(key) {
+  const s = STATES[key];
+  const body = document.getElementById('env-table-body');
+  body.innerHTML = '';
+
+  s.envelopes.forEach(env => {
+    const row = document.createElement('div');
+    row.className = 'env-table-row' + (env.over ? ' env-table-row--over' : '');
+
+    // Burn% colour
+    let pctColor = 'var(--text-secondary)';
+    if (env.pctRaw >= 100) pctColor = 'var(--error)';
+    else if (env.pctRaw >= 85) pctColor = 'var(--warning)';
+    else if (env.pctRaw >= 50) pctColor = 'var(--primary)';
+
+    const spentClass = env.over ? 'env-table-row__spent env-table-row__spent--over' : 'env-table-row__spent';
+
+    row.innerHTML = `
+      <div class="env-table-row__name">
+        <span class="env-table-row__emoji">${env.emoji}</span>
+        <span class="env-table-row__label">${env.name}</span>
+      </div>
+      <div class="env-table-row__budget">${env.budget}</div>
+      <div class="${spentClass}">${env.spent}</div>
+      <div class="env-table-row__pct" style="color:${pctColor};">${env.pct}</div>
+      <div class="env-table-row__status">
+        <span class="chip ${env.chipCls}">${env.chipTxt}</span>
+      </div>
+    `;
+    body.appendChild(row);
+  });
+}
+
+/* ─────────────────────────────────────────────
+   APPLY STATE
+───────────────────────────────────────────── */
+function applyState(key) {
+  const s = STATES[key];
+
+  // Summary strip
+  document.getElementById('strip-spent-label').textContent = s.stripSpent;
+  document.getElementById('strip-spent-pct').textContent   = s.stripPct;
+
+  // Warning banners
+  const bannerAmber = document.getElementById('warning-amber');
+  const bannerRed   = document.getElementById('warning-red');
+  bannerAmber.classList.toggle('visible', s.warning === 'amber');
+  bannerRed.classList.toggle('visible',   s.warning === 'red');
+
+  // Chart
+  drawChart(key);
+
+  // Table
+  renderTable(key);
+}
+
+/* ─────────────────────────────────────────────
+   DEMO BAR WIRING
+───────────────────────────────────────────── */
+document.querySelectorAll('.demo-btn[data-state]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.demo-btn[data-state]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyState(btn.dataset.state);
+    toast('State: ' + btn.textContent.trim());
+  });
+});
+
+/* ─────────────────────────────────────────────
+   INITIAL RENDER
+───────────────────────────────────────────── */
+applyState('on-track');
+</script>
+</body>
+</html>

@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Sweep Rules</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+
+    /* ── Page layout ── */
+    .page-content--sweep {
+      padding: 0;
+      padding-top: calc(var(--top-bar-h) + var(--sp-4));
+      padding-bottom: calc(var(--bottom-nav-h) + var(--sp-10));
+      overflow-y: auto;
+    }
+
+    /* ── Intro blurb ── */
+    .sweep-intro {
+      font-size: 13px;
+      color: var(--text-secondary);
+      padding: 0 var(--sp-4);
+      margin-bottom: var(--sp-4);
+      line-height: 1.55;
+    }
+
+    /* ── Rule card ── */
+    .rule-card {
+      background: var(--surface-raised);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: var(--sp-4);
+      margin: 0 var(--sp-3) var(--sp-3);
+      animation: card-in var(--dur-med) var(--ease-out) both;
+      transition: background var(--dur-fast), border-color var(--dur-fast),
+                  box-shadow var(--dur-fast);
+    }
+    .rule-card:hover {
+      box-shadow: var(--sh-md);
+      border-color: var(--border-strong);
+    }
+
+    /* Card header row */
+    .rule-card__header {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+      margin-bottom: var(--sp-3);
+    }
+    .rule-card__priority {
+      /* teal chip for rule number */
+      display: inline-flex; align-items: center;
+      height: 22px; padding: 0 9px;
+      background: var(--primary-light);
+      color: var(--primary);
+      border: 1px solid rgba(13,148,136,.3);
+      border-radius: var(--r-sm);
+      font-size: 10px; font-weight: 800;
+      letter-spacing: .07em; text-transform: uppercase;
+    }
+    .rule-card__spacer { flex: 1; }
+    .rule-card__actions {
+      display: flex; gap: 4px; align-items: center;
+    }
+
+    /* Edit / delete icon buttons (small) */
+    .rule-btn {
+      width: 32px; height: 32px; border-radius: var(--r-full);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-muted);
+      transition: background var(--dur-fast), color var(--dur-fast);
+      cursor: pointer; background: none; border: none;
+      flex-shrink: 0;
+    }
+    .rule-btn:hover { background: var(--surface); color: var(--text-primary); }
+    .rule-btn--delete:hover { background: var(--error-light); color: var(--error); }
+
+    /* Row: label + value */
+    .rule-card__row {
+      display: flex; align-items: baseline; gap: var(--sp-2);
+      margin-bottom: var(--sp-2);
+    }
+    .rule-card__row:last-child { margin-bottom: 0; }
+    .rule-card__label {
+      font-size: 11px; font-weight: 700; letter-spacing: .06em;
+      text-transform: uppercase; color: var(--text-muted);
+      flex-shrink: 0; min-width: 60px;
+    }
+    .rule-card__value {
+      font-size: 14px; font-weight: 500; color: var(--text-primary);
+      flex: 1; min-width: 0;
+      display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap;
+    }
+    .rule-card__value .t-mono {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+      color: var(--primary); font-weight: 700;
+    }
+
+    /* ── Empty state ── */
+    .sweep-empty {
+      display: flex; flex-direction: column; align-items: center;
+      text-align: center;
+      padding: var(--sp-10) var(--sp-6);
+      animation: fade-in var(--dur-med) var(--ease-out) both;
+    }
+    .sweep-empty__icon { font-size: 48px; margin-bottom: var(--sp-4); }
+    .sweep-empty__title {
+      font-size: 18px; font-weight: 700; color: var(--text-primary);
+      margin-bottom: var(--sp-2);
+    }
+    .sweep-empty__sub {
+      font-size: 14px; color: var(--text-muted);
+      line-height: 1.55; margin-bottom: var(--sp-6);
+    }
+
+    /* ── Add Rule top-bar button ── */
+    .btn--sm-primary {
+      height: 32px; padding: 0 var(--sp-3);
+      background: var(--primary); color: #fff;
+      border: none; border-radius: var(--r-md);
+      font-size: 13px; font-weight: 600;
+      cursor: pointer; display: flex; align-items: center; gap: 5px;
+      transition: box-shadow var(--dur-fast), background var(--dur-fast);
+      white-space: nowrap;
+    }
+    .btn--sm-primary:hover { box-shadow: 0 4px 14px rgba(13,148,136,.35); }
+
+    /* ── Sheet form fields ── */
+    .ae-field { margin-bottom: var(--sp-4); }
+    .ae-field__label {
+      display: block;
+      font-size: 11px; font-weight: 700;
+      letter-spacing: .07em; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: var(--sp-2);
+    }
+    .ae-field__input {
+      width: 100%; box-sizing: border-box; height: 44px;
+      background: var(--surface-raised); border: 1.5px solid var(--border);
+      border-radius: var(--r-lg); padding: 0 var(--sp-3);
+      font-size: 15px; font-weight: 500; color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      transition: border-color var(--dur-fast), box-shadow var(--dur-fast);
+    }
+    .ae-field__input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(13,148,136,.12);
+    }
+    .ae-field__input::placeholder { color: var(--text-muted); }
+    select.ae-field__input {
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2378716C' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 36px;
+      cursor: pointer;
+    }
+    select.ae-field__input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(13,148,136,.12);
+    }
+
+    /* ── Divider in rules list ── */
+    .rules-divider {
+      height: 1px; background: var(--border);
+      margin: 0 var(--sp-3) var(--sp-3);
+    }
+
+    /* ── Info banner (what sweep rules do) ── */
+    .sweep-info-banner {
+      margin: 0 var(--sp-3) var(--sp-4);
+      background: var(--info-light);
+      border: 1px solid rgba(59,130,246,.22);
+      border-radius: var(--r-lg);
+      padding: var(--sp-3) var(--sp-4);
+      display: flex; align-items: flex-start; gap: var(--sp-3);
+      font-size: 12px; color: var(--info); line-height: 1.5;
+    }
+    .sweep-info-banner__icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+    /* ── Section heading ── */
+    .rules-section-heading {
+      font-size: 11px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--text-muted);
+      padding: var(--sp-2) var(--sp-4) var(--sp-3);
+      display: flex; align-items: center; gap: var(--sp-2);
+    }
+    .rules-section-heading::before {
+      content: ''; width: 3px; height: 12px; border-radius: 2px;
+      background: var(--primary); flex-shrink: 0;
+    }
+
+    /* ── Toast (legacy single-element style used here) ── */
+    .toast {
+      position: fixed;
+      top: calc(var(--demo-bar-h) + var(--top-bar-h) + var(--sp-2));
+      left: 50%; transform: translateX(-50%) translateY(-12px) scale(.95);
+      z-index: var(--z-toast);
+      padding: var(--sp-3) var(--sp-5);
+      border-radius: var(--r-xl);
+      font-size: 13px; font-weight: 600;
+      background: rgba(34,197,94,.15);
+      border: 1px solid rgba(34,197,94,.3);
+      color: var(--success);
+      box-shadow: var(--sh-lg);
+      backdrop-filter: blur(8px);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity var(--dur-base) var(--ease-out),
+                  transform var(--dur-base) var(--ease-spring);
+      white-space: nowrap;
+    }
+    .toast.visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0) scale(1);
+    }
+    .toast--error {
+      background: rgba(233,69,96,.15);
+      border-color: rgba(233,69,96,.3);
+      color: var(--error);
+    }
+
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">State</span>
+    <button class="demo-btn active" data-state="has-rules">Has Rules</button>
+    <button class="demo-btn" data-state="empty">Empty</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="period.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Sweep Rules</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="btn--sm-primary" id="add-rule-btn" onclick="openAddRule(null)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Add Rule
+      </button>
+      <button class="icon-btn" id="theme-toggle-2" aria-label="Toggle theme">
+        <span id="theme-icon-2" style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content page-content--sweep" id="page-content">
+
+    <!-- ── Intro blurb ── -->
+    <p class="sweep-intro">
+      Sweep rules suggest how to allocate unspent income. They never move real money — you always confirm before applying.
+    </p>
+
+    <!-- ── Has Rules State ── -->
+    <div id="view-has-rules">
+
+      <!-- Info banner -->
+      <div class="sweep-info-banner">
+        <span class="sweep-info-banner__icon">ℹ️</span>
+        <span>Rules run top-to-bottom when you press <strong>Sweep ✨</strong> on the budget screen. Drag to reorder (coming soon).</span>
+      </div>
+
+      <div class="rules-section-heading">Active Rules</div>
+
+      <!-- Rule 1 — TOP_UP -->
+      <div class="rule-card" id="rule-card-0" style="animation-delay:0ms;">
+        <div class="rule-card__header">
+          <span class="rule-card__priority">Rule 1</span>
+          <span class="rule-card__spacer"></span>
+          <div class="rule-card__actions">
+            <button class="rule-btn" aria-label="Edit rule 1" onclick="openAddRule(0)" title="Edit">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+            </button>
+            <button class="rule-btn rule-btn--delete" aria-label="Delete rule 1" onclick="deleteRule(0)" title="Delete">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                <path d="M10 11v6"/><path d="M14 11v6"/>
+                <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="rule-card__row">
+          <span class="rule-card__label">Income</span>
+          <span class="rule-card__value">Salary (You)</span>
+        </div>
+        <div class="rule-card__row">
+          <span class="rule-card__label">Action</span>
+          <span class="rule-card__value">
+            Top-up <strong>🛒 Groceries</strong> to <span class="t-mono">₹12,000</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Rule 2 — FILL -->
+      <div class="rule-card" id="rule-card-1" style="animation-delay:60ms;">
+        <div class="rule-card__header">
+          <span class="rule-card__priority">Rule 2</span>
+          <span class="rule-card__spacer"></span>
+          <div class="rule-card__actions">
+            <button class="rule-btn" aria-label="Edit rule 2" onclick="openAddRule(1)" title="Edit">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+            </button>
+            <button class="rule-btn rule-btn--delete" aria-label="Delete rule 2" onclick="deleteRule(1)" title="Delete">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                <path d="M10 11v6"/><path d="M14 11v6"/>
+                <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="rule-card__row">
+          <span class="rule-card__label">Income</span>
+          <span class="rule-card__value">All Sources</span>
+        </div>
+        <div class="rule-card__row">
+          <span class="rule-card__label">Action</span>
+          <span class="rule-card__value">
+            Fill <strong>💸 Emergency Fund</strong> to <span class="t-mono">₹10,000</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Rule 3 — REMAINDER_TO -->
+      <div class="rule-card" id="rule-card-2" style="animation-delay:120ms;">
+        <div class="rule-card__header">
+          <span class="rule-card__priority">Rule 3</span>
+          <span class="chip chip--info" style="font-size:10px; height:20px; padding:0 7px; letter-spacing:.04em;">Remainder</span>
+          <span class="rule-card__spacer"></span>
+          <div class="rule-card__actions">
+            <button class="rule-btn" aria-label="Edit rule 3" onclick="openAddRule(2)" title="Edit">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+            </button>
+            <button class="rule-btn rule-btn--delete" aria-label="Delete rule 3" onclick="deleteRule(2)" title="Delete">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                <path d="M10 11v6"/><path d="M14 11v6"/>
+                <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="rule-card__row">
+          <span class="rule-card__label">Income</span>
+          <span class="rule-card__value">Salary (You)</span>
+        </div>
+        <div class="rule-card__row">
+          <span class="rule-card__label">Action</span>
+          <span class="rule-card__value">
+            Remainder →&nbsp;<strong>🏠 Housing EMI</strong>
+          </span>
+        </div>
+      </div>
+
+    </div>
+    <!-- /view-has-rules -->
+
+    <!-- ── Empty State ── -->
+    <div id="view-empty" style="display:none;">
+      <div class="sweep-empty">
+        <div class="sweep-empty__icon">✨</div>
+        <div class="sweep-empty__title">No Sweep Rules</div>
+        <div class="sweep-empty__sub">Add rules to auto-suggest how income gets allocated when you press Sweep.</div>
+        <button class="btn btn--primary" onclick="openAddRule(null)">+ Create First Rule</button>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       SHEET BACKDROP + ADD/EDIT RULE SHEET
+  ═══════════════════════════════════════════ -->
+  <div class="sheet-backdrop" id="rule-backdrop" onclick="closeRuleSheet()"></div>
+  <div class="sheet" id="rule-sheet">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <span class="sheet__title" id="rule-sheet-title">New Rule</span>
+      <button class="sheet__close" onclick="closeRuleSheet()" aria-label="Close">✕</button>
+    </div>
+    <div class="sheet__body">
+
+      <!-- Income source -->
+      <div class="ae-field">
+        <label class="ae-field__label" for="rule-income">Income Source</label>
+        <select class="ae-field__input" id="rule-income">
+          <option value="all">All Sources</option>
+          <option value="salary">Salary (You)</option>
+          <option value="pension">Pension (Mother)</option>
+        </select>
+      </div>
+
+      <!-- Action type -->
+      <div class="ae-field">
+        <label class="ae-field__label" for="rule-action">Action</label>
+        <select class="ae-field__input" id="rule-action" onchange="onActionChange()">
+          <option value="TOP_UP">Top-up envelope to target</option>
+          <option value="FILL">Fill envelope to exact amount</option>
+          <option value="FIXED_AMOUNT">Add fixed amount to envelope</option>
+          <option value="REMAINDER_TO">Dump remainder into envelope</option>
+        </select>
+      </div>
+
+      <!-- Target envelope -->
+      <div class="ae-field">
+        <label class="ae-field__label" for="rule-envelope">Envelope</label>
+        <select class="ae-field__input" id="rule-envelope">
+          <option value="groceries">🛒 Groceries</option>
+          <option value="dining">🍽 Dining Out</option>
+          <option value="housing">🏠 Housing EMI</option>
+          <option value="emergency">💸 Emergency Fund</option>
+          <option value="sip">💰 SIP Investments</option>
+          <option value="utilities">⚡ Utilities</option>
+          <option value="fuel">🚗 Fuel</option>
+          <option value="mobile">📱 Mobile/Internet</option>
+        </select>
+      </div>
+
+      <!-- Amount (hidden for REMAINDER_TO) -->
+      <div class="ae-field" id="rule-amount-field">
+        <label class="ae-field__label" id="rule-amount-label" for="rule-amount">Target Amount (₹)</label>
+        <input class="ae-field__input" id="rule-amount" type="text" inputmode="numeric"
+               placeholder="e.g. 12,000" autocomplete="off">
+      </div>
+
+      <!-- Priority -->
+      <div class="ae-field">
+        <label class="ae-field__label" for="rule-priority">Priority</label>
+        <input class="ae-field__input" id="rule-priority" type="number"
+               min="1" max="99" value="1" placeholder="1">
+      </div>
+
+      <!-- Helper text -->
+      <p style="font-size:12px; color:var(--text-muted); margin-top:calc(-1 * var(--sp-2)); margin-bottom:var(--sp-2); line-height:1.5;">
+        Lower priority number runs first. Rules with the same priority run in order added.
+      </p>
+
+    </div><!-- /sheet__body -->
+    <div class="sheet__footer">
+      <button class="btn btn--ghost" onclick="closeRuleSheet()">Cancel</button>
+      <button class="btn btn--primary" onclick="confirmRule()">Save Rule</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOAST
+  ═══════════════════════════════════════════ -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" aria-label="Dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+           stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7" rx="1"/>
+        <rect x="14" y="3" width="7" height="7" rx="1"/>
+        <rect x="3" y="14" width="7" height="7" rx="1"/>
+        <rect x="14" y="14" width="7" height="7" rx="1"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" aria-label="Transactions">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+           stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="1" x2="12" y2="23"/>
+        <path d="M17 5H9.5a3.5 3.5 0 1 0 0 7h5a3.5 3.5 0 1 1 0 7H6"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="index.html" class="nav-tab active" aria-label="Budget">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+           stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="3" width="20" height="14" rx="2"/>
+        <line x1="8" y1="21" x2="16" y2="21"/>
+        <line x1="12" y1="17" x2="12" y2="21"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../investments/index.html" class="nav-tab" aria-label="Invest">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+           stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="../settings/index.html" class="nav-tab" aria-label="More">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+           stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
+      </svg>
+      <span>More</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script>
+/* ─────────────────────────────────────────────
+   THEME
+───────────────────────────────────────────── */
+(function () {
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+
+  function syncIcons(theme) {
+    const icon = theme === 'dark' ? '☀️' : '🌙';
+    document.getElementById('theme-icon').textContent = icon;
+    document.getElementById('theme-icon-2').textContent = icon;
+  }
+
+  // initialise icon to reflect stored theme
+  syncIcons(stored || 'light');
+
+  function toggleTheme() {
+    const cur = document.documentElement.getAttribute('data-theme') || 'light';
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    syncIcons(next);
+  }
+
+  document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+  document.getElementById('theme-toggle-2').addEventListener('click', toggleTheme);
+})();
+
+/* ─────────────────────────────────────────────
+   TOAST
+───────────────────────────────────────────── */
+let toastTimer;
+function toast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast' + (type === 'error' ? ' toast--error' : '') + ' visible';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('visible'), 2800);
+}
+
+/* ─────────────────────────────────────────────
+   DEMO STATE DATA
+───────────────────────────────────────────── */
+// Mutable rule list — starts as the three demo rules.
+// Each rule card exists in the DOM; we show/hide by index.
+// In a real app this would be driven by the DB.
+const RULES = [
+  {
+    priority: 1,
+    income: 'salary',
+    action: 'TOP_UP',
+    envelope: 'groceries',
+    amount: 12000,
+    label: 'Top-up 🛒 Groceries to ₹12,000',
+  },
+  {
+    priority: 2,
+    income: 'all',
+    action: 'FILL',
+    envelope: 'emergency',
+    amount: 10000,
+    label: 'Fill 💸 Emergency Fund to ₹10,000',
+  },
+  {
+    priority: 3,
+    income: 'salary',
+    action: 'REMAINDER_TO',
+    envelope: 'housing',
+    amount: null,
+    label: 'Remainder → 🏠 Housing EMI',
+  },
+];
+
+/* ─────────────────────────────────────────────
+   DEMO BAR
+───────────────────────────────────────────── */
+function applyState(key) {
+  document.querySelectorAll('.demo-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.state === key);
+  });
+
+  const viewRules = document.getElementById('view-has-rules');
+  const viewEmpty = document.getElementById('view-empty');
+
+  if (key === 'has-rules') {
+    viewRules.style.display = '';
+    viewEmpty.style.display  = 'none';
+  } else {
+    viewRules.style.display = 'none';
+    viewEmpty.style.display  = '';
+  }
+}
+
+document.querySelectorAll('.demo-btn').forEach(btn => {
+  btn.addEventListener('click', () => applyState(btn.dataset.state));
+});
+
+// Apply initial state
+applyState('has-rules');
+
+/* ─────────────────────────────────────────────
+   SHEET: OPEN / CLOSE
+───────────────────────────────────────────── */
+let editingIndex = null; // null = new rule; 0/1/2 = editing existing
+
+const INCOME_LABELS = {
+  all: 'All Sources',
+  salary: 'Salary (You)',
+  pension: 'Pension (Mother)',
+};
+
+const ACTION_LABELS = {
+  TOP_UP:        'Top-up envelope to target',
+  FILL:          'Fill envelope to exact amount',
+  FIXED_AMOUNT:  'Add fixed amount to envelope',
+  REMAINDER_TO:  'Dump remainder into envelope',
+};
+
+const ENVELOPE_LABELS = {
+  groceries: '🛒 Groceries',
+  dining:    '🍽 Dining Out',
+  housing:   '🏠 Housing EMI',
+  emergency: '💸 Emergency Fund',
+  sip:       '💰 SIP Investments',
+  utilities: '⚡ Utilities',
+  fuel:      '🚗 Fuel',
+  mobile:    '📱 Mobile/Internet',
+};
+
+function openAddRule(idx) {
+  editingIndex = idx;
+
+  document.getElementById('rule-sheet-title').textContent =
+    idx === null ? 'New Rule' : 'Edit Rule';
+
+  if (idx !== null && RULES[idx]) {
+    const r = RULES[idx];
+    document.getElementById('rule-income').value   = r.income;
+    document.getElementById('rule-action').value   = r.action;
+    document.getElementById('rule-envelope').value = r.envelope;
+    document.getElementById('rule-amount').value   =
+      r.amount !== null ? r.amount.toLocaleString('en-IN') : '';
+    document.getElementById('rule-priority').value = r.priority;
+  } else {
+    // Defaults for new rule
+    document.getElementById('rule-income').value   = 'salary';
+    document.getElementById('rule-action').value   = 'TOP_UP';
+    document.getElementById('rule-envelope').value = 'groceries';
+    document.getElementById('rule-amount').value   = '';
+    document.getElementById('rule-priority').value = RULES.length + 1;
+  }
+
+  onActionChange(); // sync amount field visibility + label
+
+  document.getElementById('rule-backdrop').classList.add('open');
+  document.getElementById('rule-sheet').classList.add('open');
+}
+
+function closeRuleSheet() {
+  document.getElementById('rule-backdrop').classList.remove('open');
+  document.getElementById('rule-sheet').classList.remove('open');
+}
+
+/* ─────────────────────────────────────────────
+   ACTION CHANGE HANDLER
+───────────────────────────────────────────── */
+function onActionChange() {
+  const action = document.getElementById('rule-action').value;
+  const amountField = document.getElementById('rule-amount-field');
+  const amountLabel = document.getElementById('rule-amount-label');
+
+  if (action === 'REMAINDER_TO') {
+    amountField.style.display = 'none';
+  } else {
+    amountField.style.display = '';
+    if (action === 'TOP_UP') {
+      amountLabel.textContent = 'Top-up Target (₹)';
+    } else if (action === 'FILL') {
+      amountLabel.textContent = 'Fill Amount (₹)';
+    } else if (action === 'FIXED_AMOUNT') {
+      amountLabel.textContent = 'Fixed Amount (₹)';
+    }
+  }
+}
+
+/* ─────────────────────────────────────────────
+   CONFIRM / SAVE RULE
+───────────────────────────────────────────── */
+function confirmRule() {
+  const income   = document.getElementById('rule-income').value;
+  const action   = document.getElementById('rule-action').value;
+  const envelope = document.getElementById('rule-envelope').value;
+  const amtRaw   = document.getElementById('rule-amount').value.replace(/,/g, '');
+  const priority = parseInt(document.getElementById('rule-priority').value, 10) || 1;
+
+  // Validate amount when needed
+  if (action !== 'REMAINDER_TO') {
+    const amt = parseInt(amtRaw, 10);
+    if (!amtRaw || isNaN(amt) || amt <= 0) {
+      document.getElementById('rule-amount').style.borderColor = 'var(--error)';
+      document.getElementById('rule-amount').focus();
+      toast('Please enter a valid amount', 'error');
+      return;
+    }
+    document.getElementById('rule-amount').style.borderColor = '';
+  }
+
+  const amount = action !== 'REMAINDER_TO' ? parseInt(amtRaw, 10) : null;
+
+  // Build human-readable label
+  const envLabel = ENVELOPE_LABELS[envelope] || envelope;
+  let label;
+  if (action === 'TOP_UP') {
+    label = 'Top-up ' + envLabel + ' to ₹' + (amount || 0).toLocaleString('en-IN');
+  } else if (action === 'FILL') {
+    label = 'Fill ' + envLabel + ' to ₹' + (amount || 0).toLocaleString('en-IN');
+  } else if (action === 'FIXED_AMOUNT') {
+    label = 'Add ₹' + (amount || 0).toLocaleString('en-IN') + ' to ' + envLabel;
+  } else {
+    label = 'Remainder → ' + envLabel;
+  }
+
+  const newRule = { priority, income, action, envelope, amount, label };
+
+  if (editingIndex !== null) {
+    RULES[editingIndex] = newRule;
+  } else {
+    RULES.push(newRule);
+  }
+
+  closeRuleSheet();
+  toast('Rule saved ✓');
+
+  // Ensure the has-rules view is shown
+  applyState('has-rules');
+  document.querySelector('[data-state="has-rules"]').classList.add('active');
+  document.querySelector('[data-state="empty"]').classList.remove('active');
+}
+
+/* ─────────────────────────────────────────────
+   DELETE RULE
+───────────────────────────────────────────── */
+function deleteRule(idx) {
+  const card = document.getElementById('rule-card-' + idx);
+  if (card) {
+    card.style.transition = 'opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out)';
+    card.style.opacity = '0';
+    card.style.transform = 'scale(0.95)';
+    setTimeout(() => {
+      card.remove();
+      RULES.splice(idx, 1);
+      toast('Rule deleted');
+
+      // If no rules remain, switch to empty state
+      const remaining = document.querySelectorAll('.rule-card');
+      if (remaining.length === 0) {
+        applyState('empty');
+      }
+    }, 200);
+  }
+}
+</script>
+</body>
+</html>
