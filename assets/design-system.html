@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Design System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .ds-section { margin-bottom: var(--sp-8); }
+    .ds-section__title {
+      font-size: 12px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--text-muted);
+      margin-bottom: var(--sp-3);
+      display: flex; align-items: center; gap: var(--sp-2);
+    }
+    .ds-section__title::before {
+      content: ''; width: 3px; height: 12px; border-radius: 2px;
+      background: var(--primary); flex-shrink: 0;
+    }
+    .ds-row { display: flex; flex-wrap: wrap; gap: var(--sp-2); align-items: center; }
+    .ds-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: var(--sp-4);
+    }
+    .ds-card + .ds-card { margin-top: var(--sp-3); }
+    .ds-label {
+      font-size: 11px; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: .05em; margin-bottom: var(--sp-2);
+    }
+
+    /* ── Color swatches ── */
+    .swatch-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-3); }
+    .swatch { display: flex; flex-direction: column; gap: var(--sp-2); }
+    .swatch__block {
+      height: 48px; border-radius: var(--r-md); border: 1px solid var(--border);
+    }
+    .swatch__name { font-size: 11px; font-weight: 600; color: var(--text-primary); }
+    .swatch__value { font-size: 10px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+
+    /* ── Segmented tabs (illustrative — not yet a shared component) ── */
+    .ds-tabs {
+      display: flex; background: var(--surface-raised); border-radius: var(--r-md);
+      padding: 3px; gap: 2px;
+    }
+    .ds-tab {
+      flex: 1; text-align: center; padding: var(--sp-2) var(--sp-3);
+      font-size: 13px; font-weight: 600; color: var(--text-secondary);
+      border-radius: var(--r-sm); cursor: pointer;
+      transition: background var(--dur-fast), color var(--dur-fast), box-shadow var(--dur-fast);
+    }
+    .ds-tab.active { background: var(--surface); color: var(--primary); box-shadow: var(--sh-sm); }
+
+    /* ── Alert / banner (illustrative — pages compose this locally from tokens) ── */
+    .ds-alert {
+      display: flex; align-items: center; gap: var(--sp-3);
+      padding: var(--sp-3) var(--sp-4); border-radius: var(--r-lg);
+      font-size: 13px; font-weight: 500;
+    }
+    .ds-alert--info    { background: var(--info-light);    color: var(--info); }
+    .ds-alert--success { background: var(--success-light); color: var(--success); }
+    .ds-alert--warning { background: var(--warning-light); color: var(--warning); }
+    .ds-alert--error   { background: var(--error-light);   color: var(--error); }
+
+    /* ── FAB shown inline for the showcase (real usage is position:fixed) ── */
+    .ds-fab-demo { position: static !important; margin: 0 auto; }
+
+    /* ── Ring demo container ── */
+    .ds-ring-row { display: flex; gap: var(--sp-6); align-items: center; }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">ArthaGrid Design System</span>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="../index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Design System</span>
+    <div class="top-bar__actions">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content">
+
+    <p class="t-body-sm text-secondary" style="margin-bottom:var(--sp-6);">
+      Every component variant used across the ArthaGrid prototype, pulled directly from
+      <code class="t-mono" style="font-size:12px;">assets/style.css</code>. This page is the reference for new screens —
+      reuse these classes instead of inventing new ones. Toggle dark mode above to verify both themes.
+    </p>
+
+    <!-- ── Typography ── -->
+    <div class="ds-section">
+      <div class="ds-section__title">Typography</div>
+      <div class="ds-card">
+        <div class="t-display">Display 32</div>
+        <div class="t-display-sm mt-2">Display SM 24</div>
+        <div class="t-h1 mt-2">Heading 1 · 22</div>
+        <div class="t-h2 mt-2">Heading 2 · 18</div>
+        <div class="t-h3 mt-2">Heading 3 · 15</div>
+        <div class="t-body-lg mt-2">Body Large · 15</div>
+        <div class="t-body mt-2">Body · 14</div>
+        <div class="t-body-sm mt-2">Body Small · 13</div>
+        <div class="t-caption mt-2 text-secondary">Caption · 12</div>
+        <div class="t-label mt-2 text-muted">Label · 12 uppercase</div>
+        <div class="t-mono mt-2">₹1,23,45,678.00 — mono figures</div>
+      </div>
+    </div>
+
+    <!-- ── Colors ── -->
+    <div class="ds-section">
+      <div class="ds-section__title">Color Tokens</div>
+      <div class="ds-card">
+        <div class="swatch-grid">
+          <div class="swatch"><div class="swatch__block" style="background:var(--primary);"></div><span class="swatch__name">Primary</span><span class="swatch__value">--primary</span></div>
+          <div class="swatch"><div class="swatch__block" style="background:var(--error);"></div><span class="swatch__name">Error</span><span class="swatch__value">--error</span></div>
+          <div class="swatch"><div class="swatch__block" style="background:var(--warning);"></div><span class="swatch__name">Warning</span><span class="swatch__value">--warning</span></div>
+          <div class="swatch"><div class="swatch__block" style="background:var(--success);"></div><span class="swatch__name">Success</span><span class="swatch__value">--success</span></div>
+          <div class="swatch"><div class="swatch__block" style="background:var(--info);"></div><span class="swatch__name">Info</span><span class="swatch__value">--info</span></div>
+          <div class="swatch"><div class="swatch__block" style="background:var(--grad-primary);"></div><span class="swatch__name">Grad Primary</span><span class="swatch__value">--grad-primary</span></div>
+          <div class="swatch"><div class="swatch__block" style="background:var(--surface); border:1px solid var(--border);"></div><span class="swatch__name">Surface</span><span class="swatch__value">--surface</span></div>
+          <div class="swatch"><div class="swatch__block" style="background:var(--surface-raised);"></div><span class="swatch__name">Surface Raised</span><span class="swatch__value">--surface-raised</span></div>
+          <div class="swatch"><div class="swatch__block" style="background:var(--bg); border:1px solid var(--border);"></div><span class="swatch__name">Canvas</span><span class="swatch__value">--bg</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Buttons ── -->
+    <div class="ds-section">
+      <div class="ds-section__title">Buttons</div>
+      <div class="ds-card">
+        <div class="ds-label">Variants</div>
+        <div class="ds-row mb-4">
+          <button class="btn btn--primary">Primary</button>
+          <button class="btn btn--secondary">Secondary</button>
+          <button class="btn btn--ghost">Ghost</button>
+          <button class="btn btn--danger">Danger</button>
+          <button class="btn btn--primary" disabled>Disabled</button>
+        </div>
+        <div class="ds-label">Sizes</div>
+        <div class="ds-row">
+          <button class="btn btn--primary btn--sm">Small</button>
+          <button class="btn btn--primary">Default</button>
+          <button class="btn btn--primary btn--lg">Large</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Status Chips ── -->
+    <div class="ds-section">
+      <div class="ds-section__title">Status Chips</div>
+      <div class="ds-card">
+        <div class="ds-row">
+          <span class="chip chip--balanced">BALANCED</span>
+          <span class="chip chip--unallocated">UNALLOCATED</span>
+          <span class="chip chip--over">OVER</span>
+          <span class="chip chip--projected">PROJECTED</span>
+          <span class="chip chip--confirmed">CONFIRMED</span>
+          <span class="chip chip--overdue">OVERDUE</span>
+          <span class="chip chip--on-track">ON TRACK</span>
+          <span class="chip chip--at-risk">AT RISK</span>
+          <span class="chip chip--behind">BEHIND</span>
+          <span class="chip chip--locked">LOCKED</span>
+          <span class="chip chip--closed">CLOSED</span>
+          <span class="chip chip--info">INFO</span>
+          <span class="chip chip--critical">CRITICAL</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Form Fields ── -->
+    <div class="ds-section">
+      <div class="ds-section__title">Form Fields</div>
+      <div class="ds-card">
+        <div class="form-group">
+          <label class="form-label">Text Input <span class="required">*</span></label>
+          <input class="form-input" placeholder="Placeholder text">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Error State</label>
+          <input class="form-input form-input--error" value="Invalid value">
+          <span class="form-error">⚠ This field is required</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">INR Amount</label>
+          <div class="form-input-wrap has-prefix">
+            <span class="input-prefix">₹</span>
+            <input class="form-input inr-input" value="1,20,000">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Select</label>
+          <select class="form-select">
+            <option>June 2026</option>
+            <option>July 2026</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Disabled</label>
+          <input class="form-input" value="Read only" disabled>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Toggle ── -->
+    <div class="ds-section">
+      <div class="ds-section__title">Toggle / Switch</div>
+      <div class="ds-card">
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-label">Biometric unlock</div>
+            <div class="toggle-sublabel">Use fingerprint or face unlock</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" checked>
+            <span class="toggle-track"></span>
+            <span class="toggle-thumb"></span>
+          </label>
+        </div>
+        <div class="toggle-row" style="border-top:1px solid var(--border);">
+          <div class="toggle-label">Off state</div>
+          <label class="toggle">
+            <input type="checkbox">
+            <span class="toggle-track"></span>
+            <span class="toggle-thumb"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Progress ── -->
+    <div class="ds-section">
+      <div class="ds-section__title">Progress</div>
+      <div class="ds-card">
+        <div class="ds-label">Linear</div>
+        <div class="progress-bar mb-4"><div class="progress-bar__fill" style="width:65%;"></div></div>
+        <div class="progress-bar progress-bar--thick mb-4"><div class="progress-bar__fill progress-bar__fill--warning" style="width:82%;"></div></div>
+        <div class="progress-bar progress-bar--slim mb-4"><div class="progress-bar__fill progress-bar__fill--danger" style="width:104%;"></div></div>
+        <div class="progress-bar"><div class="progress-bar__fill progress-bar__fill--success" style="width:100%;"></div></div>
+
+        <div class="ds-label mt-6">Ring</div>
+        <div class="ds-ring-row">
+          <div class="progress-ring" style="width:104px; height:104px;">
+            <svg width="104" height="104">
+              <circle class="progress-ring__track" cx="52" cy="52" r="44"></circle>
+              <circle class="progress-ring__fill" cx="52" cy="52" r="44"
+                stroke-dasharray="276.5" stroke-dashoffset="83"></circle>
+            </svg>
+            <span class="progress-ring__label t-body">70%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Segmented Tabs ── -->
+    <div class="ds-section">
+      <div class="ds-section__title">Segmented Tabs</div>
+      <div class="ds-card">
+        <div class="ds-tabs">
+          <div class="ds-tab active">Expense</div>
+          <div class="ds-tab">Income</div>
+          <div class="ds-tab">Transfer</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Cards ── -->
+    <div class="ds-section">
+      <div class="ds-section__title">Cards</div>
+      <div class="glass-card mb-3">
+        <div class="card-header">
+          <div class="card-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg></div>
+          <span class="card-title">Glass Card</span>
+          <span class="card-action">View →</span>
+        </div>
+        <div class="amount-text amount-text--lg">₹4,52,300</div>
+        <span class="delta delta--pos mt-2" style="display:inline-flex;">▲ 8.2% this month</span>
+      </div>
+      <div class="glass-card glass-card--compact mb-3">
+        <span class="t-body-sm text-secondary">Compact variant</span>
+      </div>
+      <div class="list-row">
+        <div class="list-row__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg></div>
+        <div class="list-row__info">
+          <div class="list-row__label">Groceries <span class="chip chip--confirmed">DONE</span></div>
+          <div class="list-row__meta">Envelope · Living Expenses</div>
+        </div>
+        <div class="list-row__amount-row">
+          <span class="list-row__amount list-row__amount--expense">−₹8,200</span>
+          <span class="list-row__amount-caption">of ₹12,000</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Alerts / Banners ── -->
+    <div class="ds-section">
+      <div class="ds-section__title">Alerts / Banners</div>
+      <div class="ds-card">
+        <div class="ds-alert ds-alert--info mb-3"><span>ℹ️</span><span>Salary credit not yet recorded for June 2026.</span></div>
+        <div class="ds-alert ds-alert--success mb-3"><span>✓</span><span>July 2026 budget created as Draft.</span></div>
+        <div class="ds-alert ds-alert--warning mb-3"><span>⚠️</span><span>Mobile &amp; Internet envelope is 93% spent.</span></div>
+        <div class="ds-alert ds-alert--error"><span>✕</span><span>2 envelopes over budget. Review your spending.</span></div>
+      </div>
+    </div>
+
+    <!-- ── Empty State ── -->
+    <div class="ds-section">
+      <div class="ds-section__title">Empty State</div>
+      <div class="ds-card">
+        <div class="empty-state" style="padding:var(--sp-6) var(--sp-4);">
+          <div class="empty-state__icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2"/></svg>
+          </div>
+          <div class="empty-state__title">No Budget Periods Yet</div>
+          <div class="empty-state__body">Create your first monthly budget to start allocating your income across envelopes.</div>
+          <button class="btn btn--primary">+ Create First Budget</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Skeleton Loaders ── -->
+    <div class="ds-section">
+      <div class="ds-section__title">Skeleton Loaders</div>
+      <div class="ds-card">
+        <div class="flex gap-3 items-center mb-4">
+          <div class="skeleton skeleton--avatar"></div>
+          <div class="flex-col gap-2" style="flex:1;">
+            <div class="skeleton skeleton--text-line" style="width:60%;"></div>
+            <div class="skeleton skeleton--text-line" style="width:40%;"></div>
+          </div>
+        </div>
+        <div class="skeleton skeleton--amount mb-4"></div>
+        <div class="skeleton skeleton--list-row mb-3"></div>
+        <div class="skeleton skeleton--card"></div>
+      </div>
+    </div>
+
+    <!-- ── Step Indicator & PIN ── -->
+    <div class="ds-section">
+      <div class="ds-section__title">Step Indicator &amp; PIN Entry</div>
+      <div class="ds-card">
+        <div class="ds-label">Wizard step indicator</div>
+        <div class="step-indicator mb-6">
+          <span class="step-dot done"></span><span class="step-line done"></span>
+          <span class="step-dot done"></span><span class="step-line done"></span>
+          <span class="step-dot current"></span><span class="step-line"></span>
+          <span class="step-dot"></span><span class="step-line"></span>
+          <span class="step-dot"></span>
+        </div>
+        <div class="ds-label">PIN digit boxes</div>
+        <div class="pin-row">
+          <input class="pin-box filled" maxlength="1" value="4">
+          <input class="pin-box filled" maxlength="1" value="2">
+          <input class="pin-box" maxlength="1">
+          <input class="pin-box" maxlength="1">
+        </div>
+      </div>
+    </div>
+
+    <!-- ── FAB ── -->
+    <div class="ds-section">
+      <div class="ds-section__title">Floating Action Button</div>
+      <div class="ds-card flex justify-center">
+        <button class="fab ds-fab-demo" aria-label="Add">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Overlays ── -->
+    <div class="ds-section">
+      <div class="ds-section__title">Overlays</div>
+      <div class="ds-card">
+        <div class="ds-row">
+          <button class="btn btn--secondary btn--sm" onclick="AG.openSheet('ds-sheet')">Open Sheet</button>
+          <button class="btn btn--secondary btn--sm" onclick="AG.openDialog('ds-dialog')">Open Dialog</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Toast ── -->
+    <div class="ds-section">
+      <div class="ds-section__title">Toast</div>
+      <div class="ds-card">
+        <div class="ds-row">
+          <button class="btn btn--ghost btn--sm" onclick="AG.showToast('Saved successfully','success')">Success</button>
+          <button class="btn btn--ghost btn--sm" onclick="AG.showToast('Something went wrong','error')">Error</button>
+          <button class="btn btn--ghost btn--sm" onclick="AG.showToast('Approaching envelope limit','warning')">Warning</button>
+          <button class="btn btn--ghost btn--sm" onclick="AG.showToast('Sweep rules updated','info')">Info</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       SHEET DEMO
+  ═══════════════════════════════════════════ -->
+  <div class="sheet-backdrop" id="ds-sheet-backdrop"></div>
+  <div class="sheet" id="ds-sheet">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <span class="sheet__title">Bottom Sheet</span>
+      <button class="sheet__close" onclick="AG.closeSheet('ds-sheet')" aria-label="Close">✕</button>
+    </div>
+    <div class="sheet__body">
+      <p class="t-body-sm text-secondary">Sheets slide up from the bottom for forms and quick actions (add envelope, edit allocation, close period).</p>
+    </div>
+    <div class="sheet__footer">
+      <button class="btn btn--ghost" onclick="AG.closeSheet('ds-sheet')">Cancel</button>
+      <button class="btn btn--primary" onclick="AG.closeSheet('ds-sheet')">Confirm</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       DIALOG DEMO
+  ═══════════════════════════════════════════ -->
+  <div class="dialog-backdrop" id="ds-dialog-backdrop">
+    <div class="dialog">
+      <div class="dialog__header"><div class="dialog__title">Confirm Action?</div></div>
+      <div class="dialog__body">Dialogs interrupt for destructive or high-stakes confirmations (lock budget, close period, delete record).</div>
+      <div class="dialog__footer">
+        <button class="btn btn--ghost btn--sm" onclick="AG.closeDialog('ds-dialog')">Cancel</button>
+        <button class="btn btn--primary btn--sm" onclick="AG.closeDialog('ds-dialog')">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+<script src="nav.js"></script>
+<script>
+  /* Local theme-toggle button in demo bar (mirrors pattern used on other pages) */
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    AG.toggleTheme();
+    document.getElementById('theme-icon').textContent = AG.getTheme() === 'dark' ? '☀️' : '🌙';
+  });
+</script>
+</body>
+</html>
