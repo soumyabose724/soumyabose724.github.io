@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — HDFC Bank Savings</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* ── Balance hero ── */
+    .acct-hero {
+      border-radius: var(--r-xl);
+      background: linear-gradient(135deg, #0B7A70 0%, #0D9488 55%, #0EA5A0 100%);
+      box-shadow: 0 6px 28px rgba(13,148,136,.32);
+      padding: var(--sp-6) var(--sp-5) var(--sp-5);
+      position: relative; overflow: hidden;
+      color: #fff; margin-bottom: var(--sp-5);
+    }
+    .acct-hero::before {
+      content: ''; position: absolute; top: -32px; right: -32px;
+      width: 110px; height: 110px; border-radius: 50%;
+      background: rgba(255,255,255,.07);
+    }
+    .acct-hero__top {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: var(--sp-4);
+    }
+    .acct-hero__bank { font-size: 13px; font-weight: 600; color: rgba(255,255,255,.85); }
+    .acct-hero__number {
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      color: rgba(255,255,255,.6); margin-top: 2px;
+    }
+    .acct-hero__badge {
+      font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+      background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.3);
+      color: rgba(255,255,255,.92); padding: 3px 9px; border-radius: var(--r-full);
+    }
+    .acct-hero__label { font-size: 11px; color: rgba(255,255,255,.65); margin-bottom: var(--sp-1); }
+    .acct-hero__amount {
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+      font-size: 34px; font-weight: 700; color: #fff; line-height: 1.1;
+    }
+    .acct-hero__meta { font-size: 12px; color: rgba(255,255,255,.6); margin-top: var(--sp-2); }
+
+    /* ── Reconcile card ── */
+    .reconcile-card {
+      display: flex; align-items: center; gap: var(--sp-3);
+      margin-bottom: var(--sp-5);
+    }
+    .reconcile-card__icon {
+      width: 40px; height: 40px; border-radius: var(--r-lg); flex-shrink: 0;
+      background: var(--info-light); color: var(--info);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .reconcile-card__body { flex: 1; min-width: 0; }
+    .reconcile-card__title { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    .reconcile-card__sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+    /* ── Section label ── */
+    .ba-section-label {
+      font-size: 11px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--text-muted);
+      margin: 0 0 var(--sp-3);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .ba-section-label a { font-size: 12px; font-weight: 600; color: var(--primary); text-transform: none; letter-spacing: 0; }
+
+    /* ── Empty transactions ── */
+    #view-no-txn { display: none; }
+
+    /* ── Close account row ── */
+    .close-account-row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: var(--sp-6);
+    }
+    .close-account-row__body { flex: 1; min-width: 0; padding-right: var(--sp-3); }
+    .close-account-row__title { font-size: 14px; font-weight: 600; color: var(--error); }
+    .close-account-row__sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">State</span>
+    <button class="demo-btn" data-state="recent">Recent Activity</button>
+    <button class="demo-btn" data-state="no-txn">No Transactions</button>
+    <button class="icon-btn" data-theme-toggle style="margin-left:auto;" aria-label="Toggle theme">
+      <span data-theme-icon style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">HDFC Bank Savings</span>
+    <div class="top-bar__actions">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content">
+
+    <!-- Balance Hero -->
+    <div class="acct-hero">
+      <div class="acct-hero__top">
+        <div>
+          <div class="acct-hero__bank">HDFC Bank</div>
+          <div class="acct-hero__number">•••• 4821</div>
+        </div>
+        <span class="acct-hero__badge">Savings</span>
+      </div>
+      <div class="acct-hero__label">Current Balance</div>
+      <div class="acct-hero__amount">₹1,84,320</div>
+      <div class="acct-hero__meta">Primary Salary Account · Updated today</div>
+    </div>
+
+    <!-- Reconcile -->
+    <div class="surface-card reconcile-card">
+      <div class="reconcile-card__icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+      </div>
+      <div class="reconcile-card__body">
+        <div class="reconcile-card__title">Reconciliation</div>
+        <div class="reconcile-card__sub" id="reconcile-sub">Last reconciled 28 Jun 2026 · 2 unreconciled</div>
+      </div>
+      <a href="../transactions/reconcile.html" class="btn btn--secondary btn--sm" style="text-decoration:none;">Reconcile</a>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="ba-section-label">
+      <span>Recent Transactions</span>
+      <a href="statement.html">Full Statement →</a>
+    </div>
+
+    <div id="view-recent">
+
+      <div class="list-row" style="animation-delay:0ms;">
+        <div class="list-row__icon list-row__icon--success">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+        </div>
+        <div class="list-row__info">
+          <div class="list-row__label">Salary Credit</div>
+          <div class="list-row__meta">10 Jul 2026 · NEXT_MONTH routing</div>
+        </div>
+        <div class="list-row__actions">
+          <span class="chip chip--confirmed" style="font-size:10px;height:18px;">✓</span>
+        </div>
+        <div class="list-row__amount-row">
+          <div class="list-row__amount list-row__amount--income">+₹1,20,000</div>
+          <div class="list-row__amount-caption">Balance: ₹1,84,320</div>
+        </div>
+      </div>
+
+      <div class="list-row" style="animation-delay:45ms;">
+        <div class="list-row__icon list-row__icon--muted">🏠</div>
+        <div class="list-row__info">
+          <div class="list-row__label">UPI — Landlord (Rent)</div>
+          <div class="list-row__meta">09 Jul 2026 · UPI</div>
+        </div>
+        <div class="list-row__actions">
+          <span class="chip chip--unallocated" style="font-size:10px;height:18px;">Pending</span>
+        </div>
+        <div class="list-row__amount-row">
+          <div class="list-row__amount list-row__amount--expense">−₹28,000</div>
+          <div class="list-row__amount-caption">Balance: ₹64,320</div>
+        </div>
+      </div>
+
+      <div class="list-row" style="animation-delay:90ms;">
+        <div class="list-row__icon list-row__icon--info">💰</div>
+        <div class="list-row__info">
+          <div class="list-row__label">SIP — Axis Bluechip Fund</div>
+          <div class="list-row__meta">05 Jul 2026 · Auto-debit</div>
+        </div>
+        <div class="list-row__actions">
+          <span class="chip chip--confirmed" style="font-size:10px;height:18px;">✓</span>
+        </div>
+        <div class="list-row__amount-row">
+          <div class="list-row__amount list-row__amount--expense">−₹10,000</div>
+          <div class="list-row__amount-caption">Balance: ₹92,320</div>
+        </div>
+      </div>
+
+      <div class="list-row" style="animation-delay:135ms;">
+        <div class="list-row__icon">🏠</div>
+        <div class="list-row__info">
+          <div class="list-row__label">EMI — Home Loan (HDFC)</div>
+          <div class="list-row__meta">03 Jul 2026 · Auto-debit</div>
+        </div>
+        <div class="list-row__actions">
+          <span class="chip chip--confirmed" style="font-size:10px;height:18px;">✓</span>
+        </div>
+        <div class="list-row__amount-row">
+          <div class="list-row__amount list-row__amount--expense">−₹38,500</div>
+          <div class="list-row__amount-caption">Balance: ₹1,02,320</div>
+        </div>
+      </div>
+
+      <div class="list-row" style="animation-delay:180ms;">
+        <div class="list-row__icon list-row__icon--warning">🛒</div>
+        <div class="list-row__info">
+          <div class="list-row__label">UPI — BigBasket</div>
+          <div class="list-row__meta">02 Jul 2026 · UPI</div>
+        </div>
+        <div class="list-row__actions">
+          <span class="chip chip--confirmed" style="font-size:10px;height:18px;">✓</span>
+        </div>
+        <div class="list-row__amount-row">
+          <div class="list-row__amount list-row__amount--expense">−₹3,240</div>
+          <div class="list-row__amount-caption">Balance: ₹1,40,820</div>
+        </div>
+      </div>
+
+      <div class="list-row" style="animation-delay:225ms;">
+        <div class="list-row__icon list-row__icon--warning">⚡</div>
+        <div class="list-row__info">
+          <div class="list-row__label">Electricity Bill (BESCOM)</div>
+          <div class="list-row__meta">01 Jul 2026 · Auto-debit</div>
+        </div>
+        <div class="list-row__actions">
+          <span class="chip chip--confirmed" style="font-size:10px;height:18px;">✓</span>
+        </div>
+        <div class="list-row__amount-row">
+          <div class="list-row__amount list-row__amount--expense">−₹2,150</div>
+          <div class="list-row__amount-caption">Balance: ₹1,44,060</div>
+        </div>
+      </div>
+
+    </div><!-- /view-recent -->
+
+    <div id="view-no-txn">
+      <div class="empty-state">
+        <div class="empty-state__icon">🧾</div>
+        <div class="empty-state__title">No Transactions Yet</div>
+        <div class="empty-state__body">Transactions posted to this account will appear here.</div>
+      </div>
+    </div>
+
+    <!-- Close Account -->
+    <div class="surface-card close-account-row">
+      <div class="close-account-row__body">
+        <div class="close-account-row__title">Close Account</div>
+        <div class="close-account-row__sub">Archives this account — it will no longer accept new transactions</div>
+      </div>
+      <button class="btn btn--danger btn--sm" onclick="AG.openDialog('close-account')">Close</button>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       CLOSE ACCOUNT DIALOG
+  ═══════════════════════════════════════════ -->
+  <div class="dialog-backdrop" id="close-account-backdrop">
+    <div class="dialog">
+      <div class="dialog__header">
+        <div class="dialog__title">Close HDFC Bank Savings?</div>
+      </div>
+      <div class="dialog__body">
+        This account will be archived, not deleted — its history stays intact for records and tax purposes.
+        <br><br>
+        <strong style="color:var(--text-primary);">3 scheduled rules reference this account:</strong>
+        <ul style="margin:8px 0 0 18px; padding:0;">
+          <li>Salary Credit — Next Month routing</li>
+          <li>Home Loan EMI (HDFC) — Auto-debit</li>
+          <li>SIP — Axis Bluechip Fund — Auto-debit</li>
+        </ul>
+        These rules will need a new account before their next run.
+      </div>
+      <div class="dialog__footer">
+        <button class="btn btn--ghost btn--sm" onclick="AG.closeDialog('close-account')">Cancel</button>
+        <button class="btn btn--danger btn--sm" onclick="confirmClose()">Close Account</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    AG.initBottomNav('bank-accounts');
+
+    AG.initDemoBar({
+      'recent': () => {
+        document.getElementById('view-recent').style.display = '';
+        document.getElementById('view-no-txn').style.display = 'none';
+        document.getElementById('reconcile-sub').textContent = 'Last reconciled 28 Jun 2026 · 2 unreconciled';
+      },
+      'no-txn': () => {
+        document.getElementById('view-recent').style.display = 'none';
+        document.getElementById('view-no-txn').style.display = '';
+        document.getElementById('reconcile-sub').textContent = 'No transactions to reconcile yet';
+      },
+    });
+  });
+
+  function confirmClose() {
+    AG.closeDialog('close-account');
+    AG.showToast('HDFC Bank Savings closed ✓', 'success');
+  }
+</script>
+</body>
+</html>

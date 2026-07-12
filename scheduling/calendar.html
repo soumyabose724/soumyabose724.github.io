@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Schedule Calendar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* ── Month nav bar (fixed, below top-bar) ── */
+    .month-nav-bar {
+      position: fixed;
+      top: calc(var(--demo-bar-h) + var(--top-bar-h));
+      left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: var(--page-max);
+      height: 52px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 var(--sp-2);
+      z-index: 45;
+    }
+    .month-nav-btn {
+      width: 36px; height: 36px; border-radius: var(--r-full);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-secondary);
+      transition: background var(--dur-fast), color var(--dur-fast);
+      flex-shrink: 0;
+    }
+    .month-nav-btn:hover { background: var(--surface-raised); color: var(--text-primary); }
+    .month-nav-label {
+      font-size: 15px; font-weight: 700; color: var(--text-primary);
+      text-align: center; flex: 1;
+    }
+    .month-nav-fy {
+      font-size: 10px; font-weight: 600; color: var(--text-muted);
+      display: block; margin-top: 1px; letter-spacing: .04em;
+    }
+
+    /* ── Page content ── */
+    .page-content--schedule {
+      padding: 0;
+      padding-top: calc(var(--top-bar-h) + 52px + var(--sp-4));
+      padding-bottom: calc(var(--bottom-nav-h) + var(--sp-10));
+      overflow-y: auto;
+    }
+
+    /* ── Legend ── */
+    .legend-row {
+      display: flex; align-items: center; gap: var(--sp-4);
+      padding: 0 var(--sp-4) var(--sp-4);
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11px; font-weight: 500; color: var(--text-secondary);
+    }
+    .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .legend-dot--income  { background: var(--success); }
+    .legend-dot--expense { background: var(--warning); }
+    .legend-arrow { font-weight: 800; color: var(--primary); font-size: 13px; }
+
+    /* ── Calendar grid ── */
+    .cal-grid {
+      display: grid; grid-template-columns: repeat(7, 1fr);
+      gap: 3px;
+      padding: 0 var(--sp-3) var(--sp-5);
+    }
+    .cal-dow {
+      font-size: 10px; font-weight: 700; text-align: center;
+      color: var(--text-muted); text-transform: uppercase;
+      padding-bottom: 6px;
+    }
+    .cal-day {
+      min-height: 72px;
+      border: 1px solid var(--border); border-radius: var(--r-sm);
+      padding: 3px 2px;
+      display: flex; flex-direction: column; gap: 2px;
+      cursor: pointer; background: var(--surface);
+      transition: background var(--dur-fast), border-color var(--dur-fast);
+      position: relative;
+      animation: card-in var(--dur-med) var(--ease-out) both;
+    }
+    .cal-day:hover { background: var(--primary-xlight); border-color: var(--primary); }
+    .cal-day--muted {
+      opacity: .32; cursor: default; pointer-events: none; background: transparent;
+    }
+    .cal-day--today { border-color: var(--primary); border-width: 1.5px; }
+    .cal-day__num { font-size: 10px; font-weight: 600; color: var(--text-secondary); }
+    .cal-day--today .cal-day__num { color: var(--primary); font-weight: 800; }
+    .cal-pill {
+      font-size: 8px; line-height: 1.25; padding: 1px 3px; border-radius: 4px;
+      font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      display: flex; align-items: center; gap: 2px;
+    }
+    .cal-pill--income   { background: var(--success-light); color: var(--success); }
+    .cal-pill--expense  { background: var(--warning-light); color: var(--warning); }
+    .cal-pill--overdue  { background: var(--error-light);   color: var(--error); }
+    .cal-pill--skipped  { background: var(--surface-raised); color: var(--text-muted); text-decoration: line-through; }
+    .cal-more { font-size: 8px; color: var(--text-muted); font-weight: 600; padding-left: 2px; }
+
+    /* ── Empty state CTA ── */
+    .empty-state__cta { display: flex; flex-direction: column; gap: var(--sp-3); width: 100%; max-width: 220px; }
+
+    /* ── Day sheet rows ── */
+    .day-sheet-date {
+      font-size: 13px; color: var(--text-secondary); margin-bottom: var(--sp-4);
+    }
+    .day-instance-row {
+      display: flex; align-items: center; gap: var(--sp-3);
+      padding: var(--sp-3) 0; border-bottom: 1px solid var(--border);
+    }
+    .day-instance-row:last-child { border-bottom: none; }
+    .day-instance-row__icon {
+      width: 38px; height: 38px; border-radius: var(--r-lg);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; font-weight: 700; flex-shrink: 0; color: #fff;
+    }
+    .day-instance-row__info { flex: 1; min-width: 0; }
+    .day-instance-row__name {
+      font-size: 14px; font-weight: 600; color: var(--text-primary);
+      display: flex; align-items: center; gap: 5px; flex-wrap: wrap;
+    }
+    .day-instance-row__meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .day-instance-row__right {
+      display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0;
+    }
+    .day-instance-row__amount {
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+      font-size: 14px; font-weight: 700;
+    }
+    .day-empty {
+      text-align: center; padding: var(--sp-8) var(--sp-4);
+      color: var(--text-muted); font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">State</span>
+    <button class="demo-btn active" data-state="populated">Populated</button>
+    <button class="demo-btn" data-state="empty">Empty</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="../dashboard/index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Schedule</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <a href="list.html" class="icon-btn" aria-label="List view" title="List view" style="text-decoration:none;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+          <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+        </svg>
+      </a>
+      <a href="rule-editor.html" class="icon-btn" aria-label="New rule" title="New recurring rule" style="text-decoration:none;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+      </a>
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       MONTH NAV
+  ═══════════════════════════════════════════ -->
+  <div class="month-nav-bar">
+    <button class="month-nav-btn" id="prev-month" aria-label="Previous month">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div class="month-nav-label">
+      <span id="month-label">June 2026</span>
+      <span class="month-nav-fy" id="month-fy">FY 2026-27</span>
+    </div>
+    <button class="month-nav-btn" id="next-month" aria-label="Next month">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content page-content--schedule" id="page-content">
+
+    <!-- ── Populated state ── -->
+    <div id="view-populated">
+
+      <div class="legend-row">
+        <span class="legend-item"><span class="legend-dot legend-dot--income"></span>Income</span>
+        <span class="legend-item"><span class="legend-dot legend-dot--expense"></span>Expense</span>
+        <span class="legend-item"><span class="legend-arrow">→</span>Routed to a different period</span>
+      </div>
+
+      <div class="cal-grid" id="cal-grid">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+
+    <!-- ── Empty / First Use state ── -->
+    <div id="view-empty" style="display:none;">
+      <div class="empty-state">
+        <div class="empty-state__icon">🗓️</div>
+        <div class="empty-state__title">No Recurring Rules Yet</div>
+        <div class="empty-state__body">Add SIPs, EMIs, salary credit, and bills as recurring rules to see them projected on your calendar.</div>
+        <div class="empty-state__cta">
+          <a href="rule-editor.html" class="btn btn--primary btn--full" style="text-decoration:none;">+ Create First Rule</a>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       DAY DETAIL SHEET
+  ═══════════════════════════════════════════ -->
+  <div class="sheet-backdrop" id="day-sheet-backdrop"></div>
+  <div class="sheet" id="day-sheet">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <span class="sheet__title" id="day-sheet-title">Jun 5, 2026</span>
+      <button class="sheet__close" id="day-sheet-close" aria-label="Close">✕</button>
+    </div>
+    <div class="sheet__body">
+      <div id="day-sheet-body"><!-- Rendered by JS --></div>
+    </div>
+    <div class="sheet__footer">
+      <a href="list.html" class="btn btn--ghost" style="text-decoration:none;">View Full List</a>
+      <a href="rule-editor.html" class="btn btn--primary" style="text-decoration:none;">+ New Rule</a>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ── Theme toggle (top demo-bar icon mirrors data-theme-toggle buttons) ── */
+  document.getElementById('theme-toggle').addEventListener('click', () => AG.toggleTheme());
+
+  /* ═══════════════════════════════════════════
+     RECURRING RULE DATA (Vikas Sharma persona)
+     All money in Paise — never floats.
+  ═══════════════════════════════════════════ */
+  const RULES = [
+    { id: 'salary',       name: 'Salary Credit',                    type: 'income',  amountPaise: 12000000, dayType: 'first-working', account: 'SBI •••4521',   routing: 'NEXT_MONTH' },
+    { id: 'pension',      name: 'Family Pension (Mother)',          type: 'income',  amountPaise: 1850000,  dayType: 'day', day: 3,   account: 'SBI •••7734',   routing: 'SAME_MONTH' },
+    { id: 'home-emi',     name: 'HDFC Home Loan EMI',               type: 'expense', amountPaise: 3850000,  dayType: 'day', day: 5,   account: 'HDFC •••2210',  routing: 'SAME_MONTH' },
+    { id: 'sip',          name: 'SIP — Nippon Multicap Fund',       type: 'expense', amountPaise: 2000000,  dayType: 'day', day: 5,   account: 'HDFC •••2210',  routing: 'SAME_MONTH' },
+    { id: 'car-emi',      name: 'ICICI Car Loan EMI',               type: 'expense', amountPaise: 1250000,  dayType: 'day', day: 7,   account: 'ICICI •••6634', routing: 'SAME_MONTH' },
+    { id: 'netflix',      name: 'OTT Subscription (Netflix)',       type: 'expense', amountPaise: 64900,    dayType: 'day', day: 10,  account: 'HDFC •••2210',  routing: 'SAME_MONTH' },
+    { id: 'insurance',    name: 'Life & Health Insurance Premium',  type: 'expense', amountPaise: 250000,   dayType: 'day', day: 15,  account: 'HDFC •••2210',  routing: 'SAME_MONTH' },
+    { id: 'mobile',       name: 'Mobile & Broadband (Jio)',         type: 'expense', amountPaise: 200000,   dayType: 'day', day: 18,  account: 'HDFC •••2210',  routing: 'SAME_MONTH' },
+    { id: 'electricity',  name: 'Electricity Bill (BESCOM)',        type: 'expense', amountPaise: 320000,   dayType: 'variable',      account: 'HDFC •••2210',  routing: 'SAME_MONTH' },
+    { id: 'maintenance',  name: 'Society Maintenance',              type: 'expense', amountPaise: 450000,   dayType: 'last-working',  account: 'HDFC •••2210',  routing: 'SAME_MONTH' },
+  ];
+
+  /* Status exceptions for the "active" narrative month (June 2026) only */
+  const STATUS_EXCEPTIONS = {
+    'netflix@2026-6-10':   'skipped',
+    'insurance@2026-6-15': 'overdue',
+  };
+
+  const TODAY = new Date(2026, 5, 18); // 18 June 2026 — narrative "today" for this prototype
+  const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const DOW = ['S','M','T','W','T','F','S'];
+
+  let viewYear  = 2026;
+  let viewMonth = 5; // June (0-indexed)
+
+  function daysInMonth(y, m) { return new Date(y, m + 1, 0).getDate(); }
+  function firstWorkingDay(y, m) {
+    let d = new Date(y, m, 1);
+    while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() + 1);
+    return d.getDate();
+  }
+  function lastWorkingDay(y, m) {
+    let d = new Date(y, m + 1, 0);
+    while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() - 1);
+    return d.getDate();
+  }
+  function resolveDay(rule, y, m) {
+    const dim = daysInMonth(y, m);
+    if (rule.dayType === 'day')           return Math.min(rule.day, dim);
+    if (rule.dayType === 'first-working') return firstWorkingDay(y, m);
+    if (rule.dayType === 'last-working')  return lastWorkingDay(y, m);
+    if (rule.dayType === 'variable')      return Math.min(20, dim); // estimated
+    return 1;
+  }
+  function dayTypeLabel(rule) {
+    if (rule.dayType === 'first-working') return 'First Working Day';
+    if (rule.dayType === 'last-working')  return 'Last Working Day';
+    if (rule.dayType === 'variable')      return 'Variable (estimated)';
+    return 'Day ' + rule.day + ' of month';
+  }
+  function statusFor(rule, y, m, day) {
+    const key = rule.id + '@' + y + '-' + m + '-' + day;
+    if (STATUS_EXCEPTIONS[key]) return STATUS_EXCEPTIONS[key];
+    const occDate = new Date(y, m, day);
+    return occDate < TODAY ? 'confirmed' : 'projected';
+  }
+  function chipClassFor(status) {
+    return { confirmed: 'chip--confirmed', projected: 'chip--projected', overdue: 'chip--overdue', skipped: 'chip--closed' }[status] || 'chip--closed';
+  }
+  function statusLabel(status) {
+    return { confirmed: 'CONFIRMED', projected: 'PROJECTED', overdue: 'OVERDUE', skipped: 'SKIPPED' }[status] || status.toUpperCase();
+  }
+
+  function occurrencesForMonth(y, m) {
+    return RULES.map(rule => {
+      const day = resolveDay(rule, y, m);
+      const status = statusFor(rule, y, m, day);
+      const isRouted = rule.routing === 'NEXT_MONTH';
+      let routedLabel = null;
+      if (isRouted) {
+        const routedMonth = (m + 1) % 12;
+        const routedYear  = m === 11 ? y + 1 : y;
+        routedLabel = MONTH_NAMES[routedMonth] + ' ' + routedYear;
+      }
+      return { rule, day, status, isRouted, routedLabel };
+    }).sort((a, b) => a.day - b.day);
+  }
+
+  function fiscalYearLabel(y, m) {
+    const fyStart = m >= 3 ? y : y - 1; // FY Apr–Mar
+    return 'FY ' + fyStart + '-' + String((fyStart + 1) % 100).padStart(2, '0');
+  }
+
+  let EMPTY_MODE = false;
+
+  function renderCalendar() {
+    document.getElementById('month-label').textContent = MONTH_NAMES[viewMonth] + ' ' + viewYear;
+    document.getElementById('month-fy').textContent = fiscalYearLabel(viewYear, viewMonth);
+
+    const grid = document.getElementById('cal-grid');
+    grid.innerHTML = '';
+    DOW.forEach(d => {
+      const el = document.createElement('div');
+      el.className = 'cal-dow';
+      el.textContent = d;
+      grid.appendChild(el);
+    });
+
+    const dim = daysInMonth(viewYear, viewMonth);
+    const startDow = new Date(viewYear, viewMonth, 1).getDay();
+    const occurrences = EMPTY_MODE ? [] : occurrencesForMonth(viewYear, viewMonth);
+    const byDay = {};
+    occurrences.forEach(o => {
+      (byDay[o.day] = byDay[o.day] || []).push(o);
+    });
+
+    // Leading muted cells
+    for (let i = 0; i < startDow; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'cal-day cal-day--muted';
+      grid.appendChild(cell);
+    }
+
+    for (let day = 1; day <= dim; day++) {
+      const cell = document.createElement('div');
+      const isToday = viewYear === TODAY.getFullYear() && viewMonth === TODAY.getMonth() && day === TODAY.getDate();
+      cell.className = 'cal-day' + (isToday ? ' cal-day--today' : '');
+      cell.setAttribute('role', 'button');
+      cell.setAttribute('aria-label', 'Scheduled items on ' + MONTH_NAMES[viewMonth] + ' ' + day);
+
+      const num = document.createElement('div');
+      num.className = 'cal-day__num';
+      num.textContent = day;
+      cell.appendChild(num);
+
+      const items = byDay[day] || [];
+      items.slice(0, 2).forEach(o => {
+        const pill = document.createElement('div');
+        let pillClass = o.rule.type === 'income' ? 'cal-pill--income' : 'cal-pill--expense';
+        if (o.status === 'overdue') pillClass = 'cal-pill--overdue';
+        if (o.status === 'skipped') pillClass = 'cal-pill--skipped';
+        pill.className = 'cal-pill ' + pillClass;
+        pill.textContent = AG.formatINR(o.rule.amountPaise, { compact: true }) + (o.isRouted ? ' →' : '');
+        if (o.isRouted) pill.title = 'Routed to ' + o.routedLabel;
+        cell.appendChild(pill);
+      });
+      if (items.length > 2) {
+        const more = document.createElement('div');
+        more.className = 'cal-more';
+        more.textContent = '+' + (items.length - 2) + ' more';
+        cell.appendChild(more);
+      }
+
+      cell.addEventListener('click', () => openDaySheet(day, items));
+      grid.appendChild(cell);
+    }
+  }
+
+  function openDaySheet(day, items) {
+    document.getElementById('day-sheet-title').textContent = MONTH_NAMES[viewMonth] + ' ' + day + ', ' + viewYear;
+    const body = document.getElementById('day-sheet-body');
+    body.innerHTML = '';
+    if (!items.length) {
+      const empty = document.createElement('div');
+      empty.className = 'day-empty';
+      empty.textContent = 'Nothing scheduled on this day.';
+      body.appendChild(empty);
+    } else {
+      items.forEach(o => {
+        const row = document.createElement('div');
+        row.className = 'day-instance-row';
+        const iconBg = o.rule.type === 'income' ? 'var(--grad-success)' : 'var(--grad-danger)';
+        const amountClass = o.rule.type === 'income' ? 'amount-text--income' : 'amount-text--expense';
+        row.innerHTML = `
+          <div class="day-instance-row__icon" style="background:${iconBg};">${o.rule.type === 'income' ? '↓' : '↑'}</div>
+          <div class="day-instance-row__info">
+            <div class="day-instance-row__name">
+              ${o.rule.name}
+              ${o.isRouted ? '<span title="Routed to ' + o.routedLabel + '" style="color:var(--primary);font-weight:800;">→</span>' : ''}
+            </div>
+            <div class="day-instance-row__meta">${o.rule.account} · ${dayTypeLabel(o.rule)}${o.isRouted ? ' · Routed to ' + o.routedLabel : ''}</div>
+          </div>
+          <div class="day-instance-row__right">
+            <span class="amount-text amount-text--sm ${amountClass}">${AG.formatINR(o.rule.amountPaise)}</span>
+            <span class="chip ${chipClassFor(o.status)}">${statusLabel(o.status)}</span>
+          </div>`;
+        body.appendChild(row);
+      });
+    }
+    AG.openSheet('day-sheet');
+  }
+  document.getElementById('day-sheet-close').addEventListener('click', () => AG.closeSheet('day-sheet'));
+
+  document.getElementById('prev-month').addEventListener('click', () => {
+    viewMonth--;
+    if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+    renderCalendar();
+  });
+  document.getElementById('next-month').addEventListener('click', () => {
+    viewMonth++;
+    if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+    renderCalendar();
+  });
+
+  /* ── Demo bar: Populated / Empty ── */
+  function applyState(key) {
+    document.querySelectorAll('.demo-btn').forEach(b => b.classList.toggle('active', b.dataset.state === key));
+    EMPTY_MODE = key === 'empty';
+    document.getElementById('view-populated').style.display = EMPTY_MODE ? 'none' : '';
+    document.getElementById('view-empty').style.display = EMPTY_MODE ? '' : 'none';
+    if (!EMPTY_MODE) renderCalendar();
+  }
+  document.querySelectorAll('.demo-btn').forEach(btn => {
+    btn.addEventListener('click', () => applyState(btn.dataset.state));
+  });
+
+  renderCalendar();
+</script>
+</body>
+</html>

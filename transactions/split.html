@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Split Transaction</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .icon-btn {
+      width: 40px; height: 40px; border-radius: var(--r-full);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-secondary);
+      transition: background var(--dur-fast), color var(--dur-fast);
+      cursor: pointer;
+    }
+    .icon-btn:hover { background: var(--surface-raised); color: var(--text-primary); }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--grad-primary); color: #fff;
+      font-size: 13px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* ── Context card ── */
+    .split-context {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-xl); padding: var(--sp-4) var(--sp-5);
+      margin-bottom: var(--sp-5); display: flex; align-items: center; gap: var(--sp-3);
+      box-shadow: var(--sh-sm);
+    }
+    .split-context__icon {
+      width: 44px; height: 44px; border-radius: var(--r-lg); flex-shrink: 0;
+      background: #D1FAE5; display: flex; align-items: center; justify-content: center; font-size: 22px;
+    }
+    .split-context__info { flex: 1; min-width: 0; }
+    .split-context__payee { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+    .split-context__meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .split-context__amount {
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+      font-size: 18px; font-weight: 700; color: var(--text-primary); flex-shrink: 0;
+    }
+
+    /* ── Split line rows ── */
+    .split-line {
+      display: flex; align-items: flex-end; gap: var(--sp-2);
+      margin-bottom: var(--sp-3); animation: item-in var(--dur-base) var(--ease-out) both;
+    }
+    .split-line__index {
+      width: 24px; height: 44px; display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; color: var(--text-muted); flex-shrink: 0;
+    }
+    .split-line__envelope { flex: 1.3; min-width: 0; }
+    .split-line__amount { flex: 1; min-width: 0; }
+    .split-line__remove {
+      width: 40px; height: 44px; border-radius: var(--r-md); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-muted); background: var(--surface-raised); border: 1.5px solid var(--border);
+      cursor: pointer; transition: background var(--dur-fast), color var(--dur-fast);
+    }
+    .split-line__remove:hover { background: var(--error-light); color: var(--error); border-color: var(--error); }
+    .split-line__remove:disabled { opacity: .3; cursor: not-allowed; }
+
+    .add-line-btn {
+      width: 100%; height: 44px; border-radius: var(--r-md);
+      background: var(--primary-xlight); border: 1.5px dashed var(--primary);
+      color: var(--primary); font-size: 13px; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      margin-bottom: var(--sp-2);
+      transition: background var(--dur-fast);
+    }
+    .add-line-btn:hover { background: var(--primary-light); }
+    .add-line-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+    .line-count-note { font-size: 11px; color: var(--text-muted); margin-bottom: var(--sp-5); text-align: right; }
+
+    /* ── Remaining counter ── */
+    .remaining-card {
+      position: sticky; bottom: 0;
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: var(--r-xl); padding: var(--sp-4) var(--sp-5);
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: var(--sh-md); margin-top: var(--sp-2); margin-bottom: var(--sp-4);
+      transition: border-color var(--dur-fast);
+    }
+    .remaining-card__label { font-size: 12px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--text-muted); }
+    .remaining-card__value {
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+      font-size: 20px; font-weight: 700;
+    }
+    .remaining-card__value--balanced { color: var(--primary); }
+    .remaining-card__value--over { color: var(--error); }
+    .remaining-card.balanced { border-color: var(--primary); }
+    .remaining-card.over { border-color: var(--error); }
+
+    .page-content--form { padding-bottom: calc(var(--bottom-nav-h) + 76px + var(--sp-6)); }
+    .form-footer-bar {
+      position: fixed; bottom: var(--bottom-nav-h); left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: var(--page-max);
+      background: var(--surface); border-top: 1px solid var(--border);
+      padding: var(--sp-3) var(--sp-4); display: flex; gap: var(--sp-3);
+      z-index: 40;
+    }
+    .form-footer-bar .btn { flex: 1; }
+    .form-footer-bar .btn--primary { flex: 2; }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="add.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Split Transaction</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content page-content--form">
+
+    <!-- Context -->
+    <div class="split-context">
+      <div class="split-context__icon">🛒</div>
+      <div class="split-context__info">
+        <div class="split-context__payee">Big Bazaar Superstore</div>
+        <div class="split-context__meta">20 Jun 2026 · HDFC Current ····8912</div>
+      </div>
+      <div class="split-context__amount" id="split-total-display">₹6,000</div>
+    </div>
+
+    <div class="section-title">Split Across Envelopes</div>
+
+    <div id="split-lines">
+      <!-- Line 1 -->
+      <div class="split-line" data-line>
+        <span class="split-line__index">1</span>
+        <div class="split-line__envelope">
+          <select class="form-select">
+            <option>Groceries</option>
+            <option>Dining Out</option>
+            <option>Utilities</option>
+            <option>Mobile &amp; Internet</option>
+            <option>Fuel &amp; Transport</option>
+            <option selected disabled hidden>—</option>
+            <option>Healthcare</option>
+            <option>Insurance</option>
+            <option>Education</option>
+            <option>Emergency Fund</option>
+            <option>Vacation Fund</option>
+          </select>
+        </div>
+        <div class="split-line__amount">
+          <div class="form-input-wrap has-prefix">
+            <span class="input-prefix">₹</span>
+            <input class="form-input inr-input split-amount-input" type="text" inputmode="numeric" value="4,500" oninput="recomputeRemaining()">
+          </div>
+        </div>
+        <button class="split-line__remove" onclick="removeLine(this)" disabled title="Remove line">✕</button>
+      </div>
+
+      <!-- Line 2 -->
+      <div class="split-line" data-line>
+        <span class="split-line__index">2</span>
+        <div class="split-line__envelope">
+          <select class="form-select">
+            <option>Groceries</option>
+            <option>Dining Out</option>
+            <option>Utilities</option>
+            <option>Mobile &amp; Internet</option>
+            <option>Fuel &amp; Transport</option>
+            <option selected>Healthcare</option>
+            <option>Insurance</option>
+            <option>Education</option>
+            <option>Emergency Fund</option>
+            <option>Vacation Fund</option>
+          </select>
+        </div>
+        <div class="split-line__amount">
+          <div class="form-input-wrap has-prefix">
+            <span class="input-prefix">₹</span>
+            <input class="form-input inr-input split-amount-input" type="text" inputmode="numeric" value="" placeholder="0" oninput="recomputeRemaining()">
+          </div>
+        </div>
+        <button class="split-line__remove" onclick="removeLine(this)" disabled title="Remove line">✕</button>
+      </div>
+    </div>
+
+    <button class="add-line-btn" id="add-line-btn" onclick="addLine()">+ Add Line</button>
+    <div class="line-count-note" id="line-count-note">2 of 10 lines · minimum 2</div>
+
+    <!-- Remaining counter -->
+    <div class="remaining-card over" id="remaining-card">
+      <span class="remaining-card__label">Remaining</span>
+      <span class="remaining-card__value remaining-card__value--over" id="remaining-value">₹1,500</span>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- Footer action bar -->
+  <div class="form-footer-bar">
+    <button class="btn btn--ghost" onclick="location.href='add.html'">Cancel</button>
+    <button class="btn btn--primary" id="save-split-btn" disabled onclick="saveSplit()">Save Split</button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAVIGATION
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="index.html" class="nav-tab active" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  AG.initBottomNav('txn');
+
+  const TOTAL_PAISE = 600000; // ₹6,000 — the original transaction being split
+  const MIN_LINES = 2;
+  const MAX_LINES = 10;
+  let lineCounter = 2;
+
+  function parseRupeeInput(val) {
+    const cleaned = (val || '').replace(/,/g, '').trim();
+    const n = parseFloat(cleaned);
+    return isNaN(n) ? 0 : Math.round(n * 100);
+  }
+
+  function recomputeRemaining() {
+    const inputs = document.querySelectorAll('.split-amount-input');
+    let sum = 0;
+    inputs.forEach(inp => { sum += parseRupeeInput(inp.value); });
+    const remaining = TOTAL_PAISE - sum;
+    const card = document.getElementById('remaining-card');
+    const valueEl = document.getElementById('remaining-value');
+    valueEl.textContent = (remaining < 0 ? '−' : '') + AG.formatINR(Math.abs(remaining));
+    const balanced = remaining === 0;
+    card.classList.toggle('balanced', balanced);
+    card.classList.toggle('over', !balanced);
+    valueEl.classList.toggle('remaining-card__value--balanced', balanced);
+    valueEl.classList.toggle('remaining-card__value--over', !balanced);
+    document.getElementById('save-split-btn').disabled = !balanced;
+  }
+
+  function updateLineChrome() {
+    const lines = document.querySelectorAll('.split-line');
+    lines.forEach((line, i) => {
+      line.querySelector('.split-line__index').textContent = i + 1;
+      const removeBtn = line.querySelector('.split-line__remove');
+      removeBtn.disabled = lines.length <= MIN_LINES;
+    });
+    document.getElementById('line-count-note').textContent = lines.length + ' of ' + MAX_LINES + ' lines · minimum 2';
+    document.getElementById('add-line-btn').disabled = lines.length >= MAX_LINES;
+  }
+
+  function addLine() {
+    const container = document.getElementById('split-lines');
+    if (container.children.length >= MAX_LINES) return;
+    lineCounter++;
+    const div = document.createElement('div');
+    div.className = 'split-line';
+    div.setAttribute('data-line', '');
+    div.innerHTML = `
+      <span class="split-line__index"></span>
+      <div class="split-line__envelope">
+        <select class="form-select">
+          <option selected>Groceries</option>
+          <option>Dining Out</option>
+          <option>Utilities</option>
+          <option>Mobile &amp; Internet</option>
+          <option>Fuel &amp; Transport</option>
+          <option>Healthcare</option>
+          <option>Insurance</option>
+          <option>Education</option>
+          <option>Emergency Fund</option>
+          <option>Vacation Fund</option>
+        </select>
+      </div>
+      <div class="split-line__amount">
+        <div class="form-input-wrap has-prefix">
+          <span class="input-prefix">₹</span>
+          <input class="form-input inr-input split-amount-input" type="text" inputmode="numeric" value="" placeholder="0" oninput="recomputeRemaining()">
+        </div>
+      </div>
+      <button class="split-line__remove" onclick="removeLine(this)" title="Remove line">✕</button>
+    `;
+    container.appendChild(div);
+    updateLineChrome();
+    recomputeRemaining();
+  }
+
+  function removeLine(btn) {
+    const lines = document.querySelectorAll('.split-line');
+    if (lines.length <= MIN_LINES) return;
+    btn.closest('.split-line').remove();
+    updateLineChrome();
+    recomputeRemaining();
+  }
+
+  function saveSplit() {
+    if (document.getElementById('save-split-btn').disabled) return;
+    AG.showToast('Split saved across envelopes ✓', 'success');
+    setTimeout(() => { location.href = 'index.html'; }, 900);
+  }
+
+  updateLineChrome();
+  recomputeRemaining();
+</script>
+</body>
+</html>

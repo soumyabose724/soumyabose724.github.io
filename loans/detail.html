@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Loan Detail</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* ── Lender header ── */
+    .lender-header {
+      display: flex; align-items: center; gap: var(--sp-3);
+      margin-bottom: var(--sp-5);
+    }
+    .lender-header__icon {
+      width: 52px; height: 52px; border-radius: var(--r-xl); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; color: #fff;
+    }
+    .lender-header__name { font-size: 17px; font-weight: 700; color: var(--text-primary); }
+    .lender-header__sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    /* ── Stat grid ── */
+    .stat-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3);
+      margin-bottom: var(--sp-5);
+    }
+    .stat-cell {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: var(--sp-4);
+    }
+    .stat-cell__label {
+      font-size: 10px; font-weight: 700; letter-spacing: .06em;
+      text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;
+    }
+    .stat-cell__value {
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+      font-size: 17px; font-weight: 700; color: var(--text-primary);
+    }
+    .stat-cell__value--accent { color: var(--primary); }
+
+    /* ── Payoff timeline chart ── */
+    .chart-card { margin-bottom: var(--sp-5); }
+    .chart-card__label {
+      font-size: 12px; font-weight: 600; color: var(--text-secondary);
+      margin-bottom: var(--sp-3);
+    }
+    .chart-svg-wrap svg { width: 100%; height: 130px; display: block; }
+    .chart-axis-labels {
+      display: flex; justify-content: space-between;
+      font-size: 10px; color: var(--text-muted); margin-top: 4px;
+    }
+
+    /* ── Next EMI card ── */
+    .next-emi-card {
+      display: flex; align-items: center; justify-content: space-between;
+      background: linear-gradient(135deg, rgba(13,148,136,.08), rgba(20,184,166,.03));
+      border: 1px solid rgba(13,148,136,.18);
+      border-radius: var(--r-lg); padding: var(--sp-4);
+      margin-bottom: var(--sp-5);
+    }
+    .next-emi-card__label { font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+    .next-emi-card__date { font-size: 16px; font-weight: 700; color: var(--text-primary); margin-top: 3px; }
+    .next-emi-card__amt { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 700; color: var(--primary); }
+
+    /* ── Action links row ── */
+    .action-links { display: flex; flex-direction: column; gap: var(--sp-2); margin-bottom: var(--sp-5); }
+    .action-link-row {
+      display: flex; align-items: center; gap: var(--sp-3);
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: var(--sp-4); text-decoration: none;
+      transition: background var(--dur-fast);
+    }
+    .action-link-row:hover { background: var(--primary-xlight); }
+    .action-link-row__icon {
+      width: 36px; height: 36px; border-radius: var(--r-md); flex-shrink: 0;
+      background: var(--primary-xlight); color: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .action-link-row__title { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    .action-link-row__sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+
+    .account-line { font-size: 12px; color: var(--text-muted); margin-bottom: var(--sp-5); }
+    .account-line strong { color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">Loan</span>
+    <button class="demo-btn" data-state="home">Home Loan</button>
+    <button class="demo-btn" data-state="car">Car Loan</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title" id="top-title">Loan Detail</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content">
+
+    <!-- Lender Header -->
+    <div class="lender-header">
+      <div class="lender-header__icon" id="lender-icon"></div>
+      <div>
+        <div class="lender-header__name" id="lender-name">HDFC Bank</div>
+        <div class="lender-header__sub" id="lender-sub">Home Loan · Reducing Balance</div>
+      </div>
+    </div>
+
+    <!-- Stat Grid -->
+    <div class="stat-grid">
+      <div class="stat-cell">
+        <div class="stat-cell__label">Original Principal</div>
+        <div class="stat-cell__value" id="stat-principal">₹44,50,000</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-cell__label">Outstanding</div>
+        <div class="stat-cell__value stat-cell__value--accent" id="stat-outstanding">₹37,86,000</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-cell__label">EMI / Month</div>
+        <div class="stat-cell__value" id="stat-emi">₹38,500</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-cell__label">Interest Rate</div>
+        <div class="stat-cell__value" id="stat-rate">8.50% p.a.</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-cell__label">Original Tenure</div>
+        <div class="stat-cell__value" id="stat-orig-tenure">240 months</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-cell__label">Remaining Tenure</div>
+        <div class="stat-cell__value" id="stat-rem-tenure">169 months</div>
+      </div>
+    </div>
+
+    <!-- Payoff Timeline Chart -->
+    <div class="chart-card">
+      <div class="chart-card__label">Payoff Timeline — Outstanding Balance</div>
+      <div class="chart-svg-wrap">
+        <svg id="payoff-chart" viewBox="0 0 320 130" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#14B8A6"/>
+              <stop offset="100%" stop-color="#0D9488"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <div class="chart-axis-labels">
+        <span id="chart-axis-start">Jul 2026</span>
+        <span id="chart-axis-end">Debt-free</span>
+      </div>
+    </div>
+
+    <!-- Next EMI Due -->
+    <div class="next-emi-card">
+      <div>
+        <div class="next-emi-card__label">Next EMI Due</div>
+        <div class="next-emi-card__date" id="next-due-date">5 Aug 2026</div>
+      </div>
+      <div class="next-emi-card__amt" id="next-due-amt">₹38,500</div>
+    </div>
+
+    <a href="#" class="btn btn--primary btn--full" style="margin-bottom:var(--sp-5); text-decoration:none;" id="record-payment-btn">
+      Record Payment
+    </a>
+
+    <!-- Action Links -->
+    <div class="section-title">Explore</div>
+    <div class="action-links">
+      <a href="amortisation.html?loan=home" class="action-link-row" id="link-amort">
+        <div class="action-link-row__icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12" y="8" width="3" height="10"/><rect x="17" y="5" width="3" height="13"/></svg>
+        </div>
+        <div style="flex:1; min-width:0;">
+          <div class="action-link-row__title">Amortisation Schedule</div>
+          <div class="action-link-row__sub">Month-by-month principal &amp; interest split</div>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted); flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+      <a href="sandbox.html?loan=home" class="action-link-row" id="link-sandbox">
+        <div class="action-link-row__icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <div style="flex:1; min-width:0;">
+          <div class="action-link-row__title">Pre-Closure Sandbox</div>
+          <div class="action-link-row__sub">Simulate a lump-sum prepayment</div>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted); flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+    </div>
+
+    <div class="account-line">Loan A/C <strong id="account-masked">•••• 4821</strong> · Disbursed <span id="disbursed-label">5 Jul 2020</span></div>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV — none active (no Loans tab)
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ── Theme toggle (matches other pages) ── */
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+
+  /* ── Loan data (paise) ── */
+  const LOANS = {
+    home: {
+      id: 'home', lender: 'HDFC Bank', type: 'Home Loan', icon: 'home', iconClass: 'list-row__icon--danger',
+      principalPaise: 445000000, outstandingPaise: 378600000,
+      ratePct: 8.5, emiPaise: 3850000,
+      origTenureMonths: 240, remainingMonths: 169,
+      disbursedLabel: '5 Jul 2020', nextDueLabel: '5 Aug 2026',
+      account: '•••• 4821',
+    },
+    car: {
+      id: 'car', lender: 'ICICI Bank', type: 'Car Loan', icon: 'car', iconClass: 'list-row__icon--warning',
+      principalPaise: 73500000, outstandingPaise: 60100000,
+      ratePct: 9.5, emiPaise: 1200000,
+      origTenureMonths: 84, remainingMonths: 65,
+      disbursedLabel: '5 Nov 2024', nextDueLabel: '10 Aug 2026',
+      account: '•••• 7719',
+    },
+  };
+
+  const ICONS = {
+    home: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+    car:  '<rect x="1" y="3" width="15" height="13" rx="1"/><path d="m16 8 5 3v5h-5V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>',
+  };
+
+  function computeBalance(outstandingPaise, ratePct, emiPaise, k) {
+    if (k <= 0) return outstandingPaise;
+    const r = ratePct / 12 / 100;
+    const f = Math.pow(1 + r, k);
+    return Math.max(0, Math.round(outstandingPaise * f - emiPaise * (f - 1) / r));
+  }
+
+  function renderPayoffChart(loan) {
+    const svg = document.getElementById('payoff-chart');
+    const n = loan.remainingMonths;
+    const numBars = 9;
+    const step = Math.max(1, Math.round(n / (numBars - 1)));
+    const points = [];
+    for (let k = 0; k < n; k += step) points.push(k);
+    points.push(n);
+    const w = 320, h = 130, padBottom = 18;
+    const gap = w / points.length;
+    const barW = gap * 0.55;
+    const max = loan.outstandingPaise;
+    let bars = '';
+    points.forEach((k, i) => {
+      const bal = computeBalance(loan.outstandingPaise, loan.ratePct, loan.emiPaise, k);
+      const barH = Math.max(2, (bal / max) * (h - padBottom));
+      const x = i * gap + (gap - barW) / 2;
+      const y = (h - padBottom) - barH;
+      bars += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${barH.toFixed(1)}" rx="3" fill="url(#barGrad)"></rect>`;
+    });
+    svg.innerHTML = `
+      <defs>
+        <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#14B8A6"/>
+          <stop offset="100%" stop-color="#0D9488"/>
+        </linearGradient>
+      </defs>
+      ${bars}
+      <line x1="0" y1="${h - padBottom}" x2="${w}" y2="${h - padBottom}" stroke="var(--border)" stroke-width="1"/>`;
+  }
+
+  function monthLabel(monthsFromNow) {
+    const base = new Date(2026, 6, 1); // Jul 2026
+    const d = new Date(base.getFullYear(), base.getMonth() + monthsFromNow, 1);
+    return d.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' });
+  }
+
+  function render(key) {
+    const l = LOANS[key];
+    document.title = `ArthaGrid — ${l.lender} ${l.type}`;
+    document.getElementById('top-title').textContent = `${l.lender} ${l.type}`;
+    document.getElementById('lender-name').textContent = `${l.lender}`;
+    document.getElementById('lender-sub').textContent = `${l.type} · Reducing Balance`;
+    const iconEl = document.getElementById('lender-icon');
+    iconEl.className = 'lender-header__icon ' + (l.id === 'home' ? '' : '');
+    iconEl.style.background = l.id === 'home' ? 'var(--grad-danger)' : 'linear-gradient(135deg,#D97706,#F59E0B)';
+    iconEl.innerHTML = `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${ICONS[l.icon]}</svg>`;
+
+    document.getElementById('stat-principal').textContent = AG.formatINR(l.principalPaise);
+    document.getElementById('stat-outstanding').textContent = AG.formatINR(l.outstandingPaise);
+    document.getElementById('stat-emi').textContent = AG.formatINR(l.emiPaise);
+    document.getElementById('stat-rate').textContent = l.ratePct.toFixed(2) + '% p.a.';
+    document.getElementById('stat-orig-tenure').textContent = l.origTenureMonths + ' months';
+    document.getElementById('stat-rem-tenure').textContent = l.remainingMonths + ' months (~' + Math.round(l.remainingMonths / 12) + ' yrs)';
+
+    document.getElementById('next-due-date').textContent = l.nextDueLabel;
+    document.getElementById('next-due-amt').textContent = AG.formatINR(l.emiPaise);
+    document.getElementById('account-masked').textContent = l.account;
+    document.getElementById('disbursed-label').textContent = l.disbursedLabel;
+
+    document.getElementById('chart-axis-start').textContent = monthLabel(0);
+    document.getElementById('chart-axis-end').textContent = 'Debt-free · ' + monthLabel(l.remainingMonths);
+
+    document.getElementById('link-amort').href = `amortisation.html?loan=${l.id}`;
+    document.getElementById('link-sandbox').href = `sandbox.html?loan=${l.id}`;
+    document.getElementById('record-payment-btn').href = `../transactions/add.html?type=LOAN_PAYMENT&loanId=${l.id}`;
+
+    renderPayoffChart(l);
+
+    document.querySelectorAll('.demo-btn').forEach(b => b.classList.toggle('active', b.dataset.state === key));
+  }
+
+  document.querySelectorAll('.demo-btn[data-state]').forEach(btn => {
+    btn.addEventListener('click', () => render(btn.dataset.state));
+  });
+
+  /* Initial loan from ?loan= query param, default home */
+  const params = new URLSearchParams(location.search);
+  const initial = LOANS[params.get('loan')] ? params.get('loan') : 'home';
+  render(initial);
+</script>
+</body>
+</html>

@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Pre-Closure Sandbox</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* ── Loan strip ── */
+    .loan-strip {
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--surface-raised); border-radius: var(--r-lg);
+      padding: var(--sp-3) var(--sp-4); margin-bottom: var(--sp-5);
+      font-size: 12px; color: var(--text-secondary);
+    }
+    .loan-strip strong { color: var(--text-primary); }
+
+    /* ── Lump sum input ── */
+    .lump-card { margin-bottom: var(--sp-5); }
+    .lump-display {
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+      font-size: 32px; font-weight: 700; text-align: center; color: var(--primary);
+      padding: var(--sp-3) 0 var(--sp-1);
+    }
+    .lump-slider {
+      width: 100%; margin: var(--sp-2) 0 var(--sp-1); accent-color: var(--primary);
+      height: 6px;
+    }
+    .lump-range-labels {
+      display: flex; justify-content: space-between;
+      font-size: 11px; color: var(--text-muted);
+    }
+    .lump-quick-row { display: flex; gap: var(--sp-2); margin-top: var(--sp-3); }
+    .lump-quick-btn {
+      flex: 1; height: 34px; border-radius: var(--r-md);
+      background: var(--surface-raised); border: 1px solid var(--border);
+      font-size: 12px; font-weight: 600; color: var(--text-secondary);
+      transition: background var(--dur-fast), color var(--dur-fast), border-color var(--dur-fast);
+    }
+    .lump-quick-btn:hover, .lump-quick-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+    /* ── Strategy segmented control ── */
+    .seg-control {
+      display: flex; background: var(--surface-raised); border: 1px solid var(--border);
+      border-radius: var(--r-full); padding: 3px; margin-bottom: var(--sp-5);
+    }
+    .seg-btn {
+      flex: 1; height: 36px; border-radius: var(--r-full);
+      font-size: 12px; font-weight: 600; color: var(--text-secondary);
+      transition: background var(--dur-fast), color var(--dur-fast);
+    }
+    .seg-btn.active { background: var(--grad-primary); color: #fff; box-shadow: 0 2px 8px rgba(13,148,136,.28); }
+
+    /* ── Before / After comparison ── */
+    .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); margin-bottom: var(--sp-5); }
+    .compare-col {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: var(--sp-4);
+    }
+    .compare-col--new { border-color: rgba(13,148,136,.35); background: var(--primary-xlight); }
+    .compare-col__title {
+      font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: var(--sp-3);
+    }
+    .compare-col--new .compare-col__title { color: var(--primary); }
+    .compare-stat { margin-bottom: var(--sp-3); }
+    .compare-stat:last-child { margin-bottom: 0; }
+    .compare-stat__label { font-size: 10px; color: var(--text-muted); margin-bottom: 2px; }
+    .compare-stat__value {
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+      font-size: 14px; font-weight: 700; color: var(--text-primary);
+    }
+
+    /* ── Interest saved callout ── */
+    .saved-callout {
+      background: var(--grad-success); border-radius: var(--r-xl);
+      padding: var(--sp-5); text-align: center; color: #fff;
+      box-shadow: 0 8px 24px rgba(34,197,94,.28);
+    }
+    .saved-callout__label {
+      font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+      opacity: .85; margin-bottom: var(--sp-2);
+    }
+    .saved-callout__amount {
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+      font-size: 30px; font-weight: 700; line-height: 1.1;
+    }
+    .saved-callout__sub { font-size: 12px; opacity: .9; margin-top: var(--sp-2); }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">Loan</span>
+    <button class="demo-btn" data-state="home">Home Loan</button>
+    <button class="demo-btn" data-state="car">Car Loan</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="detail.html" class="top-bar__back" id="back-link" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Pre-Closure Sandbox</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content">
+
+    <div class="loan-strip">
+      <span id="loan-strip-name"><strong>HDFC Home Loan</strong></span>
+      <span id="loan-strip-meta">₹37,86,000 outstanding · 8.50% p.a.</span>
+    </div>
+
+    <!-- Lump Sum Input -->
+    <div class="glass-card glass-card--compact lump-card">
+      <div class="card-header" style="margin-bottom:0;">
+        <div class="card-title">Lump-Sum Prepayment</div>
+      </div>
+      <div class="lump-display" id="lump-display">₹5,00,000</div>
+      <input type="range" class="lump-slider" id="lump-slider" min="0" step="5000">
+      <div class="lump-range-labels">
+        <span>₹0</span>
+        <span id="lump-max-label">Max: ₹37,86,000</span>
+      </div>
+      <div class="lump-quick-row">
+        <button class="lump-quick-btn" onclick="setQuickPct(0.1)">10%</button>
+        <button class="lump-quick-btn" onclick="setQuickPct(0.25)">25%</button>
+        <button class="lump-quick-btn active" onclick="setQuickPct(0.5)">50%</button>
+      </div>
+    </div>
+
+    <!-- Strategy Toggle -->
+    <div class="section-title">After Prepayment, Prefer To…</div>
+    <div class="seg-control">
+      <button class="seg-btn active" id="seg-tenure" onclick="setMode('tenure')">Reduce Tenure</button>
+      <button class="seg-btn" id="seg-emi" onclick="setMode('emi')">Reduce EMI</button>
+    </div>
+
+    <!-- Before / After -->
+    <div class="section-title">Before vs After</div>
+    <div class="compare-grid">
+      <div class="compare-col">
+        <div class="compare-col__title">Original</div>
+        <div class="compare-stat">
+          <div class="compare-stat__label">EMI / Month</div>
+          <div class="compare-stat__value" id="orig-emi">₹38,500</div>
+        </div>
+        <div class="compare-stat">
+          <div class="compare-stat__label">Tenure Remaining</div>
+          <div class="compare-stat__value" id="orig-tenure">169 mo</div>
+        </div>
+        <div class="compare-stat">
+          <div class="compare-stat__label">Total Interest</div>
+          <div class="compare-stat__value" id="orig-interest">₹—</div>
+        </div>
+      </div>
+      <div class="compare-col compare-col--new">
+        <div class="compare-col__title">After Prepayment</div>
+        <div class="compare-stat">
+          <div class="compare-stat__label">EMI / Month</div>
+          <div class="compare-stat__value" id="new-emi">₹—</div>
+        </div>
+        <div class="compare-stat">
+          <div class="compare-stat__label">Tenure Remaining</div>
+          <div class="compare-stat__value" id="new-tenure">—</div>
+        </div>
+        <div class="compare-stat">
+          <div class="compare-stat__label">Total Interest</div>
+          <div class="compare-stat__value" id="new-interest">₹—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interest Saved Callout -->
+    <div class="saved-callout">
+      <div class="saved-callout__label">Interest Saved</div>
+      <div class="saved-callout__amount" id="interest-saved">₹—</div>
+      <div class="saved-callout__sub" id="saved-sub">—</div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV — none active (no Loans tab)
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ── Theme toggle (matches other pages) ── */
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+
+  /* ── Loan data (paise) ── */
+  const LOANS = {
+    home: {
+      id: 'home', lender: 'HDFC Bank', type: 'Home Loan',
+      outstandingPaise: 378600000, ratePct: 8.5, emiPaise: 3850000, remainingMonths: 169,
+    },
+    car: {
+      id: 'car', lender: 'ICICI Bank', type: 'Car Loan',
+      outstandingPaise: 60100000, ratePct: 9.5, emiPaise: 1200000, remainingMonths: 65,
+    },
+  };
+
+  let current = 'home';
+  let mode = 'tenure'; // 'tenure' | 'emi'
+  let lumpPaise = 0;
+
+  /* ── Reducing-balance schedule (paise), used to sum total interest ── */
+  function scheduleInterestTotal(balancePaise, ratePct, emiPaise, fixedMonths) {
+    const r = ratePct / 12 / 100;
+    let balance = balancePaise;
+    let totalInterest = 0;
+    let months = 0;
+    const cap = fixedMonths ? fixedMonths : 600;
+    for (let m = 1; m <= cap; m++) {
+      if (balance <= 0) break;
+      const interest = Math.round(balance * r);
+      let principal = emiPaise - interest;
+      if (principal >= balance) principal = balance;
+      totalInterest += interest;
+      balance = Math.max(0, balance - principal);
+      months = m;
+      if (fixedMonths && m === fixedMonths) break;
+    }
+    return { totalInterest, months };
+  }
+
+  function computeNewEmiForFixedTenure(balancePaise, ratePct, n) {
+    const r = ratePct / 12 / 100;
+    const f = Math.pow(1 + r, n);
+    return Math.round(balancePaise * r * f / (f - 1));
+  }
+
+  function recompute() {
+    const l = LOANS[current];
+    const origResult = scheduleInterestTotal(l.outstandingPaise, l.ratePct, l.emiPaise, null);
+    document.getElementById('orig-emi').textContent = AG.formatINR(l.emiPaise);
+    document.getElementById('orig-tenure').textContent = l.remainingMonths + ' mo';
+    document.getElementById('orig-interest').textContent = AG.formatINR(origResult.totalInterest, { compact: true });
+
+    const newBalance = Math.max(0, l.outstandingPaise - lumpPaise);
+
+    let newEmiPaise, newTenure, newInterest;
+    if (newBalance <= 0) {
+      newEmiPaise = 0; newTenure = 0; newInterest = 0;
+    } else if (mode === 'tenure') {
+      newEmiPaise = l.emiPaise;
+      const r = scheduleInterestTotal(newBalance, l.ratePct, l.emiPaise, null);
+      newTenure = r.months;
+      newInterest = r.totalInterest;
+    } else {
+      newEmiPaise = computeNewEmiForFixedTenure(newBalance, l.ratePct, l.remainingMonths);
+      const r = scheduleInterestTotal(newBalance, l.ratePct, newEmiPaise, l.remainingMonths);
+      newTenure = l.remainingMonths;
+      newInterest = r.totalInterest;
+    }
+
+    document.getElementById('new-emi').textContent = newBalance <= 0 ? '₹0' : AG.formatINR(newEmiPaise);
+    document.getElementById('new-tenure').textContent = newBalance <= 0 ? '0 mo (closed)' : newTenure + ' mo';
+    document.getElementById('new-interest').textContent = AG.formatINR(newInterest, { compact: true });
+
+    const saved = origResult.totalInterest - newInterest;
+    document.getElementById('interest-saved').textContent = AG.formatINR(Math.max(0, saved));
+
+    let subLine;
+    if (newBalance <= 0) {
+      subLine = 'Full prepayment — loan closes immediately.';
+    } else if (mode === 'tenure') {
+      const monthsSaved = l.remainingMonths - newTenure;
+      subLine = `EMI stays at ${AG.formatINR(l.emiPaise)}/mo, but you finish ~${monthsSaved} months sooner.`;
+    } else {
+      const emiCut = l.emiPaise - newEmiPaise;
+      subLine = `Tenure stays ${l.remainingMonths} months, but EMI drops by ${AG.formatINR(emiCut)}/mo.`;
+    }
+    document.getElementById('saved-sub').textContent = subLine;
+  }
+
+  function setMode(m) {
+    mode = m;
+    document.getElementById('seg-tenure').classList.toggle('active', m === 'tenure');
+    document.getElementById('seg-emi').classList.toggle('active', m === 'emi');
+    recompute();
+  }
+
+  function setLump(paise) {
+    const l = LOANS[current];
+    lumpPaise = Math.min(Math.max(0, paise), l.outstandingPaise);
+    document.getElementById('lump-slider').value = lumpPaise;
+    document.getElementById('lump-display').textContent = AG.formatINR(lumpPaise);
+    recompute();
+  }
+
+  function setQuickPct(pct) {
+    const l = LOANS[current];
+    setLump(Math.round((l.outstandingPaise * pct) / 5000) * 5000);
+    document.querySelectorAll('.lump-quick-btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+  }
+
+  document.getElementById('lump-slider').addEventListener('input', (e) => {
+    setLump(parseInt(e.target.value, 10));
+    document.querySelectorAll('.lump-quick-btn').forEach(b => b.classList.remove('active'));
+  });
+
+  function render(key) {
+    current = key;
+    const l = LOANS[key];
+    document.title = `ArthaGrid — ${l.lender} ${l.type} Sandbox`;
+    document.getElementById('back-link').href = `detail.html?loan=${l.id}`;
+    document.getElementById('loan-strip-name').innerHTML = `<strong>${l.lender} ${l.type}</strong>`;
+    document.getElementById('loan-strip-meta').textContent = `${AG.formatINR(l.outstandingPaise)} outstanding · ${l.ratePct.toFixed(2)}% p.a.`;
+    document.getElementById('lump-slider').max = l.outstandingPaise;
+    document.getElementById('lump-max-label').textContent = 'Max: ' + AG.formatINR(l.outstandingPaise);
+
+    setLump(Math.round((l.outstandingPaise * 0.5) / 5000) * 5000);
+    document.querySelectorAll('.demo-btn').forEach(b => b.classList.toggle('active', b.dataset.state === key));
+  }
+
+  document.querySelectorAll('.demo-btn[data-state]').forEach(btn => {
+    btn.addEventListener('click', () => render(btn.dataset.state));
+  });
+
+  const params = new URLSearchParams(location.search);
+  const initial = LOANS[params.get('loan')] ? params.get('loan') : 'home';
+  render(initial);
+</script>
+</body>
+</html>

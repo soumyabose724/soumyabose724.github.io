@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Statement Cycle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* ── Cycle period card ── */
+    .cyc-period-card { margin-bottom: var(--sp-4); }
+    .cyc-period-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: var(--sp-4);
+    }
+    .cyc-period-label { font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--text-muted); }
+    .cyc-period-dates { font-size: 16px; font-weight: 700; color: var(--text-primary); margin-top: 2px; }
+
+    .cyc-stats {
+      display: flex; justify-content: space-between; align-items: stretch;
+      margin-bottom: var(--sp-3);
+    }
+    .cyc-stat { flex: 1; text-align: left; }
+    .cyc-stat--right { text-align: right; }
+    .cyc-stat__label { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; }
+    .cyc-stat__val {
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+      font-size: 22px; font-weight: 700; color: var(--text-primary);
+    }
+    .cyc-stat__val--mad { font-size: 18px; color: var(--text-secondary); }
+    .cyc-due-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-top: var(--sp-3); border-top: 1px solid var(--border);
+    }
+    .cyc-due-label { font-size: 12px; color: var(--text-secondary); }
+    .cyc-due-date { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+
+    /* ── Interest projection note ── */
+    .cyc-interest-note {
+      display: none; align-items: flex-start; gap: var(--sp-3);
+      background: var(--warning-light); border: 1px solid rgba(245,158,11,.28);
+      border-radius: var(--r-lg); padding: var(--sp-4); margin-bottom: var(--sp-4);
+      font-size: 12px; color: var(--text-secondary); line-height: 1.6;
+    }
+    .cyc-interest-note.visible { display: flex; }
+    .cyc-interest-note--overdue { background: var(--error-light); border-color: rgba(233,69,96,.3); }
+    .cyc-interest-note strong { color: var(--text-primary); }
+
+    .cyc-paid-note {
+      display: none; align-items: center; gap: var(--sp-3);
+      background: var(--success-light); border: 1px solid rgba(34,197,94,.28);
+      border-radius: var(--r-lg); padding: var(--sp-4); margin-bottom: var(--sp-4);
+      font-size: 13px; font-weight: 600; color: var(--success);
+    }
+    .cyc-paid-note.visible { display: flex; }
+
+    /* ── Breakdown ── */
+    .cyc-breakdown-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: var(--sp-3);
+    }
+    .cyc-add-txn-link {
+      font-size: 12px; font-weight: 600; color: var(--primary);
+      text-decoration: none; display: flex; align-items: center; gap: 3px;
+    }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">State</span>
+    <button class="demo-btn active" data-state="due">Due</button>
+    <button class="demo-btn" data-state="paid">Paid in Full</button>
+    <button class="demo-btn" data-state="overdue">Overdue</button>
+    <button class="icon-btn" data-theme-toggle style="margin-left:auto;" aria-label="Toggle theme">
+      <span data-theme-icon style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="card-detail.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Statement Cycle</span>
+    <div class="top-bar__actions">
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content">
+
+    <!-- Cycle Period + TAD/MAD -->
+    <div class="glass-card cyc-period-card">
+      <div class="cyc-period-head">
+        <div>
+          <div class="cyc-period-label">HDFC Bank Regalia · •••• 4521</div>
+          <div class="cyc-period-dates">9 Jun 2026 – 8 Jul 2026</div>
+        </div>
+        <span class="chip" id="cyc-status-chip">Due</span>
+      </div>
+
+      <div class="cyc-stats">
+        <div class="cyc-stat">
+          <div class="cyc-stat__label">Total Amount Due (TAD)</div>
+          <div class="cyc-stat__val" id="cyc-tad">₹1,04,650</div>
+        </div>
+        <div class="cyc-stat cyc-stat--right">
+          <div class="cyc-stat__label">Min. Amount Due (MAD)</div>
+          <div class="cyc-stat__val cyc-stat__val--mad" id="cyc-mad">₹5,233</div>
+        </div>
+      </div>
+
+      <div class="cyc-due-row">
+        <span class="cyc-due-label">Payment Due Date</span>
+        <span class="cyc-due-date" id="cyc-due-date">28 Jul 2026</span>
+      </div>
+    </div>
+
+    <!-- Paid in full note -->
+    <div class="cyc-paid-note" id="cyc-paid-note">
+      <span style="font-size:18px;">✓</span>
+      <span>Paid in full on 24 Jul 2026 — no interest charged this cycle.</span>
+    </div>
+
+    <!-- Interest projection note -->
+    <div class="cyc-interest-note" id="cyc-interest-note">
+      <span style="font-size:18px; flex-shrink:0;">ⓘ</span>
+      <span id="cyc-interest-text">
+        If <strong>₹1,04,650</strong> is not paid in full by the due date, interest accrues at <strong>3.49% per month</strong>
+        (41.88% p.a.) on the outstanding balance from the transaction date, and the interest-free grace period on
+        new purchases is lost. Projected interest for next cycle if only the Minimum Amount Due is paid: <strong>≈ ₹3,652</strong>.
+      </span>
+    </div>
+
+    <!-- Breakdown -->
+    <div class="section">
+      <div class="cyc-breakdown-head">
+        <div class="section-title" style="margin-bottom:0;">Charges This Cycle</div>
+        <a href="../transactions/add.html" class="cyc-add-txn-link">
+          + Add Transaction
+        </a>
+      </div>
+
+      <div class="list-row">
+        <div class="list-row__icon list-row__icon--info">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 10h20"/></svg>
+        </div>
+        <div class="list-row__info">
+          <div class="list-row__label">Croma Electronics <span class="chip chip--locked" style="font-size:9px;height:16px;">EMI 5/6</span></div>
+          <div class="list-row__meta">28 Jun 2026 · EMI Installment</div>
+        </div>
+        <div class="list-row__amount-row">
+          <span class="list-row__amount list-row__amount--expense">−₹7,834</span>
+        </div>
+      </div>
+
+      <div class="list-row">
+        <div class="list-row__icon list-row__icon--warning">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        </div>
+        <div class="list-row__info">
+          <div class="list-row__label">Amazon.in</div>
+          <div class="list-row__meta">22 Jun 2026 · Shopping · UPI</div>
+        </div>
+        <div class="list-row__amount-row">
+          <span class="list-row__amount list-row__amount--expense">−₹3,450</span>
+        </div>
+      </div>
+
+      <div class="list-row">
+        <div class="list-row__icon list-row__icon--muted">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        </div>
+        <div class="list-row__info">
+          <div class="list-row__label">Big Basket</div>
+          <div class="list-row__meta">18 Jun 2026 · Groceries</div>
+        </div>
+        <div class="list-row__amount-row">
+          <span class="list-row__amount list-row__amount--expense">−₹2,340</span>
+        </div>
+      </div>
+
+      <div class="list-row">
+        <div class="list-row__icon list-row__icon--muted">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>
+        </div>
+        <div class="list-row__info">
+          <div class="list-row__label">Uber</div>
+          <div class="list-row__meta">15 Jun 2026 · Fuel &amp; Transport</div>
+        </div>
+        <div class="list-row__amount-row">
+          <span class="list-row__amount list-row__amount--expense">−₹560</span>
+        </div>
+      </div>
+
+      <div class="list-row">
+        <div class="list-row__icon list-row__icon--danger">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5a2 2 0 0 1 2-2h9l5 5v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/></svg>
+        </div>
+        <div class="list-row__info">
+          <div class="list-row__label">IRCTC</div>
+          <div class="list-row__meta">10 Jun 2026 · Travel</div>
+        </div>
+        <div class="list-row__amount-row">
+          <span class="list-row__amount list-row__amount--expense">−₹4,200</span>
+        </div>
+      </div>
+
+      <div class="list-row">
+        <div class="list-row__icon list-row__icon--success">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <div class="list-row__info">
+          <div class="list-row__label">Payment Received</div>
+          <div class="list-row__meta">5 Jun 2026 · Credit Card Payment · UPI</div>
+        </div>
+        <div class="list-row__amount-row">
+          <span class="list-row__amount list-row__amount--income">+₹20,000</span>
+        </div>
+      </div>
+    </div>
+
+    <a href="card-detail.html" class="btn btn--primary btn--full btn--lg" style="margin-top:var(--sp-2); text-decoration:none;">
+      Make Payment
+    </a>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  const CYC_STATES = {
+    due: {
+      chip: 'Due', chipClass: 'chip--info',
+      showInterestNote: true, interestOverdue: false,
+      showPaidNote: false,
+    },
+    paid: {
+      chip: 'Paid in Full', chipClass: 'chip--balanced',
+      showInterestNote: false, interestOverdue: false,
+      showPaidNote: true,
+    },
+    overdue: {
+      chip: 'Overdue', chipClass: 'chip--overdue',
+      showInterestNote: true, interestOverdue: true,
+      showPaidNote: false,
+    },
+  };
+
+  function applyCycleState(key) {
+    const s = CYC_STATES[key];
+    const chip = document.getElementById('cyc-status-chip');
+    chip.textContent = s.chip;
+    chip.className = 'chip ' + s.chipClass;
+
+    document.getElementById('cyc-paid-note').classList.toggle('visible', s.showPaidNote);
+
+    const note = document.getElementById('cyc-interest-note');
+    note.classList.toggle('visible', s.showInterestNote);
+    note.classList.toggle('cyc-interest-note--overdue', s.interestOverdue);
+
+    document.getElementById('cyc-interest-text').innerHTML = s.interestOverdue
+      ? 'This statement is <strong>overdue</strong>. Interest is now accruing at <strong>3.49% per month</strong> (41.88% p.a.) on the outstanding balance, a late payment fee may apply, and the interest-free grace period on new purchases is lost until the balance is cleared. Projected interest so far: <strong>≈ ₹3,652</strong>.'
+      : 'If <strong>₹1,04,650</strong> is not paid in full by the due date, interest accrues at <strong>3.49% per month</strong> (41.88% p.a.) on the outstanding balance from the transaction date, and the interest-free grace period on new purchases is lost. Projected interest for next cycle if only the Minimum Amount Due is paid: <strong>≈ ₹3,652</strong>.';
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    AG.initDemoBar({
+      due:     () => applyCycleState('due'),
+      paid:    () => applyCycleState('paid'),
+      overdue: () => applyCycleState('overdue'),
+    });
+  });
+</script>
+</body>
+</html>

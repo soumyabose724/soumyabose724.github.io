@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Snowball vs Avalanche</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* ── Assumption strip ── */
+    .assume-strip {
+      background: var(--surface-raised); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: var(--sp-3) var(--sp-4);
+      font-size: 12px; color: var(--text-secondary); line-height: 1.5;
+      margin-bottom: var(--sp-5);
+    }
+    .assume-strip strong { color: var(--text-primary); }
+
+    /* ── Strategy cards ── */
+    .strat-card {
+      border: 1.5px solid var(--border); border-radius: var(--r-xl);
+      padding: var(--sp-5); margin-bottom: var(--sp-4);
+      background: var(--surface);
+    }
+    .strat-card--snowball { border-color: rgba(59,130,246,.30); }
+    .strat-card--avalanche { border-color: rgba(245,158,11,.30); }
+    .strat-card__header { display: flex; align-items: center; gap: var(--sp-2); margin-bottom: var(--sp-4); }
+    .strat-card__icon { font-size: 20px; }
+    .strat-card__title { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+    .strat-card__sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+
+    .payoff-order { display: flex; flex-direction: column; gap: var(--sp-2); margin-bottom: var(--sp-4); }
+    .payoff-order__item {
+      display: flex; align-items: center; gap: var(--sp-3);
+      background: var(--surface-raised); border-radius: var(--r-md);
+      padding: var(--sp-2) var(--sp-3);
+    }
+    .payoff-order__rank {
+      width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+      background: var(--grad-primary); color: #fff; font-size: 11px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .payoff-order__name { flex: 1; font-size: 13px; font-weight: 600; color: var(--text-primary); }
+    .payoff-order__meta { font-size: 11px; color: var(--text-muted); }
+
+    .strat-stats { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); }
+    .strat-stat__label { font-size: 10px; color: var(--text-muted); margin-bottom: 2px; text-transform: uppercase; letter-spacing: .04em; font-weight: 700; }
+    .strat-stat__value { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-size: 16px; font-weight: 700; color: var(--text-primary); }
+
+    /* ── Winner callout ── */
+    .winner-callout {
+      border-radius: var(--r-xl); padding: var(--sp-5); text-align: center;
+      margin-top: var(--sp-2); margin-bottom: var(--sp-5);
+    }
+    .winner-callout--win { background: var(--grad-success); color: #fff; box-shadow: 0 8px 24px rgba(34,197,94,.28); }
+    .winner-callout--tie { background: var(--surface-raised); border: 1.5px dashed var(--border-strong); color: var(--text-primary); }
+    .winner-callout__label {
+      font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+      margin-bottom: var(--sp-2); opacity: .85;
+    }
+    .winner-callout__headline { font-size: 20px; font-weight: 700; line-height: 1.25; }
+    .winner-callout__sub { font-size: 12px; margin-top: var(--sp-3); line-height: 1.55; opacity: .92; }
+    .winner-callout--tie .winner-callout__sub { color: var(--text-secondary); opacity: 1; }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">Extra / Month</span>
+    <button class="demo-btn" data-extra="0">₹0</button>
+    <button class="demo-btn" data-extra="15000">₹15,000</button>
+    <button class="demo-btn" data-extra="30000">₹30,000</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Snowball vs Avalanche</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content">
+
+    <div class="assume-strip">
+      Comparing both loans — <strong>HDFC Home Loan</strong> (₹37,86,000 @ 8.50%) and <strong>ICICI Car Loan</strong> (₹6,01,000 @ 9.50%) — assuming minimum EMIs of <strong id="assume-emi">₹50,500</strong>/month plus an extra <strong id="assume-extra">₹15,000</strong>/month directed at whichever loan each strategy prioritises.
+    </div>
+
+    <!-- Snowball -->
+    <div class="strat-card strat-card--snowball">
+      <div class="strat-card__header">
+        <span class="strat-card__icon">❄️</span>
+        <div>
+          <div class="strat-card__title">Snowball</div>
+          <div class="strat-card__sub">Smallest balance paid off first</div>
+        </div>
+      </div>
+      <div class="payoff-order" id="snowball-order"></div>
+      <div class="strat-stats">
+        <div>
+          <div class="strat-stat__label">Debt-Free In</div>
+          <div class="strat-stat__value" id="snowball-months">— mo</div>
+        </div>
+        <div>
+          <div class="strat-stat__label">Total Interest Paid</div>
+          <div class="strat-stat__value" id="snowball-interest">₹—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Avalanche -->
+    <div class="strat-card strat-card--avalanche">
+      <div class="strat-card__header">
+        <span class="strat-card__icon">🏔️</span>
+        <div>
+          <div class="strat-card__title">Avalanche</div>
+          <div class="strat-card__sub">Highest interest rate paid off first</div>
+        </div>
+      </div>
+      <div class="payoff-order" id="avalanche-order"></div>
+      <div class="strat-stats">
+        <div>
+          <div class="strat-stat__label">Debt-Free In</div>
+          <div class="strat-stat__value" id="avalanche-months">— mo</div>
+        </div>
+        <div>
+          <div class="strat-stat__label">Total Interest Paid</div>
+          <div class="strat-stat__value" id="avalanche-interest">₹—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Winner Callout -->
+    <div class="winner-callout" id="winner-callout">
+      <div class="winner-callout__label">Result</div>
+      <div class="winner-callout__headline" id="winner-headline">Computing…</div>
+      <div class="winner-callout__sub" id="winner-sub"></div>
+    </div>
+
+    <div style="font-size:11px; color:var(--text-muted); line-height:1.6;">
+      With Vikas's current two loans, the Car Loan happens to have <em>both</em> the smaller outstanding balance and the higher interest rate — so Snowball and Avalanche pick the same loan first. The two strategies only diverge in total interest when the smallest-balance loan and the highest-rate loan are different loans. Figures are approximate, computed client-side for this prototype.
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV — none active (no Loans tab)
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ── Theme toggle (matches other pages) ── */
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+
+  /* ── Vikas Sharma's two loans (paise) ── */
+  const LOANS = [
+    { id: 'home', name: 'HDFC Home Loan', balancePaise: 378600000, ratePct: 8.5, emiPaise: 3850000 },
+    { id: 'car', name: 'ICICI Car Loan', balancePaise: 60100000, ratePct: 9.5, emiPaise: 1200000 },
+  ];
+
+  /* ── Generic snowball/avalanche simulation ──
+     Pays minimum EMI on every loan; the single fixed "extra" pool, plus the
+     freed-up EMI of any already-cleared loan, is directed entirely at the
+     first still-active loan in `order` each month. */
+  function simulate(order, extraPaise) {
+    const bal = order.map(l => l.balancePaise);
+    const rate = order.map(l => l.ratePct / 12 / 100);
+    const emi = order.map(l => l.emiPaise);
+    let month = 0;
+    let totalInterest = 0;
+    while (bal.some(b => b > 0) && month < 1200) {
+      month++;
+      let pool = extraPaise;
+      order.forEach((l, i) => { if (bal[i] <= 0) pool += emi[i]; });
+      let firstActiveFound = false;
+      for (let i = 0; i < order.length; i++) {
+        if (bal[i] <= 0) continue;
+        const interest = Math.round(bal[i] * rate[i]);
+        totalInterest += interest;
+        let pay = emi[i];
+        if (!firstActiveFound) { pay += pool; firstActiveFound = true; }
+        let principal = pay - interest;
+        if (principal >= bal[i]) principal = bal[i];
+        bal[i] -= principal;
+      }
+    }
+    return { months: month, totalInterest };
+  }
+
+  function orderHtml(order) {
+    return order.map((l, i) => `
+      <div class="payoff-order__item">
+        <span class="payoff-order__rank">${i + 1}</span>
+        <span class="payoff-order__name">${l.name}</span>
+        <span class="payoff-order__meta">${l.ratePct.toFixed(2)}% · ${AG.formatINR(l.balancePaise, { compact: true })}</span>
+      </div>`).join('');
+  }
+
+  let extraPaiseCurrent = 1500000; // ₹15,000 default
+
+  function render() {
+    const snowballOrder = LOANS.slice().sort((a, b) => a.balancePaise - b.balancePaise);
+    const avalancheOrder = LOANS.slice().sort((a, b) => b.ratePct - a.ratePct);
+
+    document.getElementById('snowball-order').innerHTML = orderHtml(snowballOrder);
+    document.getElementById('avalanche-order').innerHTML = orderHtml(avalancheOrder);
+
+    const snow = simulate(snowballOrder, extraPaiseCurrent);
+    const ava = simulate(avalancheOrder, extraPaiseCurrent);
+
+    document.getElementById('snowball-months').textContent = snow.months + ' mo';
+    document.getElementById('snowball-interest').textContent = AG.formatINR(snow.totalInterest, { compact: true });
+    document.getElementById('avalanche-months').textContent = ava.months + ' mo';
+    document.getElementById('avalanche-interest').textContent = AG.formatINR(ava.totalInterest, { compact: true });
+
+    const totalEmi = LOANS.reduce((s, l) => s + l.emiPaise, 0);
+    document.getElementById('assume-emi').textContent = AG.formatINR(totalEmi);
+    document.getElementById('assume-extra').textContent = AG.formatINR(extraPaiseCurrent);
+
+    const callout = document.getElementById('winner-callout');
+    const headline = document.getElementById('winner-headline');
+    const sub = document.getElementById('winner-sub');
+    const diff = snow.totalInterest - ava.totalInterest;
+
+    if (Math.abs(diff) < 100000) { // within ₹1,000 — treat as a tie
+      callout.className = 'winner-callout winner-callout--tie';
+      headline.textContent = "It's a Tie — Same Order, Same Savings";
+      sub.textContent = `Both strategies pay off the Car Loan first, then the Home Loan, finishing debt-free in ${ava.months} months with ${AG.formatINR(ava.totalInterest, { compact: true })} total interest. Neither has an edge on this specific loan mix.`;
+    } else if (diff > 0) {
+      callout.className = 'winner-callout winner-callout--win';
+      headline.textContent = `Avalanche Saves You ${AG.formatINR(diff, { compact: true })}`;
+      sub.textContent = `Prioritising the higher interest rate pays off. Avalanche reaches debt-free in ${ava.months} months vs Snowball's ${snow.months} months.`;
+    } else {
+      callout.className = 'winner-callout winner-callout--win';
+      headline.textContent = `Snowball Saves You ${AG.formatINR(-diff, { compact: true })}`;
+      sub.textContent = `On this loan mix, paying off the smallest balance first works out cheaper. Snowball reaches debt-free in ${snow.months} months vs Avalanche's ${ava.months} months.`;
+    }
+  }
+
+  document.querySelectorAll('.demo-btn[data-extra]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.demo-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      extraPaiseCurrent = parseInt(btn.dataset.extra, 10) * 100;
+      render();
+    });
+  });
+  document.querySelector('.demo-btn[data-extra="15000"]').classList.add('active');
+
+  render();
+</script>
+</body>
+</html>

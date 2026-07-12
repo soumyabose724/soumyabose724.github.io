@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — SBI Fixed Deposit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* ── Balance hero ── */
+    .acct-hero {
+      border-radius: var(--r-xl);
+      background: linear-gradient(135deg, #0B7A70 0%, #0D9488 55%, #0EA5A0 100%);
+      box-shadow: 0 6px 28px rgba(13,148,136,.32);
+      padding: var(--sp-6) var(--sp-5) var(--sp-5);
+      position: relative; overflow: hidden;
+      color: #fff; margin-bottom: var(--sp-5);
+    }
+    .acct-hero::before {
+      content: ''; position: absolute; top: -32px; right: -32px;
+      width: 110px; height: 110px; border-radius: 50%;
+      background: rgba(255,255,255,.07);
+    }
+    .acct-hero__top { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--sp-4); }
+    .acct-hero__bank { font-size: 13px; font-weight: 600; color: rgba(255,255,255,.85); }
+    .acct-hero__number { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: rgba(255,255,255,.6); margin-top: 2px; }
+    .acct-hero__badge {
+      font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+      background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.3);
+      color: rgba(255,255,255,.92); padding: 3px 9px; border-radius: var(--r-full);
+    }
+    .acct-hero__label { font-size: 11px; color: rgba(255,255,255,.65); margin-bottom: var(--sp-1); }
+    .acct-hero__amount {
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+      font-size: 32px; font-weight: 700; color: #fff; line-height: 1.1;
+    }
+    .acct-hero__sub { font-size: 12px; color: rgba(255,255,255,.65); margin-top: 2px; }
+    .acct-hero__meta-row {
+      display: flex; justify-content: space-between; margin-top: var(--sp-4);
+      padding-top: var(--sp-3); border-top: 1px solid rgba(255,255,255,.18);
+    }
+    .acct-hero__meta-cell { text-align: left; }
+    .acct-hero__meta-cell + .acct-hero__meta-cell { text-align: right; }
+    .acct-hero__meta-label { font-size: 10px; color: rgba(255,255,255,.55); text-transform: uppercase; letter-spacing: .06em; }
+    .acct-hero__meta-val { font-size: 13px; font-weight: 600; color: #fff; margin-top: 2px; }
+
+    /* ── Details grid ── */
+    .details-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3);
+      margin-bottom: var(--sp-5);
+    }
+    .details-cell {
+      background: var(--surface-raised); border-radius: var(--r-lg);
+      padding: var(--sp-3) var(--sp-3);
+    }
+    .details-cell__label {
+      font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: 4px;
+    }
+    .details-cell__val {
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+      font-size: 15px; font-weight: 700; color: var(--text-primary);
+    }
+
+    /* ── Calculator card ── */
+    .calc-formula {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--surface-raised); border: 1px dashed var(--border-strong);
+      border-radius: var(--r-lg); padding: var(--sp-3) var(--sp-4);
+      font-size: 13px; color: var(--primary); font-weight: 600;
+      text-align: center; margin-bottom: var(--sp-4);
+      overflow-x: auto; white-space: nowrap;
+    }
+    .calc-steps { font-size: 13px; color: var(--text-secondary); line-height: 2; }
+    .calc-steps strong { color: var(--text-primary); font-family: 'JetBrains Mono', monospace; }
+    .calc-result {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--success-light); border-radius: var(--r-lg);
+      padding: var(--sp-3) var(--sp-4); margin-top: var(--sp-4);
+    }
+    .calc-result__label { font-size: 13px; font-weight: 600; color: var(--success); }
+    .calc-result__val {
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+      font-size: 16px; font-weight: 700; color: var(--success);
+    }
+
+    /* ── RD monthly table ── */
+    .rd-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: var(--sp-4); }
+    .rd-table th {
+      text-align: left; font-size: 10px; font-weight: 700; letter-spacing: .05em;
+      text-transform: uppercase; color: var(--text-muted);
+      padding: 6px 4px; border-bottom: 1px solid var(--border);
+    }
+    .rd-table td {
+      padding: 8px 4px; border-bottom: 1px solid var(--border);
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+    }
+    .rd-table tr:last-child td { border-bottom: none; }
+    .rd-table td.rd-month { font-family: 'Inter', sans-serif; font-weight: 500; color: var(--text-primary); }
+    .rd-table td.rd-highlight { color: var(--primary); font-weight: 700; }
+
+    /* ── TDS threshold card ── */
+    .tds-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .tds-label { font-size: 12px; color: var(--text-secondary); }
+    .tds-val { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: var(--text-primary); }
+    .tds-note {
+      font-size: 12px; color: var(--text-secondary); line-height: 1.6; margin-top: var(--sp-3);
+      padding-top: var(--sp-3); border-top: 1px solid var(--border);
+    }
+
+    /* ── Section title ── */
+    .fd-section-title {
+      font-size: 11px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--text-muted);
+      margin: 0 0 var(--sp-3);
+    }
+
+    #view-rd { display: none; }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">State</span>
+    <button class="demo-btn" data-state="fd">Fixed Deposit (SBI)</button>
+    <button class="demo-btn" data-state="rd">Recurring Deposit (India Post)</button>
+    <button class="icon-btn" data-theme-toggle style="margin-left:auto;" aria-label="Toggle theme">
+      <span data-theme-icon style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title" id="page-title">Fixed Deposit</span>
+    <div class="top-bar__actions">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content">
+
+    <!-- ═══════════ FD VIEW ═══════════ -->
+    <div id="view-fd">
+
+      <div class="acct-hero">
+        <div class="acct-hero__top">
+          <div>
+            <div class="acct-hero__bank">State Bank of India</div>
+            <div class="acct-hero__number">•••• 3390</div>
+          </div>
+          <span class="acct-hero__badge">Fixed Deposit</span>
+        </div>
+        <div class="acct-hero__label">Current Value</div>
+        <div class="acct-hero__amount">₹8,50,490</div>
+        <div class="acct-hero__sub">Principal ₹7,50,000 · 7.25% p.a. · Quarterly compounding</div>
+        <div class="acct-hero__meta-row">
+          <div class="acct-hero__meta-cell">
+            <div class="acct-hero__meta-label">Opened</div>
+            <div class="acct-hero__meta-val">1 Oct 2024</div>
+          </div>
+          <div class="acct-hero__meta-cell">
+            <div class="acct-hero__meta-label">Matures</div>
+            <div class="acct-hero__meta-val">1 Oct 2027</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fd-section-title">Deposit Details</div>
+      <div class="details-grid">
+        <div class="details-cell">
+          <div class="details-cell__label">Principal</div>
+          <div class="details-cell__val">₹7,50,000</div>
+        </div>
+        <div class="details-cell">
+          <div class="details-cell__label">Interest Rate</div>
+          <div class="details-cell__val">7.25% p.a.</div>
+        </div>
+        <div class="details-cell">
+          <div class="details-cell__label">Compounding</div>
+          <div class="details-cell__val">Quarterly</div>
+        </div>
+        <div class="details-cell">
+          <div class="details-cell__label">Tenure</div>
+          <div class="details-cell__val">36 months</div>
+        </div>
+      </div>
+
+      <div class="fd-section-title">Maturity Calculator</div>
+      <div class="glass-card glass-card--compact" style="margin-bottom:var(--sp-5);">
+        <div class="calc-formula">M = P × (1 + r/n)^(n×t)</div>
+        <div class="calc-steps">
+          P (principal) = <strong>₹7,50,000</strong><br>
+          r (annual rate) = <strong>7.25%</strong> · n (compounds/yr) = <strong>4</strong> · t (years) = <strong>3</strong><br>
+          M = 7,50,000 × (1 + 0.0725/4)<sup>4×3</sup><br>
+          M = 7,50,000 × (1.018125)<sup>12</sup> = 7,50,000 × 1.24055
+        </div>
+        <div class="calc-result">
+          <span class="calc-result__label">Maturity Value (1 Oct 2027)</span>
+          <span class="calc-result__val">₹9,30,410</span>
+        </div>
+      </div>
+
+      <div class="fd-section-title">Accrued Interest</div>
+      <div class="surface-card" style="margin-bottom:var(--sp-5);">
+        <div class="tds-row">
+          <span class="tds-label">Current value (7 of 12 quarters compounded)</span>
+          <span class="tds-val">₹8,50,490</span>
+        </div>
+        <div class="tds-row">
+          <span class="tds-label">Interest earned since opening</span>
+          <span class="tds-val" style="color:var(--success);">₹1,00,490</span>
+        </div>
+      </div>
+
+      <div class="fd-section-title">TDS Threshold — FY 2026-27</div>
+      <div class="glass-card glass-card--compact glass-card--warning">
+        <div class="tds-row">
+          <span class="tds-label">Interest earned this FY (to date)</span>
+          <span class="tds-val">₹15,141</span>
+        </div>
+        <div class="progress-bar" style="margin-bottom:var(--sp-3);">
+          <div class="progress-bar__fill" style="width:37.9%;"></div>
+        </div>
+        <div class="tds-row">
+          <span class="tds-label">Projected full-year interest (FY 2026-27)</span>
+          <span class="tds-val">₹46,250</span>
+        </div>
+        <div class="progress-bar progress-bar--thick">
+          <div class="progress-bar__fill progress-bar__fill--danger" style="width:100%;"></div>
+        </div>
+        <div class="flex items-center gap-2 mt-3">
+          <span class="chip chip--over">⚠ Projected to cross ₹40,000</span>
+        </div>
+        <div class="tds-note">
+          TDS applies once FY interest income from this bank crosses <strong style="color:var(--text-primary);">₹40,000</strong> (₹50,000 for senior citizens). SBI is projected to deduct TDS on interest above this threshold unless a valid Form 15G/15H is on file.
+        </div>
+      </div>
+
+    </div><!-- /view-fd -->
+
+    <!-- ═══════════ RD VIEW ═══════════ -->
+    <div id="view-rd">
+
+      <div class="acct-hero">
+        <div class="acct-hero__top">
+          <div>
+            <div class="acct-hero__bank">India Post Office</div>
+            <div class="acct-hero__number">•••• 9012</div>
+          </div>
+          <span class="acct-hero__badge">Recurring Deposit</span>
+        </div>
+        <div class="acct-hero__label">Current Value</div>
+        <div class="acct-hero__amount">₹1,00,486</div>
+        <div class="acct-hero__sub">₹5,000/month · 6.7% p.a. · Monthly compounding</div>
+        <div class="acct-hero__meta-row">
+          <div class="acct-hero__meta-cell">
+            <div class="acct-hero__meta-label">Started</div>
+            <div class="acct-hero__meta-val">1 Jan 2025</div>
+          </div>
+          <div class="acct-hero__meta-cell">
+            <div class="acct-hero__meta-label">Matures</div>
+            <div class="acct-hero__meta-val">1 Jan 2030</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fd-section-title">Deposit Details</div>
+      <div class="details-grid">
+        <div class="details-cell">
+          <div class="details-cell__label">Monthly Instalment</div>
+          <div class="details-cell__val">₹5,000</div>
+        </div>
+        <div class="details-cell">
+          <div class="details-cell__label">Interest Rate</div>
+          <div class="details-cell__val">6.7% p.a.</div>
+        </div>
+        <div class="details-cell">
+          <div class="details-cell__label">Compounding</div>
+          <div class="details-cell__val">Monthly</div>
+        </div>
+        <div class="details-cell">
+          <div class="details-cell__label">Tenure</div>
+          <div class="details-cell__val">60 months</div>
+        </div>
+      </div>
+
+      <div class="fd-section-title">Maturity Calculator — Iterative Monthly Contribution</div>
+      <div class="glass-card glass-card--compact" style="margin-bottom:var(--sp-5);">
+        <p style="font-size:12px; color:var(--text-secondary); line-height:1.6; margin-bottom:var(--sp-3);">
+          Unlike a lump-sum FD, each RD instalment starts earning interest only from the month it's deposited. Every month the running balance (previous balance + new instalment) compounds once at the monthly rate — this mirrors the India Post / bank RD convention.
+        </p>
+        <div class="calc-formula" style="white-space:normal;">Balance(m) = (Balance(m−1) + ₹5,000) × (1 + 0.067/12)</div>
+        <table class="rd-table">
+          <tr><th>Month</th><th>Contributed</th><th>Running Balance</th></tr>
+          <tr><td class="rd-month">Month 1</td><td>₹5,000</td><td>₹5,028</td></tr>
+          <tr><td class="rd-month">Month 12</td><td>₹60,000</td><td>₹61,749</td></tr>
+          <tr><td class="rd-month rd-highlight">Month 19 (today)</td><td class="rd-highlight">₹95,000</td><td class="rd-highlight">₹1,00,486</td></tr>
+          <tr><td class="rd-month">Month 60 (maturity)</td><td>₹3,00,000</td><td>₹3,57,182</td></tr>
+        </table>
+        <div class="calc-result">
+          <span class="calc-result__label">Maturity Value (1 Jan 2030)</span>
+          <span class="calc-result__val">₹3,57,182</span>
+        </div>
+      </div>
+
+      <div class="fd-section-title">Accrued Interest</div>
+      <div class="surface-card" style="margin-bottom:var(--sp-5);">
+        <div class="tds-row">
+          <span class="tds-label">Current value (19 of 60 instalments)</span>
+          <span class="tds-val">₹1,00,486</span>
+        </div>
+        <div class="tds-row">
+          <span class="tds-label">Interest earned since start</span>
+          <span class="tds-val" style="color:var(--success);">₹5,486</span>
+        </div>
+      </div>
+
+      <div class="fd-section-title">TDS Threshold — FY 2026-27</div>
+      <div class="glass-card glass-card--compact glass-card--success">
+        <div class="tds-row">
+          <span class="tds-label">Interest earned this FY (to date)</span>
+          <span class="tds-val">₹2,047</span>
+        </div>
+        <div class="progress-bar" style="margin-bottom:var(--sp-3);">
+          <div class="progress-bar__fill progress-bar__fill--success" style="width:5.1%;"></div>
+        </div>
+        <div class="tds-row">
+          <span class="tds-label">Projected full-year interest (FY 2026-27)</span>
+          <span class="tds-val">₹7,643</span>
+        </div>
+        <div class="progress-bar progress-bar--thick">
+          <div class="progress-bar__fill progress-bar__fill--success" style="width:19.1%;"></div>
+        </div>
+        <div class="flex items-center gap-2 mt-3">
+          <span class="chip chip--balanced">✓ Well within threshold</span>
+        </div>
+        <div class="tds-note">
+          TDS applies once FY interest income from this institution crosses <strong style="color:var(--text-primary);">₹40,000</strong> (₹50,000 for senior citizens). This RD is well clear of the threshold at current instalment levels.
+        </div>
+      </div>
+
+    </div><!-- /view-rd -->
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    AG.initBottomNav('bank-accounts');
+
+    AG.initDemoBar({
+      'fd': () => {
+        document.getElementById('view-fd').style.display = '';
+        document.getElementById('view-rd').style.display = 'none';
+        document.getElementById('page-title').textContent = 'Fixed Deposit';
+        document.title = 'ArthaGrid — SBI Fixed Deposit';
+      },
+      'rd': () => {
+        document.getElementById('view-fd').style.display = 'none';
+        document.getElementById('view-rd').style.display = '';
+        document.getElementById('page-title').textContent = 'Recurring Deposit';
+        document.title = 'ArthaGrid — India Post RD';
+      },
+    });
+  });
+</script>
+</body>
+</html>

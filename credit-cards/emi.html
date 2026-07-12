@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — EMI Details</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* ── Purchase summary card ── */
+    .emi-purchase-card { margin-bottom: var(--sp-4); }
+    .emi-purchase-head {
+      display: flex; align-items: center; gap: var(--sp-3); margin-bottom: var(--sp-4);
+    }
+    .emi-purchase-icon {
+      width: 44px; height: 44px; border-radius: var(--r-lg); flex-shrink: 0;
+      background: var(--grad-primary); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .emi-purchase-title { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+    .emi-purchase-sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+    .emi-purchase-amount {
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+      font-size: 26px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px;
+    }
+    .emi-purchase-amount-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: var(--sp-1); }
+
+    /* ── Terms stat row ── */
+    .emi-terms {
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--sp-3); margin-bottom: var(--sp-4);
+    }
+    .emi-term { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: var(--sp-3); text-align: center; }
+    .emi-term__label { font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: var(--sp-1); }
+    .emi-term__val { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-size: 15px; font-weight: 700; color: var(--text-primary); }
+
+    /* ── Progress card ── */
+    .emi-progress-card { margin-bottom: var(--sp-4); }
+    .emi-progress-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: var(--sp-3); }
+    .emi-progress-title { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    .emi-progress-count { font-size: 13px; font-weight: 700; color: var(--primary); }
+    .emi-progress-labels { display: flex; justify-content: space-between; margin-top: var(--sp-2); font-size: 11px; color: var(--text-muted); }
+
+    /* ── Installment schedule mini list ── */
+    .emi-sched-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: var(--sp-2) 0; border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .emi-sched-row:last-child { border-bottom: none; }
+    .emi-sched-row__label { color: var(--text-primary); font-weight: 500; display: flex; align-items: center; gap: var(--sp-2); }
+    .emi-sched-row__amt { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-weight: 600; }
+    .emi-sched-row--paid .emi-sched-row__amt { color: var(--text-muted); }
+    .emi-sched-row--pending .emi-sched-row__amt { color: var(--text-primary); }
+    .emi-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .emi-dot--paid { background: var(--success); }
+    .emi-dot--pending { background: var(--border-strong); }
+
+    /* ── Payoff summary ── */
+    .emi-payoff-grid { display: flex; justify-content: space-between; margin-bottom: var(--sp-2); }
+    .emi-payoff-cell__label { font-size: 11px; color: var(--text-muted); margin-bottom: 2px; }
+    .emi-payoff-cell__val { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-size: 15px; font-weight: 700; color: var(--text-primary); }
+
+    /* ── Foreclose dialog rows ── */
+    .fc-row { display: flex; justify-content: space-between; align-items: center; padding: var(--sp-2) 0; font-size: 13px; }
+    .fc-row__label { color: var(--text-secondary); }
+    .fc-row__val { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-weight: 600; color: var(--text-primary); }
+    .fc-row--total { border-top: 1px solid var(--border); margin-top: var(--sp-1); padding-top: var(--sp-3); }
+    .fc-row--total .fc-row__label { font-weight: 700; color: var(--text-primary); }
+    .fc-row--total .fc-row__val { font-size: 16px; color: var(--error); }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">State</span>
+    <button class="demo-btn active" data-state="p4">4 of 6 Paid</button>
+    <button class="demo-btn" data-state="p5">5 of 6 Paid</button>
+    <button class="icon-btn" data-theme-toggle style="margin-left:auto;" aria-label="Toggle theme">
+      <span data-theme-icon style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="card-detail.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">EMI Details</span>
+    <div class="top-bar__actions">
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content">
+
+    <!-- Purchase Summary -->
+    <div class="glass-card emi-purchase-card">
+      <div class="emi-purchase-head">
+        <div class="emi-purchase-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 10h20"/></svg>
+        </div>
+        <div>
+          <div class="emi-purchase-title">Croma Electronics</div>
+          <div class="emi-purchase-sub">HDFC Bank Regalia · •••• 4521 · Purchased 8 Feb 2026</div>
+        </div>
+      </div>
+      <div class="emi-purchase-amount-label">Original Purchase Amount</div>
+      <div class="emi-purchase-amount">₹45,000</div>
+      <span class="chip chip--locked">EMI Conversion Active</span>
+    </div>
+
+    <!-- Terms -->
+    <div class="emi-terms">
+      <div class="emi-term">
+        <div class="emi-term__label">Tenure</div>
+        <div class="emi-term__val">6 months</div>
+      </div>
+      <div class="emi-term">
+        <div class="emi-term__label">Interest Rate</div>
+        <div class="emi-term__val">15.0% p.a.</div>
+      </div>
+      <div class="emi-term">
+        <div class="emi-term__label">Monthly EMI</div>
+        <div class="emi-term__val" style="color:var(--primary);">₹7,834</div>
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="glass-card glass-card--compact emi-progress-card">
+      <div class="emi-progress-head">
+        <span class="emi-progress-title">Repayment Progress</span>
+        <span class="emi-progress-count" id="emi-progress-count">4 of 6 paid</span>
+      </div>
+      <div class="progress-bar progress-bar--thick">
+        <div class="progress-bar__fill" id="emi-progress-fill" style="width:66.7%;"></div>
+      </div>
+      <div class="emi-progress-labels">
+        <span id="emi-progress-remaining">2 installments remaining</span>
+        <span id="emi-next-due">Next due 28 Jul 2026</span>
+      </div>
+    </div>
+
+    <!-- Installment schedule -->
+    <div class="section">
+      <div class="section-title">Installment Schedule</div>
+      <div class="surface-card">
+        <div id="emi-schedule">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Payoff summary -->
+    <div class="section">
+      <div class="section-title">Payoff Summary</div>
+      <div class="surface-card">
+        <div class="emi-payoff-grid">
+          <div>
+            <div class="emi-payoff-cell__label">Total Payable</div>
+            <div class="emi-payoff-cell__val">₹47,004</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="emi-payoff-cell__label">Total Interest</div>
+            <div class="emi-payoff-cell__val" style="color:var(--warning);">₹2,004</div>
+          </div>
+        </div>
+        <div class="emi-payoff-grid" style="margin-bottom:0;">
+          <div>
+            <div class="emi-payoff-cell__label">Paid So Far</div>
+            <div class="emi-payoff-cell__val" id="emi-paid-so-far" style="color:var(--success);">₹31,336</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="emi-payoff-cell__label">Remaining Principal</div>
+            <div class="emi-payoff-cell__val" id="emi-remaining-principal">₹15,364</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Foreclose action -->
+    <button class="btn btn--danger btn--full btn--lg" style="margin-top:var(--sp-2);" onclick="openForecloseDialog()">
+      Foreclose EMI
+    </button>
+    <div class="form-helper" style="text-align:center; margin-top:var(--sp-2);">Closing this EMI early settles the remaining principal now and stops future interest.</div>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       FORECLOSURE CONFIRMATION DIALOG
+  ═══════════════════════════════════════════ -->
+  <div class="dialog-backdrop" id="foreclose-dialog-backdrop">
+    <div class="dialog">
+      <div class="dialog__header">
+        <div class="dialog__title">Foreclose this EMI?</div>
+      </div>
+      <div class="dialog__body">
+        <p style="margin-bottom:var(--sp-3);">You're about to close the Croma Electronics EMI ahead of schedule. This amount will be charged to your card as a one-time payment:</p>
+        <div class="fc-row">
+          <span class="fc-row__label">Remaining Principal</span>
+          <span class="fc-row__val" id="fc-principal">₹15,364</span>
+        </div>
+        <div class="fc-row">
+          <span class="fc-row__label">Foreclosure Charge (3% + GST)</span>
+          <span class="fc-row__val" id="fc-charge">₹544</span>
+        </div>
+        <div class="fc-row fc-row--total">
+          <span class="fc-row__label">Total Payable Now</span>
+          <span class="fc-row__val" id="fc-total">₹15,908</span>
+        </div>
+      </div>
+      <div class="dialog__footer">
+        <button class="btn btn--ghost btn--sm" onclick="AG.closeDialog('foreclose-dialog')">Cancel</button>
+        <button class="btn btn--danger btn--sm" onclick="confirmForeclose()">Confirm Foreclosure</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  // Reducing-balance EMI schedule for ₹45,000 @ 15% p.a. over 6 months (EMI ₹7,834)
+  const EMI_SCHEDULE = [
+    { n: 1, date: '28 Mar 2026', emi: 783400, interest: 56250,  principal: 727150 },
+    { n: 2, date: '28 Apr 2026', emi: 783400, interest: 47161,  principal: 736239 },
+    { n: 3, date: '28 May 2026', emi: 783400, interest: 37958,  principal: 745442 },
+    { n: 4, date: '28 Jun 2026', emi: 783400, interest: 28640,  principal: 754760 },
+    { n: 5, date: '28 Jul 2026', emi: 783400, interest: 19205,  principal: 764195 },
+    { n: 6, date: '28 Aug 2026', emi: 783400, interest: 9653,   principal: 773747 },
+  ];
+
+  const EMI_STATES = {
+    p4: {
+      paidCount: 4,
+      remainingPrincipal: 1536409,  // ₹15,364.09 → rounded for display
+      foreclosureCharge: 54400,     // ₹544
+      nextDue: '28 Jul 2026',
+    },
+    p5: {
+      paidCount: 5,
+      remainingPrincipal: 772214,   // ₹7,722.14
+      foreclosureCharge: 27300,     // ₹273
+      nextDue: '28 Aug 2026',
+    },
+  };
+
+  let currentState = 'p4';
+
+  function renderSchedule(paidCount) {
+    const container = document.getElementById('emi-schedule');
+    container.innerHTML = '';
+    EMI_SCHEDULE.forEach(row => {
+      const paid = row.n <= paidCount;
+      const div = document.createElement('div');
+      div.className = 'emi-sched-row ' + (paid ? 'emi-sched-row--paid' : 'emi-sched-row--pending');
+      div.innerHTML = `
+        <span class="emi-sched-row__label">
+          <span class="emi-dot ${paid ? 'emi-dot--paid' : 'emi-dot--pending'}"></span>
+          Installment ${row.n} · ${row.date}
+        </span>
+        <span class="emi-sched-row__amt">${AG.formatINR(row.emi)}${paid ? ' ✓' : ''}</span>
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  function applyEmiState(key) {
+    currentState = key;
+    const s = EMI_STATES[key];
+    const remaining = 6 - s.paidCount;
+    const pct = (s.paidCount / 6 * 100);
+    const paidSoFar = s.paidCount * 783400;
+    const total = s.remainingPrincipal + s.foreclosureCharge;
+
+    document.getElementById('emi-progress-count').textContent = `${s.paidCount} of 6 paid`;
+    document.getElementById('emi-progress-fill').style.width = pct.toFixed(1) + '%';
+    document.getElementById('emi-progress-remaining').textContent = `${remaining} installment${remaining === 1 ? '' : 's'} remaining`;
+    document.getElementById('emi-next-due').textContent = remaining > 0 ? `Next due ${s.nextDue}` : 'Fully repaid';
+
+    document.getElementById('emi-paid-so-far').textContent = AG.formatINR(paidSoFar);
+    document.getElementById('emi-remaining-principal').textContent = AG.formatINR(s.remainingPrincipal);
+
+    document.getElementById('fc-principal').textContent = AG.formatINR(s.remainingPrincipal);
+    document.getElementById('fc-charge').textContent = AG.formatINR(s.foreclosureCharge);
+    document.getElementById('fc-total').textContent = AG.formatINR(total);
+
+    renderSchedule(s.paidCount);
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    AG.initDemoBar({
+      p4: () => applyEmiState('p4'),
+      p5: () => applyEmiState('p5'),
+    });
+  });
+
+  function openForecloseDialog() {
+    AG.openDialog('foreclose-dialog');
+  }
+
+  function confirmForeclose() {
+    const s = EMI_STATES[currentState];
+    const total = s.remainingPrincipal + s.foreclosureCharge;
+    AG.closeDialog('foreclose-dialog');
+    AG.showToast(`EMI foreclosed — ${AG.formatINR(total)} charged to card ✓`, 'success');
+  }
+</script>
+</body>
+</html>

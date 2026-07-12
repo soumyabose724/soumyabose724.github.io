@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Scheduled Instances</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* ── Filter strip (fixed, below top-bar) ── */
+    .filter-bar {
+      position: fixed;
+      top: calc(var(--demo-bar-h) + var(--top-bar-h));
+      left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: var(--page-max);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: var(--sp-3) var(--sp-4);
+      z-index: 45;
+      display: flex; gap: var(--sp-2); overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .filter-bar::-webkit-scrollbar { display: none; }
+    .filter-chip {
+      height: 30px; padding: 0 var(--sp-3); border-radius: var(--r-full);
+      font-size: 12px; font-weight: 600; white-space: nowrap; flex-shrink: 0;
+      background: var(--surface-raised); color: var(--text-secondary);
+      border: 1.5px solid var(--border);
+      transition: background var(--dur-fast), color var(--dur-fast), border-color var(--dur-fast);
+    }
+    .filter-chip:hover { border-color: var(--primary); color: var(--primary); }
+    .filter-chip.selected { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+    /* ── Page content ── */
+    .page-content--sched-list {
+      padding: 0;
+      padding-top: calc(var(--top-bar-h) + 54px + var(--sp-4));
+      padding-bottom: calc(var(--bottom-nav-h) + var(--sp-10));
+      overflow-y: auto;
+    }
+
+    .sched-section-label {
+      font-size: 11px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--text-muted);
+      padding: var(--sp-2) var(--sp-4) var(--sp-3);
+      display: flex; align-items: center; gap: var(--sp-2);
+    }
+    .sched-section-label::before {
+      content: ''; width: 3px; height: 12px; border-radius: 2px;
+      background: var(--primary); flex-shrink: 0;
+    }
+    .sched-section { padding: 0 var(--sp-3); margin-bottom: var(--sp-2); }
+
+    .routed-note {
+      display: inline-flex; align-items: center; gap: 3px;
+      font-size: 10px; font-weight: 700; color: var(--primary);
+      background: var(--primary-light); padding: 1px 6px; border-radius: var(--r-full);
+    }
+
+    /* ── Row glyph sizing (arrow icons stand in for full SVG icon set) ── */
+    .list-row__icon { font-size: 20px; font-weight: 700; }
+
+    /* ── FAB visibility (hidden in Empty demo state) ── */
+    .fab { display: none; }
+    .fab.visible { display: flex; }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">State</span>
+    <button class="demo-btn active" data-state="populated">Populated</button>
+    <button class="demo-btn" data-state="empty">Empty</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="../dashboard/index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Scheduled Items</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <a href="calendar.html" class="icon-btn" aria-label="Calendar view" title="Calendar view" style="text-decoration:none;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+      </a>
+      <a href="rule-editor.html" class="icon-btn" aria-label="New rule" title="New recurring rule" style="text-decoration:none;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+      </a>
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       FILTER STRIP
+  ═══════════════════════════════════════════ -->
+  <div class="filter-bar">
+    <button class="filter-chip selected" data-filter="all">All</button>
+    <button class="filter-chip" data-filter="income">Income</button>
+    <button class="filter-chip" data-filter="expense">Expense</button>
+    <button class="filter-chip" data-filter="overdue">Overdue</button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content page-content--sched-list" id="page-content">
+
+    <!-- ── Populated state ── -->
+    <div id="view-populated">
+
+      <!-- PAST -->
+      <div class="sched-section-label" id="label-past">Past</div>
+      <div class="sched-section" id="section-past">
+
+        <div class="list-row" data-type="income" data-status="confirmed">
+          <div class="list-row__icon list-row__icon--success">↓</div>
+          <div class="list-row__info">
+            <div class="list-row__label">Salary Credit <span class="routed-note">→ Jul</span></div>
+            <div class="list-row__meta">SBI •••4521 · Mon, 1 Jun 2026</div>
+          </div>
+          <div class="list-row__actions"><span class="chip chip--confirmed">CONFIRMED</span></div>
+          <div class="list-row__amount-row">
+            <span class="list-row__amount list-row__amount--income">₹1,20,000</span>
+            <span class="list-row__amount-caption">Routed to July 2026 budget (NEXT_MONTH)</span>
+          </div>
+        </div>
+
+        <div class="list-row" data-type="income" data-status="confirmed">
+          <div class="list-row__icon list-row__icon--success">↓</div>
+          <div class="list-row__info">
+            <div class="list-row__label">Family Pension (Mother)</div>
+            <div class="list-row__meta">SBI •••7734 · Wed, 3 Jun 2026</div>
+          </div>
+          <div class="list-row__actions"><span class="chip chip--confirmed">CONFIRMED</span></div>
+          <div class="list-row__amount-row">
+            <span class="list-row__amount list-row__amount--income">₹18,500</span>
+            <span class="list-row__amount-caption">Same-month · June 2026 budget</span>
+          </div>
+        </div>
+
+        <div class="list-row" data-type="expense" data-status="confirmed">
+          <div class="list-row__icon list-row__icon--danger">↑</div>
+          <div class="list-row__info">
+            <div class="list-row__label">HDFC Home Loan EMI</div>
+            <div class="list-row__meta">HDFC •••2210 · Fri, 5 Jun 2026</div>
+          </div>
+          <div class="list-row__actions"><span class="chip chip--confirmed">CONFIRMED</span></div>
+          <div class="list-row__amount-row">
+            <span class="list-row__amount list-row__amount--expense">₹38,500</span>
+            <span class="list-row__amount-caption">Housing EMI envelope</span>
+          </div>
+        </div>
+
+        <div class="list-row" data-type="expense" data-status="confirmed">
+          <div class="list-row__icon list-row__icon--danger">↑</div>
+          <div class="list-row__info">
+            <div class="list-row__label">SIP — Nippon Multicap Fund</div>
+            <div class="list-row__meta">HDFC •••2210 · Fri, 5 Jun 2026</div>
+          </div>
+          <div class="list-row__actions"><span class="chip chip--confirmed">CONFIRMED</span></div>
+          <div class="list-row__amount-row">
+            <span class="list-row__amount list-row__amount--expense">₹20,000</span>
+            <span class="list-row__amount-caption">SIP Investments envelope</span>
+          </div>
+        </div>
+
+        <div class="list-row" data-type="expense" data-status="confirmed">
+          <div class="list-row__icon list-row__icon--danger">↑</div>
+          <div class="list-row__info">
+            <div class="list-row__label">ICICI Car Loan EMI</div>
+            <div class="list-row__meta">ICICI •••6634 · Sun, 7 Jun 2026</div>
+          </div>
+          <div class="list-row__actions"><span class="chip chip--confirmed">CONFIRMED</span></div>
+          <div class="list-row__amount-row">
+            <span class="list-row__amount list-row__amount--expense">₹12,500</span>
+            <span class="list-row__amount-caption">9.25% p.a. · Reducing balance</span>
+          </div>
+        </div>
+
+        <div class="list-row" data-type="expense" data-status="skipped">
+          <div class="list-row__icon list-row__icon--muted">↑</div>
+          <div class="list-row__info">
+            <div class="list-row__label">OTT Subscription (Netflix)</div>
+            <div class="list-row__meta">HDFC •••2210 · Wed, 10 Jun 2026</div>
+          </div>
+          <div class="list-row__actions"><span class="chip chip--closed">SKIPPED</span></div>
+          <div class="list-row__amount-row">
+            <span class="list-row__amount" style="color:var(--text-muted);text-decoration:line-through;">₹649</span>
+            <span class="list-row__amount-caption">Subscription paused this month</span>
+          </div>
+        </div>
+
+        <div class="list-row" data-type="expense" data-status="overdue">
+          <div class="list-row__icon list-row__icon--danger">↑</div>
+          <div class="list-row__info">
+            <div class="list-row__label">Life &amp; Health Insurance Premium</div>
+            <div class="list-row__meta">HDFC •••2210 · Mon, 15 Jun 2026</div>
+          </div>
+          <div class="list-row__actions"><span class="chip chip--overdue">OVERDUE</span></div>
+          <div class="list-row__amount-row">
+            <span class="list-row__amount list-row__amount--expense">₹2,500</span>
+            <span class="list-row__amount-caption">3 days past due — not yet paid</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- THIS PERIOD -->
+      <div class="sched-section-label" id="label-thisperiod">This Period · June 2026</div>
+      <div class="sched-section" id="section-thisperiod">
+
+        <div class="list-row" data-type="expense" data-status="projected">
+          <div class="list-row__icon list-row__icon--warning">↑</div>
+          <div class="list-row__info">
+            <div class="list-row__label">Mobile &amp; Broadband (Jio)</div>
+            <div class="list-row__meta">HDFC •••2210 · Thu, 18 Jun 2026 · Today</div>
+          </div>
+          <div class="list-row__actions"><span class="chip chip--projected">PROJECTED</span></div>
+          <div class="list-row__amount-row">
+            <span class="list-row__amount list-row__amount--expense">₹2,000</span>
+            <span class="list-row__amount-caption">Mobile &amp; Internet envelope</span>
+          </div>
+        </div>
+
+        <div class="list-row" data-type="expense" data-status="projected">
+          <div class="list-row__icon list-row__icon--warning">↑</div>
+          <div class="list-row__info">
+            <div class="list-row__label">Electricity Bill (BESCOM)</div>
+            <div class="list-row__meta">HDFC •••2210 · ~Sat, 20 Jun 2026 · Variable date</div>
+          </div>
+          <div class="list-row__actions"><span class="chip chip--projected">PROJECTED</span></div>
+          <div class="list-row__amount-row">
+            <span class="list-row__amount list-row__amount--expense">₹3,200</span>
+            <span class="list-row__amount-caption">Estimated — actual bill date varies</span>
+          </div>
+        </div>
+
+        <div class="list-row" data-type="expense" data-status="projected">
+          <div class="list-row__icon list-row__icon--warning">↑</div>
+          <div class="list-row__info">
+            <div class="list-row__label">Society Maintenance</div>
+            <div class="list-row__meta">HDFC •••2210 · Tue, 30 Jun 2026 · Last Working Day</div>
+          </div>
+          <div class="list-row__actions"><span class="chip chip--projected">PROJECTED</span></div>
+          <div class="list-row__amount-row">
+            <span class="list-row__amount list-row__amount--expense">₹4,500</span>
+            <span class="list-row__amount-caption">Last working day of June</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- UPCOMING -->
+      <div class="sched-section-label" id="label-upcoming">Upcoming · July 2026</div>
+      <div class="sched-section" id="section-upcoming">
+
+        <div class="list-row" data-type="income" data-status="projected">
+          <div class="list-row__icon list-row__icon--success">↓</div>
+          <div class="list-row__info">
+            <div class="list-row__label">Salary Credit <span class="routed-note">→ Aug</span></div>
+            <div class="list-row__meta">SBI •••4521 · Wed, 1 Jul 2026</div>
+          </div>
+          <div class="list-row__actions"><span class="chip chip--projected">PROJECTED</span></div>
+          <div class="list-row__amount-row">
+            <span class="list-row__amount list-row__amount--income">₹1,20,000</span>
+            <span class="list-row__amount-caption">Routed to August 2026 budget (NEXT_MONTH)</span>
+          </div>
+        </div>
+
+        <div class="list-row" data-type="expense" data-status="projected">
+          <div class="list-row__icon list-row__icon--danger">↑</div>
+          <div class="list-row__info">
+            <div class="list-row__label">HDFC Home Loan EMI</div>
+            <div class="list-row__meta">HDFC •••2210 · Sun, 5 Jul 2026</div>
+          </div>
+          <div class="list-row__actions"><span class="chip chip--projected">PROJECTED</span></div>
+          <div class="list-row__amount-row">
+            <span class="list-row__amount list-row__amount--expense">₹38,500</span>
+            <span class="list-row__amount-caption">Housing EMI envelope</span>
+          </div>
+        </div>
+
+        <div class="list-row" data-type="expense" data-status="projected">
+          <div class="list-row__icon list-row__icon--danger">↑</div>
+          <div class="list-row__info">
+            <div class="list-row__label">SIP — Nippon Multicap Fund</div>
+            <div class="list-row__meta">HDFC •••2210 · Sun, 5 Jul 2026</div>
+          </div>
+          <div class="list-row__actions"><span class="chip chip--projected">PROJECTED</span></div>
+          <div class="list-row__amount-row">
+            <span class="list-row__amount list-row__amount--expense">₹20,000</span>
+            <span class="list-row__amount-caption">SIP Investments envelope</span>
+          </div>
+        </div>
+
+        <div class="list-row" data-type="expense" data-status="projected">
+          <div class="list-row__icon list-row__icon--danger">↑</div>
+          <div class="list-row__info">
+            <div class="list-row__label">ICICI Car Loan EMI</div>
+            <div class="list-row__meta">ICICI •••6634 · Tue, 7 Jul 2026</div>
+          </div>
+          <div class="list-row__actions"><span class="chip chip--projected">PROJECTED</span></div>
+          <div class="list-row__amount-row">
+            <span class="list-row__amount list-row__amount--expense">₹12,500</span>
+            <span class="list-row__amount-caption">9.25% p.a. · Reducing balance</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="empty-state" id="filter-empty" style="display:none;">
+        <div class="empty-state__icon">🔍</div>
+        <div class="empty-state__title">No Matching Items</div>
+        <div class="empty-state__body">Try a different filter to see more scheduled instances.</div>
+      </div>
+
+    </div><!-- /view-populated -->
+
+    <!-- ── Empty / First Use state ── -->
+    <div id="view-empty" style="display:none;">
+      <div class="empty-state">
+        <div class="empty-state__icon">🗓️</div>
+        <div class="empty-state__title">No Recurring Rules Yet</div>
+        <div class="empty-state__body">Add SIPs, EMIs, salary credit, and bills as recurring rules to auto-project them every period.</div>
+        <a href="rule-editor.html" class="btn btn--primary" style="text-decoration:none;min-width:200px;">+ Create First Rule</a>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       FAB — New Rule
+  ═══════════════════════════════════════════ -->
+  <a href="rule-editor.html" class="fab" id="fab" aria-label="New recurring rule" style="text-decoration:none;">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+  </a>
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  document.getElementById('theme-toggle').addEventListener('click', () => AG.toggleTheme());
+
+  /* ── Filter strip ── */
+  const sections = ['section-past', 'section-thisperiod', 'section-upcoming'];
+  const labels   = ['label-past', 'label-thisperiod', 'label-upcoming'];
+
+  function applyFilter(filter) {
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.toggle('selected', c.dataset.filter === filter));
+    let anyVisible = false;
+
+    sections.forEach((secId, i) => {
+      const section = document.getElementById(secId);
+      let sectionHasVisible = false;
+      section.querySelectorAll('.list-row').forEach(row => {
+        const type = row.dataset.type;
+        const status = row.dataset.status;
+        let show = true;
+        if (filter === 'income')   show = type === 'income';
+        if (filter === 'expense')  show = type === 'expense';
+        if (filter === 'overdue')  show = status === 'overdue';
+        row.style.display = show ? '' : 'none';
+        if (show) { sectionHasVisible = true; anyVisible = true; }
+      });
+      section.style.display = sectionHasVisible ? '' : 'none';
+      document.getElementById(labels[i]).style.display = sectionHasVisible ? '' : 'none';
+    });
+
+    document.getElementById('filter-empty').style.display = anyVisible ? 'none' : '';
+  }
+
+  document.querySelectorAll('.filter-chip').forEach(btn => {
+    btn.addEventListener('click', () => applyFilter(btn.dataset.filter));
+  });
+
+  /* ── Demo bar: Populated / Empty ── */
+  function applyState(key) {
+    document.querySelectorAll('.demo-btn').forEach(b => b.classList.toggle('active', b.dataset.state === key));
+    const isEmpty = key === 'empty';
+    document.getElementById('view-populated').style.display = isEmpty ? 'none' : '';
+    document.getElementById('view-empty').style.display = isEmpty ? '' : 'none';
+    document.querySelector('.filter-bar').style.display = isEmpty ? 'none' : '';
+    document.getElementById('fab').classList.toggle('visible', !isEmpty);
+    document.querySelector('.page-content--sched-list').style.paddingTop = isEmpty
+      ? 'calc(var(--top-bar-h) + var(--sp-4))'
+      : 'calc(var(--top-bar-h) + 54px + var(--sp-4))';
+  }
+  document.querySelectorAll('.demo-btn[data-state]').forEach(btn => {
+    btn.addEventListener('click', () => applyState(btn.dataset.state));
+  });
+
+  /* FAB is always visible in populated state by default */
+  document.getElementById('fab').classList.add('visible');
+</script>
+</body>
+</html>

@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — HDFC Bank Regalia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* ── Mini card banner ── */
+    .cd-banner {
+      color: #fff; position: relative; overflow: hidden;
+      background: linear-gradient(135deg, #1C1917 0%, #3F3527 55%, #6B5730 100%);
+      margin-bottom: var(--sp-4);
+    }
+    .cd-banner::before {
+      content: ''; position: absolute; top: -30px; right: -30px;
+      width: 130px; height: 130px; border-radius: 50%;
+      background: rgba(255,255,255,.06); pointer-events: none;
+    }
+    .cd-banner__row { display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 1; }
+    .cd-banner__bank { font-size: 15px; font-weight: 700; }
+    .cd-banner__product { font-size: 12px; color: rgba(255,255,255,.65); margin-top: 2px; }
+    .cd-banner__number { font-family:'JetBrains Mono',monospace; font-size: 14px; letter-spacing: .1em; color: rgba(255,255,255,.85); }
+    .cd-banner__network {
+      font-size: 11px; font-weight: 800; letter-spacing: .06em; color: #E8C97A;
+      padding: 3px 9px; border-radius: var(--r-full);
+      background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.22);
+    }
+
+    /* ── Stat row ── */
+    .cd-stats {
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--sp-3); margin-bottom: var(--sp-4);
+    }
+    .cd-stat {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: var(--sp-3);
+      text-align: center;
+    }
+    .cd-stat__label {
+      font-size: 10px; font-weight: 600; letter-spacing: .06em;
+      text-transform: uppercase; color: var(--text-muted);
+      margin-bottom: var(--sp-1);
+    }
+    .cd-stat__val {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+      font-size: 15px; font-weight: 700; color: var(--text-primary);
+    }
+
+    /* ── Gauge card ── */
+    .cd-gauge-card {
+      display: flex; align-items: center; gap: var(--sp-5);
+      margin-bottom: var(--sp-4);
+    }
+    .cd-gauge-info { flex: 1; min-width: 0; }
+    .cd-gauge-title { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: var(--sp-1); }
+    .cd-gauge-sub { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+
+    /* ── Cycle summary ── */
+    .cd-cycle-card {
+      text-decoration: none; color: inherit; display: block;
+      cursor: pointer; margin-bottom: var(--sp-4);
+    }
+    .cd-cycle-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--sp-3); }
+    .cd-cycle-title { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    .cd-cycle-grid { display: flex; justify-content: space-between; margin-bottom: var(--sp-3); }
+    .cd-cycle-cell__label { font-size: 11px; color: var(--text-muted); margin-bottom: 2px; }
+    .cd-cycle-cell__val {
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+      font-size: 16px; font-weight: 700; color: var(--text-primary);
+    }
+    .cd-cycle-link { font-size: 13px; color: var(--primary); font-weight: 500; display: flex; align-items: center; gap: 4px; }
+
+    /* ── EMI link row ── */
+    .cd-emi-row {
+      display: flex; align-items: center; gap: var(--sp-3);
+      text-decoration: none; color: inherit; cursor: pointer;
+      margin-bottom: var(--sp-4);
+    }
+    .cd-emi-icon {
+      width: 44px; height: 44px; border-radius: var(--r-lg); flex-shrink: 0;
+      background: var(--grad-primary); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .cd-emi-info { flex: 1; min-width: 0; }
+    .cd-emi-title { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    .cd-emi-sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+    .cd-emi-chevron { color: var(--text-muted); flex-shrink: 0; }
+
+    /* ── Make Payment sheet: option cards ── */
+    .pay-option {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: var(--sp-4); border: 1.5px solid var(--border);
+      border-radius: var(--r-lg); cursor: pointer;
+      transition: border-color var(--dur-fast), background var(--dur-fast);
+      margin-bottom: var(--sp-3);
+    }
+    .pay-option:hover { background: var(--primary-xlight); }
+    .pay-option.selected { border-color: var(--primary); background: var(--primary-xlight); }
+    .pay-option__radio {
+      width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+      border: 2px solid var(--border-strong); margin-right: var(--sp-3);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .pay-option.selected .pay-option__radio { border-color: var(--primary); }
+    .pay-option.selected .pay-option__radio::after {
+      content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--primary);
+    }
+    .pay-option__body { flex: 1; display: flex; align-items: center; min-width: 0; }
+    .pay-option__label { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    .pay-option__sub { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+    .pay-option__amount {
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+      font-size: 15px; font-weight: 700; color: var(--text-primary); flex-shrink: 0;
+    }
+    .pay-partial-input { display: none; margin-top: var(--sp-3); }
+    .pay-partial-input.visible { display: block; }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">State</span>
+    <button class="demo-btn active" data-state="warning">Warning</button>
+    <button class="demo-btn" data-state="safe">Safe</button>
+    <button class="demo-btn" data-state="critical">Critical</button>
+    <button class="icon-btn" data-theme-toggle style="margin-left:auto;" aria-label="Toggle theme">
+      <span data-theme-icon style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Card Details</span>
+    <div class="top-bar__actions">
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content">
+
+    <!-- Mini card banner -->
+    <div class="glass-card glass-card--compact cd-banner">
+      <div class="cd-banner__row">
+        <div>
+          <div class="cd-banner__bank">HDFC Bank Regalia</div>
+          <div class="cd-banner__product">Visa Infinite · •••• 4521</div>
+        </div>
+        <span class="cd-banner__network">VISA</span>
+      </div>
+    </div>
+
+    <!-- Stat row -->
+    <div class="cd-stats">
+      <div class="cd-stat">
+        <div class="cd-stat__label">Credit Limit</div>
+        <div class="cd-stat__val">₹3,00,000</div>
+      </div>
+      <div class="cd-stat">
+        <div class="cd-stat__label">Outstanding</div>
+        <div class="cd-stat__val" id="cd-outstanding" style="color:var(--warning);">₹1,04,650</div>
+      </div>
+      <div class="cd-stat">
+        <div class="cd-stat__label">Available</div>
+        <div class="cd-stat__val" id="cd-available" style="color:var(--success);">₹1,95,350</div>
+      </div>
+    </div>
+
+    <!-- Utilisation gauge -->
+    <div class="glass-card glass-card--compact cd-gauge-card">
+      <div class="progress-ring" id="cd-ring" style="width:104px; height:104px;">
+        <svg width="104" height="104" viewBox="0 0 104 104">
+          <circle class="progress-ring__track" cx="52" cy="52" r="44"></circle>
+          <circle class="progress-ring__fill" id="cd-ring-fill" cx="52" cy="52" r="44" style="stroke:var(--warning);"></circle>
+        </svg>
+        <div class="progress-ring__label" id="cd-ring-label" style="font-size:18px;">34.9%</div>
+      </div>
+      <div class="cd-gauge-info">
+        <div class="cd-gauge-title">Utilisation Gauge</div>
+        <div class="cd-gauge-sub" id="cd-gauge-sub">
+          <span id="cd-gauge-status" style="color:var(--warning); font-weight:600;">Above 30% — </span>
+          keeping utilisation under 30% helps your credit score.
+        </div>
+      </div>
+    </div>
+
+    <!-- This Cycle summary -->
+    <a href="cycle.html" class="glass-card glass-card--compact cd-cycle-card">
+      <div class="cd-cycle-head">
+        <span class="cd-cycle-title">This Cycle</span>
+        <span class="chip chip--info">9 Jun – 8 Jul</span>
+      </div>
+      <div class="cd-cycle-grid">
+        <div>
+          <div class="cd-cycle-cell__label">Total Amount Due</div>
+          <div class="cd-cycle-cell__val" id="cd-tad">₹1,04,650</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="cd-cycle-cell__label">Min. Amount Due</div>
+          <div class="cd-cycle-cell__val" id="cd-mad" style="color:var(--text-secondary); font-size:14px;">₹5,233</div>
+        </div>
+      </div>
+      <div class="cd-cycle-link">View Cycle Details
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </a>
+
+    <!-- Active EMI link -->
+    <a href="emi.html" class="glass-card glass-card--compact cd-emi-row">
+      <div class="cd-emi-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 10h20"/></svg>
+      </div>
+      <div class="cd-emi-info">
+        <div class="cd-emi-title">Croma Electronics — EMI Active</div>
+        <div class="cd-emi-sub">₹45,000 · 6 months · 4 of 6 installments paid</div>
+      </div>
+      <svg class="cd-emi-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+
+    <!-- Recent Transactions -->
+    <div class="section">
+      <div class="section-title">Recent Transactions</div>
+
+      <div class="list-row" onclick="window.location.href='emi.html'">
+        <div class="list-row__icon list-row__icon--info">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 10h20"/></svg>
+        </div>
+        <div class="list-row__info">
+          <div class="list-row__label">Croma Electronics <span class="chip chip--locked" style="font-size:9px;height:16px;">EMI 5/6</span></div>
+          <div class="list-row__meta">28 Jun 2026 · EMI Installment</div>
+        </div>
+        <div class="list-row__amount-row">
+          <span class="list-row__amount list-row__amount--expense">−₹7,834</span>
+        </div>
+      </div>
+
+      <div class="list-row">
+        <div class="list-row__icon list-row__icon--warning">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        </div>
+        <div class="list-row__info">
+          <div class="list-row__label">Amazon.in</div>
+          <div class="list-row__meta">22 Jun 2026 · Shopping · UPI</div>
+        </div>
+        <div class="list-row__amount-row">
+          <span class="list-row__amount list-row__amount--expense">−₹3,450</span>
+        </div>
+      </div>
+
+      <div class="list-row">
+        <div class="list-row__icon list-row__icon--danger">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>
+        </div>
+        <div class="list-row__info">
+          <div class="list-row__label">Swiggy</div>
+          <div class="list-row__meta">25 Jun 2026 · Food &amp; Dining</div>
+        </div>
+        <div class="list-row__amount-row">
+          <span class="list-row__amount list-row__amount--expense">−₹680</span>
+        </div>
+      </div>
+
+      <div class="list-row">
+        <div class="list-row__icon list-row__icon--muted">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5a2 2 0 0 1 2-2h9l5 5v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/></svg>
+        </div>
+        <div class="list-row__info">
+          <div class="list-row__label">IRCTC</div>
+          <div class="list-row__meta">10 Jun 2026 · Travel</div>
+        </div>
+        <div class="list-row__amount-row">
+          <span class="list-row__amount list-row__amount--expense">−₹4,200</span>
+        </div>
+      </div>
+
+      <div class="list-row">
+        <div class="list-row__icon list-row__icon--success">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <div class="list-row__info">
+          <div class="list-row__label">Payment Received</div>
+          <div class="list-row__meta">5 Jun 2026 · Credit Card Payment · UPI</div>
+        </div>
+        <div class="list-row__amount-row">
+          <span class="list-row__amount list-row__amount--income">+₹20,000</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Make Payment CTA -->
+    <button class="btn btn--primary btn--full btn--lg" style="margin-top:var(--sp-2);" onclick="AG.openSheet('pay-sheet')">
+      Make Payment
+    </button>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       MAKE PAYMENT SHEET
+  ═══════════════════════════════════════════ -->
+  <div class="sheet-backdrop" id="pay-sheet-backdrop"></div>
+  <div class="sheet" id="pay-sheet">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <span class="sheet__title">Make Payment · HDFC Regalia</span>
+      <button class="sheet__close" aria-label="Close" onclick="AG.closeSheet('pay-sheet')">✕</button>
+    </div>
+    <div class="sheet__body">
+
+      <div class="pay-option selected" id="pay-full" onclick="selectPayOption('full')">
+        <div class="pay-option__radio"></div>
+        <div class="pay-option__body">
+          <div>
+            <div class="pay-option__label">Full Payment</div>
+            <div class="pay-option__sub">Total Amount Due · avoids interest</div>
+          </div>
+        </div>
+        <span class="pay-option__amount" id="pay-full-amt">₹1,04,650</span>
+      </div>
+
+      <div class="pay-option" id="pay-min" onclick="selectPayOption('min')">
+        <div class="pay-option__radio"></div>
+        <div class="pay-option__body">
+          <div>
+            <div class="pay-option__label">Minimum Amount Due</div>
+            <div class="pay-option__sub">Keeps account in good standing</div>
+          </div>
+        </div>
+        <span class="pay-option__amount" id="pay-min-amt">₹5,233</span>
+      </div>
+
+      <div class="pay-option" id="pay-partial" onclick="selectPayOption('partial')">
+        <div class="pay-option__radio"></div>
+        <div class="pay-option__body">
+          <div>
+            <div class="pay-option__label">Partial Amount</div>
+            <div class="pay-option__sub">Enter a custom amount</div>
+          </div>
+        </div>
+        <span class="pay-option__amount">—</span>
+      </div>
+
+      <div class="pay-partial-input" id="pay-partial-input">
+        <label class="form-label" for="pay-partial-value">Amount (₹)</label>
+        <div class="form-input-wrap has-prefix" style="margin-top:var(--sp-2);">
+          <span class="input-prefix">₹</span>
+          <input class="form-input inr-input" id="pay-partial-value" type="text" inputmode="numeric" placeholder="10,000">
+        </div>
+      </div>
+
+      <div class="form-helper" style="margin-top:var(--sp-4);">Recorded as a <strong>Credit Card Payment</strong> transaction linked to this card.</div>
+    </div>
+    <div class="sheet__footer">
+      <button class="btn btn--ghost" onclick="AG.closeSheet('pay-sheet')">Cancel</button>
+      <button class="btn btn--primary" onclick="confirmPayment()">Confirm Payment</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  const CD_STATES = {
+    safe:     { outstanding: 4500000,  pct: 15.0, tone: 'success' },
+    warning:  { outstanding: 10465000, pct: 34.9, tone: 'warning' },
+    critical: { outstanding: 27900000, pct: 93.0, tone: 'danger'  },
+  };
+  const CD_LIMIT_PAISE = 30000000; // ₹3,00,000
+
+  const toneColor = { success: 'var(--success)', warning: 'var(--warning)', danger: 'var(--error)' };
+
+  function applyCardState(key) {
+    const s = CD_STATES[key];
+    const available = CD_LIMIT_PAISE - s.outstanding;
+    const mad = Math.round(s.outstanding * 0.05 / 100) * 100; // 5% of TAD, rounded to nearest ₹1
+
+    document.getElementById('cd-outstanding').textContent = AG.formatINR(s.outstanding);
+    document.getElementById('cd-outstanding').style.color = toneColor[s.tone];
+    document.getElementById('cd-available').textContent = AG.formatINR(available);
+    document.getElementById('cd-tad').textContent = AG.formatINR(s.outstanding);
+    document.getElementById('cd-mad').textContent = AG.formatINR(mad);
+    document.getElementById('pay-full-amt').textContent = AG.formatINR(s.outstanding);
+    document.getElementById('pay-min-amt').textContent = AG.formatINR(mad);
+
+    document.getElementById('cd-ring-label').textContent = s.pct.toFixed(1) + '%';
+    document.getElementById('cd-ring-fill').style.stroke = toneColor[s.tone];
+    AG.animateRing(document.getElementById('cd-ring'), s.pct, 44);
+
+    const statusEl = document.getElementById('cd-gauge-status');
+    statusEl.style.color = toneColor[s.tone];
+    statusEl.textContent = s.tone === 'success' ? 'Under 30% — ' : (s.tone === 'warning' ? 'Above 30% — ' : 'Above 90% — ');
+    document.getElementById('cd-gauge-sub').lastChild.textContent =
+      s.tone === 'success' ? 'great job keeping utilisation low.' :
+      (s.tone === 'warning' ? 'keeping utilisation under 30% helps your credit score.' : 'high utilisation can hurt your credit score. Pay down soon.');
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    AG.initDemoBar({
+      safe:     () => applyCardState('safe'),
+      warning:  () => applyCardState('warning'),
+      critical: () => applyCardState('critical'),
+    });
+  });
+
+  function selectPayOption(key) {
+    ['full', 'min', 'partial'].forEach(k => {
+      document.getElementById('pay-' + k).classList.toggle('selected', k === key);
+    });
+    document.getElementById('pay-partial-input').classList.toggle('visible', key === 'partial');
+  }
+
+  function confirmPayment() {
+    const selected = document.querySelector('.pay-option.selected');
+    const label = selected ? selected.querySelector('.pay-option__label').textContent : 'Payment';
+    AG.closeSheet('pay-sheet');
+    AG.showToast(`${label} scheduled — recorded as Credit Card Payment ✓`, 'success');
+  }
+</script>
+</body>
+</html>

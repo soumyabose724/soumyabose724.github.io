@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Loans</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* ── Hero summary ── */
+    .loans-hero-label {
+      font-size: 11px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--text-secondary);
+      margin-bottom: var(--sp-2);
+    }
+    .loans-hero-amount {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+      font-size: 34px; font-weight: 700; line-height: 1.1;
+    }
+    .loans-hero-sub {
+      font-size: 12px; color: var(--text-secondary); margin-top: var(--sp-3);
+    }
+    .loans-hero-sub strong { color: var(--text-primary); font-weight: 600; }
+    .loans-hero-footer {
+      display: flex; align-items: center; gap: var(--sp-2);
+      margin-top: var(--sp-4); padding-top: var(--sp-3);
+      border-top: 1px solid var(--glass-border);
+      font-size: 12px; color: var(--text-muted);
+    }
+
+    /* ── Strategy toggle ── */
+    .strategy-row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin: var(--sp-5) 0 var(--sp-3);
+    }
+    .strategy-label { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+    .strategy-toggle {
+      display: inline-flex; background: var(--surface-raised);
+      border: 1px solid var(--border); border-radius: var(--r-full);
+      padding: 3px; gap: 2px;
+    }
+    .strategy-btn {
+      height: 30px; padding: 0 var(--sp-4); border-radius: var(--r-full);
+      font-size: 12px; font-weight: 600; color: var(--text-secondary);
+      transition: background var(--dur-fast), color var(--dur-fast);
+      white-space: nowrap;
+    }
+    .strategy-btn.active { background: var(--grad-primary); color: #fff; box-shadow: 0 2px 8px rgba(13,148,136,.28); }
+
+    /* ── Priority badge ── */
+    .priority-badge {
+      display: inline-flex; align-items: center; gap: 3px;
+      font-size: 10px; font-weight: 700; letter-spacing: .02em;
+      padding: 1px 7px; border-radius: var(--r-full);
+      background: var(--primary-light); color: var(--primary);
+      flex-shrink: 0;
+    }
+    .priority-badge--second { background: var(--surface-raised); color: var(--text-muted); }
+
+    /* ── Loan card additions ── */
+    .loan-meta-row {
+      display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap;
+      font-size: 12px; color: var(--text-secondary); margin-top: 2px;
+    }
+    .loan-meta-row .dot { color: var(--text-muted); }
+    .loan-progress-wrap { grid-area: amount; margin-top: var(--sp-1); }
+    .loan-amount-cols {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      gap: var(--sp-3); margin-bottom: var(--sp-2);
+    }
+    .loan-amount-cols .col-right { text-align: right; }
+    .loan-emi-val {
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+      font-size: 16px; font-weight: 600; color: var(--text-secondary);
+    }
+
+    /* ── Compare strategies link card ── */
+    .compare-link-card {
+      display: flex; align-items: center; gap: var(--sp-3);
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: var(--sp-4);
+      margin-top: var(--sp-5); text-decoration: none;
+      transition: background var(--dur-fast), box-shadow var(--dur-fast);
+    }
+    .compare-link-card:hover { background: var(--primary-xlight); box-shadow: var(--sh-sm); }
+    .compare-link-card__icon {
+      width: 40px; height: 40px; border-radius: var(--r-lg); flex-shrink: 0;
+      background: var(--grad-primary); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .compare-link-card__title { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    .compare-link-card__sub { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">State</span>
+    <button class="demo-btn" data-state="populated">Populated</button>
+    <button class="demo-btn" data-state="empty">Empty (No Loans)</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="../dashboard/index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Loans</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content" id="page-content">
+
+    <!-- ── Populated State ── -->
+    <div id="view-populated">
+
+      <!-- Hero: Total Debt Outstanding -->
+      <div class="glass-card glass-card--hero">
+        <div class="loans-hero-label">Total Debt Outstanding</div>
+        <div class="loans-hero-amount gradient-text" id="hero-total">₹43,87,000</div>
+        <div class="loans-hero-sub">
+          <strong id="hero-count">2 active loans</strong> · <strong id="hero-emi">₹50,500</strong>/mo total EMI
+        </div>
+        <div class="loans-hero-footer">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+          <span>Debt-free at minimum EMIs by <strong style="color:var(--text-secondary);">~Aug 2040</strong></span>
+        </div>
+      </div>
+
+      <!-- Strategy Toggle -->
+      <div class="strategy-row">
+        <span class="strategy-label">Payoff Strategy</span>
+        <div class="strategy-toggle">
+          <button class="strategy-btn active" id="btn-snowball" onclick="setStrategy('snowball')">❄️ Snowball</button>
+          <button class="strategy-btn" id="btn-avalanche" onclick="setStrategy('avalanche')">🏔️ Avalanche</button>
+        </div>
+      </div>
+      <div style="font-size:11px; color:var(--text-muted); margin-bottom:var(--sp-3);" id="strategy-hint">
+        Snowball pays off the smallest balance first — extra payments go to Car Loan.
+      </div>
+
+      <div class="section-title" style="margin-top:var(--sp-2);">Your Loans</div>
+      <div id="loan-list"><!-- rendered by JS --></div>
+
+      <!-- Compare Strategies -->
+      <a href="comparator.html" class="compare-link-card">
+        <div class="compare-link-card__icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>
+          </svg>
+        </div>
+        <div style="flex:1; min-width:0;">
+          <div class="compare-link-card__title">Compare Strategies</div>
+          <div class="compare-link-card__sub">Snowball vs Avalanche — side by side</div>
+        </div>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted); flex-shrink:0;">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </a>
+
+    </div><!-- /view-populated -->
+
+    <!-- ── Empty State ── -->
+    <div id="view-empty" style="display:none;">
+      <div class="empty-state">
+        <div class="empty-state__icon">🎉</div>
+        <div class="empty-state__title">You're Debt-Free!</div>
+        <div class="empty-state__body">No loans or EMIs on record. If you take on a loan — home, car, personal, or education — add it here to track payoff progress.</div>
+        <a href="../setup-wizard/step-05-loans.html" class="btn btn--primary" style="min-width:180px; text-decoration:none;">
+          + Add Your First Loan
+        </a>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV — none active (no Loans tab)
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ── Theme toggle (matches other pages) ── */
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+
+  /* ── Vikas Sharma's loan book (paise) ── */
+  const LOANS = [
+    {
+      id: 'home', lender: 'HDFC Bank', type: 'Home Loan', icon: 'home',
+      principalPaise: 445000000, outstandingPaise: 378600000,
+      ratePct: 8.5, emiPaise: 3850000,
+      origTenureMonths: 240, remainingMonths: 169,
+      nextDueLabel: '5 Aug 2026',
+    },
+    {
+      id: 'car', lender: 'ICICI Bank', type: 'Car Loan', icon: 'car',
+      principalPaise: 73500000, outstandingPaise: 60100000,
+      ratePct: 9.5, emiPaise: 1200000,
+      origTenureMonths: 84, remainingMonths: 65,
+      nextDueLabel: '10 Aug 2026',
+    },
+  ];
+
+  const ICONS = {
+    home: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+    car:  '<rect x="1" y="3" width="15" height="13" rx="1"/><path d="m16 8 5 3v5h-5V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>',
+  };
+
+  let strategy = 'snowball';
+
+  function sortedLoans(strat) {
+    const copy = LOANS.slice();
+    if (strat === 'snowball') {
+      copy.sort((a, b) => a.outstandingPaise - b.outstandingPaise);
+    } else {
+      copy.sort((a, b) => b.ratePct - a.ratePct);
+    }
+    return copy;
+  }
+
+  function loanRowHtml(loan, rank) {
+    const paidOffPct = Math.round(((loan.principalPaise - loan.outstandingPaise) / loan.principalPaise) * 100);
+    const badge = rank === 0
+      ? '<span class="priority-badge">① Pay First</span>'
+      : '<span class="priority-badge priority-badge--second">② Then</span>';
+    return `
+      <a href="detail.html?loan=${loan.id}" class="list-row">
+        <div class="list-row__icon ${loan.id === 'home' ? 'list-row__icon--danger' : 'list-row__icon--warning'}">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${ICONS[loan.icon]}</svg>
+        </div>
+        <div class="list-row__info">
+          <div class="list-row__label">
+            ${loan.lender} ${loan.type}
+            ${badge}
+          </div>
+          <div class="loan-meta-row">
+            <span>${loan.ratePct.toFixed(2)}% p.a.</span>
+            <span class="dot">·</span>
+            <span>Next EMI ${loan.nextDueLabel}</span>
+          </div>
+        </div>
+        <div class="loan-progress-wrap">
+          <div class="loan-amount-cols">
+            <div>
+              <div class="list-row__amount list-row__amount--expense">${AG.formatINR(loan.outstandingPaise)}</div>
+              <div class="list-row__amount-caption">Outstanding</div>
+            </div>
+            <div class="col-right">
+              <div class="loan-emi-val">${AG.formatINR(loan.emiPaise)}</div>
+              <div class="list-row__amount-caption">EMI / month</div>
+            </div>
+          </div>
+          <div class="util-bar-wrap">
+            <div class="util-label-row">
+              <span class="util-label">Repaid</span>
+              <span class="util-pct util-pct--safe">${paidOffPct}%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-bar__fill" style="width:${paidOffPct}%; background:var(--grad-success);"></div>
+            </div>
+          </div>
+        </div>
+      </a>`;
+  }
+
+  function renderList() {
+    const ordered = sortedLoans(strategy);
+    document.getElementById('loan-list').innerHTML = ordered.map((l, i) => loanRowHtml(l, i)).join('');
+    const hint = document.getElementById('strategy-hint');
+    const first = ordered[0];
+    if (strategy === 'snowball') {
+      hint.textContent = `Snowball pays off the smallest balance first — extra payments go to ${first.lender} ${first.type}.`;
+    } else {
+      hint.textContent = `Avalanche pays off the highest interest rate first — extra payments go to ${first.lender} ${first.type} (${first.ratePct}% p.a.).`;
+    }
+  }
+
+  function setStrategy(s) {
+    strategy = s;
+    document.getElementById('btn-snowball').classList.toggle('active', s === 'snowball');
+    document.getElementById('btn-avalanche').classList.toggle('active', s === 'avalanche');
+    renderList();
+  }
+
+  /* Hero totals */
+  const totalOutstanding = LOANS.reduce((sum, l) => sum + l.outstandingPaise, 0);
+  const totalEmi = LOANS.reduce((sum, l) => sum + l.emiPaise, 0);
+  document.getElementById('hero-total').textContent = AG.formatINR(totalOutstanding);
+  document.getElementById('hero-count').textContent = LOANS.length + ' active loans';
+  document.getElementById('hero-emi').textContent = AG.formatINR(totalEmi);
+
+  renderList();
+
+  /* ── Demo bar: Populated / Empty ── */
+  AG.initDemoBar({
+    populated: () => {
+      document.getElementById('view-populated').style.display = '';
+      document.getElementById('view-empty').style.display = 'none';
+    },
+    empty: () => {
+      document.getElementById('view-populated').style.display = 'none';
+      document.getElementById('view-empty').style.display = '';
+    },
+  });
+</script>
+</body>
+</html>

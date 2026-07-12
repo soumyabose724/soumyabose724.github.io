@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Amortisation Schedule</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* ── Summary strip ── */
+    .amort-summary {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--sp-2);
+      margin-bottom: var(--sp-5);
+    }
+    .amort-summary-cell {
+      background: var(--surface-raised); border-radius: var(--r-lg);
+      padding: var(--sp-3); text-align: center;
+    }
+    .amort-summary-cell__label {
+      font-size: 9px; font-weight: 700; letter-spacing: .05em;
+      text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px;
+    }
+    .amort-summary-cell__value {
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+      font-size: 13px; font-weight: 700; color: var(--text-primary);
+    }
+
+    /* ── Table ── */
+    .amort-table-wrap {
+      overflow-x: auto; border: 1px solid var(--border); border-radius: var(--r-lg);
+      margin-bottom: var(--sp-4); -webkit-overflow-scrolling: touch;
+    }
+    table.amort-table {
+      width: 100%; border-collapse: collapse; min-width: 460px;
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+    }
+    .amort-table thead th {
+      position: sticky; top: 0; background: var(--surface-raised);
+      font-family: 'Inter', sans-serif;
+      font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+      color: var(--text-muted); text-align: right; padding: var(--sp-2) var(--sp-3);
+      border-bottom: 1px solid var(--border);
+    }
+    .amort-table thead th:first-child { text-align: left; }
+    .amort-table tbody td {
+      font-size: 12px; text-align: right; padding: 6px var(--sp-3);
+      border-bottom: 1px solid var(--border); color: var(--text-secondary);
+      white-space: nowrap;
+    }
+    .amort-table tbody td:first-child {
+      text-align: left; font-family: 'Inter', sans-serif; font-weight: 600; color: var(--text-primary);
+    }
+    .amort-table tbody td.col-principal { color: var(--success); }
+    .amort-table tbody td.col-interest { color: var(--error); }
+    .amort-table tbody td.col-balance { color: var(--text-primary); font-weight: 600; }
+    .amort-table tbody tr:last-child td { border-bottom: none; }
+    .amort-divider td {
+      text-align: center !important; font-family: 'Inter', sans-serif !important;
+      font-size: 11px; color: var(--text-muted); font-weight: 500;
+      background: var(--surface-raised); padding: var(--sp-2);
+    }
+
+    .show-full-btn { width: 100%; }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">Loan</span>
+    <button class="demo-btn" data-state="home">Home Loan</button>
+    <button class="demo-btn" data-state="car">Car Loan</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="detail.html" class="top-bar__back" id="back-link" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Amortisation Schedule</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content">
+
+    <div class="section-title" style="margin-top:0;" id="loan-name-title">HDFC Home Loan</div>
+
+    <!-- Summary -->
+    <div class="amort-summary">
+      <div class="amort-summary-cell">
+        <div class="amort-summary-cell__label">EMI</div>
+        <div class="amort-summary-cell__value" id="sum-emi">₹38,500</div>
+      </div>
+      <div class="amort-summary-cell">
+        <div class="amort-summary-cell__label">Months Left</div>
+        <div class="amort-summary-cell__value" id="sum-months">169</div>
+      </div>
+      <div class="amort-summary-cell">
+        <div class="amort-summary-cell__label">Total Interest</div>
+        <div class="amort-summary-cell__value" id="sum-interest" style="color:var(--error);">₹—</div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="amort-table-wrap">
+      <table class="amort-table">
+        <thead>
+          <tr>
+            <th>Month</th>
+            <th>EMI</th>
+            <th>Principal</th>
+            <th>Interest</th>
+            <th>Balance</th>
+          </tr>
+        </thead>
+        <tbody id="amort-tbody"><!-- rendered by JS --></tbody>
+      </table>
+    </div>
+
+    <button class="btn btn--secondary show-full-btn" id="toggle-full-btn" onclick="toggleFull()">Show Full Schedule</button>
+
+    <div style="font-size:11px; color:var(--text-muted); margin-top:var(--sp-3); line-height:1.6;">
+      Reducing-balance amortisation: interest is charged monthly on the outstanding balance; the principal component grows and the interest component shrinks with every EMI. Figures are approximate for prototype purposes.
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV — none active (no Loans tab)
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ── Theme toggle (matches other pages) ── */
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+
+  /* ── Loan data (paise) ── */
+  const LOANS = {
+    home: {
+      id: 'home', lender: 'HDFC Bank', type: 'Home Loan',
+      outstandingPaise: 378600000, ratePct: 8.5, emiPaise: 3850000,
+      nextDue: { year: 2026, month: 7 }, // Aug 2026 (0-indexed month=7)
+    },
+    car: {
+      id: 'car', lender: 'ICICI Bank', type: 'Car Loan',
+      outstandingPaise: 60100000, ratePct: 9.5, emiPaise: 1200000,
+      nextDue: { year: 2026, month: 7 },
+    },
+  };
+
+  let schedule = [];
+  let expanded = false;
+  let current = 'home';
+
+  /* ── Reducing-balance amortisation schedule (paise) ── */
+  function buildSchedule(outstandingPaise, ratePct, emiPaise, maxMonths) {
+    const r = ratePct / 12 / 100;
+    let balance = outstandingPaise;
+    const rows = [];
+    for (let m = 1; m <= maxMonths; m++) {
+      const interest = Math.round(balance * r);
+      let principal = emiPaise - interest;
+      let emiThisMonth = emiPaise;
+      if (principal >= balance) {
+        principal = balance;
+        emiThisMonth = principal + interest;
+      }
+      balance = Math.max(0, balance - principal);
+      rows.push({ month: m, emi: emiThisMonth, principal, interest, balance });
+      if (balance <= 0) break;
+    }
+    return rows;
+  }
+
+  function monthLabel(base, offset) {
+    const d = new Date(base.year, base.month + offset, 1);
+    return d.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' });
+  }
+
+  function rowHtml(row, base) {
+    return `<tr>
+      <td>${row.month} · ${monthLabel(base, row.month - 1)}</td>
+      <td>${AG.formatINR(row.emi)}</td>
+      <td class="col-principal">${AG.formatINR(row.principal)}</td>
+      <td class="col-interest">${AG.formatINR(row.interest)}</td>
+      <td class="col-balance">${AG.formatINR(row.balance)}</td>
+    </tr>`;
+  }
+
+  function truncated(rows) {
+    if (rows.length <= 16) return rows;
+    const head = rows.slice(0, 12);
+    const tail = rows.slice(-3);
+    const hidden = rows.length - head.length - tail.length;
+    return { truncatedView: true, head, tail, hidden };
+  }
+
+  function renderTable() {
+    const base = LOANS[current].nextDue;
+    const tbody = document.getElementById('amort-tbody');
+    if (expanded) {
+      tbody.innerHTML = schedule.map(r => rowHtml(r, base)).join('');
+    } else {
+      const t = truncated(schedule);
+      if (t.truncatedView) {
+        tbody.innerHTML = t.head.map(r => rowHtml(r, base)).join('')
+          + `<tr class="amort-divider"><td colspan="5">⋯ ${t.hidden} more months ⋯</td></tr>`
+          + t.tail.map(r => rowHtml(r, base)).join('');
+      } else {
+        tbody.innerHTML = schedule.map(r => rowHtml(r, base)).join('');
+      }
+    }
+    document.getElementById('toggle-full-btn').textContent = expanded
+      ? 'Show Summary View'
+      : `Show Full Schedule (${schedule.length} months)`;
+  }
+
+  function toggleFull() {
+    expanded = !expanded;
+    renderTable();
+  }
+
+  function render(key) {
+    current = key;
+    expanded = false;
+    const l = LOANS[key];
+    document.title = `ArthaGrid — ${l.lender} ${l.type} Amortisation`;
+    document.getElementById('loan-name-title').textContent = `${l.lender} ${l.type}`;
+    document.getElementById('back-link').href = `detail.html?loan=${l.id}`;
+
+    schedule = buildSchedule(l.outstandingPaise, l.ratePct, l.emiPaise, 480);
+    const totalInterest = schedule.reduce((sum, r) => sum + r.interest, 0);
+
+    document.getElementById('sum-emi').textContent = AG.formatINR(l.emiPaise);
+    document.getElementById('sum-months').textContent = schedule.length;
+    document.getElementById('sum-interest').textContent = AG.formatINR(totalInterest, { compact: true });
+
+    renderTable();
+    document.querySelectorAll('.demo-btn').forEach(b => b.classList.toggle('active', b.dataset.state === key));
+  }
+
+  document.querySelectorAll('.demo-btn[data-state]').forEach(btn => {
+    btn.addEventListener('click', () => render(btn.dataset.state));
+  });
+
+  const params = new URLSearchParams(location.search);
+  const initial = LOANS[params.get('loan')] ? params.get('loan') : 'home';
+  render(initial);
+</script>
+</body>
+</html>

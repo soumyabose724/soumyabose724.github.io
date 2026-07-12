@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Add Transaction</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .icon-btn {
+      width: 40px; height: 40px; border-radius: var(--r-full);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-secondary);
+      transition: background var(--dur-fast), color var(--dur-fast);
+      cursor: pointer;
+    }
+    .icon-btn:hover { background: var(--surface-raised); color: var(--text-primary); }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--grad-primary); color: #fff;
+      font-size: 13px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* ── Type segmented tabs ── */
+    .type-tabs {
+      display: flex; gap: var(--sp-2); overflow-x: auto; padding: var(--sp-1) var(--sp-1) var(--sp-2);
+      margin-bottom: var(--sp-5); scrollbar-width: none;
+    }
+    .type-tabs::-webkit-scrollbar { display: none; }
+    .type-tab {
+      flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 4px;
+      min-width: 78px; padding: var(--sp-3) var(--sp-2); border-radius: var(--r-lg);
+      background: var(--surface-raised); border: 1.5px solid var(--border); cursor: pointer;
+      transition: background var(--dur-fast), border-color var(--dur-fast), transform var(--dur-fast);
+    }
+    .type-tab:active { transform: scale(0.96); }
+    .type-tab__icon { font-size: 20px; }
+    .type-tab__label { font-size: 11px; font-weight: 600; color: var(--text-secondary); white-space: nowrap; }
+    .type-tab.active { background: var(--primary-light); border-color: var(--primary); }
+    .type-tab.active .type-tab__label { color: var(--primary); }
+
+    .type-fields { display: none; }
+    .type-fields.visible { display: block; animation: fade-in var(--dur-base) var(--ease-out) both; }
+
+    /* ── Routing / helper info boxes ── */
+    .info-box {
+      display: flex; align-items: flex-start; gap: var(--sp-2);
+      background: var(--info-light); border: 1px solid rgba(59,130,246,.28);
+      border-radius: var(--r-lg); padding: var(--sp-3) var(--sp-4);
+      font-size: 12px; color: var(--text-secondary); line-height: 1.5;
+      margin-top: var(--sp-2);
+    }
+    .info-box strong { color: var(--info); }
+    .info-box--muted {
+      background: var(--surface-raised); border-color: var(--border); color: var(--text-secondary);
+    }
+    .info-box--muted strong { color: var(--text-primary); }
+
+    /* ── Payment type segmented (Full/Minimum/Partial) ── */
+    .seg-row { display: flex; gap: var(--sp-2); }
+    .seg-btn {
+      flex: 1; height: 40px; border-radius: var(--r-md);
+      background: var(--surface-raised); border: 1.5px solid var(--border);
+      font-size: 13px; font-weight: 600; color: var(--text-secondary); cursor: pointer;
+      transition: background var(--dur-fast), border-color var(--dur-fast), color var(--dur-fast);
+    }
+    .seg-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+    /* ── More Options collapsible ── */
+    .more-options-toggle {
+      width: 100%; display: flex; align-items: center; gap: var(--sp-2);
+      background: none; border: none; padding: var(--sp-4) var(--sp-1);
+      color: var(--primary); font-size: 13px; font-weight: 600; cursor: pointer;
+    }
+    .more-options-toggle__icon { transition: transform var(--dur-base) var(--ease-out); }
+    .more-options-toggle__icon.open { transform: rotate(180deg); }
+    .more-options-body { max-height: 0; overflow: hidden; transition: max-height var(--dur-med) var(--ease-out); }
+    .more-options-body.open { max-height: 500px; }
+
+    .split-link {
+      display: flex; align-items: center; gap: 6px; margin-top: var(--sp-3);
+      font-size: 13px; font-weight: 600; color: var(--primary); text-decoration: none;
+    }
+
+    /* ── Future date warning ── */
+    .future-warning { display: none; }
+    .future-warning.visible { display: flex; }
+
+    /* ── Investment computed amount ── */
+    .computed-amount-row {
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--surface-raised); border-radius: var(--r-lg);
+      padding: var(--sp-3) var(--sp-4); margin-top: var(--sp-2);
+    }
+    .computed-amount-row__label { font-size: 12px; color: var(--text-secondary); font-weight: 600; }
+    .computed-amount-row__value {
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+      font-size: 16px; font-weight: 700; color: var(--primary);
+    }
+
+    /* ── Footer action bar (fixed, above bottom-nav) ── */
+    .page-content--form { padding-bottom: calc(var(--bottom-nav-h) + 76px + var(--sp-6)); }
+    .form-footer-bar {
+      position: fixed; bottom: var(--bottom-nav-h); left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: var(--page-max);
+      background: var(--surface); border-top: 1px solid var(--border);
+      padding: var(--sp-3) var(--sp-4); display: flex; gap: var(--sp-3);
+      z-index: 40;
+    }
+    .form-footer-bar .btn { flex: 1; }
+    .form-footer-bar .btn--primary { flex: 2; }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title" id="page-title">Add Expense</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content page-content--form">
+
+    <!-- Type segmented control -->
+    <div class="type-tabs" id="type-tabs">
+      <div class="type-tab" data-type="income" onclick="selectType('income')">
+        <span class="type-tab__icon">💰</span>
+        <span class="type-tab__label">Income</span>
+      </div>
+      <div class="type-tab active" data-type="expense" onclick="selectType('expense')">
+        <span class="type-tab__icon">🧾</span>
+        <span class="type-tab__label">Expense</span>
+      </div>
+      <div class="type-tab" data-type="transfer" onclick="selectType('transfer')">
+        <span class="type-tab__icon">🔁</span>
+        <span class="type-tab__label">Transfer</span>
+      </div>
+      <div class="type-tab" data-type="card" onclick="selectType('card')">
+        <span class="type-tab__icon">💳</span>
+        <span class="type-tab__label">Card Pmt</span>
+      </div>
+      <div class="type-tab" data-type="loan" onclick="selectType('loan')">
+        <span class="type-tab__icon">🏠</span>
+        <span class="type-tab__label">Loan Pmt</span>
+      </div>
+      <div class="type-tab" data-type="investment" onclick="selectType('investment')">
+        <span class="type-tab__icon">📈</span>
+        <span class="type-tab__label">Investment</span>
+      </div>
+    </div>
+
+    <!-- ═══ INCOME fields ═══ -->
+    <div class="type-fields" data-type="income">
+      <div class="form-group">
+        <label class="form-label" for="inc-source">Source<span class="required">*</span></label>
+        <select class="form-select" id="inc-source">
+          <option>Salary (You)</option>
+          <option>Freelance / Consulting</option>
+          <option>Pension (Mother)</option>
+          <option>Interest / Dividend</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="inc-amount">Amount<span class="required">*</span></label>
+        <div class="form-input-wrap has-prefix">
+          <span class="input-prefix">₹</span>
+          <input class="form-input inr-input" id="inc-amount" type="text" inputmode="numeric" value="1,20,000">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="inc-date">Date<span class="required">*</span></label>
+        <input class="form-input" id="inc-date" type="date" value="2026-06-01" onchange="checkFutureDate('inc-date','inc-future-warning')">
+        <div class="form-error future-warning" id="inc-future-warning">⚠ This date is more than 7 days in the future.</div>
+      </div>
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">One-off Windfall</div>
+          <div class="toggle-sublabel">Off = regular income like salary. On = one-time inflow (bonus, gift).</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="inc-windfall" onchange="updateRoutingPreview()">
+          <span class="toggle-track"></span>
+          <span class="toggle-thumb"></span>
+        </label>
+      </div>
+      <div class="info-box">
+        <span>ℹ️</span>
+        <span id="routing-preview"><strong>Proposed period: July 2026</strong> (NEXT_MONTH routing rule)</span>
+      </div>
+    </div>
+
+    <!-- ═══ EXPENSE fields ═══ -->
+    <div class="type-fields visible" data-type="expense">
+      <div class="form-group">
+        <label class="form-label" for="exp-payee">Payee<span class="required">*</span></label>
+        <input class="form-input" id="exp-payee" type="text" placeholder="e.g. Big Bazaar" value="Big Bazaar">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="exp-amount">Amount<span class="required">*</span></label>
+        <div class="form-input-wrap has-prefix">
+          <span class="input-prefix">₹</span>
+          <input class="form-input inr-input" id="exp-amount" type="text" inputmode="numeric" value="8,200">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="exp-date">Date<span class="required">*</span></label>
+        <input class="form-input" id="exp-date" type="date" value="2026-06-08" onchange="checkFutureDate('exp-date','exp-future-warning')">
+        <div class="form-error future-warning" id="exp-future-warning">⚠ This date is more than 7 days in the future.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="exp-envelope">Envelope / Category<span class="required">*</span></label>
+        <select class="form-select" id="exp-envelope">
+          <option>Groceries</option>
+          <option>Dining Out</option>
+          <option>Utilities</option>
+          <option>Mobile &amp; Internet</option>
+          <option>Fuel &amp; Transport</option>
+          <option>Healthcare</option>
+          <option>Insurance</option>
+          <option>Education</option>
+          <option>Emergency Fund</option>
+          <option>Vacation Fund</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="exp-account">Account<span class="required">*</span></label>
+        <select class="form-select" id="exp-account">
+          <option>HDFC Current ····8912</option>
+          <option>SBI Savings ····4521</option>
+          <option>Cash</option>
+        </select>
+      </div>
+      <a class="split-link" href="split.html">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M11 3 8 9l4 12 4-12-3-6"/><path d="M2 9h20"/></svg>
+        Split into multiple envelopes →
+      </a>
+    </div>
+
+    <!-- ═══ TRANSFER fields ═══ -->
+    <div class="type-fields" data-type="transfer">
+      <div class="form-group">
+        <label class="form-label" for="tr-from">From Account<span class="required">*</span></label>
+        <select class="form-select" id="tr-from">
+          <option>SBI Savings ····4521</option>
+          <option>HDFC Current ····8912</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="tr-to">To Account<span class="required">*</span></label>
+        <select class="form-select" id="tr-to">
+          <option>HDFC Current ····8912</option>
+          <option>SBI Savings ····4521</option>
+          <option>Spouse Joint A/c · SBI ····2210</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="tr-amount">Amount<span class="required">*</span></label>
+        <div class="form-input-wrap has-prefix">
+          <span class="input-prefix">₹</span>
+          <input class="form-input inr-input" id="tr-amount" type="text" inputmode="numeric" value="5,000">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="tr-date">Date<span class="required">*</span></label>
+        <input class="form-input" id="tr-date" type="date" value="2026-06-25" onchange="checkFutureDate('tr-date','tr-future-warning')">
+        <div class="form-error future-warning" id="tr-future-warning">⚠ This date is more than 7 days in the future.</div>
+      </div>
+      <div class="info-box info-box--muted">
+        <span>ℹ️</span>
+        <span>Transfers move money between your own accounts and are never counted as income or expense.</span>
+      </div>
+    </div>
+
+    <!-- ═══ CREDIT_CARD_PAYMENT fields ═══ -->
+    <div class="type-fields" data-type="card">
+      <div class="form-group">
+        <label class="form-label" for="card-select">Card<span class="required">*</span></label>
+        <select class="form-select" id="card-select">
+          <option>HDFC Millennia ····4211</option>
+          <option>ICICI Amazon Pay ····8776</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Payment Type<span class="required">*</span></label>
+        <div class="seg-row">
+          <button type="button" class="seg-btn active" data-pay-type="full" onclick="selectPayType('full')">Full</button>
+          <button type="button" class="seg-btn" data-pay-type="minimum" onclick="selectPayType('minimum')">Minimum</button>
+          <button type="button" class="seg-btn" data-pay-type="partial" onclick="selectPayType('partial')">Partial</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="card-amount">Amount<span class="required">*</span></label>
+        <div class="form-input-wrap has-prefix">
+          <span class="input-prefix">₹</span>
+          <input class="form-input inr-input" id="card-amount" type="text" inputmode="numeric" value="15,400" disabled>
+        </div>
+        <div class="form-helper" id="card-amount-helper">Full statement balance — amount is auto-filled.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="card-date">Date<span class="required">*</span></label>
+        <input class="form-input" id="card-date" type="date" value="2026-06-03" onchange="checkFutureDate('card-date','card-future-warning')">
+        <div class="form-error future-warning" id="card-future-warning">⚠ This date is more than 7 days in the future.</div>
+      </div>
+    </div>
+
+    <!-- ═══ LOAN_PAYMENT fields ═══ -->
+    <div class="type-fields" data-type="loan">
+      <div class="form-group">
+        <label class="form-label" for="loan-select">Loan<span class="required">*</span></label>
+        <select class="form-select" id="loan-select">
+          <option>HDFC Home Loan</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="loan-amount">Amount<span class="required">*</span></label>
+        <div class="form-input-wrap has-prefix">
+          <span class="input-prefix">₹</span>
+          <input class="form-input inr-input" id="loan-amount" type="text" inputmode="numeric" value="38,500">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="loan-date">Date<span class="required">*</span></label>
+        <input class="form-input" id="loan-date" type="date" value="2026-06-01" onchange="checkFutureDate('loan-date','loan-future-warning')">
+        <div class="form-error future-warning" id="loan-future-warning">⚠ This date is more than 7 days in the future.</div>
+      </div>
+      <div class="info-box info-box--muted">
+        <span>🧮</span>
+        <span>This EMI splits into <strong>Principal ₹22,140</strong> + <strong>Interest ₹16,360</strong>, auto-calculated via reducing-balance amortisation.</span>
+      </div>
+    </div>
+
+    <!-- ═══ INVESTMENT fields ═══ -->
+    <div class="type-fields" data-type="investment">
+      <div class="form-group">
+        <label class="form-label">Type<span class="required">*</span></label>
+        <div class="seg-row">
+          <button type="button" class="seg-btn active" data-inv-type="sip" onclick="selectInvType('sip')">SIP</button>
+          <button type="button" class="seg-btn" data-inv-type="lumpsum" onclick="selectInvType('lumpsum')">Lumpsum</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="inv-holding">Holding<span class="required">*</span></label>
+        <select class="form-select" id="inv-holding">
+          <option>HDFC Flexicap Fund</option>
+          <option>Axis Bluechip Fund</option>
+          <option>Nippon India Gold Fund</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="inv-units">Units<span class="required">*</span></label>
+        <input class="form-input" id="inv-units" type="text" inputmode="decimal" value="84.3" oninput="updateInvestmentAmount()">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="inv-nav">NAV (per unit)<span class="required">*</span></label>
+        <div class="form-input-wrap has-prefix">
+          <span class="input-prefix">₹</span>
+          <input class="form-input inr-input" id="inv-nav" type="text" inputmode="decimal" value="142.35" oninput="updateInvestmentAmount()">
+        </div>
+      </div>
+      <div class="computed-amount-row">
+        <span class="computed-amount-row__label">Computed Amount</span>
+        <span class="computed-amount-row__value" id="inv-computed">₹12,000</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="inv-date">Date<span class="required">*</span></label>
+        <input class="form-input" id="inv-date" type="date" value="2026-06-05" onchange="checkFutureDate('inv-date','inv-future-warning')">
+        <div class="form-error future-warning" id="inv-future-warning">⚠ This date is more than 7 days in the future.</div>
+      </div>
+    </div>
+
+    <!-- ═══ More Options (shared) ═══ -->
+    <button class="more-options-toggle" onclick="toggleMoreOptions()">
+      <span class="more-options-toggle__icon" id="more-options-icon">▾</span>
+      More Options
+    </button>
+    <div class="more-options-body" id="more-options-body">
+      <div class="form-group">
+        <label class="form-label" for="opt-reference">Reference / UPI ID</label>
+        <input class="form-input" id="opt-reference" type="text" placeholder="e.g. UPI Ref: 402198273645">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="opt-notes">Notes</label>
+        <input class="form-input" id="opt-notes" type="text" placeholder="Add a note...">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="opt-tags">Tags</label>
+        <input class="form-input" id="opt-tags" type="text" placeholder="e.g. family, recurring">
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- Footer action bar -->
+  <div class="form-footer-bar">
+    <button class="btn btn--ghost" onclick="location.href='index.html'">Cancel</button>
+    <button class="btn btn--primary" onclick="saveTransaction()">Save</button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAVIGATION
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="index.html" class="nav-tab active" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  AG.initBottomNav('txn');
+
+  const TYPE_TITLES = {
+    income: 'Add Income',
+    expense: 'Add Expense',
+    transfer: 'Add Transfer',
+    card: 'Add Card Payment',
+    loan: 'Add Loan Payment',
+    investment: 'Add Investment',
+  };
+
+  /* Reference "today" for this demo — persona's active period is June 2026 */
+  const DEMO_TODAY = new Date('2026-06-18T00:00:00');
+
+  function selectType(type) {
+    document.querySelectorAll('.type-tab').forEach(t => t.classList.toggle('active', t.dataset.type === type));
+    document.querySelectorAll('.type-fields').forEach(sec => sec.classList.toggle('visible', sec.dataset.type === type));
+    document.getElementById('page-title').textContent = TYPE_TITLES[type];
+  }
+
+  function selectPayType(type) {
+    document.querySelectorAll('.seg-btn[data-pay-type]').forEach(b => b.classList.toggle('active', b.dataset.payType === type));
+    const amountInput = document.getElementById('card-amount');
+    const helper = document.getElementById('card-amount-helper');
+    if (type === 'full') {
+      amountInput.value = '15,400'; amountInput.disabled = true;
+      helper.textContent = 'Full statement balance — amount is auto-filled.';
+    } else if (type === 'minimum') {
+      amountInput.value = '1,540'; amountInput.disabled = true;
+      helper.textContent = 'Minimum due (5% of statement) — amount is auto-filled.';
+    } else {
+      amountInput.disabled = false;
+      helper.textContent = 'Enter the amount you want to pay towards this card.';
+    }
+  }
+
+  function selectInvType(type) {
+    document.querySelectorAll('.seg-btn[data-inv-type]').forEach(b => b.classList.toggle('active', b.dataset.invType === type));
+  }
+
+  function updateInvestmentAmount() {
+    const units = parseFloat(document.getElementById('inv-units').value) || 0;
+    const nav = parseFloat((document.getElementById('inv-nav').value || '0').replace(/,/g, '')) || 0;
+    const paise = Math.round(units * nav * 100);
+    document.getElementById('inv-computed').textContent = AG.formatINR(paise);
+  }
+
+  function updateRoutingPreview() {
+    const windfall = document.getElementById('inc-windfall').checked;
+    const el = document.getElementById('routing-preview');
+    if (windfall) {
+      el.innerHTML = '<strong>Proposed period: June 2026</strong> (SAME_MONTH — one-off windfalls land in the current period)';
+    } else {
+      el.innerHTML = '<strong>Proposed period: July 2026</strong> (NEXT_MONTH routing rule)';
+    }
+  }
+
+  function checkFutureDate(inputId, warningId) {
+    const val = document.getElementById(inputId).value;
+    const warning = document.getElementById(warningId);
+    if (!val) { warning.classList.remove('visible'); return; }
+    const chosen = new Date(val + 'T00:00:00');
+    const diffDays = (chosen - DEMO_TODAY) / (1000 * 60 * 60 * 24);
+    warning.classList.toggle('visible', diffDays > 7);
+  }
+
+  function toggleMoreOptions() {
+    const body = document.getElementById('more-options-body');
+    const icon = document.getElementById('more-options-icon');
+    body.classList.toggle('open');
+    icon.classList.toggle('open');
+  }
+
+  function saveTransaction() {
+    const activeType = document.querySelector('.type-tab.active').dataset.type;
+    AG.showToast(TYPE_TITLES[activeType].replace('Add ', '') + ' saved ✓', 'success');
+    setTimeout(() => { location.href = 'index.html'; }, 900);
+  }
+
+  updateInvestmentAmount();
+</script>
+</body>
+</html>

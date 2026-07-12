@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Bank Accounts</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* ── Balance hero ── */
+    .balance-hero {
+      border-radius: var(--r-xl);
+      background: linear-gradient(135deg, #0B7A70 0%, #0D9488 55%, #0EA5A0 100%);
+      box-shadow: 0 6px 28px rgba(13,148,136,.32);
+      padding: var(--sp-6) var(--sp-5) var(--sp-5);
+      position: relative; overflow: hidden;
+      color: #fff; margin-bottom: var(--sp-5);
+    }
+    .balance-hero::before {
+      content: ''; position: absolute; top: -32px; right: -32px;
+      width: 110px; height: 110px; border-radius: 50%;
+      background: rgba(255,255,255,.07);
+    }
+    .balance-hero::after {
+      content: ''; position: absolute; bottom: -24px; left: 30%;
+      width: 160px; height: 80px; border-radius: 50%;
+      background: rgba(255,255,255,.04);
+    }
+    .balance-hero__label {
+      font-size: 11px; font-weight: 700; letter-spacing: .09em;
+      text-transform: uppercase; color: rgba(255,255,255,.65);
+      margin-bottom: var(--sp-2);
+    }
+    .balance-hero__amount {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+      font-size: 34px; font-weight: 700; color: #fff; line-height: 1.1;
+      margin-bottom: var(--sp-3);
+    }
+    .balance-hero__meta {
+      font-size: 12px; color: rgba(255,255,255,.65);
+      display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap;
+    }
+    .balance-hero__meta strong { color: rgba(255,255,255,.9); font-weight: 600; }
+    .balance-hero__breakdown {
+      display: flex; gap: var(--sp-2); margin-top: var(--sp-4); flex-wrap: wrap;
+    }
+    .balance-hero__pill {
+      background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.22);
+      border-radius: var(--r-full); padding: 4px 10px;
+      font-size: 11px; font-weight: 600; color: rgba(255,255,255,.92);
+    }
+
+    /* ── Toolbar row ── */
+    .accounts-toolbar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: var(--sp-2);
+    }
+    .accounts-toolbar .toggle-row { padding: var(--sp-2) 0; flex: 1; }
+
+    /* ── Section label ── */
+    .ba-section-label {
+      font-size: 11px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--text-muted);
+      margin: var(--sp-5) 0 var(--sp-3);
+      display: flex; align-items: center; gap: var(--sp-2);
+    }
+    .ba-section-label::before {
+      content: ''; width: 3px; height: 12px; border-radius: 2px;
+      background: var(--primary); flex-shrink: 0;
+    }
+
+    /* ── Accounts grid ── */
+    .accounts-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3);
+    }
+    .account-tile {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-xl); padding: var(--sp-4);
+      cursor: pointer; text-decoration: none; color: inherit;
+      display: block;
+      transition: box-shadow var(--dur-fast), transform var(--dur-fast), background var(--dur-fast);
+      animation: card-in var(--dur-med) var(--ease-out) both;
+    }
+    .account-tile:hover  { box-shadow: var(--sh-md); background: var(--primary-xlight); }
+    .account-tile:active { transform: scale(0.98); }
+    .account-tile--closed { opacity: .6; cursor: default; }
+    .account-tile--closed:hover { box-shadow: none; background: var(--surface); }
+
+    .account-tile__top {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      margin-bottom: var(--sp-3);
+    }
+    .account-tile__logo {
+      width: 40px; height: 40px; border-radius: var(--r-lg);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 800; letter-spacing: .01em;
+      flex-shrink: 0;
+    }
+    .account-tile__bank {
+      font-size: 13px; font-weight: 600; color: var(--text-primary);
+      margin-top: 2px; line-height: 1.3;
+    }
+    .account-tile__number {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px; color: var(--text-muted);
+      margin-bottom: var(--sp-3);
+    }
+    .account-tile__balance {
+      display: block; margin-bottom: 3px;
+    }
+    .account-tile__caption {
+      font-size: 11px; color: var(--text-muted);
+    }
+
+    /* ── Empty state ── */
+    #view-empty { display: none; }
+
+    /* ── Add Account sheet ── */
+    .ae-field { margin-bottom: var(--sp-4); }
+    .ae-field__label {
+      display: block; font-size: 11px; font-weight: 700;
+      letter-spacing: .06em; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: var(--sp-2);
+    }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">State</span>
+    <button class="demo-btn" data-state="populated">Populated</button>
+    <button class="demo-btn" data-state="empty">First Use</button>
+    <button class="icon-btn" data-theme-toggle style="margin-left:auto;" aria-label="Toggle theme">
+      <span data-theme-icon style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="../dashboard/index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Bank Accounts</span>
+    <div class="top-bar__actions">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content" id="page-content">
+
+    <!-- ── Populated State ── -->
+    <div id="view-populated">
+
+      <!-- Total Balance Hero -->
+      <div class="balance-hero">
+        <div class="balance-hero__label">Total Balance</div>
+        <div class="balance-hero__amount" id="hero-total">₹12,16,386</div>
+        <div class="balance-hero__meta">
+          Across <strong>5 linked accounts</strong> · Updated today
+        </div>
+        <div class="balance-hero__breakdown">
+          <span class="balance-hero__pill">💳 2 Savings</span>
+          <span class="balance-hero__pill">🏦 1 Current</span>
+          <span class="balance-hero__pill">🔒 1 FD</span>
+          <span class="balance-hero__pill">📮 1 RD</span>
+        </div>
+      </div>
+
+      <!-- Toolbar: Show Closed -->
+      <div class="accounts-toolbar">
+        <div class="toggle-row" style="width:100%;">
+          <div>
+            <div class="toggle-label">Show Closed Accounts</div>
+            <div class="toggle-sublabel">Closed accounts are archived, never deleted</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="show-closed-toggle" onchange="toggleClosed()">
+            <span class="toggle-track"></span>
+            <span class="toggle-thumb"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Active Accounts -->
+      <div class="ba-section-label">Savings &amp; Current</div>
+      <div class="accounts-grid">
+
+        <a href="detail.html" class="account-tile" style="animation-delay:0ms;">
+          <div class="account-tile__top">
+            <div class="account-tile__logo" style="background:#FEE2E2;color:#B91C1C;">HDFC</div>
+            <span class="chip chip--info">Savings</span>
+          </div>
+          <div class="account-tile__bank">HDFC Bank</div>
+          <div class="account-tile__number">•••• 4821</div>
+          <div class="account-tile__balance amount-text amount-text--lg">₹1,84,320</div>
+          <div class="account-tile__caption">Primary Salary Account</div>
+        </a>
+
+        <a href="detail.html" class="account-tile" style="animation-delay:45ms;">
+          <div class="account-tile__top">
+            <div class="account-tile__logo" style="background:#FFEDD5;color:#C2410C;">ICICI</div>
+            <span class="chip chip--info">Savings</span>
+          </div>
+          <div class="account-tile__bank">ICICI Bank</div>
+          <div class="account-tile__number">•••• 7756</div>
+          <div class="account-tile__balance amount-text amount-text--lg">₹62,150</div>
+          <div class="account-tile__caption">Secondary Savings</div>
+        </a>
+
+        <a href="detail.html" class="account-tile" style="animation-delay:90ms;">
+          <div class="account-tile__top">
+            <div class="account-tile__logo" style="background:#FCE7F3;color:#BE185D;">KMB</div>
+            <span class="chip chip--balanced">Current</span>
+          </div>
+          <div class="account-tile__bank">Kotak Mahindra Bank</div>
+          <div class="account-tile__number">•••• 2214</div>
+          <div class="account-tile__balance amount-text amount-text--lg">₹18,940</div>
+          <div class="account-tile__caption">Household &amp; Freelance</div>
+        </a>
+
+      </div>
+
+      <div class="ba-section-label">Fixed &amp; Recurring Deposits</div>
+      <div class="accounts-grid">
+
+        <a href="fd-rd.html" class="account-tile" style="animation-delay:135ms;">
+          <div class="account-tile__top">
+            <div class="account-tile__logo" style="background:#DBEAFE;color:#1E3A8A;">SBI</div>
+            <span class="chip chip--locked">Fixed Deposit</span>
+          </div>
+          <div class="account-tile__bank">State Bank of India</div>
+          <div class="account-tile__number">•••• 3390</div>
+          <div class="account-tile__balance amount-text amount-text--lg">₹8,50,490</div>
+          <div class="account-tile__caption">Matures 1 Oct 2027</div>
+        </a>
+
+        <a href="fd-rd.html" class="account-tile" style="animation-delay:180ms;">
+          <div class="account-tile__top">
+            <div class="account-tile__logo" style="background:#D1FAE5;color:#065F46;">POST</div>
+            <span class="chip chip--locked">Recurring Deposit</span>
+          </div>
+          <div class="account-tile__bank">India Post Office</div>
+          <div class="account-tile__number">•••• 9012</div>
+          <div class="account-tile__balance amount-text amount-text--lg">₹1,00,486</div>
+          <div class="account-tile__caption">Matures 1 Jan 2030</div>
+        </a>
+
+      </div>
+
+      <!-- Closed Accounts (toggle) -->
+      <div id="closed-section" style="display:none;">
+        <div class="ba-section-label">Closed Accounts</div>
+        <div class="accounts-grid">
+          <div class="account-tile account-tile--closed" onclick="AG.showToast('This account is closed and read-only', 'info')">
+            <div class="account-tile__top">
+              <div class="account-tile__logo" style="background:#F1F5F9;color:#64748B;">YES</div>
+              <span class="chip chip--closed">Closed</span>
+            </div>
+            <div class="account-tile__bank">Yes Bank</div>
+            <div class="account-tile__number">•••• 5543</div>
+            <div class="account-tile__balance amount-text amount-text--lg" style="color:var(--text-muted);">₹0</div>
+            <div class="account-tile__caption">Closed 12 Mar 2024 · migrated to HDFC</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /view-populated -->
+
+    <!-- ── Empty / First Use State ── -->
+    <div id="view-empty">
+      <div class="empty-state">
+        <div class="empty-state__icon">🏦</div>
+        <div class="empty-state__title">No Bank Accounts Linked</div>
+        <div class="empty-state__body">Add your savings, current, FD or RD accounts to track balances and reconcile transactions in one place.</div>
+        <button class="btn btn--primary" onclick="AG.openSheet('add-account')">+ Link Your First Account</button>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       FAB
+  ═══════════════════════════════════════════ -->
+  <button class="fab visible" aria-label="Add Account" onclick="AG.openSheet('add-account')">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+  </button>
+
+  <!-- ═══════════════════════════════════════════
+       ADD ACCOUNT SHEET
+  ═══════════════════════════════════════════ -->
+  <div class="sheet-backdrop" id="add-account-backdrop"></div>
+  <div class="sheet" id="add-account">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <span class="sheet__title">Add Account</span>
+      <button class="sheet__close" onclick="AG.closeSheet('add-account')" aria-label="Close">✕</button>
+    </div>
+    <div class="sheet__body">
+
+      <div class="ae-field">
+        <label class="ae-field__label" for="aa-bank">Bank</label>
+        <select class="form-select" id="aa-bank">
+          <option>HDFC Bank</option>
+          <option>ICICI Bank</option>
+          <option>State Bank of India</option>
+          <option>Axis Bank</option>
+          <option>Kotak Mahindra Bank</option>
+          <option>Punjab National Bank</option>
+          <option>India Post Office</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <div class="ae-field">
+        <label class="ae-field__label" for="aa-type">Account Type</label>
+        <select class="form-select" id="aa-type">
+          <option>Savings</option>
+          <option>Current</option>
+          <option>Fixed Deposit</option>
+          <option>Recurring Deposit</option>
+        </select>
+      </div>
+
+      <div class="ae-field">
+        <label class="ae-field__label" for="aa-number">Account Number</label>
+        <input class="form-input" id="aa-number" type="text" inputmode="numeric" placeholder="Last 4 digits, e.g. 4821" maxlength="20">
+        <div class="form-helper">Only the last 4 digits are stored on-device.</div>
+      </div>
+
+      <div class="ae-field">
+        <label class="ae-field__label" for="aa-balance">Opening Balance</label>
+        <div class="form-input-wrap has-prefix">
+          <span class="input-prefix">₹</span>
+          <input class="form-input inr-input" id="aa-balance" type="text" inputmode="numeric" placeholder="0">
+        </div>
+      </div>
+
+    </div>
+    <div class="sheet__footer">
+      <button class="btn btn--ghost" onclick="AG.closeSheet('add-account')">Cancel</button>
+      <button class="btn btn--primary" onclick="saveAccount()">Save Account</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    AG.initBottomNav('bank-accounts');
+
+    AG.initDemoBar({
+      'populated': () => {
+        document.getElementById('view-populated').style.display = '';
+        document.getElementById('view-empty').style.display = 'none';
+        document.querySelector('.fab').classList.add('visible');
+      },
+      'empty': () => {
+        document.getElementById('view-populated').style.display = 'none';
+        document.getElementById('view-empty').style.display = '';
+        document.querySelector('.fab').classList.remove('visible');
+      },
+    });
+  });
+
+  function toggleClosed() {
+    const on = document.getElementById('show-closed-toggle').checked;
+    document.getElementById('closed-section').style.display = on ? '' : 'none';
+  }
+
+  function saveAccount() {
+    const bank = document.getElementById('aa-bank').value;
+    AG.closeSheet('add-account');
+    AG.showToast(bank + ' account added ✓', 'success');
+  }
+</script>
+</body>
+</html>
