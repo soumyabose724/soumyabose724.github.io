@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Categories</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .cat-toolbar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: var(--sp-4);
+    }
+    .cat-toolbar__hint { font-size: 12px; color: var(--text-muted); }
+    .merge-btn {
+      display: flex; align-items: center; gap: 6px;
+      height: 32px; padding: 0 var(--sp-3); border-radius: var(--r-full);
+      background: var(--primary-light); color: var(--primary);
+      border: 1.5px solid rgba(13,148,136,.25);
+      font-size: 12px; font-weight: 700; flex-shrink: 0;
+      transition: background var(--dur-fast);
+    }
+    .merge-btn:hover { background: rgba(13,148,136,.18); }
+
+    .cat-group {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-xl); padding: var(--sp-4);
+      animation: card-in var(--dur-med) var(--ease-out) both;
+    }
+    .cat-group + .cat-group { margin-top: var(--sp-3); }
+    .cat-group__header { display: flex; align-items: center; gap: var(--sp-3); margin-bottom: var(--sp-3); }
+    .cat-group__icon {
+      width: 40px; height: 40px; border-radius: var(--r-lg); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 19px;
+    }
+    .cat-group__name { flex: 1; font-size: 15px; font-weight: 700; color: var(--text-primary); }
+    .cat-group__count { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+    .cat-group__actions { display: flex; gap: 2px; flex-shrink: 0; }
+
+    .subcat-row {
+      display: flex; align-items: center; gap: var(--sp-2);
+      padding: var(--sp-2) var(--sp-2);
+      border-radius: var(--r-md);
+      transition: background var(--dur-fast);
+    }
+    .subcat-row:hover { background: var(--surface-raised); }
+    .subcat-row + .subcat-row { margin-top: 2px; }
+    .subcat-row__dot { width: 6px; height: 6px; border-radius: 50%; background: var(--primary); flex-shrink: 0; }
+    .subcat-row__name { flex: 1; font-size: 13px; color: var(--text-primary); font-weight: 500; }
+    .subcat-row__actions { display: flex; gap: 2px; flex-shrink: 0; }
+    .subcat-list { padding-top: var(--sp-2); border-top: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">Settings</span>
+    <button class="icon-btn" data-theme-toggle style="margin-left:auto;" aria-label="Toggle theme">
+      <span data-theme-icon style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Categories</span>
+    <div class="top-bar__actions">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content" id="page-content">
+
+    <div class="cat-toolbar">
+      <span class="cat-toolbar__hint">8 categories · 21 sub-categories</span>
+      <button class="merge-btn" onclick="AG.openSheet('merge-demo')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg>
+        Merge Categories
+      </button>
+    </div>
+
+    <!-- Housing -->
+    <div class="cat-group">
+      <div class="cat-group__header">
+        <div class="cat-group__icon" style="background:#DBEAFE;">🏠</div>
+        <div style="flex:1; min-width:0;">
+          <div class="cat-group__name">Housing</div>
+          <div class="cat-group__count">3 sub-categories · Housing EMI envelope</div>
+        </div>
+        <div class="cat-group__actions">
+          <button class="list-row__action-btn" onclick="AG.openSheet('add-subcat')" aria-label="Add sub-category"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+          <button class="list-row__action-btn" aria-label="Edit"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        </div>
+      </div>
+      <div class="subcat-list">
+        <div class="subcat-row"><span class="subcat-row__dot"></span><span class="subcat-row__name">Rent / Home EMI</span></div>
+        <div class="subcat-row"><span class="subcat-row__dot"></span><span class="subcat-row__name">Maintenance</span></div>
+        <div class="subcat-row"><span class="subcat-row__dot"></span><span class="subcat-row__name">Property Tax</span></div>
+      </div>
+    </div>
+
+    <!-- Insurance -->
+    <div class="cat-group" style="animation-delay:40ms;">
+      <div class="cat-group__header">
+        <div class="cat-group__icon" style="background:#FEE2E2;">🛡️</div>
+        <div style="flex:1; min-width:0;">
+          <div class="cat-group__name">Insurance</div>
+          <div class="cat-group__count">3 sub-categories · Insurance envelope</div>
+        </div>
+        <div class="cat-group__actions">
+          <button class="list-row__action-btn" onclick="AG.openSheet('add-subcat')" aria-label="Add sub-category"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+          <button class="list-row__action-btn" aria-label="Edit"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        </div>
+      </div>
+      <div class="subcat-list">
+        <div class="subcat-row"><span class="subcat-row__dot"></span><span class="subcat-row__name">Life Insurance</span></div>
+        <div class="subcat-row"><span class="subcat-row__dot"></span><span class="subcat-row__name">Health Insurance</span></div>
+        <div class="subcat-row"><span class="subcat-row__dot"></span><span class="subcat-row__name">Vehicle Insurance</span></div>
+      </div>
+    </div>
+
+    <!-- Food & Dining -->
+    <div class="cat-group" style="animation-delay:80ms;">
+      <div class="cat-group__header">
+        <div class="cat-group__icon" style="background:#D1FAE5;">🍽️</div>
+        <div style="flex:1; min-width:0;">
+          <div class="cat-group__name">Food &amp; Dining</div>
+          <div class="cat-group__count">3 sub-categories · Groceries, Dining Out envelopes</div>
+        </div>
+        <div class="cat-group__actions">
+          <button class="list-row__action-btn" onclick="AG.openSheet('add-subcat')" aria-label="Add sub-category"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+          <button class="list-row__action-btn" aria-label="Edit"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        </div>
+      </div>
+      <div class="subcat-list">
+        <div class="subcat-row"><span class="subcat-row__dot"></span><span class="subcat-row__name">Groceries</span></div>
+        <div class="subcat-row">
+          <span class="subcat-row__dot"></span>
+          <span class="subcat-row__name">Dining Out</span>
+          <div class="subcat-row__actions">
+            <button class="list-row__action-btn" onclick="AG.openSheet('merge-demo')" aria-label="Merge" title="Merge into Food &amp; Dining">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="subcat-row"><span class="subcat-row__dot"></span><span class="subcat-row__name">Food Delivery</span></div>
+      </div>
+    </div>
+
+    <!-- Utilities -->
+    <div class="cat-group" style="animation-delay:120ms;">
+      <div class="cat-group__header">
+        <div class="cat-group__icon" style="background:#E0E7FF;">⚡</div>
+        <div style="flex:1; min-width:0;">
+          <div class="cat-group__name">Utilities</div>
+          <div class="cat-group__count">3 sub-categories · Utilities, Mobile &amp; Internet envelopes</div>
+        </div>
+        <div class="cat-group__actions">
+          <button class="list-row__action-btn" onclick="AG.openSheet('add-subcat')" aria-label="Add sub-category"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+          <button class="list-row__action-btn" aria-label="Edit"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        </div>
+      </div>
+      <div class="subcat-list">
+        <div class="subcat-row"><span class="subcat-row__dot"></span><span class="subcat-row__name">Electricity &amp; Gas</span></div>
+        <div class="subcat-row"><span class="subcat-row__dot"></span><span class="subcat-row__name">Mobile &amp; Internet</span></div>
+        <div class="subcat-row"><span class="subcat-row__dot"></span><span class="subcat-row__name">Water &amp; Broadband</span></div>
+      </div>
+    </div>
+
+    <!-- Transport -->
+    <div class="cat-group" style="animation-delay:160ms;">
+      <div class="cat-group__header">
+        <div class="cat-group__icon" style="background:#F1F5F9;">🚗</div>
+        <div style="flex:1; min-width:0;">
+          <div class="cat-group__name">Transport</div>
+          <div class="cat-group__count">3 sub-categories · Fuel &amp; Transport envelope</div>
+        </div>
+        <div class="cat-group__actions">
+          <button class="list-row__action-btn" onclick="AG.openSheet('add-subcat')" aria-label="Add sub-category"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+          <button class="list-row__action-btn" aria-label="Edit"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        </div>
+      </div>
+      <div class="subcat-list">
+        <div class="subcat-row"><span class="subcat-row__dot"></span><span class="subcat-row__name">Fuel</span></div>
+        <div class="subcat-row"><span class="subcat-row__dot"></span><span class="subcat-row__name">Cabs &amp; Ride-hailing</span></div>
+        <div class="subcat-row"><span class="subcat-row__dot"></span><span class="subcat-row__name">Public Transport</span></div>
+      </div>
+    </div>
+
+    <!-- Health -->
+    <div class="cat-group" style="animation-delay:200ms;">
+      <div class="cat-group__header">
+        <div class="cat-group__icon" style="background:#CCFBF1;">🏥</div>
+        <div style="flex:1; min-width:0;">
+          <div class="cat-group__name">Health</div>
+          <div class="cat-group__count">2 sub-categories · Healthcare envelope</div>
+        </div>
+        <div class="cat-group__actions">
+          <button class="list-row__action-btn" onclick="AG.openSheet('add-subcat')" aria-label="Add sub-category"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+          <button class="list-row__action-btn" aria-label="Edit"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        </div>
+      </div>
+      <div class="subcat-list">
+        <div class="subcat-row"><span class="subcat-row__dot"></span><span class="subcat-row__name">Doctor &amp; Pharmacy</span></div>
+        <div class="subcat-row"><span class="subcat-row__dot"></span><span class="subcat-row__name">Diagnostics &amp; Checkups</span></div>
+      </div>
+    </div>
+
+    <!-- Investments -->
+    <div class="cat-group" style="animation-delay:240ms;">
+      <div class="cat-group__header">
+        <div class="cat-group__icon" style="background:#D1FAE5;">💰</div>
+        <div style="flex:1; min-width:0;">
+          <div class="cat-group__name">Investments</div>
+          <div class="cat-group__count">2 sub-categories · SIP Investments envelope</div>
+        </div>
+        <div class="cat-group__actions">
+          <button class="list-row__action-btn" onclick="AG.openSheet('add-subcat')" aria-label="Add sub-category"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+          <button class="list-row__action-btn" aria-label="Edit"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        </div>
+      </div>
+      <div class="subcat-list">
+        <div class="subcat-row"><span class="subcat-row__dot"></span><span class="subcat-row__name">SIP / Mutual Funds</span></div>
+        <div class="subcat-row"><span class="subcat-row__dot"></span><span class="subcat-row__name">Retirement (NPS / PPF)</span></div>
+      </div>
+    </div>
+
+    <!-- Education & Savings -->
+    <div class="cat-group" style="animation-delay:280ms;">
+      <div class="cat-group__header">
+        <div class="cat-group__icon" style="background:#EDE9FE;">📚</div>
+        <div style="flex:1; min-width:0;">
+          <div class="cat-group__name">Education &amp; Savings</div>
+          <div class="cat-group__count">3 sub-categories · Education, Emergency, Vacation envelopes</div>
+        </div>
+        <div class="cat-group__actions">
+          <button class="list-row__action-btn" onclick="AG.openSheet('add-subcat')" aria-label="Add sub-category"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+          <button class="list-row__action-btn" aria-label="Edit"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        </div>
+      </div>
+      <div class="subcat-list">
+        <div class="subcat-row"><span class="subcat-row__dot"></span><span class="subcat-row__name">Education</span></div>
+        <div class="subcat-row"><span class="subcat-row__dot"></span><span class="subcat-row__name">Emergency Fund</span></div>
+        <div class="subcat-row"><span class="subcat-row__dot"></span><span class="subcat-row__name">Vacation Fund</span></div>
+      </div>
+    </div>
+
+    <!-- Add category -->
+    <button class="btn btn--secondary btn--full" style="margin-top:var(--sp-5);" onclick="AG.openSheet('add-category')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Add Category
+    </button>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       MERGE CATEGORIES SHEET (demo)
+  ═══════════════════════════════════════════ -->
+  <div class="sheet-backdrop" id="merge-demo-backdrop"></div>
+  <div class="sheet" id="merge-demo">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <span class="sheet__title">Merge Categories</span>
+      <button class="sheet__close" onclick="AG.closeSheet('merge-demo')" aria-label="Close">✕</button>
+    </div>
+    <div class="sheet__body">
+      <div style="text-align:center; padding:var(--sp-4) 0;">
+        <div style="width:56px; height:56px; border-radius:50%; background:var(--warning-light); color:var(--warning); display:flex; align-items:center; justify-content:center; margin:0 auto var(--sp-4);">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg>
+        </div>
+        <div style="font-size:15px; font-weight:600; color:var(--text-primary); margin-bottom:var(--sp-2);">
+          Merge &ldquo;Dining Out&rdquo; into &ldquo;Food &amp; Dining&rdquo;?
+        </div>
+        <div style="font-size:13px; color:var(--text-secondary); line-height:1.6;">
+          This will re-tag <strong style="color:var(--text-primary);">12 transactions</strong> from Dining Out to Food &amp; Dining. This action cannot be undone.
+        </div>
+      </div>
+    </div>
+    <div class="sheet__footer">
+      <button class="btn btn--ghost" onclick="AG.closeSheet('merge-demo')">Cancel</button>
+      <button class="btn btn--primary" onclick="AG.closeSheet('merge-demo');AG.showToast('Dining Out merged into Food & Dining · 12 transactions re-tagged', 'success')">Merge</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       ADD SUB-CATEGORY SHEET
+  ═══════════════════════════════════════════ -->
+  <div class="sheet-backdrop" id="add-subcat-backdrop"></div>
+  <div class="sheet" id="add-subcat">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <span class="sheet__title">Add Sub-category</span>
+      <button class="sheet__close" onclick="AG.closeSheet('add-subcat')" aria-label="Close">✕</button>
+    </div>
+    <div class="sheet__body">
+      <div class="form-group">
+        <label class="form-label">Sub-category Name</label>
+        <input class="form-input" type="text" placeholder="e.g. Streaming Subscriptions">
+      </div>
+      <button class="btn btn--primary btn--full" style="margin-top:var(--sp-4);" onclick="AG.closeSheet('add-subcat');AG.showToast('Sub-category added', 'success')">Save</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       ADD CATEGORY SHEET
+  ═══════════════════════════════════════════ -->
+  <div class="sheet-backdrop" id="add-category-backdrop"></div>
+  <div class="sheet" id="add-category">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <span class="sheet__title">Add Category</span>
+      <button class="sheet__close" onclick="AG.closeSheet('add-category')" aria-label="Close">✕</button>
+    </div>
+    <div class="sheet__body">
+      <div class="form-group">
+        <label class="form-label">Category Name</label>
+        <input class="form-input" type="text" placeholder="e.g. Shopping">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Icon</label>
+        <input class="form-input" type="text" placeholder="Pick an emoji, e.g. 🛍️" maxlength="4">
+      </div>
+      <button class="btn btn--primary btn--full" style="margin-top:var(--sp-4);" onclick="AG.closeSheet('add-category');AG.showToast('Category added', 'success')">Save</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="../investments/index.html" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="index.html" class="nav-tab active" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    AG.initBottomNav('profile');
+  });
+</script>
+</body>
+</html>
