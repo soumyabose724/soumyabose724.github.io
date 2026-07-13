@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Atal Pension Yojana</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .scheme-hero-label { font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-secondary); margin-bottom:var(--sp-2); }
+    .scheme-hero-amount { font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums; font-size:30px; font-weight:700; line-height:1.1; }
+    .scheme-hero-sub { font-size:12px; color:var(--text-secondary); margin-top:var(--sp-3); }
+    .scheme-hero-sub strong { color:var(--text-primary); font-weight:600; }
+
+    .slab-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-top:var(--sp-3); }
+    .slab-btn { height:44px; border-radius:var(--r-md); background:var(--surface-raised); border:1.5px solid var(--border); font-size:12px; font-weight:700; color:var(--text-secondary); cursor:pointer; transition:background var(--dur-fast), color var(--dur-fast), border-color var(--dur-fast); }
+    .slab-btn.active { background:var(--grad-primary); color:#fff; border-color:transparent; }
+
+    .scheme-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-xl); padding:var(--sp-4) var(--sp-5); margin-top:var(--sp-3); }
+    .scheme-card__row { display:flex; justify-content:space-between; align-items:center; padding:6px 0; font-size:13px; }
+    .scheme-card__row + .scheme-card__row { border-top:1px solid var(--border); }
+    .scheme-card__row span:first-child { color:var(--text-secondary); }
+    .scheme-card__row span:last-child { font-family:'JetBrains Mono',monospace; font-weight:600; color:var(--text-primary); }
+
+    .not-applicable-banner {
+      display:flex; gap:var(--sp-3); align-items:flex-start;
+      background:var(--warning-light); border:1px solid rgba(245,158,11,.32);
+      border-radius:var(--r-lg); padding:var(--sp-4); margin-bottom:var(--sp-5);
+    }
+    .not-applicable-banner__icon { color:var(--warning); flex-shrink:0; }
+    .not-applicable-banner__text { font-size:12.5px; color:var(--text-secondary); line-height:1.55; }
+    .not-applicable-banner__text strong { color:var(--text-primary); }
+
+    .attribution-pill { display:inline-flex; align-items:center; gap:6px; background:var(--surface-raised); border:1px solid var(--border); border-radius:var(--r-full); padding:4px 12px; font-size:12px; font-weight:600; color:var(--text-secondary); margin-bottom:var(--sp-4); }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <div class="demo-bar">
+    <span class="demo-bar__label">State</span>
+    <button class="demo-btn" data-state="na">Not Applicable (Vikas)</button>
+    <button class="demo-btn" data-state="household">Household Help — Preview</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Atal Pension Yojana</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <div class="page-content" id="page-content">
+
+    <!-- ── Not Applicable (default) ── -->
+    <div id="view-na">
+      <div class="empty-state">
+        <div class="empty-state__icon">🧑‍💼</div>
+        <div class="empty-state__title">Not Applicable to You</div>
+        <div class="empty-state__body">
+          Atal Pension Yojana (APY) is a guaranteed-pension scheme designed for workers in the <strong>unorganized sector</strong> without formal employer-backed retirement cover. As a salaried employee with EPF and NPS already in place, Vikas is not eligible to newly enrol in APY.
+        </div>
+        <div class="form-helper" style="max-width:280px; margin:0 auto;">Toggle the demo state above to see how ArthaGrid would track an APY account for an eligible household member instead.</div>
+      </div>
+    </div>
+
+    <!-- ── Household Help preview ── -->
+    <div id="view-household" style="display:none;">
+
+      <div class="not-applicable-banner">
+        <svg class="not-applicable-banner__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div class="not-applicable-banner__text">
+          <strong>Illustrative only — not part of Vikas's net worth.</strong> This account belongs to Meena Devi, domestic help employed by the Sharma household. Vikas helped set it up and tracks it here for reference; it is excluded from all portfolio and net-worth totals.
+        </div>
+      </div>
+
+      <span class="attribution-pill">👤 Meena Devi · Age 38 · Domestic help</span>
+
+      <div class="glass-card glass-card--hero">
+        <div class="scheme-hero-label">Guaranteed Monthly Pension (from age 60)</div>
+        <div class="scheme-hero-amount gradient-text" id="hero-pension">₹2,000/mo</div>
+        <div class="scheme-hero-sub">
+          <strong>22 years</strong> to eligibility · Contributing <strong id="hero-contrib">₹126/mo</strong>
+        </div>
+      </div>
+
+      <div class="section-title" style="margin-top:var(--sp-5);">Choose Guaranteed Pension Slab</div>
+      <div class="slab-grid" id="slab-grid">
+        <button class="slab-btn" data-slab="1000" onclick="pickSlab(1000)">₹1,000</button>
+        <button class="slab-btn active" data-slab="2000" onclick="pickSlab(2000)">₹2,000</button>
+        <button class="slab-btn" data-slab="3000" onclick="pickSlab(3000)">₹3,000</button>
+        <button class="slab-btn" data-slab="4000" onclick="pickSlab(4000)">₹4,000</button>
+        <button class="slab-btn" data-slab="5000" onclick="pickSlab(5000)">₹5,000</button>
+      </div>
+
+      <div class="scheme-card">
+        <div class="scheme-card__row"><span>Current age</span><span>38 years</span></div>
+        <div class="scheme-card__row"><span>Joining age</span><span>38 years</span></div>
+        <div class="scheme-card__row"><span>Contribution required</span><span id="row-contrib">₹126/month</span></div>
+        <div class="scheme-card__row"><span>Contributes until</span><span>Age 60 (22 years)</span></div>
+        <div class="scheme-card__row"><span>Co-contribution (Govt, if eligible)</span><span style="color:var(--text-muted);">Not applicable (post-2015 joiner)</span></div>
+      </div>
+
+      <div class="util-bar-wrap" style="margin-top:var(--sp-4);">
+        <div class="util-label-row">
+          <span class="util-label">Years contributed</span>
+          <span class="util-pct util-pct--safe">0 of 22 years</span>
+        </div>
+        <div class="progress-bar progress-bar--thick"><div class="progress-bar__fill" style="width:2%;"></div></div>
+      </div>
+
+      <div class="not-applicable-banner" style="background:var(--info-light); border-color:rgba(59,130,246,.24); margin-top:var(--sp-5); margin-bottom:0;">
+        <svg class="not-applicable-banner__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--info);"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <div class="not-applicable-banner__text">
+          On death of the subscriber, the spouse can continue contributions or receive the pension/corpus. On death of both, the accumulated corpus (up to age 60) is paid to the nominee.
+        </div>
+      </div>
+
+    </div><!-- /view-household -->
+
+  </div><!-- /page-content -->
+
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+
+  /* Approximate monthly contribution table for joining age 38 (illustrative, per PFRDA APY chart) */
+  const CONTRIB = { 1000: 63, 2000: 126, 3000: 182, 4000: 246, 5000: 297 };
+
+  function pickSlab(v) {
+    document.querySelectorAll('.slab-btn').forEach(b => b.classList.toggle('active', Number(b.dataset.slab) === v));
+    document.getElementById('hero-pension').textContent = AG.formatINR(v * 100) + '/mo';
+    document.getElementById('hero-contrib').textContent = '₹' + CONTRIB[v] + '/mo';
+    document.getElementById('row-contrib').textContent = '₹' + CONTRIB[v] + '/month';
+  }
+
+  AG.initDemoBar({
+    na: () => {
+      document.getElementById('view-na').style.display = '';
+      document.getElementById('view-household').style.display = 'none';
+    },
+    household: () => {
+      document.getElementById('view-na').style.display = 'none';
+      document.getElementById('view-household').style.display = '';
+    },
+  });
+</script>
+</body>
+</html>

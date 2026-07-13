@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — US Stocks</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .stat-row { display: flex; gap: var(--sp-3); margin-top: var(--sp-4); }
+    .stat-col { flex: 1; min-width: 0; }
+    .stat-col__label { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px; }
+    .stat-col__value { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-size: 17px; font-weight: 700; color: var(--text-primary); }
+
+    .pl-split-row {
+      display: flex; justify-content: space-between; gap: var(--sp-2);
+      margin-top: var(--sp-3); padding-top: var(--sp-3);
+      border-top: 1px solid var(--glass-border);
+    }
+    .pl-split-col { flex: 1; min-width: 0; }
+    .pl-split-col:last-child { text-align: right; }
+    .pl-split-col__label { font-size: 10.5px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 3px; }
+    .pl-split-col__value { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-size: 14px; font-weight: 700; }
+
+    .holding-card { margin-top: var(--sp-3); }
+    .holding-card .card-header { margin-bottom: var(--sp-3); }
+    .holding-ticker-badge {
+      font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700;
+      color: var(--text-muted); letter-spacing: .03em;
+    }
+    .fx-caption {
+      font-size: 11.5px; color: var(--text-muted); margin-top: var(--sp-2);
+      line-height: 1.5; background: var(--surface-raised); border-radius: var(--r-md);
+      padding: var(--sp-2) var(--sp-3);
+    }
+    .fx-caption strong { color: var(--text-secondary); font-weight: 600; }
+
+    .callout-note { font-size: 12.5px; line-height: 1.6; color: var(--text-secondary); margin-top: var(--sp-3); }
+    .callout-note strong { color: var(--text-primary); }
+
+    .related-link-card {
+      display: flex; align-items: center; gap: var(--sp-3);
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: var(--sp-4);
+      margin-top: var(--sp-3); text-decoration: none;
+      transition: background var(--dur-fast), box-shadow var(--dur-fast);
+    }
+    .related-link-card:hover { background: var(--primary-xlight); box-shadow: var(--sh-sm); }
+    .related-link-card__title { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    .related-link-card__sub { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- DEMO BAR -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">State</span>
+    <button class="demo-btn active" data-state="populated">US Stock Holdings</button>
+    <button class="demo-btn" data-state="empty">No US Stocks</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">US Stocks</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- PAGE CONTENT -->
+  <div class="page-content" id="page-content">
+
+    <div id="view-populated">
+
+      <!-- Hero: combined US stock portfolio -->
+      <div class="glass-card glass-card--hero">
+        <div class="loans-hero-label" style="font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-secondary); margin-bottom:var(--sp-2);">US Stock Portfolio Value</div>
+        <div class="amount-text amount-text--display gradient-text">₹16,32,884</div>
+        <div class="t-caption text-muted mt-1">$19,555.50 · converted at current FX ₹83.50/USD (12 Jul 2026)</div>
+        <div class="stat-row">
+          <div class="stat-col">
+            <div class="stat-col__label">Invested (Cost Basis)</div>
+            <div class="stat-col__value">₹14,70,614</div>
+          </div>
+          <div class="stat-col">
+            <div class="stat-col__label">Total P&amp;L</div>
+            <div class="stat-col__value" style="color:var(--success);">+₹1,62,270</div>
+          </div>
+          <div class="stat-col">
+            <div class="stat-col__label">Return</div>
+            <div class="stat-col__value" style="color:var(--success);">+11.0%</div>
+          </div>
+        </div>
+        <div class="pl-split-row">
+          <div class="pl-split-col">
+            <div class="pl-split-col__label">Price Gain</div>
+            <div class="pl-split-col__value" style="color:var(--success);">+₹1,49,261</div>
+          </div>
+          <div class="pl-split-col">
+            <div class="pl-split-col__label">FX Gain / Loss</div>
+            <div class="pl-split-col__value" style="color:var(--success);">+₹13,010</div>
+          </div>
+        </div>
+        <div class="loans-hero-footer" style="margin-top:var(--sp-4); padding-top:var(--sp-3); border-top:1px solid var(--glass-border); display:flex; align-items:center; gap:var(--sp-2); font-size:12px; color:var(--text-muted);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+          </svg>
+          <span>Held via Vested — US-investing platform linked to an Indian broker</span>
+        </div>
+      </div>
+
+      <div class="section-title" style="margin-top:var(--sp-5);">Holdings (3)</div>
+
+      <!-- AAPL -->
+      <div class="surface-card holding-card">
+        <div class="card-header">
+          <div class="card-icon card-icon--info">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"/><path d="M10 2c1 .5 2 2 2 5"/></svg>
+          </div>
+          <div style="flex:1; min-width:0;">
+            <div class="card-title">Apple Inc.</div>
+            <div class="holding-ticker-badge">NASDAQ: AAPL · 40 shares</div>
+          </div>
+          <span class="delta delta--pos">+15.7%</span>
+        </div>
+        <div class="fx-caption">
+          Bought 15 Jan 2025: <strong>$7,400.00</strong> at <strong>₹82.10/USD</strong> = <strong>₹6,07,540</strong> (FX snapshot at purchase — never recomputed)
+        </div>
+        <div class="fx-caption" style="margin-top:var(--sp-2);">
+          Now: 40 sh × $210.50 = <strong>$8,420.00</strong> at <strong>₹83.50/USD</strong> = <strong>₹7,03,070</strong>
+        </div>
+        <div class="pl-split-row">
+          <div class="pl-split-col">
+            <div class="pl-split-col__label">Price Gain</div>
+            <div class="pl-split-col__value" style="color:var(--success);">+₹83,742</div>
+          </div>
+          <div class="pl-split-col" style="text-align:center;">
+            <div class="pl-split-col__label">FX Gain</div>
+            <div class="pl-split-col__value" style="color:var(--success);">+₹11,788</div>
+          </div>
+          <div class="pl-split-col">
+            <div class="pl-split-col__label">Total P&amp;L</div>
+            <div class="pl-split-col__value" style="color:var(--success);">+₹95,530</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MSFT -->
+      <div class="surface-card holding-card">
+        <div class="card-header">
+          <div class="card-icon card-icon--info">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/></svg>
+          </div>
+          <div style="flex:1; min-width:0;">
+            <div class="card-title">Microsoft Corp.</div>
+            <div class="holding-ticker-badge">NASDAQ: MSFT · 15 shares</div>
+          </div>
+          <span class="delta delta--pos">+7.86%</span>
+        </div>
+        <div class="fx-caption">
+          Bought 03 Aug 2025: <strong>$6,225.00</strong> at <strong>₹83.05/USD</strong> = <strong>₹5,16,986</strong> (FX snapshot at purchase — never recomputed)
+        </div>
+        <div class="fx-caption" style="margin-top:var(--sp-2);">
+          Now: 15 sh × $445.20 = <strong>$6,678.00</strong> at <strong>₹83.50/USD</strong> = <strong>₹5,57,613</strong>
+        </div>
+        <div class="pl-split-row">
+          <div class="pl-split-col">
+            <div class="pl-split-col__label">Price Gain</div>
+            <div class="pl-split-col__value" style="color:var(--success);">+₹37,622</div>
+          </div>
+          <div class="pl-split-col" style="text-align:center;">
+            <div class="pl-split-col__label">FX Gain</div>
+            <div class="pl-split-col__value" style="color:var(--success);">+₹3,005</div>
+          </div>
+          <div class="pl-split-col">
+            <div class="pl-split-col__label">Total P&amp;L</div>
+            <div class="pl-split-col__value" style="color:var(--success);">+₹40,627</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GOOGL -->
+      <div class="surface-card holding-card">
+        <div class="card-header">
+          <div class="card-icon card-icon--info">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18"/><path d="M12 8a4 4 0 0 0 0 8"/></svg>
+          </div>
+          <div style="flex:1; min-width:0;">
+            <div class="card-title">Alphabet Inc. (Class A)</div>
+            <div class="holding-ticker-badge">NASDAQ: GOOGL · 25 shares</div>
+          </div>
+          <span class="delta delta--pos">+7.55%</span>
+        </div>
+        <div class="fx-caption">
+          Bought 10 Mar 2026: <strong>$4,125.00</strong> at <strong>₹83.90/USD</strong> = <strong>₹3,46,088</strong> (FX snapshot at purchase — never recomputed)
+        </div>
+        <div class="fx-caption" style="margin-top:var(--sp-2);">
+          Now: 25 sh × $178.30 = <strong>$4,457.50</strong> at <strong>₹83.50/USD</strong> = <strong>₹3,72,201</strong>
+        </div>
+        <div class="pl-split-row">
+          <div class="pl-split-col">
+            <div class="pl-split-col__label">Price Gain</div>
+            <div class="pl-split-col__value" style="color:var(--success);">+₹27,897</div>
+          </div>
+          <div class="pl-split-col" style="text-align:center;">
+            <div class="pl-split-col__label">FX Gain/Loss</div>
+            <div class="pl-split-col__value" style="color:var(--error);">−₹1,783</div>
+          </div>
+          <div class="pl-split-col">
+            <div class="pl-split-col__label">Total P&amp;L</div>
+            <div class="pl-split-col__value" style="color:var(--success);">+₹26,113</div>
+          </div>
+        </div>
+        <div class="form-helper mt-2">The rupee strengthened between purchase (₹83.90/USD) and today (₹83.50/USD) — this shows up as a small FX loss even though the stock price itself gained.</div>
+      </div>
+
+      <!-- Compliance notes -->
+      <div class="section" style="margin-top:var(--sp-6);">
+        <div class="section-title">Compliance Notes</div>
+
+        <div class="glass-card glass-card--warning glass-card--compact">
+          <div class="card-header" style="margin-bottom:var(--sp-2);">
+            <div class="card-icon card-icon--warning">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <div class="card-title">TCS on LRS Remittance</div>
+          </div>
+          <div class="callout-note">
+            Remittances under the Liberalised Remittance Scheme (LRS) to fund investments like these attract <strong>20% TCS</strong> once your <strong>aggregate LRS remittances this FY cross ₹7,00,000</strong> (rates as of the rules in effect for FY 2026-27). This purchase's remittance is already reflected in your running total —
+            <a href="tcs.html" style="color:var(--primary); font-weight:600;">see the TCS Monitor</a>.
+          </div>
+        </div>
+
+        <div class="glass-card glass-card--compact mt-3">
+          <div class="card-header" style="margin-bottom:var(--sp-2);">
+            <div class="card-icon card-icon--info">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </div>
+            <div class="card-title">Foreign Tax Credit (Dividends)</div>
+          </div>
+          <div class="callout-note">
+            US dividends on these holdings are subject to <strong>25% withholding tax</strong> at source under the India–US DTAA (reduced from the standard 30% via treaty benefit). This withheld tax can be claimed as a <strong>Foreign Tax Credit</strong> against your Indian tax liability by filing <strong>Form 67</strong> before your ITR due date.
+          </div>
+        </div>
+      </div>
+
+      <a href="lrs.html" class="related-link-card">
+        <div class="compare-link-card__icon" style="width:40px; height:40px; border-radius:var(--r-lg); flex-shrink:0; background:var(--grad-primary); color:#fff; display:flex; align-items:center; justify-content:center;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z"/></svg>
+        </div>
+        <div style="flex:1; min-width:0;">
+          <div class="related-link-card__title">LRS Compliance Engine</div>
+          <div class="related-link-card__sub">Track your USD 2,50,000 annual remittance limit</div>
+        </div>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted); flex-shrink:0;">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </a>
+
+    </div><!-- /view-populated -->
+
+    <!-- Empty state -->
+    <div id="view-empty" style="display:none;">
+      <div class="empty-state">
+        <div class="empty-state__icon">📈</div>
+        <div class="empty-state__title">No US Stocks Tracked</div>
+        <div class="empty-state__body">Add holdings from a US-investing platform (like Vested or INDmoney) to track price gain and FX gain/loss separately, plus LRS &amp; TCS impact.</div>
+        <a href="index.html" class="btn btn--primary" style="min-width:180px; text-decoration:none;">+ Add US Stock Holding</a>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ── Theme toggle (matches other pages) ── */
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+
+  /* ── Demo bar: Populated / Empty ── */
+  AG.initDemoBar({
+    populated: () => {
+      document.getElementById('view-populated').style.display = '';
+      document.getElementById('view-empty').style.display = 'none';
+    },
+    empty: () => {
+      document.getElementById('view-populated').style.display = 'none';
+      document.getElementById('view-empty').style.display = '';
+    },
+  });
+</script>
+</body>
+</html>

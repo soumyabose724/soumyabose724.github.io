@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Investments</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* ── Hero ── */
+    .inv-hero-label { font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-secondary); margin-bottom:var(--sp-2); }
+    .inv-hero-amount { font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums; font-size:34px; font-weight:700; line-height:1.1; }
+    .inv-hero-sub { font-size:12px; color:var(--text-secondary); margin-top:var(--sp-3); }
+    .inv-hero-sub strong { color:var(--text-primary); font-weight:600; }
+    .inv-hero-footer {
+      display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:var(--sp-2);
+      margin-top:var(--sp-4); padding-top:var(--sp-3); border-top:1px solid var(--glass-border);
+    }
+
+    /* ── Donut allocation ── */
+    .donut-card { margin-top:var(--sp-5); }
+    .donut-wrap { display:flex; align-items:center; gap:var(--sp-5); }
+    .donut {
+      width:120px; height:120px; border-radius:50%; flex-shrink:0;
+      background: conic-gradient(
+        var(--primary) 0% 56.0%,
+        #3B82F6 56.0% 83.0%,
+        #F59E0B 83.0% 92.4%,
+        #CA8A04 92.4% 96.5%,
+        #C4B5FD 96.5% 100%
+      );
+      position:relative;
+      box-shadow:var(--sh-sm);
+    }
+    .donut::after {
+      content:''; position:absolute; inset:18px; border-radius:50%;
+      background:var(--surface);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .donut-center {
+      position:absolute; inset:18px; border-radius:50%; background:var(--surface);
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+    }
+    .donut-center__pct { font-size:15px; font-weight:700; color:var(--text-primary); font-family:'JetBrains Mono',monospace; }
+    .donut-center__label { font-size:8.5px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.04em; }
+    .donut-legend { flex:1; min-width:0; display:flex; flex-direction:column; gap:8px; }
+    .donut-legend__row { display:flex; align-items:center; gap:8px; font-size:12.5px; }
+    .donut-legend__dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+    .donut-legend__name { flex:1; min-width:0; color:var(--text-primary); font-weight:500; }
+    .donut-legend__pct { color:var(--text-secondary); font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:600; flex-shrink:0; }
+    .donut-legend__amt { font-size:10.5px; color:var(--text-muted); font-family:'JetBrains Mono',monospace; margin-left:17px; margin-top:-6px; }
+
+    /* ── Asset class tile row ── */
+    .asset-tile-row {
+      display:flex; gap:var(--sp-3); overflow-x:auto; padding:2px 2px 8px;
+      -webkit-overflow-scrolling:touch; scrollbar-width:none;
+    }
+    .asset-tile-row::-webkit-scrollbar { display:none; }
+    .asset-tile {
+      flex-shrink:0; width:100px; background:var(--surface); border:1px solid var(--border);
+      border-radius:var(--r-lg); padding:var(--sp-3) var(--sp-2); text-decoration:none;
+      color:var(--text-primary); text-align:center;
+      transition:background var(--dur-fast), box-shadow var(--dur-fast), transform var(--dur-fast);
+    }
+    .asset-tile:hover { background:var(--primary-xlight); box-shadow:var(--sh-sm); }
+    .asset-tile:active { transform:scale(0.97); }
+    .asset-tile__icon {
+      width:34px; height:34px; border-radius:var(--r-md); background:var(--grad-primary); color:#fff;
+      display:flex; align-items:center; justify-content:center; margin:0 auto var(--sp-2);
+    }
+    .asset-tile--muted .asset-tile__icon { background:var(--surface-raised); color:var(--text-muted); }
+    .asset-tile--muted { opacity:.86; }
+    .asset-tile__label { font-size:11px; font-weight:600; line-height:1.25; }
+
+    .tile-group-label {
+      font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+      color:var(--text-muted); margin:var(--sp-5) 0 var(--sp-2);
+    }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">State</span>
+    <button class="demo-btn active" data-state="populated">Populated</button>
+    <button class="demo-btn" data-state="empty">Empty (No Investments)</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="../dashboard/index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Investments</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content" id="page-content">
+
+    <!-- ── Populated State ── -->
+    <div id="view-populated">
+
+      <!-- Hero: Portfolio Value -->
+      <div class="glass-card glass-card--hero">
+        <div class="inv-hero-label">Total Portfolio Value</div>
+        <div class="inv-hero-amount gradient-text" id="hero-total">₹3,71,100</div>
+        <div class="inv-hero-sub">
+          Invested <strong id="hero-invested">₹3,04,000</strong> · Gain <strong style="color:var(--success);" id="hero-gain">+₹67,100</strong>
+        </div>
+        <div class="inv-hero-footer">
+          <span class="delta delta--pos" style="font-size:13px; padding:4px 10px;">▲ +18.4% XIRR</span>
+          <span style="font-size:11px; color:var(--text-muted);">FY 2026-27 · as of Jun 2026</span>
+        </div>
+      </div>
+
+      <!-- Allocation Donut -->
+      <div class="glass-card glass-card--compact donut-card">
+        <div class="card-header" style="margin-bottom:var(--sp-3);">
+          <div class="card-title">Asset Allocation</div>
+        </div>
+        <div class="donut-wrap">
+          <div class="donut">
+            <div class="donut-center">
+              <span class="donut-center__pct">₹3.71L</span>
+              <span class="donut-center__label">Total</span>
+            </div>
+          </div>
+          <div class="donut-legend">
+            <div>
+              <div class="donut-legend__row">
+                <span class="donut-legend__dot" style="background:var(--primary);"></span>
+                <span class="donut-legend__name">Mutual Funds</span>
+                <span class="donut-legend__pct">56.0%</span>
+              </div>
+              <div class="donut-legend__amt">₹2,08,000</div>
+            </div>
+            <div>
+              <div class="donut-legend__row">
+                <span class="donut-legend__dot" style="background:#3B82F6;"></span>
+                <span class="donut-legend__name">Equities</span>
+                <span class="donut-legend__pct">27.0%</span>
+              </div>
+              <div class="donut-legend__amt">₹1,00,000</div>
+            </div>
+            <div>
+              <div class="donut-legend__row">
+                <span class="donut-legend__dot" style="background:#F59E0B;"></span>
+                <span class="donut-legend__name">Fixed Income</span>
+                <span class="donut-legend__pct">9.4%</span>
+              </div>
+              <div class="donut-legend__amt">₹35,000</div>
+            </div>
+            <div>
+              <div class="donut-legend__row">
+                <span class="donut-legend__dot" style="background:#CA8A04;"></span>
+                <span class="donut-legend__name">Gold</span>
+                <span class="donut-legend__pct">4.1%</span>
+              </div>
+              <div class="donut-legend__amt">₹15,100</div>
+            </div>
+            <div>
+              <div class="donut-legend__row">
+                <span class="donut-legend__dot" style="background:#C4B5FD;"></span>
+                <span class="donut-legend__name">Other</span>
+                <span class="donut-legend__pct">3.5%</span>
+              </div>
+              <div class="donut-legend__amt">₹13,000</div>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:11px; color:var(--text-muted); margin-top:var(--sp-4); line-height:1.5;">
+          "Fixed Income" covers EPF/PPF-style holdings tracked in linked modules. "Gold" is your Gold ETF; "Other" combines your Nifty ETF and ELSS lumpsum. See <a href="etf.html" style="color:var(--primary); font-weight:500;">ETF</a> and <a href="tax-saving.html" style="color:var(--primary); font-weight:500;">Tax-Saving</a> for detail.
+        </div>
+      </div>
+
+      <!-- Your Holdings -->
+      <div class="tile-group-label">Your Holdings</div>
+      <div class="asset-tile-row">
+        <a href="mutual-funds.html" class="asset-tile">
+          <div class="asset-tile__icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+          </div>
+          <div class="asset-tile__label">Mutual Funds</div>
+        </a>
+        <a href="equities.html" class="asset-tile">
+          <div class="asset-tile__icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+          </div>
+          <div class="asset-tile__label">Equities</div>
+        </a>
+        <a href="sips.html" class="asset-tile">
+          <div class="asset-tile__icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+          </div>
+          <div class="asset-tile__label">SIPs</div>
+        </a>
+        <a href="nps.html" class="asset-tile">
+          <div class="asset-tile__icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2"/><path d="M12 12v3"/></svg>
+          </div>
+          <div class="asset-tile__label">Provident Funds · NPS</div>
+        </a>
+        <a href="capital-gains.html" class="asset-tile">
+          <div class="asset-tile__icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
+          </div>
+          <div class="asset-tile__label">Capital Gains</div>
+        </a>
+        <a href="performance.html" class="asset-tile">
+          <div class="asset-tile__icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div class="asset-tile__label">Performance</div>
+        </a>
+        <a href="tax-saving.html" class="asset-tile">
+          <div class="asset-tile__icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div class="asset-tile__label">Tax-Saving</div>
+        </a>
+        <a href="etf.html" class="asset-tile">
+          <div class="asset-tile__icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+          </div>
+          <div class="asset-tile__label">ETF</div>
+        </a>
+      </div>
+
+      <!-- Other Asset Classes (tracked elsewhere) -->
+      <div class="tile-group-label">More Asset Classes</div>
+      <div class="asset-tile-row">
+        <a href="sgb.html" class="asset-tile asset-tile--muted">
+          <div class="asset-tile__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M8 9.5h5.5a2 2 0 1 1 0 4H9"/></svg></div>
+          <div class="asset-tile__label">Sovereign Gold Bonds</div>
+        </a>
+        <a href="gold.html" class="asset-tile asset-tile--muted">
+          <div class="asset-tile__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="12" rx="1"/><path d="M7 8V6a5 5 0 0 1 10 0v2"/></svg></div>
+          <div class="asset-tile__label">Physical Gold</div>
+        </a>
+        <a href="land.html" class="asset-tile asset-tile--muted">
+          <div class="asset-tile__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg></div>
+          <div class="asset-tile__label">Land &amp; Property</div>
+        </a>
+        <a href="reits.html" class="asset-tile asset-tile--muted">
+          <div class="asset-tile__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="12" y2="16"/></svg></div>
+          <div class="asset-tile__label">REITs</div>
+        </a>
+        <a href="ncds.html" class="asset-tile asset-tile--muted">
+          <div class="asset-tile__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+          <div class="asset-tile__label">NCDs</div>
+        </a>
+        <a href="p2p.html" class="asset-tile asset-tile--muted">
+          <div class="asset-tile__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          <div class="asset-tile__label">P2P Lending</div>
+        </a>
+        <a href="bonds-54ec.html" class="asset-tile asset-tile--muted">
+          <div class="asset-tile__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/></svg></div>
+          <div class="asset-tile__label">54EC Bonds</div>
+        </a>
+        <a href="tax-free-bonds.html" class="asset-tile asset-tile--muted">
+          <div class="asset-tile__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10v4M18 10v4"/></svg></div>
+          <div class="asset-tile__label">Tax-Free Bonds</div>
+        </a>
+        <a href="kvp.html" class="asset-tile asset-tile--muted">
+          <div class="asset-tile__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2z"/><path d="M2 10h20"/></svg></div>
+          <div class="asset-tile__label">Kisan Vikas Patra</div>
+        </a>
+        <a href="mssc.html" class="asset-tile asset-tile--muted">
+          <div class="asset-tile__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2z"/><circle cx="12" cy="13" r="3"/></svg></div>
+          <div class="asset-tile__label">Mahila Samman Savings</div>
+        </a>
+        <a href="pomis.html" class="asset-tile asset-tile--muted">
+          <div class="asset-tile__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v4H4z"/><path d="M4 8v12h16V8"/><path d="M9 12h6"/></svg></div>
+          <div class="asset-tile__label">POMIS</div>
+        </a>
+        <a href="nsc.html" class="asset-tile asset-tile--muted">
+          <div class="asset-tile__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M9 15l2 2 4-4"/></svg></div>
+          <div class="asset-tile__label">NSC</div>
+        </a>
+        <a href="scss.html" class="asset-tile asset-tile--muted">
+          <div class="asset-tile__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg></div>
+          <div class="asset-tile__label">Senior Citizen Savings</div>
+        </a>
+        <a href="ssy.html" class="asset-tile asset-tile--muted">
+          <div class="asset-tile__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M5 21v-1a7 7 0 0 1 14 0v1"/></svg></div>
+          <div class="asset-tile__label">Sukanya Samriddhi</div>
+        </a>
+        <a href="potd.html" class="asset-tile asset-tile--muted">
+          <div class="asset-tile__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+          <div class="asset-tile__label">Post Office TD</div>
+        </a>
+        <a href="lic.html" class="asset-tile asset-tile--muted">
+          <div class="asset-tile__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+          <div class="asset-tile__label">LIC / Endowment</div>
+        </a>
+        <a href="us-stocks.html" class="asset-tile asset-tile--muted">
+          <div class="asset-tile__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20z"/></svg></div>
+          <div class="asset-tile__label">US Stocks</div>
+        </a>
+        <a href="esop.html" class="asset-tile asset-tile--muted">
+          <div class="asset-tile__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2"/></svg></div>
+          <div class="asset-tile__label">ESOPs</div>
+        </a>
+        <a href="rsu.html" class="asset-tile asset-tile--muted">
+          <div class="asset-tile__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/></svg></div>
+          <div class="asset-tile__label">RSUs</div>
+        </a>
+        <a href="lrs.html" class="asset-tile asset-tile--muted">
+          <div class="asset-tile__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+          <div class="asset-tile__label">LRS Remittances</div>
+        </a>
+        <a href="tcs.html" class="asset-tile asset-tile--muted">
+          <div class="asset-tile__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
+          <div class="asset-tile__label">TCS on Foreign Spend</div>
+        </a>
+      </div>
+
+    </div><!-- /view-populated -->
+
+    <!-- ── Empty State ── -->
+    <div id="view-empty" style="display:none;">
+      <div class="empty-state">
+        <div class="empty-state__icon">📈</div>
+        <div class="empty-state__title">No Investments Yet</div>
+        <div class="empty-state__body">Add your mutual funds, stocks, SIPs, or other holdings to track your portfolio's value and returns in one place.</div>
+        <a href="../setup-wizard/step-07-investments.html" class="btn btn--primary" style="min-width:180px; text-decoration:none;">
+          + Add Your First Investment
+        </a>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV — Invest active
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="index.html" class="nav-tab active" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ── Theme toggle (matches other pages) ── */
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+
+  /* ── Demo bar: Populated / Empty ── */
+  AG.initDemoBar({
+    populated: () => {
+      document.getElementById('view-populated').style.display = '';
+      document.getElementById('view-empty').style.display = 'none';
+    },
+    empty: () => {
+      document.getElementById('view-populated').style.display = 'none';
+      document.getElementById('view-empty').style.display = '';
+    },
+  });
+</script>
+</body>
+</html>

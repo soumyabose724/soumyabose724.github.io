@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Trade Journal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* ── Hero stat row ── */
+    .tj-hero-stats {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-3);
+      margin-top: var(--sp-4); padding-top: var(--sp-4);
+      border-top: 1px solid var(--glass-border);
+    }
+    .tj-hero-stat__label {
+      font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: 4px;
+    }
+    .tj-hero-stat__value {
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+      font-size: 17px; font-weight: 700; color: var(--text-primary);
+    }
+    .tj-hero-stat__value--pos { color: var(--success); }
+    .tj-hero-stat__value--neg { color: var(--error); }
+
+    .tj-analytics-link {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 600; color: var(--primary);
+    }
+
+    /* ── Segment filter strip ── */
+    .segment-strip {
+      display: flex; gap: var(--sp-2); overflow-x: auto; padding: 2px 2px var(--sp-2);
+      margin-bottom: var(--sp-4); scrollbar-width: none;
+    }
+    .segment-strip::-webkit-scrollbar { display: none; }
+    .segment-chip {
+      flex-shrink: 0; height: 32px; padding: 0 var(--sp-4); border-radius: var(--r-full);
+      font-size: 12px; font-weight: 600; color: var(--text-secondary);
+      background: var(--surface-raised); border: 1.5px solid var(--border);
+      cursor: pointer; white-space: nowrap;
+      transition: background var(--dur-fast), border-color var(--dur-fast), color var(--dur-fast);
+    }
+    .segment-chip.active { background: var(--grad-primary); border-color: transparent; color: #fff; }
+
+    /* ── VCP / status chips on trade rows ── */
+    .chip--vcp { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
+
+    /* ── Open Risk mini-panel ── */
+    .open-risk-card { margin-bottom: var(--sp-5); }
+    .open-risk-stats {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-3);
+      margin-bottom: var(--sp-3);
+    }
+    .or-stat__label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; font-weight: 700; margin-bottom: 2px; }
+    .or-stat__value { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-size: 15px; font-weight: 700; }
+    .or-position-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: var(--sp-2) 0; border-top: 1px solid var(--border);
+      font-size: 12px;
+    }
+    .or-position-row__name { font-weight: 600; color: var(--text-primary); }
+    .or-position-row__meta { color: var(--text-muted); font-size: 11px; }
+    .or-position-row__pnl { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-weight: 700; }
+
+    /* ── Empty state extra ── */
+    .empty-state__title { font-size: 18px; font-weight: 700; margin-bottom: var(--sp-2); }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">State</span>
+    <button class="demo-btn" data-state="populated">Populated</button>
+    <button class="demo-btn" data-state="empty">Empty (No Trades)</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="../dashboard/index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Trade Journal</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <a href="analytics.html" class="icon-btn" aria-label="Trade Analytics" title="Analytics" style="text-decoration:none;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+      </a>
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content" id="page-content">
+
+    <!-- ── Populated State ── -->
+    <div id="view-populated">
+
+      <!-- Hero: FY summary -->
+      <div class="glass-card glass-card--hero">
+        <div class="loans-hero-label" style="font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-secondary); margin-bottom:var(--sp-2);">Total Realized P&amp;L · FY 2026-27</div>
+        <div class="amount-text amount-text--display gradient-text" id="hero-pnl">₹1,10,300</div>
+        <div class="tj-analytics-link" style="margin-top:var(--sp-2);">
+          Hobbyist trading book — separate from your long-term Investments
+        </div>
+        <div class="tj-hero-stats">
+          <div>
+            <div class="tj-hero-stat__label">Win Rate</div>
+            <div class="tj-hero-stat__value" id="hero-winrate">66.7%</div>
+          </div>
+          <div>
+            <div class="tj-hero-stat__label">Closed Trades</div>
+            <div class="tj-hero-stat__value" id="hero-closed">12</div>
+          </div>
+          <div>
+            <div class="tj-hero-stat__label">Open Positions</div>
+            <div class="tj-hero-stat__value" id="hero-open">2</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Open Risk mini-panel -->
+      <div class="glass-card glass-card--compact glass-card--warning open-risk-card" style="margin-top:var(--sp-5);">
+        <div class="card-header" style="margin-bottom:var(--sp-3);">
+          <div class="card-icon card-icon--warning">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <div class="card-title">Open Risk</div>
+        </div>
+        <div class="open-risk-stats">
+          <div>
+            <div class="or-stat__label">Open Positions</div>
+            <div class="or-stat__value" id="or-count">2</div>
+          </div>
+          <div>
+            <div class="or-stat__label">Capital Deployed</div>
+            <div class="or-stat__value" id="or-deployed">₹75,150</div>
+          </div>
+          <div>
+            <div class="or-stat__label">Unrealized P&amp;L</div>
+            <div class="or-stat__value util-pct--danger" id="or-unrealized" style="color:var(--error);">-₹400</div>
+          </div>
+        </div>
+        <div id="or-positions"><!-- rendered by JS --></div>
+      </div>
+
+      <!-- Segment filter strip -->
+      <div class="segment-strip" id="segment-strip">
+        <button class="segment-chip active" data-segment="all">All</button>
+        <button class="segment-chip" data-segment="equity">Equity Delivery</button>
+        <button class="segment-chip" data-segment="intraday">Intraday</button>
+        <button class="segment-chip" data-segment="fno">F&amp;O</button>
+        <button class="segment-chip" data-segment="commodity">Commodity</button>
+        <button class="segment-chip" data-segment="crypto">Crypto</button>
+      </div>
+
+      <div class="section-title">Trades</div>
+      <div id="trade-list"><!-- rendered by JS --></div>
+
+    </div><!-- /view-populated -->
+
+    <!-- ── Empty State ── -->
+    <div id="view-empty" style="display:none;">
+      <div class="empty-state">
+        <div class="empty-state__icon">📈</div>
+        <div class="empty-state__title">No Trades Logged Yet</div>
+        <div class="empty-state__body">Track your intraday, F&amp;O, delivery, commodity and crypto trades here — separate from your long-term SIPs and investments — to see your win rate and P&amp;L discipline over time.</div>
+        <button class="btn btn--primary" style="min-width:200px;" onclick="location.href='entry.html'">
+          + Log Your First Trade
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- FAB -->
+  <a href="entry.html" class="fab" aria-label="Log new trade" id="fab-add">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </a>
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV — none active (no Trade Journal tab)
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ── Theme toggle (matches other pages) ── */
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+
+  /* ── Vikas Sharma's Trade Journal — FY 2026-27 (paise) ── */
+  const ICONS = {
+    equity:    '<path d="M3 3v18h18"/><path d="M7 15l4-4 4 3 5-7"/>',
+    intraday:  '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+    fno:       '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
+    commodity: '<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>',
+    crypto:    '<circle cx="12" cy="12" r="10"/><path d="M9.5 8.5h3.2a1.8 1.8 0 0 1 0 3.6H9.5m0-3.6v7.2m0-3.6h3.6a1.8 1.8 0 0 1 0 3.6H9.5m0-7.2V7m0 9v1.5"/>',
+  };
+  const SEGMENT_LABELS = {
+    equity: 'Equity Delivery', intraday: 'Intraday', fno: 'F&O', commodity: 'Commodity', crypto: 'Crypto',
+  };
+  const SEGMENT_HREF = {
+    equity: 'equity-delivery.html', intraday: 'intraday.html', fno: 'fno.html', commodity: 'commodity.html', crypto: 'crypto.html',
+  };
+
+  const TRADES = [
+    { id:'t1', segment:'equity', instrument:'RELIANCE', entryDate:'2026-04-08', exitDate:'2026-04-26', pnlPaise:300000, vcp:true, open:false },
+    { id:'t2', segment:'equity', instrument:'INFY', entryDate:'2026-04-14', exitDate:'2026-05-29', pnlPaise:-180000, vcp:false, open:false },
+    { id:'t3', segment:'commodity', instrument:'Gold Mini', entryDate:'2026-05-04', exitDate:'2026-05-11', pnlPaise:620000, vcp:false, open:false },
+    { id:'t4', segment:'intraday', instrument:'TATAMOTORS', entryDate:'2026-05-15', exitDate:'2026-05-15', pnlPaise:215000, vcp:false, open:false },
+    { id:'t5', segment:'fno', instrument:'NIFTY 24800 CE', entryDate:'2026-05-18', exitDate:'2026-05-27', pnlPaise:450000, vcp:false, open:false },
+    { id:'t6', segment:'equity', instrument:'HDFCBANK', entryDate:'2026-06-02', exitDate:'2026-06-12', pnlPaise:280000, vcp:true, open:false },
+    { id:'t7', segment:'intraday', instrument:'ADANIENT', entryDate:'2026-06-05', exitDate:'2026-06-05', pnlPaise:-250000, vcp:false, open:false },
+    { id:'t8', segment:'commodity', instrument:'Crude Oil Mini', entryDate:'2026-06-08', exitDate:'2026-06-10', pnlPaise:-310000, vcp:false, open:false },
+    { id:'t9', segment:'intraday', instrument:'SBIN', entryDate:'2026-06-15', exitDate:'2026-06-15', pnlPaise:430000, vcp:true, open:false },
+    { id:'t10', segment:'crypto', instrument:'BTC · CoinDCX', entryDate:'2026-06-01', exitDate:'2026-06-24', pnlPaise:9000000, vcp:false, open:false },
+    { id:'t11', segment:'fno', instrument:'NIFTY FUT', entryDate:'2026-07-02', exitDate:'2026-07-09', pnlPaise:1125000, vcp:false, open:false },
+    { id:'t12', segment:'crypto', instrument:'ETH · WazirX', entryDate:'2026-06-20', exitDate:'2026-07-08', pnlPaise:-650000, vcp:false, open:false },
+    { id:'t13', segment:'equity', instrument:'TCS', entryDate:'2026-07-06', exitDate:null, pnlPaise:-100000, vcp:false, open:true },
+    { id:'t14', segment:'fno', instrument:'BANKNIFTY 51000 PE', entryDate:'2026-07-10', exitDate:null, pnlPaise:60000, vcp:false, open:true },
+  ];
+
+  function fmtDate(d) {
+    if (!d) return null;
+    const dt = new Date(d + 'T00:00:00');
+    return dt.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+  }
+
+  function tradeRowHtml(t) {
+    const closed = !t.open;
+    const pnlClass = t.pnlPaise >= 0 ? 'list-row__amount--income' : 'list-row__amount--expense';
+    const iconClass = t.open ? 'list-row__icon--info' : (t.pnlPaise >= 0 ? '' : '');
+    return `
+      <a href="${SEGMENT_HREF[t.segment]}" class="list-row">
+        <div class="list-row__icon ${iconClass}">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${ICONS[t.segment]}</svg>
+        </div>
+        <div class="list-row__info">
+          <div class="list-row__label">
+            ${t.instrument}
+            ${t.vcp ? '<span class="chip chip--vcp">VCP</span>' : ''}
+            ${t.open ? '<span class="chip chip--info">Open</span>' : ''}
+          </div>
+          <div class="list-row__meta">${SEGMENT_LABELS[t.segment]} · ${fmtDate(t.entryDate)} → ${closed ? fmtDate(t.exitDate) : 'Open position'}</div>
+        </div>
+        <div class="list-row__amount-row">
+          <div class="list-row__amount ${pnlClass}">${AG.formatINR(t.pnlPaise, { showSign: true })}</div>
+          <div class="list-row__amount-caption">${closed ? 'Realized P&L' : 'Unrealized P&L'}</div>
+        </div>
+      </a>`;
+  }
+
+  let currentSegment = 'all';
+  function renderTrades() {
+    const filtered = currentSegment === 'all' ? TRADES : TRADES.filter(t => t.segment === currentSegment);
+    const sorted = filtered.slice().sort((a, b) => (b.exitDate || b.entryDate).localeCompare(a.exitDate || a.entryDate));
+    document.getElementById('trade-list').innerHTML = sorted.map(tradeRowHtml).join('') ||
+      '<div class="empty-state" style="padding:var(--sp-8) var(--sp-4);"><div class="empty-state__body">No trades in this segment yet.</div></div>';
+  }
+
+  document.querySelectorAll('.segment-chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.segment-chip').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentSegment = btn.dataset.segment;
+      renderTrades();
+    });
+  });
+
+  /* ── Hero + Open Risk figures ── */
+  const closedTrades = TRADES.filter(t => !t.open);
+  const openTrades = TRADES.filter(t => t.open);
+  const totalRealized = closedTrades.reduce((s, t) => s + t.pnlPaise, 0);
+  const wins = closedTrades.filter(t => t.pnlPaise > 0).length;
+  const winRate = (wins / closedTrades.length) * 100;
+
+  document.getElementById('hero-pnl').textContent = AG.formatINR(totalRealized);
+  document.getElementById('hero-winrate').textContent = winRate.toFixed(1) + '%';
+  document.getElementById('hero-closed').textContent = String(closedTrades.length);
+  document.getElementById('hero-open').textContent = String(openTrades.length);
+
+  /* Open Risk panel — cost basis + unrealized P&L for the 2 open positions */
+  const OPEN_DETAIL = {
+    t13: { costPaise: 7200000, label: 'TCS · Equity Delivery', metaLabel: 'Entered 6 Jul · Qty 20 @ ₹3,600' },
+    t14: { costPaise: 315000, label: 'BANKNIFTY 51000 PE · F&O', metaLabel: 'Entered 10 Jul · Lot 15 @ ₹210 premium' },
+  };
+  const totalDeployed = openTrades.reduce((s, t) => s + OPEN_DETAIL[t.id].costPaise, 0);
+  const totalUnrealized = openTrades.reduce((s, t) => s + t.pnlPaise, 0);
+  document.getElementById('or-count').textContent = String(openTrades.length);
+  document.getElementById('or-deployed').textContent = AG.formatINR(totalDeployed);
+  const orUnrealizedEl = document.getElementById('or-unrealized');
+  orUnrealizedEl.textContent = AG.formatINR(totalUnrealized, { showSign: true });
+  orUnrealizedEl.style.color = totalUnrealized >= 0 ? 'var(--success)' : 'var(--error)';
+
+  document.getElementById('or-positions').innerHTML = openTrades.map(t => {
+    const d = OPEN_DETAIL[t.id];
+    const pnlColor = t.pnlPaise >= 0 ? 'var(--success)' : 'var(--error)';
+    return `
+      <div class="or-position-row">
+        <div>
+          <div class="or-position-row__name">${d.label}</div>
+          <div class="or-position-row__meta">${d.metaLabel}</div>
+        </div>
+        <div class="or-position-row__pnl" style="color:${pnlColor};">${AG.formatINR(t.pnlPaise, { showSign: true })}</div>
+      </div>`;
+  }).join('');
+
+  renderTrades();
+
+  /* ── Demo bar: Populated / Empty ── */
+  AG.initDemoBar({
+    populated: () => {
+      document.getElementById('view-populated').style.display = '';
+      document.getElementById('view-empty').style.display = 'none';
+      document.getElementById('fab-add').style.display = '';
+    },
+    empty: () => {
+      document.getElementById('view-populated').style.display = 'none';
+      document.getElementById('view-empty').style.display = '';
+      document.getElementById('fab-add').style.display = 'none';
+    },
+  });
+</script>
+</body>
+</html>

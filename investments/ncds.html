@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — NCDs &amp; Corporate Bonds</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .stat-row { display: flex; gap: var(--sp-3); margin-top: var(--sp-4); }
+    .stat-col { flex: 1; min-width: 0; }
+    .stat-col__label { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px; }
+    .stat-col__value { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-size: 17px; font-weight: 700; color: var(--text-primary); }
+
+    .ncd-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: var(--sp-4); margin-bottom: var(--sp-3); }
+    .ncd-card__top { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--sp-3); }
+    .ncd-card__name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    .ncd-card__issuer { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+    .ncd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); }
+    .ncd-grid__item { background: var(--surface-raised); border-radius: var(--r-md); padding: var(--sp-2) var(--sp-3); }
+    .ncd-grid__label { font-size: 10.5px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .03em; margin-bottom: 3px; }
+    .ncd-grid__value { font-size: 13.5px; font-weight: 600; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+
+    .rating-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: var(--r-full); background: var(--success-light); color: var(--success); border: 1px solid var(--success); }
+
+    .callout-note { font-size: 12.5px; line-height: 1.6; color: var(--text-secondary); margin-top: var(--sp-3); }
+    .callout-note strong { color: var(--text-primary); }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- DEMO BAR -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">State</span>
+    <button class="demo-btn active" data-state="populated">2 Holdings</button>
+    <button class="demo-btn" data-state="empty">No NCDs</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">NCDs &amp; Corporate Bonds</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- PAGE CONTENT -->
+  <div class="page-content" id="page-content">
+
+    <div id="view-populated">
+
+      <!-- Hero -->
+      <div class="glass-card glass-card--hero">
+        <div class="loans-hero-label" style="font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-secondary); margin-bottom:var(--sp-2);">Face Value Held</div>
+        <div class="amount-text amount-text--display gradient-text">₹5,00,000</div>
+        <div class="stat-row">
+          <div class="stat-col">
+            <div class="stat-col__label">Weighted Coupon</div>
+            <div class="stat-col__value">9.43% p.a.</div>
+          </div>
+          <div class="stat-col">
+            <div class="stat-col__label">Accrued Interest</div>
+            <div class="stat-col__value">₹18,540</div>
+          </div>
+          <div class="stat-col">
+            <div class="stat-col__label">Holdings</div>
+            <div class="stat-col__value">2</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Holding 1 -->
+      <div class="section">
+        <div class="section-title">Holdings</div>
+        <div class="ncd-card">
+          <div class="ncd-card__top">
+            <div>
+              <div class="ncd-card__name">Muthoot Finance NCD — Series VII</div>
+              <div class="ncd-card__issuer">Secured, Redeemable NCD · ISIN INE414G07AN2</div>
+            </div>
+            <span class="rating-chip">AA+ (CRISIL)</span>
+          </div>
+          <div class="ncd-grid">
+            <div class="ncd-grid__item">
+              <div class="ncd-grid__label">Face Value</div>
+              <div class="ncd-grid__value">₹3,00,000</div>
+            </div>
+            <div class="ncd-grid__item">
+              <div class="ncd-grid__label">Coupon Rate</div>
+              <div class="ncd-grid__value">9.25% p.a. (annual)</div>
+            </div>
+            <div class="ncd-grid__item">
+              <div class="ncd-grid__label">Accrued Interest to Date</div>
+              <div class="ncd-grid__value">₹11,100</div>
+            </div>
+            <div class="ncd-grid__item">
+              <div class="ncd-grid__label">YTM (at current price)</div>
+              <div class="ncd-grid__value">9.38%</div>
+            </div>
+            <div class="ncd-grid__item">
+              <div class="ncd-grid__label">Maturity Date</div>
+              <div class="ncd-grid__value">18 Sep 2028</div>
+            </div>
+            <div class="ncd-grid__item">
+              <div class="ncd-grid__label">Listing</div>
+              <div class="ncd-grid__value" style="font-family:'Inter',sans-serif; font-weight:500;">BSE (Debt segment)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Holding 2 -->
+        <div class="ncd-card">
+          <div class="ncd-card__top">
+            <div>
+              <div class="ncd-card__name">Shriram Finance NCD — Tranche IV</div>
+              <div class="ncd-card__issuer">Secured, Redeemable NCD · ISIN INE721A07RG5</div>
+            </div>
+            <span class="rating-chip">AA+ (ICRA)</span>
+          </div>
+          <div class="ncd-grid">
+            <div class="ncd-grid__item">
+              <div class="ncd-grid__label">Face Value</div>
+              <div class="ncd-grid__value">₹2,00,000</div>
+            </div>
+            <div class="ncd-grid__item">
+              <div class="ncd-grid__label">Coupon Rate</div>
+              <div class="ncd-grid__value">9.70% p.a. (annual)</div>
+            </div>
+            <div class="ncd-grid__item">
+              <div class="ncd-grid__label">Accrued Interest to Date</div>
+              <div class="ncd-grid__value">₹7,440</div>
+            </div>
+            <div class="ncd-grid__item">
+              <div class="ncd-grid__label">YTM (at current price)</div>
+              <div class="ncd-grid__value">9.52%</div>
+            </div>
+            <div class="ncd-grid__item">
+              <div class="ncd-grid__label">Maturity Date</div>
+              <div class="ncd-grid__value">2 Mar 2027</div>
+            </div>
+            <div class="ncd-grid__item">
+              <div class="ncd-grid__label">Listing</div>
+              <div class="ncd-grid__value" style="font-family:'Inter',sans-serif; font-weight:500;">NSE (Debt segment)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="glass-card glass-card--compact">
+          <div class="callout-note" style="margin-top:0;">
+            <strong>Risk note:</strong> NCD interest is <strong>fully taxable at your slab rate</strong> (no indexation, unlike listed bond capital gains held &gt;12 months which get LTCG treatment). "AA+" is a strong investment-grade rating, but NCDs from NBFCs carry issuer credit risk — a downgrade or default (as seen historically with a few NBFC issuers) can impair both interest and principal. Liquidity on the exchange is thin; selling before maturity may mean a wider bid-ask spread than the quoted YTM implies.
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /view-populated -->
+
+    <!-- Empty state -->
+    <div id="view-empty" style="display:none;">
+      <div class="empty-state">
+        <div class="empty-state__icon">📄</div>
+        <div class="empty-state__title">No NCDs Tracked</div>
+        <div class="empty-state__body">Non-Convertible Debentures pay a fixed coupon and are listed for trading. Add a holding to track accrued interest and YTM here.</div>
+        <a href="index.html" class="btn btn--primary" style="min-width:180px; text-decoration:none;">+ Add NCD Holding</a>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ── Theme toggle (matches other pages) ── */
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+
+  /* ── Demo bar: Populated / Empty ── */
+  AG.initDemoBar({
+    populated: () => {
+      document.getElementById('view-populated').style.display = '';
+      document.getElementById('view-empty').style.display = 'none';
+    },
+    empty: () => {
+      document.getElementById('view-populated').style.display = 'none';
+      document.getElementById('view-empty').style.display = '';
+    },
+  });
+</script>
+</body>
+</html>

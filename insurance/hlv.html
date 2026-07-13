@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Human Life Value Calculator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* ── Formula strip ── */
+    .formula-strip {
+      font-family:'JetBrains Mono',monospace; font-size:12px; line-height:1.7;
+      background:var(--surface-raised); border:1px dashed var(--border-strong);
+      border-radius:var(--r-md); padding:var(--sp-3) var(--sp-4); color:var(--text-secondary);
+      overflow-x:auto; white-space:nowrap;
+    }
+    .formula-strip strong { color:var(--primary); }
+
+    /* ── Worked steps ── */
+    .step-card {
+      background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg);
+      padding:var(--sp-4); margin-top:var(--sp-3);
+      display:flex; align-items:flex-start; gap:var(--sp-3);
+      animation: item-in var(--dur-med) var(--ease-out) both;
+    }
+    .step-num {
+      width:26px; height:26px; border-radius:50%; background:var(--primary-light); color:var(--primary);
+      display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;
+      flex-shrink:0; margin-top:1px;
+    }
+    .step-body { flex:1; min-width:0; }
+    .step-title { font-size:13px; font-weight:600; color:var(--text-primary); margin-bottom:6px; }
+    .step-line-row {
+      display:flex; justify-content:space-between; align-items:baseline; gap:var(--sp-3);
+      font-size:13px; color:var(--text-secondary); padding:3px 0;
+    }
+    .step-line-row .val { font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums; color:var(--text-primary); font-weight:600; }
+    .step-line-row.op .val { color:var(--error); }
+    .step-line-row.add .val { color:var(--warning); }
+    .step-total-row {
+      display:flex; justify-content:space-between; align-items:baseline;
+      border-top:1px solid var(--border); margin-top:6px; padding-top:8px;
+      font-size:14px; font-weight:700; color:var(--text-primary);
+    }
+    .step-total-row .val { font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums; font-size:16px; color:var(--primary); }
+
+    /* ── Compare bars ── */
+    .compare-wrap { margin-top:var(--sp-3); }
+    .compare-row { margin-bottom:var(--sp-4); }
+    .compare-label-row { display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px; }
+    .compare-label-row .name { color:var(--text-secondary); font-weight:600; }
+    .compare-label-row .amt { font-family:'JetBrains Mono',monospace; font-weight:700; color:var(--text-primary); }
+    .compare-bar-track { height:14px; background:var(--surface-raised); border-radius:var(--r-full); overflow:hidden; }
+    .compare-bar-fill { height:100%; border-radius:var(--r-full); transition:width .6s var(--ease-out); }
+    .compare-bar-fill--required { background:var(--grad-primary); }
+    .compare-bar-fill--current  { background:linear-gradient(135deg,#D97706,#F59E0B); }
+
+    /* ── Gap callout ── */
+    .gap-callout {
+      margin-top:var(--sp-5); border-radius:var(--r-xl); padding:var(--sp-5);
+      background:var(--grad-danger); color:#fff; box-shadow:0 8px 24px rgba(233,69,96,.28);
+    }
+    .gap-callout--surplus { background:var(--grad-success); box-shadow:0 8px 24px rgba(34,197,94,.28); }
+    .gap-callout__label { font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:rgba(255,255,255,.8); }
+    .gap-callout__amount { font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums; font-size:30px; font-weight:700; margin:4px 0 8px; }
+    .gap-callout__note { font-size:13px; color:rgba(255,255,255,.9); line-height:1.5; }
+    .gap-callout__cta {
+      display:inline-flex; align-items:center; gap:6px; margin-top:var(--sp-4);
+      background:rgba(255,255,255,.18); border:1.5px solid rgba(255,255,255,.32);
+      color:#fff; padding:0 var(--sp-4); height:38px; border-radius:var(--r-full);
+      font-size:13px; font-weight:600; text-decoration:none;
+    }
+
+    /* ── Assumptions ── */
+    .assumption-row { display:flex; justify-content:space-between; font-size:13px; padding:6px 0; border-bottom:1px solid var(--border); }
+    .assumption-row:last-child { border-bottom:none; }
+    .assumption-row .k { color:var(--text-secondary); }
+    .assumption-row .v { font-weight:600; color:var(--text-primary); }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">Vikas Sharma</span>
+    <button class="demo-btn active" data-state="fy2627">FY 2026-27</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Coverage Gap (HLV)</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content" id="page-content">
+
+    <!-- Intro -->
+    <div class="glass-card glass-card--hero">
+      <div class="card-header" style="margin-bottom:var(--sp-3);">
+        <div class="card-icon card-icon--info">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        </div>
+        <div class="card-title">Human Life Value (HLV)</div>
+      </div>
+      <div style="font-size:13px; color:var(--text-secondary); line-height:1.6;">
+        HLV estimates the term cover your family would need to replace your income, clear your outstanding debts, and stay afloat — after using up what you already hold in liquid assets.
+      </div>
+      <div class="formula-strip mt-4">
+        HLV = (<strong>Annual Income</strong> × <strong>Replacement Years</strong>) + <strong>Liabilities</strong> − <strong>Liquid Assets</strong>
+      </div>
+    </div>
+
+    <!-- Assumptions -->
+    <div class="section">
+      <div class="section-title">Inputs Used</div>
+      <div class="surface-card">
+        <div class="assumption-row"><span class="k">Monthly salary</span><span class="v">₹1,20,000</span></div>
+        <div class="assumption-row"><span class="k">Current age</span><span class="v">38 years</span></div>
+        <div class="assumption-row"><span class="k">Planned retirement age</span><span class="v">60 years</span></div>
+        <div class="assumption-row"><span class="k">Years to retirement (replacement years)</span><span class="v">22 years</span></div>
+      </div>
+    </div>
+
+    <!-- Step 1: Income replacement -->
+    <div class="section-title mt-6">Worked Out, Step By Step</div>
+
+    <div class="step-card">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Income replacement component</div>
+        <div class="step-line-row"><span>Annual income (₹1,20,000 × 12)</span><span class="val">₹14,40,000</span></div>
+        <div class="step-line-row"><span>× Replacement years</span><span class="val">22</span></div>
+        <div class="step-total-row"><span>Subtotal</span><span class="val">₹3,16,80,000</span></div>
+      </div>
+    </div>
+
+    <!-- Step 2: + Liabilities -->
+    <div class="step-card">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Add outstanding liabilities</div>
+        <div class="step-line-row add"><span>HDFC Home Loan (outstanding)</span><span class="val">+ ₹37,86,000</span></div>
+        <div class="step-line-row add"><span>ICICI Car Loan (outstanding)</span><span class="val">+ ₹6,01,000</span></div>
+        <div class="step-total-row"><span>Running total</span><span class="val">₹3,60,67,000</span></div>
+      </div>
+    </div>
+
+    <!-- Step 3: - Liquid assets -->
+    <div class="step-card">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Subtract liquid assets already available</div>
+        <div class="step-line-row op"><span>Bank account balances</span><span class="val">− ₹12,16,386</span></div>
+        <div class="step-line-row op"><span>Mutual fund / investment value</span><span class="val">− ₹3,71,100</span></div>
+        <div class="step-total-row"><span>Required Human Life Value</span><span class="val">₹3,44,79,514</span></div>
+      </div>
+    </div>
+
+    <!-- Compare -->
+    <div class="section">
+      <div class="section-title">Required Cover vs What You Have</div>
+      <div class="surface-card">
+        <div class="compare-wrap">
+          <div class="compare-row">
+            <div class="compare-label-row"><span class="name">Required HLV</span><span class="amt">₹3,44,79,514</span></div>
+            <div class="compare-bar-track"><div class="compare-bar-fill compare-bar-fill--required" style="width:100%;"></div></div>
+          </div>
+          <div class="compare-row" style="margin-bottom:0;">
+            <div class="compare-label-row"><span class="name">Current term cover (HDFC Life)</span><span class="amt">₹1,00,00,000</span></div>
+            <div class="compare-bar-track"><div class="compare-bar-fill compare-bar-fill--current" id="current-cover-bar" style="width:29%;"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gap callout -->
+    <div class="gap-callout" id="gap-callout">
+      <div class="gap-callout__label">Coverage Gap</div>
+      <div class="gap-callout__amount">₹2,44,79,514</div>
+      <div class="gap-callout__note">
+        ₹3,44,79,514 required − ₹1,00,00,000 current cover = <strong>₹2,44,79,514 GAP</strong>.
+        Vikas's family would fall short by this amount if he passed away today — his ₹1 Cr term policy covers only about 29% of the family's real income-replacement need.
+      </div>
+      <a href="policy-detail.html" class="gap-callout__cta">
+        Review Term Policy
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+    </div>
+
+    <div style="margin-top:var(--sp-6); text-align:center;">
+      <a href="index.html" style="font-size:13px; color:var(--primary); font-weight:600; text-decoration:none;">← Back to Insurance</a>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV — none active (no Insurance tab)
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ── Theme toggle (matches other pages) ── */
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+</script>
+</body>
+</html>

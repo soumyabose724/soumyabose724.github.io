@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Goals &amp; Runway</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* ── Goal card ── */
+    .goal-card { text-decoration: none; color: inherit; display: block; margin-bottom: var(--sp-3); }
+    .goal-card__top {
+      display: flex; align-items: center; gap: var(--sp-3); margin-bottom: var(--sp-4);
+    }
+    .goal-card__icon {
+      width: 44px; height: 44px; border-radius: var(--r-lg); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 22px;
+    }
+    .goal-card__info { flex: 1; min-width: 0; }
+    .goal-card__name {
+      font-size: 15px; font-weight: 600; color: var(--text-primary);
+      display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap;
+    }
+    .goal-card__sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+    .goal-card__amounts {
+      display: flex; justify-content: space-between; align-items: baseline;
+      margin-bottom: var(--sp-2);
+    }
+    .goal-card__current {
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+      font-size: 20px; font-weight: 700; color: var(--text-primary);
+    }
+    .goal-card__target {
+      font-size: 13px; color: var(--text-muted); font-weight: 500;
+    }
+    .goal-card__footer {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: var(--sp-3); padding-top: var(--sp-3);
+      border-top: 1px solid var(--border);
+    }
+    .goal-card__sip-label { font-size: 11px; color: var(--text-muted); }
+    .goal-card__sip-val {
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+      font-size: 14px; font-weight: 700; color: var(--primary);
+    }
+    .goal-card__arrow { color: var(--text-muted); flex-shrink: 0; }
+
+    /* ── Runway summary card ── */
+    .runway-card {
+      text-decoration: none; color: inherit; display: block;
+      background: linear-gradient(135deg, #0B7A70 0%, #0D9488 55%, #0EA5A0 100%);
+      border-radius: var(--r-xl);
+      box-shadow: 0 6px 28px rgba(13,148,136,.32);
+      padding: var(--sp-5);
+      position: relative; overflow: hidden;
+    }
+    .runway-card::before {
+      content: ''; position: absolute; top: -32px; right: -32px;
+      width: 110px; height: 110px; border-radius: 50%; background: rgba(255,255,255,.07);
+    }
+    .runway-card__label {
+      font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+      color: rgba(255,255,255,.7); margin-bottom: var(--sp-2);
+    }
+    .runway-card__months {
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+      font-size: 30px; font-weight: 700; color: #fff; line-height: 1.1;
+    }
+    .runway-card__months span { font-size: 14px; font-weight: 500; color: rgba(255,255,255,.7); }
+    .runway-card__tiers { display: flex; gap: var(--sp-4); margin-top: var(--sp-4); }
+    .runway-tier { flex: 1; }
+    .runway-tier__label {
+      font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+      color: rgba(255,255,255,.6); margin-bottom: var(--sp-1);
+    }
+    .runway-tier__track { height: 6px; background: rgba(255,255,255,.2); border-radius: 99px; overflow: hidden; margin-bottom: 4px; }
+    .runway-tier__fill { height: 100%; background: rgba(255,255,255,.88); border-radius: 99px; }
+    .runway-tier__pct { font-size: 11px; color: rgba(255,255,255,.75); font-weight: 600; }
+    .runway-card__cta {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: var(--sp-4); padding-top: var(--sp-3);
+      border-top: 1px solid rgba(255,255,255,.18);
+      font-size: 13px; font-weight: 600; color: #fff;
+    }
+
+    .section-hint { font-size: 12px; color: var(--text-muted); margin: -4px 0 var(--sp-3); }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">State</span>
+    <button class="demo-btn" data-state="populated">Populated</button>
+    <button class="demo-btn" data-state="empty">First Use</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="../dashboard/index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Goals &amp; Runway</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content" id="page-content">
+
+    <!-- ── Populated State ── -->
+    <div id="view-populated">
+
+      <!-- Emergency Fund Runway summary -->
+      <div class="section-title">Emergency Fund</div>
+      <a href="runway.html" class="runway-card">
+        <div class="runway-card__label">Coverage Available Today</div>
+        <div class="runway-card__months">1.5 <span>months of expenses</span></div>
+        <div class="runway-card__tiers">
+          <div class="runway-tier">
+            <div class="runway-tier__label">Tier 1 · Instant access</div>
+            <div class="runway-tier__track"><div class="runway-tier__fill" style="width:50%;"></div></div>
+            <div class="runway-tier__pct">50% of ₹2,98,050</div>
+          </div>
+          <div class="runway-tier">
+            <div class="runway-tier__label">Tier 2 · Sweep-FD</div>
+            <div class="runway-tier__track"><div class="runway-tier__fill" style="width:0%;"></div></div>
+            <div class="runway-tier__pct">0% of ₹11,92,200</div>
+          </div>
+        </div>
+        <div class="runway-card__cta">
+          <span>View Emergency Fund Tiers</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </a>
+
+      <div class="section-title" style="margin-top:var(--sp-6);">Your Goals</div>
+      <div class="section-hint">Tap a goal for the full Monte Carlo projection and glide path.</div>
+      <div id="goal-list"><!-- rendered by JS --></div>
+
+    </div><!-- /view-populated -->
+
+    <!-- ── Empty / First Use State ── -->
+    <div id="view-empty" style="display:none;">
+      <div class="empty-state">
+        <div class="empty-state__icon">🎯</div>
+        <div class="empty-state__title">No Goals Yet</div>
+        <div class="empty-state__body">Set a target for Child's Education, a Vacation, or a big purchase — ArthaGrid will work out the monthly SIP you need and simulate your odds of getting there.</div>
+        <button class="btn btn--primary" style="min-width:180px;" onclick="AG.showToast('Goal creation — coming soon','info')">+ Create Your First Goal</button>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ── Theme toggle (matches other pages) ── */
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+
+  /* ── Vikas Sharma's goals (paise) ── */
+  const GOALS = [
+    {
+      id: 'education', name: "Child's Education", icon: '🎓', iconBg: '#EDE9FE',
+      targetPaise: 250000000, targetLabel: 'by 2038 (Aarav, age 18)',
+      currentPaise: 42000000, requiredSipPaise: 850000,
+      status: 'on-track',
+    },
+    {
+      id: 'vacation', name: 'Vacation Fund', icon: '✈️', iconBg: '#FFE4E6',
+      targetPaise: 30000000, targetLabel: 'by Dec 2027',
+      currentPaise: 8600000, requiredSipPaise: 1250000,
+      status: 'at-risk',
+    },
+    {
+      id: 'car', name: 'Car Upgrade', icon: '🚗', iconBg: '#F1F5F9',
+      targetPaise: 90000000, targetLabel: 'by Jan 2030',
+      currentPaise: 18000000, requiredSipPaise: 1450000,
+      status: 'on-track',
+    },
+  ];
+
+  function goalCardHtml(g) {
+    const pct = Math.min(100, Math.round((g.currentPaise / g.targetPaise) * 1000) / 10);
+    const chip = g.status === 'on-track'
+      ? '<span class="chip chip--on-track">✓ ON TRACK</span>'
+      : '<span class="chip chip--at-risk">⚠ AT RISK</span>';
+    const fillClass = g.status === 'on-track' ? '' : 'progress-bar__fill--danger';
+    return `
+      <a href="detail.html?goal=${g.id}" class="glass-card goal-card">
+        <div class="goal-card__top">
+          <div class="goal-card__icon" style="background:${g.iconBg};">${g.icon}</div>
+          <div class="goal-card__info">
+            <div class="goal-card__name">${g.name} ${chip}</div>
+            <div class="goal-card__sub">Target ${AG.formatINR(g.targetPaise)} · ${g.targetLabel}</div>
+          </div>
+        </div>
+        <div class="goal-card__amounts">
+          <span class="goal-card__current">${AG.formatINR(g.currentPaise)}</span>
+          <span class="goal-card__target">of ${AG.formatINR(g.targetPaise)} (${pct}%)</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-bar__fill ${fillClass}" style="width:${pct}%;"></div>
+        </div>
+        <div class="goal-card__footer">
+          <div>
+            <div class="goal-card__sip-label">Required SIP to reach goal</div>
+            <div class="goal-card__sip-val">${AG.formatINR(g.requiredSipPaise)}/mo</div>
+          </div>
+          <svg class="goal-card__arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </a>`;
+  }
+
+  document.getElementById('goal-list').innerHTML = GOALS.map(goalCardHtml).join('');
+
+  /* ── Demo bar: Populated / First Use ── */
+  AG.initDemoBar({
+    populated: () => {
+      document.getElementById('view-populated').style.display = '';
+      document.getElementById('view-empty').style.display = 'none';
+    },
+    empty: () => {
+      document.getElementById('view-populated').style.display = 'none';
+      document.getElementById('view-empty').style.display = '';
+    },
+  });
+</script>
+</body>
+</html>

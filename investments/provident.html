@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — EPF, VPF &amp; PPF</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .scheme-hero-label { font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-secondary); margin-bottom:var(--sp-2); }
+    .scheme-hero-amount { font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums; font-size:32px; font-weight:700; line-height:1.1; }
+    .scheme-hero-sub { font-size:12px; color:var(--text-secondary); margin-top:var(--sp-3); }
+    .scheme-hero-sub strong { color:var(--text-primary); font-weight:600; }
+    .scheme-hero-footer { display:flex; align-items:center; gap:var(--sp-2); margin-top:var(--sp-4); padding-top:var(--sp-3); border-top:1px solid var(--glass-border); font-size:12px; color:var(--text-muted); }
+
+    .stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-3); margin-top:var(--sp-4); }
+    .stat-box { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg); padding:var(--sp-3) var(--sp-4); }
+    .stat-box__label { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.04em; margin-bottom:4px; }
+    .stat-box__value { font-family:'JetBrains Mono',monospace; font-size:16px; font-weight:700; color:var(--text-primary); }
+    .stat-box__meta { font-size:11px; color:var(--text-muted); margin-top:2px; }
+
+    .scheme-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-xl); padding:var(--sp-4) var(--sp-5); margin-top:var(--sp-3); }
+    .scheme-card__head { display:flex; align-items:center; gap:var(--sp-3); margin-bottom:var(--sp-3); }
+    .scheme-card__title { flex:1; font-size:15px; font-weight:700; color:var(--text-primary); }
+    .scheme-card__badge { font-size:10px; font-weight:700; letter-spacing:.04em; padding:2px 9px; border-radius:var(--r-full); background:var(--primary-light); color:var(--primary); text-transform:uppercase; }
+    .scheme-card__row { display:flex; justify-content:space-between; align-items:center; padding:6px 0; font-size:13px; }
+    .scheme-card__row + .scheme-card__row { border-top:1px solid var(--border); }
+    .scheme-card__row span:first-child { color:var(--text-secondary); }
+    .scheme-card__row span:last-child { font-family:'JetBrains Mono',monospace; font-weight:600; color:var(--text-primary); }
+
+    .info-card { display:flex; gap:var(--sp-3); background:var(--info-light); border:1px solid rgba(59,130,246,.24); border-radius:var(--r-lg); padding:var(--sp-4); margin-top:var(--sp-5); }
+    .info-card__icon { color:var(--info); flex-shrink:0; }
+    .info-card__text { font-size:12.5px; color:var(--text-secondary); line-height:1.55; }
+    .info-card__text strong { color:var(--text-primary); }
+    .eee-badge { display:inline-flex; align-items:center; gap:4px; background:var(--success-light); color:var(--success); border:1px solid var(--success); border-radius:var(--r-full); padding:2px 10px; font-size:11px; font-weight:700; letter-spacing:.03em; margin-left:6px; }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <div class="demo-bar">
+    <span class="demo-bar__label">State</span>
+    <button class="demo-btn" data-state="populated">Populated</button>
+    <button class="demo-btn" data-state="empty">Empty (Not Set Up)</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">EPF, VPF &amp; PPF</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <div class="page-content" id="page-content">
+
+    <!-- ── Populated State ── -->
+    <div id="view-populated">
+
+      <div class="glass-card glass-card--hero">
+        <div class="scheme-hero-label">Provident Fund Corpus (EPF + PPF)</div>
+        <div class="scheme-hero-amount gradient-text" id="hero-total">₹4,00,000</div>
+        <div class="scheme-hero-sub">
+          <strong>EPF ₹1,80,000</strong> · <strong>PPF ₹2,20,000</strong> · VPF not enabled
+        </div>
+        <div class="scheme-hero-footer">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 2v10l7 4"/>
+          </svg>
+          <span>All three are <strong style="color:var(--text-secondary);">EEE</strong> — contributions, growth and withdrawal are tax-exempt</span>
+        </div>
+      </div>
+
+      <!-- EPF -->
+      <div class="scheme-card">
+        <div class="scheme-card__head">
+          <div class="card-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a4 4 0 0 1 8 0v2"/></svg></div>
+          <div class="scheme-card__title">Employees' Provident Fund <span class="scheme-card__badge">Via Employer</span></div>
+        </div>
+        <div class="scheme-card__row"><span>Current balance</span><span>₹1,80,000</span></div>
+        <div class="scheme-card__row"><span>Current EPFO rate</span><span>8.25% p.a.</span></div>
+        <div class="scheme-card__row"><span>Basic pay (for EPF)</span><span>₹52,000/mo</span></div>
+        <div class="scheme-card__row"><span>Your contribution (12%)</span><span>₹6,240/mo</span></div>
+        <div class="scheme-card__row"><span>Employer contribution (3.67% to EPF)</span><span>₹1,908/mo</span></div>
+        <div class="scheme-card__row"><span>Employer → EPS (8.33%, pension)</span><span style="color:var(--text-muted);">₹4,332/mo</span></div>
+        <div class="form-helper" style="margin-top:var(--sp-2);">ⓘ The EPS portion funds your future EPS-95 pension and does not add to your withdrawable EPF corpus shown above.</div>
+      </div>
+
+      <!-- VPF toggle -->
+      <div class="scheme-card">
+        <div class="toggle-row" style="padding:0;">
+          <div>
+            <div class="toggle-label">Voluntary Provident Fund (VPF)</div>
+            <div class="toggle-sublabel" id="vpf-sub">Not enabled — top up beyond the mandatory 12% at the same EPF interest rate</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="vpf-toggle" onchange="toggleVpf()">
+            <span class="toggle-track"></span>
+            <span class="toggle-thumb"></span>
+          </label>
+        </div>
+        <div id="vpf-detail" style="display:none; margin-top:var(--sp-3); padding-top:var(--sp-3); border-top:1px solid var(--border);">
+          <div class="scheme-card__row"><span>Voluntary top-up</span><span>₹5,000/mo</span></div>
+          <div class="scheme-card__row"><span>Interest rate</span><span>8.25% p.a. (same as EPF)</span></div>
+          <div class="form-helper" style="margin-top:var(--sp-2);">ⓘ VPF can go up to 100% of basic + DA. It shares EPF's withdrawal rules and EEE tax status.</div>
+        </div>
+      </div>
+
+      <!-- PPF -->
+      <div class="scheme-card">
+        <div class="scheme-card__head">
+          <div class="card-icon card-icon--success"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+          <div class="scheme-card__title">Public Provident Fund<span class="eee-badge">EEE</span></div>
+        </div>
+        <div class="scheme-card__row"><span>Current balance</span><span>₹2,20,000</span></div>
+        <div class="scheme-card__row"><span>Current rate</span><span>7.1% p.a.</span></div>
+        <div class="scheme-card__row"><span>Opened</span><span>Apr 2023</span></div>
+        <div class="scheme-card__row"><span>Deposited this FY (2026-27)</span><span>₹40,000 / ₹1,50,000</span></div>
+        <div class="scheme-card__row"><span>Maturity</span><span>Mar 2038</span></div>
+
+        <div class="util-bar-wrap" style="margin-top:var(--sp-3);">
+          <div class="util-label-row">
+            <span class="util-label">15-year lock-in progress · Year 4 of 15</span>
+            <span class="util-pct util-pct--safe">20%</span>
+          </div>
+          <div class="progress-bar progress-bar--thick">
+            <div class="progress-bar__fill progress-bar__fill--success" style="width:20%;"></div>
+          </div>
+        </div>
+        <div class="form-helper" style="margin-top:var(--sp-3);">ⓘ Partial withdrawal allowed from Year 7. Loan against PPF allowed Years 3–6.</div>
+      </div>
+
+      <div class="info-card">
+        <svg class="info-card__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <div class="info-card__text">
+          <strong>Taxability — EEE (Exempt-Exempt-Exempt):</strong> Contributions to EPF/VPF/PPF qualify for 80C (within the combined ₹1,50,000 cap), interest earned is tax-free, and maturity/withdrawal proceeds are fully exempt — provided EPF withdrawal happens after 5 years of continuous service.
+        </div>
+      </div>
+
+    </div><!-- /view-populated -->
+
+    <!-- ── Empty State ── -->
+    <div id="view-empty" style="display:none;">
+      <div class="empty-state">
+        <div class="empty-state__icon">🏦</div>
+        <div class="empty-state__title">No Provident Fund Records Yet</div>
+        <div class="empty-state__body">Add your EPF (via employer), optional VPF top-up, or a self-opened PPF account to start tracking this retirement corpus.</div>
+        <button class="btn btn--primary" style="min-width:200px;" onclick="AG.showToast('Add EPF / PPF account — coming soon','info')">+ Add EPF / PPF Account</button>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+
+  function toggleVpf() {
+    const on = document.getElementById('vpf-toggle').checked;
+    document.getElementById('vpf-detail').style.display = on ? '' : 'none';
+    document.getElementById('vpf-sub').textContent = on
+      ? 'Enabled — ₹5,000/mo voluntary top-up at 8.25% p.a.'
+      : 'Not enabled — top up beyond the mandatory 12% at the same EPF interest rate';
+    AG.showToast(on ? 'VPF top-up enabled (demo)' : 'VPF top-up disabled', 'info');
+  }
+
+  AG.initDemoBar({
+    populated: () => {
+      document.getElementById('view-populated').style.display = '';
+      document.getElementById('view-empty').style.display = 'none';
+    },
+    empty: () => {
+      document.getElementById('view-populated').style.display = 'none';
+      document.getElementById('view-empty').style.display = '';
+    },
+  });
+</script>
+</body>
+</html>

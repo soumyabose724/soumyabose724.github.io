@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — P2P Lending</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .stat-row { display: flex; gap: var(--sp-3); margin-top: var(--sp-4); }
+    .stat-col { flex: 1; min-width: 0; }
+    .stat-col__label { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px; }
+    .stat-col__value { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-size: 17px; font-weight: 700; color: var(--text-primary); }
+
+    .detail-row { display: flex; justify-content: space-between; align-items: center; padding: var(--sp-3) 0; border-bottom: 1px solid var(--border); }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-row__label { font-size: 13px; color: var(--text-secondary); }
+    .detail-row__value { font-size: 13px; font-weight: 600; color: var(--text-primary); text-align: right; }
+    .detail-row__value.mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+
+    .status-stack-bar { display: flex; height: 14px; border-radius: var(--r-full); overflow: hidden; margin-top: var(--sp-3); }
+    .status-stack-bar__seg--current { background: var(--grad-success); }
+    .status-stack-bar__seg--delayed { background: linear-gradient(135deg,#D97706,#F59E0B); }
+    .status-stack-bar__seg--defaulted { background: var(--grad-danger); }
+    .status-legend { display: flex; flex-direction: column; gap: var(--sp-2); margin-top: var(--sp-3); }
+    .status-legend__row { display: flex; align-items: center; justify-content: space-between; font-size: 12.5px; }
+    .status-legend__name { display: flex; align-items: center; gap: 6px; color: var(--text-secondary); }
+    .status-legend__dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .status-legend__value { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--text-primary); }
+
+    .callout-note { font-size: 12.5px; line-height: 1.6; color: var(--text-secondary); margin-top: var(--sp-3); }
+    .callout-note strong { color: var(--text-primary); }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- DEMO BAR -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">State</span>
+    <button class="demo-btn active" data-state="populated">Active Lending</button>
+    <button class="demo-btn" data-state="empty">No P2P Lending</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">P2P Lending</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- PAGE CONTENT -->
+  <div class="page-content" id="page-content">
+
+    <div id="view-populated">
+
+      <!-- Hero -->
+      <div class="glass-card glass-card--hero">
+        <div class="card-header" style="margin-bottom:var(--sp-2);">
+          <div class="card-icon card-icon--warning">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div style="flex:1; min-width:0;">
+            <div class="card-title">LenDenClub</div>
+            <div style="font-size:12px; color:var(--text-muted);">RBI-registered NBFC-P2P · Reg. No. N-13.02316</div>
+          </div>
+        </div>
+        <div class="loans-hero-label" style="font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-secondary); margin-bottom:var(--sp-2);">Principal Lent</div>
+        <div class="amount-text amount-text--display gradient-text">₹1,20,000</div>
+        <div class="stat-row">
+          <div class="stat-col">
+            <div class="stat-col__label">Borrowers</div>
+            <div class="stat-col__value">340</div>
+          </div>
+          <div class="stat-col">
+            <div class="stat-col__label">Expected Return</div>
+            <div class="stat-col__value">~12.0% XIRR</div>
+          </div>
+          <div class="stat-col">
+            <div class="stat-col__label">Actual Return (to date)</div>
+            <div class="stat-col__value" style="color:var(--warning);">9.6% XIRR</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status breakdown -->
+      <div class="section">
+        <div class="section-title">Loan Book Status</div>
+        <div class="surface-card">
+          <div class="status-stack-bar">
+            <div class="status-stack-bar__seg--current" style="width:81.7%;"></div>
+            <div class="status-stack-bar__seg--delayed" style="width:11.6%;"></div>
+            <div class="status-stack-bar__seg--defaulted" style="width:6.7%;"></div>
+          </div>
+          <div class="status-legend">
+            <div class="status-legend__row">
+              <span class="status-legend__name"><span class="status-legend__dot" style="background:var(--success);"></span>Current</span>
+              <span class="status-legend__value">₹98,000 (81.7%)</span>
+            </div>
+            <div class="status-legend__row">
+              <span class="status-legend__name"><span class="status-legend__dot" style="background:#F59E0B;"></span>Delayed (1–90 days)</span>
+              <span class="status-legend__value">₹14,000 (11.6%)</span>
+            </div>
+            <div class="status-legend__row">
+              <span class="status-legend__name"><span class="status-legend__dot" style="background:var(--error);"></span>Defaulted (90+ days / written off)</span>
+              <span class="status-legend__value">₹8,000 (6.7%)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Details -->
+      <div class="section">
+        <div class="section-title">Platform Details</div>
+        <div class="surface-card">
+          <div class="detail-row">
+            <span class="detail-row__label">First Deployed</span>
+            <span class="detail-row__value">Aug 2023</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-row__label">Auto-Invest Diversification</span>
+            <span class="detail-row__value">₹500 avg / borrower</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-row__label">Lock-in</span>
+            <span class="detail-row__value">None — monthly repayments accrue</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-row__label">Platform Fee</span>
+            <span class="detail-row__value">Included in quoted return</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Risk callout — honest -->
+      <div class="section">
+        <div class="glass-card glass-card--danger">
+          <div class="card-header" style="margin-bottom:var(--sp-1);">
+            <div class="card-icon card-icon--danger">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+            </div>
+            <div class="card-title">P2P Carries Real Default Risk</div>
+          </div>
+          <div class="callout-note" style="margin-top:0;">
+            The <strong>9.6% actual return is already below the ~12% advertised/expected rate</strong> — the gap is defaults and delays, and this is normal for the category, not a platform malfunction. RBI caps individual exposure at <strong>₹50 lakh per lender across all NBFC-P2P platforms</strong> and requires diversification, but there is <strong>no deposit insurance, no capital guarantee, and returns are not assured</strong> — unlike a bank FD. Treat P2P as a high-risk, high-yield sleeve (typically capped at 3–5% of net worth), not a fixed-income substitute. Defaulted amounts are rarely recovered in full even after collection efforts.
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /view-populated -->
+
+    <!-- Empty state -->
+    <div id="view-empty" style="display:none;">
+      <div class="empty-state">
+        <div class="empty-state__icon">🤝</div>
+        <div class="empty-state__title">No P2P Lending Tracked</div>
+        <div class="empty-state__body">Peer-to-peer lending via RBI-registered NBFC-P2P platforms offers higher yields with real default risk — add a platform to track your loan book here.</div>
+        <a href="index.html" class="btn btn--primary" style="min-width:180px; text-decoration:none;">+ Add P2P Platform</a>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ── Theme toggle (matches other pages) ── */
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+
+  /* ── Demo bar: Populated / Empty ── */
+  AG.initDemoBar({
+    populated: () => {
+      document.getElementById('view-populated').style.display = '';
+      document.getElementById('view-empty').style.display = 'none';
+    },
+    empty: () => {
+      document.getElementById('view-populated').style.display = 'none';
+      document.getElementById('view-empty').style.display = '';
+    },
+  });
+</script>
+</body>
+</html>

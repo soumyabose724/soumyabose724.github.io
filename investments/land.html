@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Land / Real Estate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .value-compare { display: flex; gap: var(--sp-3); margin-top: var(--sp-4); }
+    .value-col { flex: 1; min-width: 0; background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--r-lg); padding: var(--sp-3); }
+    .value-col__label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px; }
+    .value-col__value { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-size: 18px; font-weight: 700; color: var(--text-primary); }
+    .value-col--market { border-color: rgba(13,148,136,.3); background: var(--primary-xlight); }
+    .value-col--market .value-col__value { color: var(--primary); }
+    .value-col__hint { font-size: 10.5px; color: var(--text-muted); margin-top: 4px; line-height: 1.4; }
+
+    .detail-row { display: flex; justify-content: space-between; align-items: center; padding: var(--sp-3) 0; border-bottom: 1px solid var(--border); }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-row__label { font-size: 13px; color: var(--text-secondary); }
+    .detail-row__value { font-size: 13px; font-weight: 600; color: var(--text-primary); text-align: right; }
+    .detail-row__value.mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+
+    .callout-note { font-size: 12.5px; line-height: 1.6; color: var(--text-secondary); margin-top: var(--sp-3); }
+    .callout-note strong { color: var(--text-primary); }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- DEMO BAR -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">State</span>
+    <button class="demo-btn active" data-state="populated">Plot on Record</button>
+    <button class="demo-btn" data-state="empty">No Land Holdings</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Land / Real Estate</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- PAGE CONTENT -->
+  <div class="page-content" id="page-content">
+
+    <div id="view-populated">
+
+      <!-- Hero -->
+      <div class="glass-card glass-card--hero">
+        <div class="card-header" style="margin-bottom:var(--sp-2);">
+          <div class="card-icon" style="background:linear-gradient(135deg,#57534E,#78716C);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+          </div>
+          <div style="flex:1; min-width:0;">
+            <div class="card-title">Residential Plot — Wagholi, Pune</div>
+            <div style="font-size:12px; color:var(--text-muted);">2,400 sq. ft. · Survey No. 114/2B</div>
+          </div>
+          <span class="chip chip--info">Inherited</span>
+        </div>
+        <div class="value-compare">
+          <div class="value-col">
+            <div class="value-col__label">Circle Rate Value</div>
+            <div class="value-col__value">₹16,00,000</div>
+            <div class="value-col__hint">Govt. guidance value — stamp duty &amp; registration base</div>
+          </div>
+          <div class="value-col value-col--market">
+            <div class="value-col__label">Est. Market Value</div>
+            <div class="value-col__value">₹29,00,000</div>
+            <div class="value-col__hint">Based on nearby recent sale comparables</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Details -->
+      <div class="section">
+        <div class="section-title">Holding Details</div>
+        <div class="surface-card">
+          <div class="detail-row">
+            <span class="detail-row__label">Acquisition</span>
+            <span class="detail-row__value">Inherited</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-row__label">Date Acquired</span>
+            <span class="detail-row__value">3 Feb 2018 (father's estate)</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-row__label">Original Cost of Acquisition</span>
+            <span class="detail-row__value mono">₹9,50,000 (indexed, for LTCG)</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-row__label">Title</span>
+            <span class="detail-row__value">Clear · Freehold</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-row__label">Property Tax (Annual)</span>
+            <span class="detail-row__value mono">₹4,200</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-row__label">Rental / Yield</span>
+            <span class="detail-row__value">None (vacant plot)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Illiquidity note -->
+      <div class="section">
+        <div class="glass-card glass-card--warning">
+          <div class="card-header" style="margin-bottom:var(--sp-1);">
+            <div class="card-icon card-icon--warning">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+            </div>
+            <div class="card-title">Not Counted in Liquid Net Worth</div>
+          </div>
+          <div class="callout-note">
+            Physical land takes weeks to months to sell (buyer search, due diligence, registration) and carries transaction costs of <strong>5–8% (stamp duty + brokerage)</strong> on exit. ArthaGrid excludes it from your <strong>liquid net worth</strong> and emergency-fund calculations — it's shown here as a real asset, but treat it as illiquid for cash-flow planning. Selling it also triggers <strong>capital gains tax</strong> (long-term, since held &gt;24 months) — see the Capital Gains module if you plan to sell.
+          </div>
+        </div>
+      </div>
+
+      <a href="../tax/capital-gains.html" class="compare-link-card" style="display:flex; align-items:center; gap:var(--sp-3); background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg); padding:var(--sp-4); margin-top:var(--sp-5); text-decoration:none;">
+        <div style="width:40px; height:40px; border-radius:var(--r-lg); flex-shrink:0; background:var(--grad-primary); color:#fff; display:flex; align-items:center; justify-content:center;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+        </div>
+        <div style="flex:1; min-width:0;">
+          <div style="font-size:14px; font-weight:600; color:var(--text-primary);">If You Sell — Estimate Capital Gains</div>
+          <div style="font-size:12px; color:var(--text-muted); margin-top:1px;">LTCG calculator with indexation</div>
+        </div>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted); flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+
+    </div><!-- /view-populated -->
+
+    <!-- Empty state -->
+    <div id="view-empty" style="display:none;">
+      <div class="empty-state">
+        <div class="empty-state__icon">🗺️</div>
+        <div class="empty-state__title">No Land Holdings Tracked</div>
+        <div class="empty-state__body">Add a plot, agricultural land, or ancestral property to track its circle rate vs market value alongside your portfolio.</div>
+        <a href="index.html" class="btn btn--primary" style="min-width:180px; text-decoration:none;">+ Add Land / Property</a>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ── Theme toggle (matches other pages) ── */
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+
+  /* ── Demo bar: Populated / Empty ── */
+  AG.initDemoBar({
+    populated: () => {
+      document.getElementById('view-populated').style.display = '';
+      document.getElementById('view-empty').style.display = 'none';
+    },
+    empty: () => {
+      document.getElementById('view-populated').style.display = 'none';
+      document.getElementById('view-empty').style.display = '';
+    },
+  });
+</script>
+</body>
+</html>

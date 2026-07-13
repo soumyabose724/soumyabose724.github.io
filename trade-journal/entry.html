@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Log Trade</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* ── Segment segmented tabs (mirrors transactions/add.html type-tabs) ── */
+    .type-tabs {
+      display: flex; gap: var(--sp-2); overflow-x: auto; padding: var(--sp-1) var(--sp-1) var(--sp-2);
+      margin-bottom: var(--sp-5); scrollbar-width: none;
+    }
+    .type-tabs::-webkit-scrollbar { display: none; }
+    .type-tab {
+      flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 4px;
+      min-width: 84px; padding: var(--sp-3) var(--sp-2); border-radius: var(--r-lg);
+      background: var(--surface-raised); border: 1.5px solid var(--border); cursor: pointer;
+      transition: background var(--dur-fast), border-color var(--dur-fast), transform var(--dur-fast);
+    }
+    .type-tab:active { transform: scale(0.96); }
+    .type-tab__icon { font-size: 20px; }
+    .type-tab__label { font-size: 11px; font-weight: 600; color: var(--text-secondary); white-space: nowrap; }
+    .type-tab.active { background: var(--primary-light); border-color: var(--primary); }
+    .type-tab.active .type-tab__label { color: var(--primary); }
+
+    .type-fields { display: none; }
+    .type-fields.visible { display: block; animation: fade-in var(--dur-base) var(--ease-out) both; }
+
+    .seg-row { display: flex; gap: var(--sp-2); }
+    .seg-btn {
+      flex: 1; height: 40px; border-radius: var(--r-md);
+      background: var(--surface-raised); border: 1.5px solid var(--border);
+      font-size: 13px; font-weight: 600; color: var(--text-secondary); cursor: pointer;
+      transition: background var(--dur-fast), border-color var(--dur-fast), color var(--dur-fast);
+    }
+    .seg-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+    .info-box {
+      display: flex; align-items: flex-start; gap: var(--sp-2);
+      background: var(--info-light); border: 1px solid rgba(59,130,246,.28);
+      border-radius: var(--r-lg); padding: var(--sp-3) var(--sp-4);
+      font-size: 12px; color: var(--text-secondary); line-height: 1.5;
+      margin-top: var(--sp-4);
+    }
+    .info-box strong { color: var(--info); }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); }
+
+    /* VCP toggle row */
+    .vcp-row {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--surface-raised); border: 1.5px solid var(--border);
+      border-radius: var(--r-lg); padding: var(--sp-3) var(--sp-4);
+      margin-top: var(--sp-5);
+    }
+    .vcp-row__label { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    .vcp-row__sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+    /* Fields visible only when a position is a Call/Put */
+    .strike-field { display: none; }
+    .strike-field.visible { display: block; }
+
+    .page-content--form { padding-bottom: calc(var(--bottom-nav-h) + 76px + var(--sp-6)); }
+    .form-footer-bar {
+      position: fixed; bottom: var(--bottom-nav-h); left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: var(--page-max);
+      background: var(--surface); border-top: 1px solid var(--border);
+      padding: var(--sp-3) var(--sp-4); display: flex; gap: var(--sp-3);
+      z-index: 40;
+    }
+    .form-footer-bar .btn { flex: 1; }
+    .form-footer-bar .btn--primary { flex: 2; }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title" id="page-title">Log Trade</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content page-content--form">
+
+    <!-- Segment selector -->
+    <div class="type-tabs" id="type-tabs">
+      <div class="type-tab active" data-segment="equity" onclick="selectSegment('equity')">
+        <span class="type-tab__icon">📊</span>
+        <span class="type-tab__label">Equity Delivery</span>
+      </div>
+      <div class="type-tab" data-segment="intraday" onclick="selectSegment('intraday')">
+        <span class="type-tab__icon">⚡</span>
+        <span class="type-tab__label">Intraday</span>
+      </div>
+      <div class="type-tab" data-segment="fno" onclick="selectSegment('fno')">
+        <span class="type-tab__icon">🧮</span>
+        <span class="type-tab__label">F&amp;O</span>
+      </div>
+      <div class="type-tab" data-segment="commodity" onclick="selectSegment('commodity')">
+        <span class="type-tab__icon">🛢️</span>
+        <span class="type-tab__label">Commodity</span>
+      </div>
+      <div class="type-tab" data-segment="crypto" onclick="selectSegment('crypto')">
+        <span class="type-tab__icon">₿</span>
+        <span class="type-tab__label">Crypto</span>
+      </div>
+    </div>
+
+    <!-- ═══ EQUITY DELIVERY fields ═══ -->
+    <div class="type-fields visible" data-segment="equity">
+      <div class="form-group">
+        <label class="form-label" for="eq-instrument">Stock<span class="required">*</span></label>
+        <input class="form-input" id="eq-instrument" type="text" placeholder="e.g. RELIANCE" value="RELIANCE">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="eq-qty">Quantity<span class="required">*</span></label>
+        <input class="form-input" id="eq-qty" type="text" inputmode="numeric" value="50">
+      </div>
+      <div class="form-group">
+        <div class="two-col">
+          <div>
+            <label class="form-label" for="eq-entry-date">Entry Date<span class="required">*</span></label>
+            <input class="form-input" id="eq-entry-date" type="date" value="2026-07-08">
+          </div>
+          <div>
+            <label class="form-label" for="eq-entry-price">Entry Price<span class="required">*</span></label>
+            <div class="form-input-wrap has-prefix"><span class="input-prefix">₹</span>
+              <input class="form-input inr-input" id="eq-entry-price" type="text" inputmode="decimal" value="2,450.00">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="two-col">
+          <div>
+            <label class="form-label" for="eq-exit-date">Exit Date</label>
+            <input class="form-input" id="eq-exit-date" type="date">
+          </div>
+          <div>
+            <label class="form-label" for="eq-exit-price">Exit Price</label>
+            <div class="form-input-wrap has-prefix"><span class="input-prefix">₹</span>
+              <input class="form-input inr-input" id="eq-exit-price" type="text" inputmode="decimal" placeholder="0.00">
+            </div>
+          </div>
+        </div>
+        <div class="form-helper">Leave exit date/price blank if the position is still open.</div>
+      </div>
+    </div>
+
+    <!-- ═══ INTRADAY fields ═══ -->
+    <div class="type-fields" data-segment="intraday">
+      <div class="form-group">
+        <label class="form-label" for="id-instrument">Stock<span class="required">*</span></label>
+        <input class="form-input" id="id-instrument" type="text" placeholder="e.g. TATAMOTORS" value="TATAMOTORS">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="id-qty">Quantity<span class="required">*</span></label>
+        <input class="form-input" id="id-qty" type="text" inputmode="numeric" value="200">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="id-date">Trade Date<span class="required">*</span></label>
+        <input class="form-input" id="id-date" type="date" value="2026-07-08">
+      </div>
+      <div class="form-group">
+        <div class="two-col">
+          <div>
+            <label class="form-label" for="id-entry-time">Entry Time<span class="required">*</span></label>
+            <input class="form-input" id="id-entry-time" type="time" value="09:32">
+          </div>
+          <div>
+            <label class="form-label" for="id-entry-price">Entry Price<span class="required">*</span></label>
+            <div class="form-input-wrap has-prefix"><span class="input-prefix">₹</span>
+              <input class="form-input inr-input" id="id-entry-price" type="text" inputmode="decimal" value="980.00">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="two-col">
+          <div>
+            <label class="form-label" for="id-exit-time">Exit Time</label>
+            <input class="form-input" id="id-exit-time" type="time">
+          </div>
+          <div>
+            <label class="form-label" for="id-exit-price">Exit Price</label>
+            <div class="form-input-wrap has-prefix"><span class="input-prefix">₹</span>
+              <input class="form-input inr-input" id="id-exit-price" type="text" inputmode="decimal" placeholder="0.00">
+            </div>
+          </div>
+        </div>
+        <div class="form-helper">Same trading day as entry — leave blank if still open before square-off.</div>
+      </div>
+      <div class="info-box">
+        <span>ℹ️</span>
+        <span>Intraday STT is <strong>0.025%</strong> on the sell side only — lower than delivery's 0.1% on both legs. Brokerage + STT are netted from your P&amp;L automatically.</span>
+      </div>
+    </div>
+
+    <!-- ═══ F&O fields ═══ -->
+    <div class="type-fields" data-segment="fno">
+      <div class="form-group">
+        <label class="form-label" for="fno-underlying">Underlying<span class="required">*</span></label>
+        <select class="form-select" id="fno-underlying">
+          <option>NIFTY</option>
+          <option>BANKNIFTY</option>
+          <option>FINNIFTY</option>
+          <option>Stock F&amp;O</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contract Type<span class="required">*</span></label>
+        <div class="seg-row">
+          <button type="button" class="seg-btn active" data-contract="call" onclick="selectContract('call')">Call</button>
+          <button type="button" class="seg-btn" data-contract="put" onclick="selectContract('put')">Put</button>
+          <button type="button" class="seg-btn" data-contract="future" onclick="selectContract('future')">Future</button>
+        </div>
+      </div>
+      <div class="form-group strike-field visible" id="strike-field">
+        <label class="form-label" for="fno-strike">Strike Price<span class="required">*</span></label>
+        <div class="form-input-wrap has-prefix"><span class="input-prefix">₹</span>
+          <input class="form-input inr-input" id="fno-strike" type="text" inputmode="numeric" value="24,800">
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="two-col">
+          <div>
+            <label class="form-label" for="fno-expiry">Expiry Date<span class="required">*</span></label>
+            <input class="form-input" id="fno-expiry" type="date" value="2026-07-31">
+          </div>
+          <div>
+            <label class="form-label" for="fno-lot">Lot Size<span class="required">*</span></label>
+            <input class="form-input" id="fno-lot" type="text" inputmode="numeric" value="75">
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="two-col">
+          <div>
+            <label class="form-label" for="fno-entry-date">Entry Date<span class="required">*</span></label>
+            <input class="form-input" id="fno-entry-date" type="date" value="2026-07-10">
+          </div>
+          <div>
+            <label class="form-label" for="fno-entry-price">Premium (Entry)<span class="required">*</span></label>
+            <div class="form-input-wrap has-prefix"><span class="input-prefix">₹</span>
+              <input class="form-input inr-input" id="fno-entry-price" type="text" inputmode="decimal" value="120.00">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="two-col">
+          <div>
+            <label class="form-label" for="fno-exit-date">Exit Date</label>
+            <input class="form-input" id="fno-exit-date" type="date">
+          </div>
+          <div>
+            <label class="form-label" for="fno-exit-price">Premium (Exit)</label>
+            <div class="form-input-wrap has-prefix"><span class="input-prefix">₹</span>
+              <input class="form-input inr-input" id="fno-exit-price" type="text" inputmode="decimal" placeholder="0.00">
+            </div>
+          </div>
+        </div>
+        <div class="form-helper">Leave blank if the contract is still open.</div>
+      </div>
+      <div class="info-box">
+        <span>ℹ️</span>
+        <span>F&amp;O income is taxed as <strong>Business Income</strong>, not capital gains. A tax audit is required only if annual F&amp;O turnover crosses <strong>₹10 Crore</strong> — purely informational, well above a hobbyist's activity level.</span>
+      </div>
+    </div>
+
+    <!-- ═══ COMMODITY fields ═══ -->
+    <div class="type-fields" data-segment="commodity">
+      <div class="form-group">
+        <label class="form-label" for="cm-contract">Contract<span class="required">*</span></label>
+        <select class="form-select" id="cm-contract">
+          <option>Gold Mini (100g)</option>
+          <option>Silver Mini (5kg)</option>
+          <option>Crude Oil Mini (10 bbl)</option>
+          <option>Natural Gas</option>
+          <option>Copper</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="cm-lot">Lot Size<span class="required">*</span></label>
+        <input class="form-input" id="cm-lot" type="text" inputmode="numeric" value="1">
+      </div>
+      <div class="form-group">
+        <div class="two-col">
+          <div>
+            <label class="form-label" for="cm-entry-date">Entry Date<span class="required">*</span></label>
+            <input class="form-input" id="cm-entry-date" type="date" value="2026-07-08">
+          </div>
+          <div>
+            <label class="form-label" for="cm-entry-price">Entry Price<span class="required">*</span></label>
+            <div class="form-input-wrap has-prefix"><span class="input-prefix">₹</span>
+              <input class="form-input inr-input" id="cm-entry-price" type="text" inputmode="decimal" value="71,200">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="two-col">
+          <div>
+            <label class="form-label" for="cm-exit-date">Exit Date</label>
+            <input class="form-input" id="cm-exit-date" type="date">
+          </div>
+          <div>
+            <label class="form-label" for="cm-exit-price">Exit Price</label>
+            <div class="form-input-wrap has-prefix"><span class="input-prefix">₹</span>
+              <input class="form-input inr-input" id="cm-exit-price" type="text" inputmode="decimal" placeholder="0">
+            </div>
+          </div>
+        </div>
+        <div class="form-helper">Leave blank if the position is still open.</div>
+      </div>
+    </div>
+
+    <!-- ═══ CRYPTO fields ═══ -->
+    <div class="type-fields" data-segment="crypto">
+      <div class="form-group">
+        <label class="form-label" for="cr-coin">Coin<span class="required">*</span></label>
+        <select class="form-select" id="cr-coin">
+          <option>BTC</option>
+          <option>ETH</option>
+          <option>SOL</option>
+          <option>MATIC</option>
+          <option>USDT</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="cr-exchange">Exchange<span class="required">*</span></label>
+        <select class="form-select" id="cr-exchange">
+          <option>CoinDCX</option>
+          <option>WazirX</option>
+          <option>ZebPay</option>
+          <option>Bitbns</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="cr-qty">Quantity<span class="required">*</span></label>
+        <input class="form-input" id="cr-qty" type="text" inputmode="decimal" value="0.15">
+      </div>
+      <div class="form-group">
+        <div class="two-col">
+          <div>
+            <label class="form-label" for="cr-entry-date">Entry Date<span class="required">*</span></label>
+            <input class="form-input" id="cr-entry-date" type="date" value="2026-07-01">
+          </div>
+          <div>
+            <label class="form-label" for="cr-entry-price">Entry Price (₹)<span class="required">*</span></label>
+            <div class="form-input-wrap has-prefix"><span class="input-prefix">₹</span>
+              <input class="form-input inr-input" id="cr-entry-price" type="text" inputmode="decimal" value="42,00,000">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="two-col">
+          <div>
+            <label class="form-label" for="cr-exit-date">Exit Date</label>
+            <input class="form-input" id="cr-exit-date" type="date">
+          </div>
+          <div>
+            <label class="form-label" for="cr-exit-price">Exit Price (₹)</label>
+            <div class="form-input-wrap has-prefix"><span class="input-prefix">₹</span>
+              <input class="form-input inr-input" id="cr-exit-price" type="text" inputmode="decimal" placeholder="0">
+            </div>
+          </div>
+        </div>
+        <div class="form-helper">Leave blank if the position is still open.</div>
+      </div>
+      <div class="info-box">
+        <span>⚠️</span>
+        <span>VDA (crypto) gains are taxed flat at <strong>30%</strong> with <strong>no loss set-off</strong> against other income or even other crypto gains. A <strong>1% TDS</strong> applies on transfers above ₹10,000/₹50,000 depending on the payer category.</span>
+      </div>
+    </div>
+
+    <!-- ═══ Common: Strategy tag / notes + VCP ═══ -->
+    <div class="form-group" style="margin-top:var(--sp-5);">
+      <label class="form-label" for="strategy-notes">Strategy Tag / Notes</label>
+      <input class="form-input" id="strategy-notes" type="text" placeholder="e.g. Breakout above 20 DMA, tight base">
+    </div>
+
+    <div class="vcp-row">
+      <div>
+        <div class="vcp-row__label">VCP Setup</div>
+        <div class="vcp-row__sub">Volatility Contraction Pattern — tag this trade for strategy review</div>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="vcp-checkbox">
+        <span class="toggle-track"></span>
+        <span class="toggle-thumb"></span>
+      </label>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- Footer action bar -->
+  <div class="form-footer-bar">
+    <button class="btn btn--ghost" onclick="location.href='index.html'">Cancel</button>
+    <button class="btn btn--primary" onclick="saveTrade()">Save</button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV — none active (no Trade Journal tab)
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ── Theme toggle (matches other pages) ── */
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+
+  const SEGMENT_TITLES = {
+    equity: 'Log Equity Delivery Trade',
+    intraday: 'Log Intraday Trade',
+    fno: 'Log F&O Trade',
+    commodity: 'Log Commodity Trade',
+    crypto: 'Log Crypto Trade',
+  };
+
+  function selectSegment(segment) {
+    document.querySelectorAll('.type-tab').forEach(t => t.classList.toggle('active', t.dataset.segment === segment));
+    document.querySelectorAll('.type-fields').forEach(sec => sec.classList.toggle('visible', sec.dataset.segment === segment));
+    document.getElementById('page-title').textContent = SEGMENT_TITLES[segment];
+  }
+
+  function selectContract(type) {
+    document.querySelectorAll('.seg-btn[data-contract]').forEach(b => b.classList.toggle('active', b.dataset.contract === type));
+    document.getElementById('strike-field').classList.toggle('visible', type !== 'future');
+  }
+
+  function saveTrade() {
+    const activeSegment = document.querySelector('.type-tab.active').dataset.segment;
+    AG.showToast('Trade logged to ' + SEGMENT_TITLES[activeSegment].replace('Log ', '').replace(' Trade', '') + ' ✓', 'success');
+    setTimeout(() => { location.href = 'index.html'; }, 900);
+  }
+</script>
+</body>
+</html>

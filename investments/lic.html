@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — LIC Policy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .stat-row { display: flex; gap: var(--sp-3); margin-top: var(--sp-4); }
+    .stat-col { flex: 1; min-width: 0; }
+    .stat-col__label { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px; }
+    .stat-col__value { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-size: 17px; font-weight: 700; color: var(--text-primary); }
+
+    .detail-row { display: flex; justify-content: space-between; align-items: center; padding: var(--sp-3) 0; border-bottom: 1px solid var(--border); }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-row__label { font-size: 13px; color: var(--text-secondary); }
+    .detail-row__value { font-size: 13px; font-weight: 600; color: var(--text-primary); text-align: right; }
+    .detail-row__value.mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+
+    .irr-table { width: 100%; border-collapse: collapse; margin-top: var(--sp-3); }
+    .irr-table th, .irr-table td { text-align: left; padding: var(--sp-2) var(--sp-2); font-size: 12px; }
+    .irr-table th { color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: .03em; font-size: 10px; border-bottom: 1px solid var(--border); }
+    .irr-table td { border-bottom: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; }
+    .irr-table tr:last-child td { border-bottom: none; }
+    .irr-table td.name { font-family: 'Inter', sans-serif; font-weight: 500; }
+    .irr-highlight td { color: var(--error); font-weight: 700; }
+
+    .callout-note { font-size: 12.5px; line-height: 1.6; color: var(--text-secondary); margin-top: var(--sp-3); }
+    .callout-note strong { color: var(--text-primary); }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- DEMO BAR -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">State</span>
+    <button class="demo-btn active" data-state="populated">Policy on Record</button>
+    <button class="demo-btn" data-state="empty">No LIC Policy</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">LIC Policy</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- PAGE CONTENT -->
+  <div class="page-content" id="page-content">
+
+    <div id="view-populated">
+
+      <!-- Hero -->
+      <div class="glass-card glass-card--hero">
+        <div class="card-header" style="margin-bottom:var(--sp-2);">
+          <div class="card-icon card-icon--info">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div style="flex:1; min-width:0;">
+            <div class="card-title">LIC Jeevan Anand</div>
+            <div style="font-size:12px; color:var(--text-muted);">Policy No. •••• •••• 4471</div>
+          </div>
+          <span class="chip chip--on-track">Active</span>
+        </div>
+        <div class="stat-row">
+          <div class="stat-col">
+            <div class="stat-col__label">Sum Assured</div>
+            <div class="stat-col__value">₹10,00,000</div>
+          </div>
+          <div class="stat-col">
+            <div class="stat-col__label">Annual Premium</div>
+            <div class="stat-col__value">₹45,239</div>
+          </div>
+          <div class="stat-col">
+            <div class="stat-col__label">Policy Term</div>
+            <div class="stat-col__value">20 yrs</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Policy details -->
+      <div class="section-title">Policy Details</div>
+      <div class="surface-card">
+        <div class="detail-row">
+          <span class="detail-row__label">Plan Type</span>
+          <span class="detail-row__value">Endowment + Whole Life (Jeevan Anand)</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-row__label">Policy Start Date</span>
+          <span class="detail-row__value">15 Apr 2016</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-row__label">Maturity Date</span>
+          <span class="detail-row__value">15 Apr 2036</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-row__label">Premium Frequency</span>
+          <span class="detail-row__value">Annual</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-row__label">Premiums Paid to Date</span>
+          <span class="detail-row__value mono">₹4,52,390 (10 yrs)</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-row__label">Bonus Accrued (Reversionary)</span>
+          <span class="detail-row__value mono">₹1,08,000</span>
+        </div>
+      </div>
+
+      <!-- Surrender value -->
+      <div class="section">
+        <div class="section-title">Current Surrender Value</div>
+        <div class="glass-card glass-card--compact">
+          <div style="display:flex; align-items:baseline; justify-content:space-between;">
+            <div class="amount-text amount-text--lg">₹3,85,000</div>
+            <span class="delta delta--neg">−₹67,390 vs paid-in</span>
+          </div>
+          <div class="form-helper" style="margin-top:var(--sp-2);">
+            Estimated Special Surrender Value (SSV) after 10 of 20 years. Surrendering early forfeits most of the bonus accrued — this figure is illustrative, not a guaranteed quote from LIC.
+          </div>
+        </div>
+      </div>
+
+      <!-- IRR callout — honest framing -->
+      <div class="section">
+        <div class="glass-card glass-card--warning">
+          <div class="card-header" style="margin-bottom:var(--sp-2);">
+            <div class="card-icon card-icon--warning">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+            </div>
+            <div class="card-title">IRR vs PPF / FD</div>
+          </div>
+          <table class="irr-table">
+            <thead>
+              <tr><th>Instrument</th><th>Typical Return</th><th>Risk</th></tr>
+            </thead>
+            <tbody>
+              <tr class="irr-highlight">
+                <td class="name">This LIC Policy (est. IRR)</td>
+                <td>~5.1% p.a.</td>
+                <td>Nil</td>
+              </tr>
+              <tr>
+                <td class="name">PPF</td>
+                <td>7.1% p.a.</td>
+                <td>Nil</td>
+              </tr>
+              <tr>
+                <td class="name">Bank FD (5–10 yr)</td>
+                <td>6.5–7.0% p.a.</td>
+                <td>Nil–Low</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="callout-note">
+            <strong>Honest read:</strong> Traditional LIC endowment/money-back plans bundle insurance and investment together, and typically deliver <strong>5–6% IRR over the full term</strong> — below PPF, FD, and most debt mutual funds, even before tax. The insurance cover (₹10L) is also thin for the premium paid; a comparable <strong>term insurance</strong> plan would cost a fraction of ₹45,239/year for the same cover. Most fee-only advisors recommend buying <strong>pure term insurance separately</strong> and investing the premium difference in PPF/FD/index funds — that combination usually outperforms this policy on both cover and returns. Since this policy is already 10 years in, factor in surrender-value loss before deciding whether to continue, surrender, or convert to paid-up.
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /view-populated -->
+
+    <!-- Empty state -->
+    <div id="view-empty" style="display:none;">
+      <div class="empty-state">
+        <div class="empty-state__icon">🛡️</div>
+        <div class="empty-state__title">No LIC Policy on Record</div>
+        <div class="empty-state__body">Track an LIC endowment, money-back, or whole-life policy here to see its surrender value and how its returns stack up against PPF/FD.</div>
+        <a href="index.html" class="btn btn--primary" style="min-width:180px; text-decoration:none;">+ Add LIC Policy</a>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ── Theme toggle (matches other pages) ── */
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+
+  /* ── Demo bar: Populated / Empty ── */
+  AG.initDemoBar({
+    populated: () => {
+      document.getElementById('view-populated').style.display = '';
+      document.getElementById('view-empty').style.display = 'none';
+    },
+    empty: () => {
+      document.getElementById('view-populated').style.display = 'none';
+      document.getElementById('view-empty').style.display = '';
+    },
+  });
+</script>
+</body>
+</html>

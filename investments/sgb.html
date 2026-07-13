@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Sovereign Gold Bonds</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .scheme-hero-label { font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-secondary); margin-bottom:var(--sp-2); }
+    .scheme-hero-amount { font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums; font-size:32px; font-weight:700; line-height:1.1; }
+    .scheme-hero-sub { font-size:12px; color:var(--text-secondary); margin-top:var(--sp-3); }
+    .scheme-hero-sub strong { color:var(--text-primary); font-weight:600; }
+    .scheme-hero-footer { display:flex; align-items:center; gap:var(--sp-2); margin-top:var(--sp-4); padding-top:var(--sp-3); border-top:1px solid var(--glass-border); font-size:12px; color:var(--text-muted); }
+
+    .gold-price-strip { display:flex; align-items:center; justify-content:space-between; background:var(--surface-raised); border:1px solid var(--border); border-radius:var(--r-lg); padding:var(--sp-3) var(--sp-4); margin-top:var(--sp-4); }
+    .gold-price-strip__label { font-size:12px; color:var(--text-secondary); }
+    .gold-price-strip__value { font-family:'JetBrains Mono',monospace; font-size:15px; font-weight:700; color:var(--text-primary); }
+
+    .tranche-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-xl); padding:var(--sp-4) var(--sp-5); margin-top:var(--sp-3); }
+    .tranche-card__head { display:flex; align-items:center; gap:var(--sp-3); margin-bottom:var(--sp-3); }
+    .tranche-card__title { flex:1; font-size:14px; font-weight:700; color:var(--text-primary); }
+    .tranche-card__badge { font-size:10px; font-weight:700; letter-spacing:.03em; padding:2px 9px; border-radius:var(--r-full); background:var(--primary-light); color:var(--primary); }
+    .tranche-card__row { display:flex; justify-content:space-between; align-items:center; padding:6px 0; font-size:13px; }
+    .tranche-card__row + .tranche-card__row { border-top:1px solid var(--border); }
+    .tranche-card__row span:first-child { color:var(--text-secondary); }
+    .tranche-card__row span:last-child { font-family:'JetBrains Mono',monospace; font-weight:600; color:var(--text-primary); }
+    .tranche-gain { color:var(--success) !important; }
+
+    .info-card { display:flex; gap:var(--sp-3); background:var(--info-light); border:1px solid rgba(59,130,246,.24); border-radius:var(--r-lg); padding:var(--sp-4); margin-top:var(--sp-5); }
+    .info-card__icon { color:var(--info); flex-shrink:0; }
+    .info-card__text { font-size:12.5px; color:var(--text-secondary); line-height:1.55; }
+    .info-card__text strong { color:var(--text-primary); }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <div class="demo-bar">
+    <span class="demo-bar__label">State</span>
+    <button class="demo-btn" data-state="populated">Populated</button>
+    <button class="demo-btn" data-state="empty">Empty (No SGBs)</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Sovereign Gold Bonds</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <div class="page-content" id="page-content">
+
+    <div id="view-populated">
+
+      <div class="glass-card glass-card--hero">
+        <div class="scheme-hero-label">Current Value · 2 Tranches (9g)</div>
+        <div class="scheme-hero-amount gradient-text" id="hero-total">₹70,650</div>
+        <div class="scheme-hero-sub">
+          Invested <strong>₹43,188</strong> · <span class="delta delta--pos">▲ +63.6%</span>
+        </div>
+        <div class="scheme-hero-footer">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+          <span>Interest 2.5% p.a., paid semi-annually · taxed as Other Income</span>
+        </div>
+      </div>
+
+      <div class="gold-price-strip">
+        <span class="gold-price-strip__label">Current gold reference price (999 purity)</span>
+        <span class="gold-price-strip__value">₹7,850/gm</span>
+      </div>
+
+      <div class="section-title" style="margin-top:var(--sp-5);">Your Tranches</div>
+
+      <div class="tranche-card">
+        <div class="tranche-card__head">
+          <div class="card-icon card-icon--warning"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 12h6M12 9v6"/></svg></div>
+          <div class="tranche-card__title">SGB 2020-21 Series IV <span class="tranche-card__badge">5g</span></div>
+        </div>
+        <div class="tranche-card__row"><span>Issue date</span><span>13 Jul 2020</span></div>
+        <div class="tranche-card__row"><span>Issue price</span><span>₹4,852/gm</span></div>
+        <div class="tranche-card__row"><span>Invested</span><span>₹24,260</span></div>
+        <div class="tranche-card__row"><span>Current value</span><span class="tranche-gain">₹39,250</span></div>
+        <div class="tranche-card__row"><span>Maturity (8 yrs)</span><span>13 Jul 2028</span></div>
+        <div class="tranche-card__row"><span>Early exit window</span><span>Open since 13 Jul 2025</span></div>
+        <div class="tranche-card__row"><span>Next interest credit</span><span>13 Jan 2027 · ₹303</span></div>
+      </div>
+
+      <div class="tranche-card">
+        <div class="tranche-card__head">
+          <div class="card-icon card-icon--warning"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 12h6M12 9v6"/></svg></div>
+          <div class="tranche-card__title">SGB 2021-22 Series VIII <span class="tranche-card__badge">4g</span></div>
+        </div>
+        <div class="tranche-card__row"><span>Issue date</span><span>20 Dec 2021</span></div>
+        <div class="tranche-card__row"><span>Issue price</span><span>₹4,732/gm</span></div>
+        <div class="tranche-card__row"><span>Invested</span><span>₹18,928</span></div>
+        <div class="tranche-card__row"><span>Current value</span><span class="tranche-gain">₹31,400</span></div>
+        <div class="tranche-card__row"><span>Maturity (8 yrs)</span><span>20 Dec 2029</span></div>
+        <div class="tranche-card__row"><span>Early exit window</span><span>Opens 20 Dec 2026</span></div>
+        <div class="tranche-card__row"><span>Next interest credit</span><span>20 Jun 2027 · ₹237</span></div>
+      </div>
+
+      <div class="info-card">
+        <svg class="info-card__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <div class="info-card__text">
+          <strong>Tax treatment:</strong> the 2.5% p.a. interest is fully taxable as "Income from Other Sources" at your slab rate. Capital gains on redemption <strong>at maturity are entirely tax-free</strong> for individuals. Early exit via the RBI window or stock exchange sale may attract capital gains tax (LTCG with indexation if held &gt; 3 years, sold on exchange).
+        </div>
+      </div>
+
+    </div><!-- /view-populated -->
+
+    <div id="view-empty" style="display:none;">
+      <div class="empty-state">
+        <div class="empty-state__icon">🪙</div>
+        <div class="empty-state__title">No Sovereign Gold Bonds Yet</div>
+        <div class="empty-state__body">Track SGB tranches you've subscribed to via RBI issues — interest credits, gold-price-linked value, and maturity dates.</div>
+        <button class="btn btn--primary" style="min-width:200px;" onclick="AG.showToast('Add SGB tranche — coming soon','info')">+ Add SGB Tranche</button>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+
+  AG.initDemoBar({
+    populated: () => {
+      document.getElementById('view-populated').style.display = '';
+      document.getElementById('view-empty').style.display = 'none';
+    },
+    empty: () => {
+      document.getElementById('view-populated').style.display = 'none';
+      document.getElementById('view-empty').style.display = '';
+    },
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — REITs &amp; InvITs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .stat-row { display: flex; gap: var(--sp-3); margin-top: var(--sp-4); }
+    .stat-col { flex: 1; min-width: 0; }
+    .stat-col__label { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px; }
+    .stat-col__value { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-size: 17px; font-weight: 700; color: var(--text-primary); }
+
+    .detail-row { display: flex; justify-content: space-between; align-items: center; padding: var(--sp-3) 0; border-bottom: 1px solid var(--border); }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-row__label { font-size: 13px; color: var(--text-secondary); }
+    .detail-row__value { font-size: 13px; font-weight: 600; color: var(--text-primary); text-align: right; }
+    .detail-row__value.mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+
+    .payout-bar { display: flex; height: 12px; border-radius: var(--r-full); overflow: hidden; margin-top: var(--sp-3); }
+    .payout-bar__seg--dividend { background: var(--grad-success); }
+    .payout-bar__seg--interest { background: var(--grad-primary); }
+    .payout-bar__seg--amort { background: linear-gradient(135deg,#78716C,#A8A29E); }
+    .payout-legend { display: flex; flex-direction: column; gap: var(--sp-2); margin-top: var(--sp-3); }
+    .payout-legend__row { display: flex; align-items: center; justify-content: space-between; font-size: 12.5px; }
+    .payout-legend__name { display: flex; align-items: center; gap: 6px; color: var(--text-secondary); }
+    .payout-legend__dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .payout-legend__tax { font-size: 11px; color: var(--text-muted); }
+
+    .callout-note { font-size: 12.5px; line-height: 1.6; color: var(--text-secondary); margin-top: var(--sp-3); }
+    .callout-note strong { color: var(--text-primary); }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- DEMO BAR -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">State</span>
+    <button class="demo-btn active" data-state="populated">2 Holdings</button>
+    <button class="demo-btn" data-state="empty">No REITs</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">REITs &amp; InvITs</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- PAGE CONTENT -->
+  <div class="page-content" id="page-content">
+
+    <div id="view-populated">
+
+      <!-- Hero -->
+      <div class="glass-card glass-card--hero">
+        <div class="loans-hero-label" style="font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-secondary); margin-bottom:var(--sp-2);">Current Value — REITs &amp; InvITs</div>
+        <div class="amount-text amount-text--display gradient-text">₹2,56,250</div>
+        <div class="stat-row">
+          <div class="stat-col">
+            <div class="stat-col__label">Invested</div>
+            <div class="stat-col__value">₹2,33,750</div>
+          </div>
+          <div class="stat-col">
+            <div class="stat-col__label">Unrealised Gain</div>
+            <div class="stat-col__value" style="color:var(--success);">+₹22,500</div>
+          </div>
+          <div class="stat-col">
+            <div class="stat-col__label">Units Held</div>
+            <div class="stat-col__value">750</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Holding 1: Embassy -->
+      <div class="section">
+        <div class="section-title">Holdings</div>
+        <div class="list-row" style="cursor:default;">
+          <div class="list-row__icon" style="background:linear-gradient(135deg,#2563EB,#3B82F6);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+          </div>
+          <div class="list-row__info">
+            <div class="list-row__label">Embassy Office Parks REIT</div>
+            <div class="list-row__meta">500 units · NSE: EMBASSY</div>
+          </div>
+          <div class="list-row__amount-row">
+            <div class="list-row__amount">₹1,77,500</div>
+            <div class="list-row__amount-caption">NAV ₹355.00 (bought ₹320.00) · <span style="color:var(--success);">+10.9%</span></div>
+          </div>
+        </div>
+
+        <div class="list-row" style="cursor:default; margin-top:var(--sp-2);">
+          <div class="list-row__icon" style="background:linear-gradient(135deg,#2563EB,#3B82F6);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+          </div>
+          <div class="list-row__info">
+            <div class="list-row__label">Mindspace Business Parks REIT</div>
+            <div class="list-row__meta">250 units · NSE: MINDSPACE</div>
+          </div>
+          <div class="list-row__amount-row">
+            <div class="list-row__amount">₹78,750</div>
+            <div class="list-row__amount-caption">NAV ₹315.00 (bought ₹295.00) · <span style="color:var(--success);">+6.8%</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payout breakdown -->
+      <div class="section">
+        <div class="section-title">Last Distribution — Payout Breakdown</div>
+        <div class="surface-card">
+          <div class="detail-row">
+            <span class="detail-row__label">Total Payout (Q1 FY2026-27, Embassy)</span>
+            <span class="detail-row__value mono">₹6.50 / unit</span>
+          </div>
+          <div class="payout-bar">
+            <div class="payout-bar__seg--dividend" style="width:40%;"></div>
+            <div class="payout-bar__seg--interest" style="width:45%;"></div>
+            <div class="payout-bar__seg--amort" style="width:15%;"></div>
+          </div>
+          <div class="payout-legend">
+            <div class="payout-legend__row">
+              <span class="payout-legend__name"><span class="payout-legend__dot" style="background:var(--success);"></span>Dividend — ₹2.60 (40%)</span>
+              <span class="payout-legend__tax">Taxable at slab rate</span>
+            </div>
+            <div class="payout-legend__row">
+              <span class="payout-legend__name"><span class="payout-legend__dot" style="background:var(--primary);"></span>Interest — ₹2.93 (45%)</span>
+              <span class="payout-legend__tax">Taxable at slab rate</span>
+            </div>
+            <div class="payout-legend__row">
+              <span class="payout-legend__name"><span class="payout-legend__dot" style="background:#A8A29E;"></span>Amortisation of SPV Debt — ₹0.98 (15%)</span>
+              <span class="payout-legend__tax">Tax-free (return of capital)</span>
+            </div>
+          </div>
+        </div>
+        <div class="callout-note">
+          REIT/InvIT distributions in India are split across <strong>three components with different tax treatment</strong>: the dividend portion (taxable, unless the SPV opted for the old tax regime), interest income (fully taxable at slab rate), and amortisation of SPV debt (treated as return of capital — reduces your cost basis and is tax-free until it exceeds it, then taxed as capital gains). Your broker's tax P&amp;L statement usually itemises this split per distribution — reconcile it at ITR time rather than assuming the full payout is tax-free.
+        </div>
+      </div>
+
+    </div><!-- /view-populated -->
+
+    <!-- Empty state -->
+    <div id="view-empty" style="display:none;">
+      <div class="empty-state">
+        <div class="empty-state__icon">🏢</div>
+        <div class="empty-state__title">No REIT / InvIT Holdings</div>
+        <div class="empty-state__body">REITs let you invest in rent-yielding commercial real estate (offices, malls) via listed units — add a holding to track NAV and distribution income here.</div>
+        <a href="index.html" class="btn btn--primary" style="min-width:180px; text-decoration:none;">+ Add REIT / InvIT</a>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ── Theme toggle (matches other pages) ── */
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+
+  /* ── Demo bar: Populated / Empty ── */
+  AG.initDemoBar({
+    populated: () => {
+      document.getElementById('view-populated').style.display = '';
+      document.getElementById('view-empty').style.display = 'none';
+    },
+    empty: () => {
+      document.getElementById('view-populated').style.display = 'none';
+      document.getElementById('view-empty').style.display = '';
+    },
+  });
+</script>
+</body>
+</html>

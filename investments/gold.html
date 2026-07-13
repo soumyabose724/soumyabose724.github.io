@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Gold Holdings</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .stat-row { display: flex; gap: var(--sp-3); margin-top: var(--sp-4); }
+    .stat-col { flex: 1; min-width: 0; }
+    .stat-col__label { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px; }
+    .stat-col__value { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-size: 17px; font-weight: 700; color: var(--text-primary); }
+
+    .detail-row { display: flex; justify-content: space-between; align-items: center; padding: var(--sp-3) 0; border-bottom: 1px solid var(--border); }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-row__label { font-size: 13px; color: var(--text-secondary); }
+    .detail-row__value { font-size: 13px; font-weight: 600; color: var(--text-primary); text-align: right; }
+    .detail-row__value.mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+
+    .gold-split-bar { display: flex; height: 10px; border-radius: var(--r-full); overflow: hidden; margin-top: var(--sp-3); }
+    .gold-split-bar__seg--jewellery { background: var(--grad-primary); }
+    .gold-split-bar__seg--digital { background: linear-gradient(135deg,#D97706,#F59E0B); }
+    .gold-legend { display: flex; gap: var(--sp-4); margin-top: var(--sp-3); font-size: 12px; color: var(--text-secondary); }
+    .gold-legend__dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+
+    .callout-note { font-size: 12.5px; line-height: 1.6; color: var(--text-secondary); margin-top: var(--sp-3); }
+    .callout-note strong { color: var(--text-primary); }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- DEMO BAR -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">State</span>
+    <button class="demo-btn active" data-state="populated">Gold Holdings</button>
+    <button class="demo-btn" data-state="empty">No Gold Tracked</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Gold Holdings</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- PAGE CONTENT -->
+  <div class="page-content" id="page-content">
+
+    <div id="view-populated">
+
+      <!-- Hero: combined gold exposure -->
+      <div class="glass-card glass-card--hero">
+        <div class="loans-hero-label" style="font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-secondary); margin-bottom:var(--sp-2);">Combined Gold Exposure</div>
+        <div class="amount-text amount-text--display gradient-text">₹5,50,000</div>
+        <div class="stat-row">
+          <div class="stat-col">
+            <div class="stat-col__label">Total Weight</div>
+            <div class="stat-col__value">76.2 g</div>
+          </div>
+          <div class="stat-col">
+            <div class="stat-col__label">Jewellery Share</div>
+            <div class="stat-col__value">88%</div>
+          </div>
+          <div class="stat-col">
+            <div class="stat-col__label">Digital Share</div>
+            <div class="stat-col__value">12%</div>
+          </div>
+        </div>
+        <div class="gold-split-bar">
+          <div class="gold-split-bar__seg--jewellery" style="width:88%;"></div>
+          <div class="gold-split-bar__seg--digital" style="width:12%;"></div>
+        </div>
+        <div class="gold-legend">
+          <span><span class="gold-legend__dot" style="background:var(--primary);"></span>Jewellery ₹4,86,200</span>
+          <span><span class="gold-legend__dot" style="background:#F59E0B;"></span>Digital ₹63,800</span>
+        </div>
+      </div>
+
+      <!-- Jewellery -->
+      <div class="section">
+        <div class="section-title">Physical Jewellery</div>
+        <div class="list-row" style="cursor:default;">
+          <div class="list-row__icon list-row__icon--warning">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+          </div>
+          <div class="list-row__info">
+            <div class="list-row__label">Family Jewellery (Necklace, Bangles, Rings)</div>
+            <div class="list-row__meta">68 grams · 22K purity</div>
+          </div>
+          <div class="list-row__amount-row">
+            <div class="list-row__amount">₹4,86,200</div>
+            <div class="list-row__amount-caption">@ ₹7,150/g (22K rate, 12 Jul 2026)</div>
+          </div>
+        </div>
+        <div class="surface-card mt-3">
+          <div class="detail-row">
+            <span class="detail-row__label">Purity</span>
+            <span class="detail-row__value">22 Karat (91.6% fine)</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-row__label">Storage</span>
+            <span class="detail-row__value">Bank locker</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-row__label">Insurance Cover</span>
+            <span class="detail-row__value mono">₹5,00,000 (home contents policy rider)</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-row__label">Valuation Method</span>
+            <span class="detail-row__value">Spot rate × weight, less making charges not resellable</span>
+          </div>
+        </div>
+        <div class="form-helper mt-2">
+          Making charges (typically 8–25% at purchase) are sunk cost and excluded from this valuation — resale value tracks only the metal content, not the design premium you paid.
+        </div>
+      </div>
+
+      <!-- Digital gold -->
+      <div class="section">
+        <div class="section-title">Digital Gold</div>
+        <div class="list-row" style="cursor:default;">
+          <div class="list-row__icon" style="background:linear-gradient(135deg,#D97706,#F59E0B);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <div class="list-row__info">
+            <div class="list-row__label">Groww Digital Gold</div>
+            <div class="list-row__meta">8.2 grams · 24K (999 purity) · SafeGold-backed vault</div>
+          </div>
+          <div class="list-row__amount-row">
+            <div class="list-row__amount">₹63,800</div>
+            <div class="list-row__amount-caption">@ ₹7,780/g (24K rate, 12 Jul 2026)</div>
+          </div>
+        </div>
+        <div class="form-helper mt-2">
+          Digital gold is unregulated by SEBI/RBI directly (backed by the platform's bullion partner) and has no long-term holding cap enforced by most apps — treat it as a convenience buy, not a substitute for SGB or Gold ETF for large allocations.
+        </div>
+      </div>
+
+    </div><!-- /view-populated -->
+
+    <!-- Empty state -->
+    <div id="view-empty" style="display:none;">
+      <div class="empty-state">
+        <div class="empty-state__icon">🪙</div>
+        <div class="empty-state__title">No Gold Holdings Tracked</div>
+        <div class="empty-state__body">Add family jewellery or digital gold purchases to see your combined gold exposure alongside your other investments.</div>
+        <a href="index.html" class="btn btn--primary" style="min-width:180px; text-decoration:none;">+ Add Gold Holding</a>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ── Theme toggle (matches other pages) ── */
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+
+  /* ── Demo bar: Populated / Empty ── */
+  AG.initDemoBar({
+    populated: () => {
+      document.getElementById('view-populated').style.display = '';
+      document.getElementById('view-empty').style.display = 'none';
+    },
+    empty: () => {
+      document.getElementById('view-populated').style.display = 'none';
+      document.getElementById('view-empty').style.display = '';
+    },
+  });
+</script>
+</body>
+</html>
