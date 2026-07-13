@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — FD Calculator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* No demo-bar on this page — anchor the fixed top-bar to the true top */
+    :root { --demo-bar-h: 0px; }
+
+    .calc-field { margin-bottom: var(--sp-5); }
+    .calc-field__head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: var(--sp-2); }
+    .calc-field__label { font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--text-secondary); }
+    .calc-field__value { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-size: 15px; font-weight: 700; color: var(--primary); }
+    input[type="range"].calc-slider {
+      -webkit-appearance: none; appearance: none;
+      width: 100%; height: 6px; border-radius: var(--r-full);
+      background: var(--border); outline: none; cursor: pointer;
+    }
+    input[type="range"].calc-slider::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--primary); border: 3px solid var(--surface);
+      box-shadow: 0 2px 8px rgba(13,148,136,.4); cursor: pointer;
+    }
+    input[type="range"].calc-slider::-moz-range-thumb {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--primary); border: 3px solid var(--surface);
+      box-shadow: 0 2px 8px rgba(13,148,136,.4); cursor: pointer;
+    }
+    .calc-slider-range { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-top: var(--sp-1); }
+
+    .calc-result-hero { text-align: center; padding: var(--sp-2) 0 var(--sp-4); }
+    .calc-result-hero__label { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: var(--sp-2); }
+    .calc-result-hero__value { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-size: 32px; font-weight: 700; letter-spacing: -0.5px; }
+
+    .calc-split { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); margin-top: var(--sp-4); }
+    .calc-split__cell { background: var(--surface-raised); border-radius: var(--r-lg); padding: var(--sp-3) var(--sp-4); text-align: center; }
+    .calc-split__label { font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
+    .calc-split__value { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-size: 16px; font-weight: 700; }
+
+    .seg-row { display: flex; background: var(--surface-raised); border-radius: var(--r-md); padding: 3px; gap: 2px; }
+    .seg-row__btn {
+      flex: 1; text-align: center; padding: 8px 4px;
+      font-size: 12.5px; font-weight: 600; color: var(--text-secondary);
+      border-radius: var(--r-sm); cursor: pointer;
+      transition: background var(--dur-fast), color var(--dur-fast), box-shadow var(--dur-fast);
+    }
+    .seg-row__btn.selected { background: var(--surface); color: var(--primary); box-shadow: var(--sh-sm); }
+
+    .tds-strip {
+      display: flex; align-items: flex-start; gap: var(--sp-3);
+      margin-top: var(--sp-4); padding: var(--sp-3) var(--sp-4);
+      border-radius: var(--r-lg); font-size: 12.5px; font-weight: 500; line-height: 1.55;
+    }
+    .tds-strip--ok   { background: var(--success-light); color: var(--success); }
+    .tds-strip--warn { background: var(--warning-light); color: var(--warning); }
+
+    .calc-note { font-size: 12px; color: var(--text-muted); line-height: 1.6; margin-top: var(--sp-4); padding: var(--sp-3) var(--sp-4); background: var(--surface-raised); border-radius: var(--r-lg); }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">FD Calculator</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <div class="page-content">
+
+    <!-- Result -->
+    <div class="glass-card glass-card--hero" style="margin-bottom:var(--sp-5);">
+      <div class="calc-result-hero">
+        <div class="calc-result-hero__label">Maturity Value</div>
+        <div class="calc-result-hero__value gradient-text" id="r-maturity">₹0</div>
+      </div>
+      <div class="calc-split">
+        <div class="calc-split__cell">
+          <div class="calc-split__label">Principal</div>
+          <div class="calc-split__value" id="r-principal">₹0</div>
+        </div>
+        <div class="calc-split__cell">
+          <div class="calc-split__label">Interest Earned</div>
+          <div class="calc-split__value text-success" id="r-interest">₹0</div>
+        </div>
+      </div>
+      <div class="tds-strip tds-strip--ok" id="tds-strip">
+        <span style="flex-shrink:0;">ⓘ</span>
+        <span id="tds-text"></span>
+      </div>
+    </div>
+
+    <!-- Inputs -->
+    <div class="surface-card" style="padding:var(--sp-5);">
+
+      <div class="calc-field">
+        <div class="calc-field__head">
+          <span class="calc-field__label">Deposit Amount</span>
+          <span class="calc-field__value" id="v-principal">₹5,00,000</span>
+        </div>
+        <input type="range" class="calc-slider" id="in-principal" min="10000" max="5000000" step="10000" value="500000">
+        <div class="calc-slider-range"><span>₹10K</span><span>₹50L</span></div>
+      </div>
+
+      <div class="calc-field">
+        <div class="calc-field__head">
+          <span class="calc-field__label">Interest Rate (p.a.)</span>
+          <span class="calc-field__value" id="v-rate">7.25%</span>
+        </div>
+        <input type="range" class="calc-slider" id="in-rate" min="3" max="9.5" step="0.05" value="7.25">
+        <div class="calc-slider-range"><span>3%</span><span>9.5%</span></div>
+      </div>
+
+      <div class="calc-field">
+        <div class="calc-field__head">
+          <span class="calc-field__label">Tenure</span>
+          <span class="calc-field__value" id="v-tenure">3 years</span>
+        </div>
+        <input type="range" class="calc-slider" id="in-tenure" min="3" max="120" step="3" value="36">
+        <div class="calc-slider-range"><span>3 mo</span><span>10 yrs</span></div>
+      </div>
+
+      <div class="calc-field" style="margin-bottom:0;">
+        <div class="calc-field__head" style="margin-bottom:var(--sp-2);">
+          <span class="calc-field__label">Compounding</span>
+        </div>
+        <div class="seg-row" id="seg-compound">
+          <div class="seg-row__btn selected" data-n="4">Quarterly</div>
+          <div class="seg-row__btn" data-n="2">Half-yearly</div>
+          <div class="seg-row__btn" data-n="1">Yearly</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="calc-note">
+      ⓘ M = P × (1 + r/n)^(n×t). Most Indian bank FDs compound quarterly. Interest is fully taxable at your slab rate; the TDS note above tracks the ₹40,000/FY per-bank deduction threshold (₹50,000 for senior citizens). See Vikas's real SBI FD in <a href="../bank-accounts/fd-rd.html" style="color:var(--primary); font-weight:600;">Bank Accounts</a>.
+    </div>
+
+  </div><!-- /page-content -->
+
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2"/></svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      <span>Transactions</span>
+    </a>
+    <a href="../investments/index.html" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span>Invest</span>
+    </a>
+    <a href="../settings/index.html" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+<script src="../assets/nav.js"></script>
+<script>
+  let compoundingsPerYear = 4;
+
+  document.querySelectorAll('#seg-compound .seg-row__btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#seg-compound .seg-row__btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      compoundingsPerYear = Number(btn.dataset.n);
+      recompute();
+    });
+  });
+
+  function tenureLabel(months) {
+    if (months < 12) return months + ' months';
+    const y = Math.floor(months / 12), m = months % 12;
+    return y + (y === 1 ? ' year' : ' years') + (m ? ' ' + m + ' mo' : '');
+  }
+
+  function recompute() {
+    const pRupees   = Number(document.getElementById('in-principal').value);
+    const annualPct = Number(document.getElementById('in-rate').value);
+    const months    = Number(document.getElementById('in-tenure').value);
+
+    document.getElementById('v-principal').textContent = AG.formatINR(pRupees * 100, { compact: pRupees >= 10000000 });
+    document.getElementById('v-rate').textContent      = annualPct.toFixed(2) + '%';
+    document.getElementById('v-tenure').textContent    = tenureLabel(months);
+
+    const pPaise = pRupees * 100;
+    const n = compoundingsPerYear;
+    const t = months / 12;
+    const maturityPaise = Math.round(pPaise * Math.pow(1 + (annualPct / 100) / n, n * t));
+    const interestPaise = maturityPaise - pPaise;
+
+    document.getElementById('r-maturity').textContent  = AG.formatINR(maturityPaise, { compact: maturityPaise >= 1000000000 });
+    document.getElementById('r-principal').textContent = AG.formatINR(pPaise, { compact: pPaise >= 1000000000 });
+    document.getElementById('r-interest').textContent  = '+' + AG.formatINR(interestPaise, { compact: interestPaise >= 1000000000 });
+
+    // TDS threshold awareness: interest earned in the FIRST full FY (approximation: simple 1-year slice)
+    const fyInterestPaise = Math.round(pPaise * Math.pow(1 + (annualPct / 100) / n, n * Math.min(1, t))) - pPaise;
+    const strip = document.getElementById('tds-strip');
+    strip.classList.remove('tds-strip--ok', 'tds-strip--warn');
+    if (fyInterestPaise > 4000000) {
+      strip.classList.add('tds-strip--warn');
+      document.getElementById('tds-text').textContent =
+        'Interest ≈ ' + AG.formatINR(fyInterestPaise) + ' in the first year — above the ₹40,000/FY threshold, so the bank will deduct 10% TDS (claimable against your total tax).';
+    } else {
+      strip.classList.add('tds-strip--ok');
+      document.getElementById('tds-text').textContent =
+        'Interest ≈ ' + AG.formatINR(fyInterestPaise) + ' in the first year — under the ₹40,000/FY TDS threshold for this deposit alone.';
+    }
+  }
+
+  ['in-principal', 'in-rate', 'in-tenure'].forEach(id => {
+    document.getElementById(id).addEventListener('input', recompute);
+  });
+  recompute();
+</script>
+</body>
+</html>

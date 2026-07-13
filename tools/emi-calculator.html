@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — EMI Calculator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* No demo-bar on this page — anchor the fixed top-bar to the true top */
+    :root { --demo-bar-h: 0px; }
+
+    .calc-field { margin-bottom: var(--sp-5); }
+    .calc-field__head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: var(--sp-2); }
+    .calc-field__label { font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--text-secondary); }
+    .calc-field__value { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-size: 15px; font-weight: 700; color: var(--primary); }
+    input[type="range"].calc-slider {
+      -webkit-appearance: none; appearance: none;
+      width: 100%; height: 6px; border-radius: var(--r-full);
+      background: var(--border); outline: none; cursor: pointer;
+    }
+    input[type="range"].calc-slider::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--primary); border: 3px solid var(--surface);
+      box-shadow: 0 2px 8px rgba(13,148,136,.4); cursor: pointer;
+    }
+    input[type="range"].calc-slider::-moz-range-thumb {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--primary); border: 3px solid var(--surface);
+      box-shadow: 0 2px 8px rgba(13,148,136,.4); cursor: pointer;
+    }
+    .calc-slider-range { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-top: var(--sp-1); }
+
+    .calc-result-hero { text-align: center; padding: var(--sp-2) 0 var(--sp-4); }
+    .calc-result-hero__label { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: var(--sp-2); }
+    .calc-result-hero__value { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-size: 32px; font-weight: 700; letter-spacing: -0.5px; }
+    .calc-result-hero__per { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+
+    .calc-split { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); margin-top: var(--sp-4); }
+    .calc-split__cell { background: var(--surface-raised); border-radius: var(--r-lg); padding: var(--sp-3) var(--sp-4); text-align: center; }
+    .calc-split__label { font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
+    .calc-split__value { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-size: 16px; font-weight: 700; }
+
+    .calc-ratio-bar { height: 10px; border-radius: var(--r-full); overflow: hidden; display: flex; margin-top: var(--sp-4); }
+    .calc-ratio-bar__principal { background: var(--border-strong); transition: width var(--dur-med) var(--ease-out); }
+    .calc-ratio-bar__interest { background: var(--grad-danger); transition: width var(--dur-med) var(--ease-out); }
+    .calc-ratio-legend { display: flex; gap: var(--sp-4); justify-content: center; margin-top: var(--sp-2); font-size: 11px; color: var(--text-secondary); }
+    .calc-ratio-legend span::before { content:''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
+    .calc-ratio-legend .lg-principal::before { background: var(--border-strong); }
+    .calc-ratio-legend .lg-interest::before { background: var(--error); }
+
+    .calc-note { font-size: 12px; color: var(--text-muted); line-height: 1.6; margin-top: var(--sp-4); padding: var(--sp-3) var(--sp-4); background: var(--surface-raised); border-radius: var(--r-lg); }
+
+    .dti-strip {
+      display: flex; align-items: center; gap: var(--sp-3);
+      margin-top: var(--sp-4); padding: var(--sp-3) var(--sp-4);
+      border-radius: var(--r-lg); font-size: 12.5px; font-weight: 500;
+    }
+    .dti-strip--ok   { background: var(--success-light); color: var(--success); }
+    .dti-strip--warn { background: var(--warning-light); color: var(--warning); }
+    .dti-strip--high { background: var(--error-light);   color: var(--error); }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">EMI Calculator</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <div class="page-content">
+
+    <!-- Result -->
+    <div class="glass-card glass-card--hero" style="margin-bottom:var(--sp-5);">
+      <div class="calc-result-hero">
+        <div class="calc-result-hero__label">Monthly EMI</div>
+        <div class="calc-result-hero__value gradient-text" id="r-emi">₹0</div>
+        <div class="calc-result-hero__per">per month</div>
+      </div>
+      <div class="calc-ratio-bar">
+        <div class="calc-ratio-bar__principal" id="bar-principal" style="width:50%;"></div>
+        <div class="calc-ratio-bar__interest" id="bar-interest" style="width:50%;"></div>
+      </div>
+      <div class="calc-ratio-legend">
+        <span class="lg-principal">Principal</span>
+        <span class="lg-interest">Total interest</span>
+      </div>
+      <div class="calc-split">
+        <div class="calc-split__cell">
+          <div class="calc-split__label">Total Interest</div>
+          <div class="calc-split__value text-error" id="r-interest">₹0</div>
+        </div>
+        <div class="calc-split__cell">
+          <div class="calc-split__label">Total Payment</div>
+          <div class="calc-split__value" id="r-total">₹0</div>
+        </div>
+      </div>
+      <div class="dti-strip dti-strip--ok" id="dti-strip">
+        <span id="dti-text">EMI is 0% of Vikas's ₹1,20,000 monthly income</span>
+      </div>
+    </div>
+
+    <!-- Inputs -->
+    <div class="surface-card" style="padding:var(--sp-5);">
+
+      <div class="calc-field">
+        <div class="calc-field__head">
+          <span class="calc-field__label">Loan Amount</span>
+          <span class="calc-field__value" id="v-principal">₹25,00,000</span>
+        </div>
+        <input type="range" class="calc-slider" id="in-principal" min="50000" max="10000000" step="50000" value="2500000">
+        <div class="calc-slider-range"><span>₹50K</span><span>₹1 Cr</span></div>
+      </div>
+
+      <div class="calc-field">
+        <div class="calc-field__head">
+          <span class="calc-field__label">Interest Rate (p.a.)</span>
+          <span class="calc-field__value" id="v-rate">8.5%</span>
+        </div>
+        <input type="range" class="calc-slider" id="in-rate" min="6" max="18" step="0.1" value="8.5">
+        <div class="calc-slider-range"><span>6%</span><span>18%</span></div>
+      </div>
+
+      <div class="calc-field" style="margin-bottom:0;">
+        <div class="calc-field__head">
+          <span class="calc-field__label">Tenure</span>
+          <span class="calc-field__value" id="v-tenure">15 years</span>
+        </div>
+        <input type="range" class="calc-slider" id="in-tenure" min="1" max="30" step="1" value="15">
+        <div class="calc-slider-range"><span>1 yr</span><span>30 yrs</span></div>
+      </div>
+
+    </div>
+
+    <div class="calc-note">
+      ⓘ Standard reducing-balance formula: EMI = P·r·(1+r)ⁿ / ((1+r)ⁿ−1). Compare against Vikas's real loans — Home ₹38,500/mo @8.5% and Car ₹12,000/mo @9.5% — in <a href="../loans/index.html" style="color:var(--primary); font-weight:600;">Loans</a>, or test a pre-payment in the <a href="../loans/sandbox.html" style="color:var(--primary); font-weight:600;">Pre-closure Sandbox</a>.
+    </div>
+
+  </div><!-- /page-content -->
+
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2"/></svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      <span>Transactions</span>
+    </a>
+    <a href="../investments/index.html" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span>Invest</span>
+    </a>
+    <a href="../settings/index.html" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+<script src="../assets/nav.js"></script>
+<script>
+  const MONTHLY_INCOME_PAISE = 12000000; // ₹1,20,000 — Vikas's salary
+
+  function recompute() {
+    const pRupees   = Number(document.getElementById('in-principal').value);
+    const annualPct = Number(document.getElementById('in-rate').value);
+    const years     = Number(document.getElementById('in-tenure').value);
+
+    document.getElementById('v-principal').textContent = AG.formatINR(pRupees * 100, { compact: pRupees >= 10000000 });
+    document.getElementById('v-rate').textContent      = annualPct.toFixed(1) + '%';
+    document.getElementById('v-tenure').textContent    = years + (years === 1 ? ' year' : ' years');
+
+    const n = years * 12;
+    const r = annualPct / 12 / 100;
+    const pPaise = pRupees * 100;
+    const emiPaise = r === 0
+      ? Math.round(pPaise / n)
+      : Math.round(pPaise * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1));
+    const totalPaise = emiPaise * n;
+    const interestPaise = totalPaise - pPaise;
+
+    document.getElementById('r-emi').textContent      = AG.formatINR(emiPaise);
+    document.getElementById('r-interest').textContent = AG.formatINR(interestPaise, { compact: interestPaise >= 1000000000 });
+    document.getElementById('r-total').textContent    = AG.formatINR(totalPaise, { compact: totalPaise >= 1000000000 });
+
+    const prinPct = Math.max(4, Math.min(96, (pPaise / totalPaise) * 100));
+    document.getElementById('bar-principal').style.width = prinPct + '%';
+    document.getElementById('bar-interest').style.width = (100 - prinPct) + '%';
+
+    // DTI awareness strip (matches the 40% caution threshold used in the Health Score)
+    const dtiPct = (emiPaise / MONTHLY_INCOME_PAISE) * 100;
+    const strip = document.getElementById('dti-strip');
+    strip.classList.remove('dti-strip--ok', 'dti-strip--warn', 'dti-strip--high');
+    let cls = 'dti-strip--ok', note = 'comfortable';
+    if (dtiPct > 40) { cls = 'dti-strip--high'; note = 'above the 40% caution threshold'; }
+    else if (dtiPct > 30) { cls = 'dti-strip--warn'; note = 'getting heavy'; }
+    strip.classList.add(cls);
+    document.getElementById('dti-text').textContent =
+      'This EMI alone is ' + dtiPct.toFixed(1) + '% of Vikas’s ₹1,20,000 monthly income — ' + note + '.';
+  }
+
+  ['in-principal', 'in-rate', 'in-tenure'].forEach(id => {
+    document.getElementById(id).addEventListener('input', recompute);
+  });
+  recompute();
+</script>
+</body>
+</html>

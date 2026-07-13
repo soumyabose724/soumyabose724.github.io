@@ -105,6 +105,53 @@
 
     /* ── Footer action bar (fixed, above bottom-nav) ── */
     .page-content--form { padding-bottom: calc(var(--bottom-nav-h) + 76px + var(--sp-6)); }
+
+    /* ── Paste UPI / SMS parser ── */
+    .sms-paste {
+      background: var(--surface); border: 1.5px dashed var(--primary);
+      border-radius: var(--r-xl); margin-bottom: var(--sp-4);
+      overflow: hidden;
+    }
+    .sms-paste__toggle {
+      width: 100%; display: flex; align-items: center; gap: var(--sp-3);
+      padding: var(--sp-3) var(--sp-4); color: var(--text-primary);
+      transition: background var(--dur-fast);
+    }
+    .sms-paste__toggle:hover { background: var(--primary-xlight); }
+    .sms-paste__toggle-icon {
+      width: 34px; height: 34px; border-radius: var(--r-md); flex-shrink: 0;
+      background: var(--grad-primary); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .sms-paste__chevron {
+      color: var(--text-muted); font-size: 14px;
+      transition: transform var(--dur-base) var(--ease-out);
+    }
+    .sms-paste.open .sms-paste__chevron { transform: rotate(180deg); }
+    .sms-paste__body {
+      max-height: 0; overflow: hidden;
+      transition: max-height var(--dur-med) var(--ease-out);
+      padding: 0 var(--sp-4);
+    }
+    .sms-paste.open .sms-paste__body { max-height: 340px; padding-bottom: var(--sp-4); }
+    .sms-paste__input {
+      width: 100%; box-sizing: border-box; resize: none;
+      background: var(--surface-raised); border: 1.5px solid var(--border);
+      border-radius: var(--r-lg); padding: var(--sp-3);
+      font-size: 13px; line-height: 1.5; color: var(--text-primary);
+      font-family: 'JetBrains Mono', monospace;
+      transition: border-color var(--dur-fast), box-shadow var(--dur-fast);
+    }
+    .sms-paste__input:focus { outline: none; border-color: var(--primary); box-shadow: var(--ring); }
+    .sms-paste__input::placeholder { color: var(--text-muted); font-family: 'Inter', sans-serif; }
+    .sms-paste__actions { display: flex; justify-content: flex-end; gap: var(--sp-2); margin-top: var(--sp-3); }
+    .sms-paste__result {
+      display: none; align-items: flex-start; gap: var(--sp-2);
+      margin-top: var(--sp-3); padding: var(--sp-3);
+      border-radius: var(--r-lg); font-size: 12.5px; line-height: 1.55; font-weight: 500;
+    }
+    .sms-paste__result.ok    { display: flex; background: var(--success-light); color: var(--success); }
+    .sms-paste__result.fail  { display: flex; background: var(--error-light);   color: var(--error); }
     .form-footer-bar {
       position: fixed; bottom: var(--bottom-nav-h); left: 50%; transform: translateX(-50%);
       width: 100%; max-width: var(--page-max);
@@ -142,6 +189,28 @@
        PAGE CONTENT
   ═══════════════════════════════════════════ -->
   <div class="page-content page-content--form">
+
+    <!-- ═══ PASTE UPI / SMS (on-device parse — Phase 4 intelligence preview) ═══ -->
+    <div class="sms-paste" id="sms-paste">
+      <button class="sms-paste__toggle" id="sms-toggle" onclick="toggleSmsPaste()">
+        <span class="sms-paste__toggle-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9z"/></svg>
+        </span>
+        <span style="flex:1; text-align:left;">
+          <span style="display:block; font-size:13.5px; font-weight:700;">Paste UPI / SMS alert</span>
+          <span style="display:block; font-size:11.5px; color:var(--text-muted); margin-top:1px;">Auto-fill this form from a bank message — parsed on-device</span>
+        </span>
+        <span class="sms-paste__chevron" id="sms-chevron">▾</span>
+      </button>
+      <div class="sms-paste__body" id="sms-body">
+        <textarea class="sms-paste__input" id="sms-input" rows="3" placeholder="e.g. Rs.680.00 debited from HDFC Bank A/c **8912 on 20-06-26 to VPA swiggy@icici (UPI Ref 5162...)"></textarea>
+        <div class="sms-paste__actions">
+          <button class="btn btn--ghost btn--sm" onclick="fillSampleSms()">Try a sample</button>
+          <button class="btn btn--primary btn--sm" onclick="parseSms()">Parse &amp; Fill</button>
+        </div>
+        <div class="sms-paste__result" id="sms-result"></div>
+      </div>
+    </div>
 
     <!-- Type segmented control -->
     <div class="type-tabs" id="type-tabs">
@@ -544,6 +613,107 @@
   }
 
   updateInvestmentAmount();
+
+  /* ═══ Paste UPI / SMS parser (rule-based, on-device — Phase 4 intelligence preview) ═══ */
+  function toggleSmsPaste() {
+    document.getElementById('sms-paste').classList.toggle('open');
+  }
+
+  const SAMPLE_SMS = 'Rs.680.00 debited from HDFC Bank A/c **8912 on 20-06-26 to VPA swiggy@icici (UPI Ref No 516723987120). Not you? Call 18002586161.';
+
+  /* Payee → envelope hints, mirroring the category_rule engine (EXACT → CONTAINS priority) */
+  const PAYEE_RULES = [
+    { match: 'swiggy',    payee: 'Swiggy',          envelope: 'Dining Out' },
+    { match: 'zomato',    payee: 'Zomato',          envelope: 'Dining Out' },
+    { match: 'bigbasket', payee: 'BigBasket',       envelope: 'Groceries' },
+    { match: 'bigbazaar', payee: 'Big Bazaar',      envelope: 'Groceries' },
+    { match: 'uber',      payee: 'Uber',            envelope: 'Fuel & Transport' },
+    { match: 'ola',       payee: 'Ola',             envelope: 'Fuel & Transport' },
+    { match: 'bescom',    payee: 'BESCOM',          envelope: 'Utilities' },
+    { match: 'jio',       payee: 'Jio',             envelope: 'Mobile & Internet' },
+    { match: 'airtel',    payee: 'Airtel',          envelope: 'Mobile & Internet' },
+    { match: 'apollo',    payee: 'Apollo Pharmacy', envelope: 'Healthcare' },
+  ];
+
+  function fillSampleSms() {
+    document.getElementById('sms-input').value = SAMPLE_SMS;
+    document.getElementById('sms-result').className = 'sms-paste__result';
+  }
+
+  function parseSms() {
+    const text = document.getElementById('sms-input').value.trim();
+    const resultEl = document.getElementById('sms-result');
+    if (!text) {
+      resultEl.className = 'sms-paste__result fail';
+      resultEl.innerHTML = '<span>✕</span><span>Paste a bank SMS or UPI alert first — or tap "Try a sample".</span>';
+      return;
+    }
+
+    // Amount: Rs.680.00 / INR 680 / ₹680
+    const amtMatch = text.match(/(?:Rs\.?|INR|₹)\s*([\d,]+(?:\.\d{1,2})?)/i);
+    // Direction: debited vs credited
+    const isCredit = /credited/i.test(text) && !/debited/i.test(text);
+    // Date: 20-06-26 / 20-06-2026 / 20/06/26
+    const dateMatch = text.match(/\b(\d{2})[-\/](\d{2})[-\/](\d{2,4})\b/);
+    // VPA payee: to VPA swiggy@icici
+    const vpaMatch = text.match(/VPA\s+([a-z0-9._-]+)@/i);
+    // Account: A/c **8912
+    const acctMatch = text.match(/A\/c\s+[X*]*(\d{4})/i);
+
+    if (!amtMatch) {
+      resultEl.className = 'sms-paste__result fail';
+      resultEl.innerHTML = '<span>✕</span><span>Couldn\'t find an amount in that message. ArthaGrid recognises the standard "Rs.X debited/credited" bank formats.</span>';
+      return;
+    }
+
+    const rupees = parseFloat(amtMatch[1].replace(/,/g, ''));
+    const paise = Math.round(rupees * 100);
+
+    // Resolve payee + envelope via the rule table
+    let payee = null, envelope = null;
+    if (vpaMatch) {
+      const handle = vpaMatch[1].toLowerCase();
+      const rule = PAYEE_RULES.find(r => handle.includes(r.match));
+      if (rule) { payee = rule.payee; envelope = rule.envelope; }
+      else { payee = vpaMatch[1]; }
+    }
+
+    // Resolve date to yyyy-mm-dd
+    let isoDate = null;
+    if (dateMatch) {
+      const yy = dateMatch[3].length === 2 ? '20' + dateMatch[3] : dateMatch[3];
+      isoDate = yy + '-' + dateMatch[2] + '-' + dateMatch[1];
+    }
+
+    // Fill the form: switch to the right type, then populate
+    const parts = [];
+    if (isCredit) {
+      selectType('income');
+      document.getElementById('inc-amount').value = rupees.toLocaleString('en-IN');
+      if (isoDate) document.getElementById('inc-date').value = isoDate;
+      parts.push('Income ' + AG.formatINR(paise));
+    } else {
+      selectType('expense');
+      document.getElementById('exp-amount').value = rupees.toLocaleString('en-IN');
+      if (isoDate) document.getElementById('exp-date').value = isoDate;
+      if (payee) { document.getElementById('exp-payee').value = payee; parts.push(payee); }
+      parts.push('Expense ' + AG.formatINR(paise));
+      if (envelope) {
+        const sel = document.getElementById('exp-envelope');
+        for (const opt of sel.options) { if (opt.text === envelope) { sel.value = opt.value || opt.text; break; } }
+        parts.push('→ ' + envelope + ' envelope');
+      }
+      if (acctMatch) {
+        const sel = document.getElementById('exp-account');
+        for (const opt of sel.options) { if (opt.text.includes(acctMatch[1])) { sel.value = opt.value || opt.text; break; } }
+      }
+    }
+    if (isoDate) parts.push('dated ' + isoDate);
+
+    resultEl.className = 'sms-paste__result ok';
+    resultEl.innerHTML = '<span>✓</span><span>Parsed: <strong>' + parts.join(' · ') + '</strong>. Review the fields below and Save — suggestions are never applied without your confirmation.</span>';
+    AG.showToast('Form filled from SMS — review before saving', 'info');
+  }
 </script>
 </body>
 </html>

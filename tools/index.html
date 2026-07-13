@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Calculators</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* No demo-bar on this page — anchor the fixed top-bar to the true top */
+    :root { --demo-bar-h: 0px; }
+
+    .tool-card {
+      display: flex; align-items: center; gap: var(--sp-4);
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-xl); padding: var(--sp-5);
+      margin-bottom: var(--sp-3); text-decoration: none; color: inherit;
+      transition: background var(--dur-fast), box-shadow var(--dur-fast), transform var(--dur-fast);
+      animation: card-in var(--dur-med) var(--ease-out) both;
+    }
+    .tool-card:hover { background: var(--primary-xlight); box-shadow: var(--sh-md); transform: translateY(-1px); }
+    .tool-card:active { transform: scale(0.98); }
+    .tool-card__icon {
+      width: 52px; height: 52px; border-radius: var(--r-xl); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; color: #fff;
+    }
+    .tool-card__title { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+    .tool-card__sub { font-size: 12.5px; color: var(--text-secondary); margin-top: 3px; line-height: 1.5; }
+    .tool-card:nth-child(1) { animation-delay: 0ms; }
+    .tool-card:nth-child(2) { animation-delay: 60ms; }
+    .tool-card:nth-child(3) { animation-delay: 120ms; }
+
+    .tools-note {
+      font-size: 12px; color: var(--text-muted); line-height: 1.6;
+      margin-top: var(--sp-5); text-align: center; padding: 0 var(--sp-4);
+    }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <div class="top-bar">
+    <a href="../dashboard/index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Calculators</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <div class="page-content">
+
+    <p class="t-body-sm text-secondary" style="margin-bottom:var(--sp-5); line-height:1.6;">
+      Plan before you commit — the same reducing-balance and compounding math ArthaGrid uses everywhere else, as standalone what-if tools.
+    </p>
+
+    <a href="sip-calculator.html" class="tool-card">
+      <div class="tool-card__icon" style="background:var(--grad-primary);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <div style="flex:1; min-width:0;">
+        <div class="tool-card__title">SIP Calculator</div>
+        <div class="tool-card__sub">What a monthly SIP grows into — invested vs. wealth gained over time.</div>
+      </div>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted); flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+
+    <a href="emi-calculator.html" class="tool-card">
+      <div class="tool-card__icon" style="background:var(--grad-danger);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </div>
+      <div style="flex:1; min-width:0;">
+        <div class="tool-card__title">EMI Calculator</div>
+        <div class="tool-card__sub">Reducing-balance EMI for any loan — plus how much of it is interest.</div>
+      </div>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted); flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+
+    <a href="fd-calculator.html" class="tool-card">
+      <div class="tool-card__icon" style="background:linear-gradient(135deg,#2563EB,#3B82F6);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+      </div>
+      <div style="flex:1; min-width:0;">
+        <div class="tool-card__title">FD Calculator</div>
+        <div class="tool-card__sub">Fixed deposit maturity with quarterly compounding, incl. TDS awareness.</div>
+      </div>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted); flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+
+    <p class="tools-note">
+      Illustrative projections only — market returns are not guaranteed and actual bank rates vary. These tools store nothing.
+    </p>
+
+  </div><!-- /page-content -->
+
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2"/></svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      <span>Transactions</span>
+    </a>
+    <a href="../investments/index.html" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span>Invest</span>
+    </a>
+    <a href="../settings/index.html" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+<script src="../assets/nav.js"></script>
+</body>
+</html>

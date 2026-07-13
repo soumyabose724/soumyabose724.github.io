@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — SIP Calculator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* No demo-bar on this page — anchor the fixed top-bar to the true top */
+    :root { --demo-bar-h: 0px; }
+
+    /* ── Shared calculator styles ── */
+    .calc-field { margin-bottom: var(--sp-5); }
+    .calc-field__head {
+      display: flex; justify-content: space-between; align-items: baseline;
+      margin-bottom: var(--sp-2);
+    }
+    .calc-field__label {
+      font-size: 12px; font-weight: 600; letter-spacing: .05em;
+      text-transform: uppercase; color: var(--text-secondary);
+    }
+    .calc-field__value {
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+      font-size: 15px; font-weight: 700; color: var(--primary);
+    }
+    input[type="range"].calc-slider {
+      -webkit-appearance: none; appearance: none;
+      width: 100%; height: 6px; border-radius: var(--r-full);
+      background: var(--border); outline: none; cursor: pointer;
+    }
+    input[type="range"].calc-slider::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--primary); border: 3px solid var(--surface);
+      box-shadow: 0 2px 8px rgba(13,148,136,.4); cursor: pointer;
+    }
+    input[type="range"].calc-slider::-moz-range-thumb {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--primary); border: 3px solid var(--surface);
+      box-shadow: 0 2px 8px rgba(13,148,136,.4); cursor: pointer;
+    }
+    .calc-slider-range {
+      display: flex; justify-content: space-between;
+      font-size: 11px; color: var(--text-muted); margin-top: var(--sp-1);
+    }
+
+    .calc-result-hero {
+      text-align: center; padding: var(--sp-2) 0 var(--sp-4);
+    }
+    .calc-result-hero__label {
+      font-size: 11px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--text-muted); margin-bottom: var(--sp-2);
+    }
+    .calc-result-hero__value {
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+      font-size: 32px; font-weight: 700; letter-spacing: -0.5px;
+    }
+    .calc-split {
+      display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3);
+      margin-top: var(--sp-4);
+    }
+    .calc-split__cell {
+      background: var(--surface-raised); border-radius: var(--r-lg);
+      padding: var(--sp-3) var(--sp-4); text-align: center;
+    }
+    .calc-split__label { font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
+    .calc-split__value { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-size: 16px; font-weight: 700; }
+
+    .calc-ratio-bar {
+      height: 10px; border-radius: var(--r-full); overflow: hidden;
+      display: flex; margin-top: var(--sp-4);
+    }
+    .calc-ratio-bar__invested { background: var(--border-strong); transition: width var(--dur-med) var(--ease-out); }
+    .calc-ratio-bar__gain { background: var(--grad-primary); transition: width var(--dur-med) var(--ease-out); }
+    .calc-ratio-legend { display: flex; gap: var(--sp-4); justify-content: center; margin-top: var(--sp-2); font-size: 11px; color: var(--text-secondary); }
+    .calc-ratio-legend span::before { content:''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
+    .calc-ratio-legend .lg-invested::before { background: var(--border-strong); }
+    .calc-ratio-legend .lg-gain::before { background: var(--primary); }
+
+    .calc-note {
+      font-size: 12px; color: var(--text-muted); line-height: 1.6;
+      margin-top: var(--sp-4); padding: var(--sp-3) var(--sp-4);
+      background: var(--surface-raised); border-radius: var(--r-lg);
+    }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">SIP Calculator</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <div class="page-content">
+
+    <!-- Result -->
+    <div class="glass-card glass-card--hero" style="margin-bottom:var(--sp-5);">
+      <div class="calc-result-hero">
+        <div class="calc-result-hero__label">Projected Value</div>
+        <div class="calc-result-hero__value gradient-text" id="r-fv">₹0</div>
+      </div>
+      <div class="calc-ratio-bar">
+        <div class="calc-ratio-bar__invested" id="bar-invested" style="width:50%;"></div>
+        <div class="calc-ratio-bar__gain" id="bar-gain" style="width:50%;"></div>
+      </div>
+      <div class="calc-ratio-legend">
+        <span class="lg-invested">Invested</span>
+        <span class="lg-gain">Wealth gained</span>
+      </div>
+      <div class="calc-split">
+        <div class="calc-split__cell">
+          <div class="calc-split__label">Total Invested</div>
+          <div class="calc-split__value" id="r-invested">₹0</div>
+        </div>
+        <div class="calc-split__cell">
+          <div class="calc-split__label">Wealth Gained</div>
+          <div class="calc-split__value text-success" id="r-gain">₹0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Inputs -->
+    <div class="surface-card" style="padding:var(--sp-5);">
+
+      <div class="calc-field">
+        <div class="calc-field__head">
+          <span class="calc-field__label">Monthly SIP</span>
+          <span class="calc-field__value" id="v-sip">₹18,000</span>
+        </div>
+        <input type="range" class="calc-slider" id="in-sip" min="500" max="100000" step="500" value="18000">
+        <div class="calc-slider-range"><span>₹500</span><span>₹1,00,000</span></div>
+      </div>
+
+      <div class="calc-field">
+        <div class="calc-field__head">
+          <span class="calc-field__label">Expected Return (p.a.)</span>
+          <span class="calc-field__value" id="v-rate">12.0%</span>
+        </div>
+        <input type="range" class="calc-slider" id="in-rate" min="4" max="20" step="0.5" value="12">
+        <div class="calc-slider-range"><span>4%</span><span>20%</span></div>
+      </div>
+
+      <div class="calc-field" style="margin-bottom:0;">
+        <div class="calc-field__head">
+          <span class="calc-field__label">Duration</span>
+          <span class="calc-field__value" id="v-years">10 years</span>
+        </div>
+        <input type="range" class="calc-slider" id="in-years" min="1" max="35" step="1" value="10">
+        <div class="calc-slider-range"><span>1 yr</span><span>35 yrs</span></div>
+      </div>
+
+    </div>
+
+    <div class="calc-note">
+      ⓘ Assumes SIP at the start of each month and steady annual returns compounded monthly. Real equity returns vary year to year — treat this as a planning estimate, not a promise. Vikas's current combined SIP is ₹18,000/mo across 3 funds.
+    </div>
+
+  </div><!-- /page-content -->
+
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2"/></svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      <span>Transactions</span>
+    </a>
+    <a href="../investments/index.html" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span>Invest</span>
+    </a>
+    <a href="../settings/index.html" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+<script src="../assets/nav.js"></script>
+<script>
+  /* All money math in integer paise, matching the app's non-negotiable rule */
+  function recompute() {
+    const sipRupees = Number(document.getElementById('in-sip').value);
+    const annualPct = Number(document.getElementById('in-rate').value);
+    const years     = Number(document.getElementById('in-years').value);
+
+    document.getElementById('v-sip').textContent   = AG.formatINR(sipRupees * 100);
+    document.getElementById('v-rate').textContent  = annualPct.toFixed(1) + '%';
+    document.getElementById('v-years').textContent = years + (years === 1 ? ' year' : ' years');
+
+    const n = years * 12;
+    const i = annualPct / 12 / 100;
+    const sipPaise = sipRupees * 100;
+    // FV of SIP at start of each month: P × [((1+i)^n − 1)/i] × (1+i)
+    const fvPaise = i === 0
+      ? sipPaise * n
+      : Math.round(sipPaise * ((Math.pow(1 + i, n) - 1) / i) * (1 + i));
+    const investedPaise = sipPaise * n;
+    const gainPaise = fvPaise - investedPaise;
+
+    document.getElementById('r-fv').textContent       = AG.formatINR(fvPaise, { compact: fvPaise >= 1000000000 });
+    document.getElementById('r-invested').textContent = AG.formatINR(investedPaise, { compact: investedPaise >= 1000000000 });
+    document.getElementById('r-gain').textContent     = '+' + AG.formatINR(gainPaise, { compact: gainPaise >= 1000000000 });
+
+    const invPct = Math.max(4, Math.min(96, (investedPaise / fvPaise) * 100));
+    document.getElementById('bar-invested').style.width = invPct + '%';
+    document.getElementById('bar-gain').style.width = (100 - invPct) + '%';
+  }
+
+  ['in-sip', 'in-rate', 'in-years'].forEach(id => {
+    document.getElementById(id).addEventListener('input', recompute);
+  });
+  recompute();
+</script>
+</body>
+</html>

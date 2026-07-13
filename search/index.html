@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Search</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* No demo-bar on this page — anchor the fixed top-bar to the true top */
+    :root { --demo-bar-h: 0px; }
+
+    /* Search input lives inside the top bar */
+    .search-input-wrap { flex: 1; position: relative; }
+    .search-input {
+      width: 100%; height: 40px; border-radius: var(--r-full);
+      background: var(--surface-raised); border: 1.5px solid var(--border);
+      padding: 0 38px 0 var(--sp-4); font-size: 14.5px; color: var(--text-primary);
+      transition: border-color var(--dur-fast), box-shadow var(--dur-fast);
+    }
+    .search-input::placeholder { color: var(--text-muted); }
+    .search-input:focus { outline: none; border-color: var(--primary); box-shadow: var(--ring); }
+    .search-clear {
+      position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+      width: 28px; height: 28px; border-radius: 50%;
+      display: none; align-items: center; justify-content: center;
+      color: var(--text-muted); font-size: 13px;
+      transition: background var(--dur-fast);
+    }
+    .search-clear:hover { background: var(--border); color: var(--text-primary); }
+    .search-clear.visible { display: flex; }
+
+    /* Filter chips */
+    .filter-strip {
+      display: flex; gap: var(--sp-2); overflow-x: auto;
+      padding: var(--sp-1) 0 var(--sp-3); scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    .filter-strip::-webkit-scrollbar { display: none; }
+    .filter-chip {
+      height: 32px; padding: 0 var(--sp-4); border-radius: var(--r-full); flex-shrink: 0;
+      background: var(--surface); border: 1.5px solid var(--border);
+      font-size: 12.5px; font-weight: 600; color: var(--text-secondary);
+      cursor: pointer; white-space: nowrap;
+      transition: background var(--dur-fast), color var(--dur-fast), border-color var(--dur-fast);
+    }
+    .filter-chip:hover { border-color: var(--primary); color: var(--primary); }
+    .filter-chip.selected { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+    /* Result group + rows */
+    .result-group { margin-bottom: var(--sp-4); }
+    .result-group__title {
+      font-size: 11px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--text-muted);
+      padding: var(--sp-2) var(--sp-1);
+      display: flex; align-items: center; gap: var(--sp-2);
+    }
+    .result-group__count {
+      background: var(--surface-raised); border: 1px solid var(--border);
+      color: var(--text-muted); font-size: 10px; font-weight: 700;
+      padding: 0 7px; border-radius: var(--r-full);
+    }
+    .result-row {
+      display: flex; align-items: center; gap: var(--sp-3);
+      padding: var(--sp-3) var(--sp-3);
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-lg); margin-bottom: var(--sp-2);
+      text-decoration: none; color: inherit;
+      transition: background var(--dur-fast), box-shadow var(--dur-fast);
+      animation: item-in var(--dur-med) var(--ease-out) both;
+    }
+    .result-row:hover { background: var(--primary-xlight); box-shadow: var(--sh-sm); }
+    .result-row__icon {
+      width: 38px; height: 38px; border-radius: var(--r-md); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; color: #fff;
+    }
+    .result-row__body { flex: 1; min-width: 0; }
+    .result-row__title {
+      font-size: 14px; font-weight: 600; color: var(--text-primary);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .result-row__title mark {
+      background: var(--primary-light); color: var(--primary);
+      border-radius: 3px; padding: 0 1px;
+    }
+    .result-row__meta { font-size: 12px; color: var(--text-muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .result-row__amount {
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+      font-size: 13.5px; font-weight: 600; flex-shrink: 0;
+    }
+
+    /* Recent chips (pre-search state) */
+    .recent-title {
+      font-size: 11px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--text-muted); margin-bottom: var(--sp-3);
+    }
+    .recent-chips { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-bottom: var(--sp-6); }
+    .recent-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      height: 34px; padding: 0 var(--sp-4); border-radius: var(--r-full);
+      background: var(--surface); border: 1.5px solid var(--border);
+      font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer;
+      transition: border-color var(--dur-fast), color var(--dur-fast);
+    }
+    .recent-chip:hover { border-color: var(--primary); color: var(--primary); }
+    .recent-chip svg { color: var(--text-muted); }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <div class="top-bar">
+    <a href="../dashboard/index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <div class="search-input-wrap">
+      <input class="search-input" id="q" type="search" placeholder="Search everything…" autocomplete="off">
+      <button class="search-clear" id="q-clear" aria-label="Clear search">✕</button>
+    </div>
+    <button class="icon-btn" data-theme-toggle aria-label="Toggle theme" style="flex-shrink:0;">
+      <span data-theme-icon style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <div class="page-content">
+
+    <!-- Pre-search state -->
+    <div id="view-idle">
+      <div class="recent-title">Try Searching For</div>
+      <div class="recent-chips">
+        <button class="recent-chip" data-q="Groceries">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Groceries
+        </button>
+        <button class="recent-chip" data-q="HDFC">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          HDFC
+        </button>
+        <button class="recent-chip" data-q="SIP">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          SIP
+        </button>
+        <button class="recent-chip" data-q="Swiggy">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Swiggy
+        </button>
+        <button class="recent-chip" data-q="insurance">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          insurance
+        </button>
+        <button class="recent-chip" data-q="tax">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          tax
+        </button>
+      </div>
+      <p class="t-body-sm text-muted" style="line-height:1.6; text-align:center; padding:0 var(--sp-4);">
+        One search across transactions, envelopes, investments, accounts, loans, policies, and screens — all matched on-device.
+      </p>
+    </div>
+
+    <!-- Results state -->
+    <div id="view-results" style="display:none;">
+      <div class="filter-strip" id="filter-strip">
+        <button class="filter-chip selected" data-cat="all">All</button>
+        <button class="filter-chip" data-cat="txn">Transactions</button>
+        <button class="filter-chip" data-cat="envelope">Envelopes</button>
+        <button class="filter-chip" data-cat="invest">Investments</button>
+        <button class="filter-chip" data-cat="account">Accounts</button>
+        <button class="filter-chip" data-cat="other">More</button>
+      </div>
+      <div id="results"></div>
+      <div class="empty-state" id="no-results" style="display:none;">
+        <div class="empty-state__icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+        <div class="empty-state__title">No matches</div>
+        <div class="empty-state__body">Nothing found for that search. Try a payee name, envelope, fund, bank, or screen name.</div>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2"/></svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      <span>Transactions</span>
+    </a>
+    <a href="../investments/index.html" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span>Invest</span>
+    </a>
+    <a href="../settings/index.html" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+<script src="../assets/nav.js"></script>
+<script>
+  /* ── Unified on-device index — every entry mirrors real data elsewhere in the prototype ── */
+  const GRAD = {
+    txn:      'var(--grad-primary)',
+    income:   'var(--grad-success)',
+    expense:  'var(--grad-danger)',
+    envelope: 'linear-gradient(135deg,#D97706,#F59E0B)',
+    invest:   'linear-gradient(135deg,#2563EB,#3B82F6)',
+    account:  'linear-gradient(135deg,#0EA5E9,#38BDF8)',
+    other:    'linear-gradient(135deg,#8B5CF6,#A78BFA)',
+  };
+  const ICONS = {
+    txn:      '<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>',
+    envelope: '<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2"/>',
+    invest:   '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
+    account:  '<rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>',
+    other:    '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
+  };
+
+  const INDEX = [
+    // Transactions (June 2026 ledger)
+    { cat:'txn', title:'Salary Credit', meta:'Income · 1 Jun · SBI Savings', amount:'+₹1,20,000', pos:true, href:'../transactions/detail.html' },
+    { cat:'txn', title:'HDFC Home Loan EMI', meta:'Loan Payment · 1 Jun', amount:'−₹38,500', href:'../transactions/detail.html' },
+    { cat:'txn', title:'Big Bazaar', meta:'Groceries · 8 Jun · HDFC Current', amount:'−₹8,200', href:'../transactions/detail.html' },
+    { cat:'txn', title:'Swiggy', meta:'Dining Out · 15 Jun · UPI', amount:'−₹1,800', href:'../transactions/detail.html' },
+    { cat:'txn', title:'BESCOM Electricity', meta:'Utilities · 10 Jun', amount:'−₹1,900', href:'../transactions/detail.html' },
+    { cat:'txn', title:'HDFC Flexicap Fund SIP', meta:'Investment · 5 Jun', amount:'−₹12,000', href:'../transactions/detail.html' },
+    { cat:'txn', title:'Barbeque Nation', meta:'Dining Out · 18 Jun', amount:'−₹2,700', href:'../transactions/detail.html' },
+    { cat:'txn', title:'HP Petrol Pump', meta:'Fuel & Transport · 20 Jun · UPI', amount:'−₹2,200', href:'../transactions/detail.html' },
+    { cat:'txn', title:'Uber', meta:'Fuel & Transport · 22 Jun', amount:'−₹900', href:'../transactions/detail.html' },
+    { cat:'txn', title:'HDFC Millennia Payment', meta:'Card Payment · 3 Jun', amount:'−₹15,400', href:'../transactions/detail.html' },
+    // Envelopes (June 2026 budget)
+    { cat:'envelope', title:'Housing EMI', meta:'Envelope · ₹38,500 spent of ₹38,500', href:'../budget/period.html' },
+    { cat:'envelope', title:'Groceries', meta:'Envelope · ₹8,200 spent of ₹12,000', href:'../budget/period.html' },
+    { cat:'envelope', title:'Dining Out', meta:'Envelope · ₹4,500 spent of ₹6,000', href:'../budget/period.html' },
+    { cat:'envelope', title:'Utilities', meta:'Envelope · ₹2,800 spent of ₹5,000', href:'../budget/period.html' },
+    { cat:'envelope', title:'Mobile & Internet', meta:'Envelope · 93% spent — near limit', href:'../budget/period.html' },
+    { cat:'envelope', title:'Fuel & Transport', meta:'Envelope · ₹3,100 spent of ₹4,000', href:'../budget/period.html' },
+    { cat:'envelope', title:'Healthcare', meta:'Envelope · ₹0 spent of ₹3,000', href:'../budget/period.html' },
+    { cat:'envelope', title:'SIP Investments', meta:'Envelope · ₹20,000 of ₹20,000', href:'../budget/period.html' },
+    { cat:'envelope', title:'Education', meta:'Envelope · ₹0 spent of ₹15,000', href:'../budget/period.html' },
+    { cat:'envelope', title:'Emergency Fund', meta:'Envelope · ₹10,000/mo', href:'../budget/period.html' },
+    { cat:'envelope', title:'Vacation Fund', meta:'Envelope · ₹2,000/mo', href:'../budget/period.html' },
+    { cat:'envelope', title:'Insurance', meta:'Envelope · ₹0 spent of ₹2,500', href:'../budget/period.html' },
+    // Investments
+    { cat:'invest', title:'Axis Bluechip Fund', meta:'Mutual Fund · SIP ₹8,000/mo', amount:'₹1,38,000', href:'../investments/mutual-funds.html' },
+    { cat:'invest', title:'Parag Parikh Flexi Cap', meta:'Mutual Fund · SIP ₹6,000/mo', amount:'₹57,000', href:'../investments/mutual-funds.html' },
+    { cat:'invest', title:'HDFC Nifty 50 Index Fund', meta:'Mutual Fund · SIP ₹4,000/mo', amount:'₹13,000', href:'../investments/mutual-funds.html' },
+    { cat:'invest', title:'HDFC Bank', meta:'Equity · Zerodha', href:'../investments/equities.html' },
+    { cat:'invest', title:'TCS', meta:'Equity · Zerodha', href:'../investments/equities.html' },
+    { cat:'invest', title:'Reliance Industries', meta:'Equity · Zerodha', href:'../investments/equities.html' },
+    { cat:'invest', title:'Infosys', meta:'Equity · Zerodha', href:'../investments/equities.html' },
+    { cat:'invest', title:'EPF', meta:'Provident Fund · 8.25% p.a.', amount:'₹1,80,000', href:'../investments/provident.html' },
+    { cat:'invest', title:'PPF', meta:'Public Provident Fund · 7.1% · EEE', amount:'₹2,20,000', href:'../investments/provident.html' },
+    { cat:'invest', title:'NPS Tier 1', meta:'Retirement · 80CCD(1B)', amount:'₹1,60,000', href:'../investments/nps.html' },
+    { cat:'invest', title:'Sovereign Gold Bonds', meta:'SGB · 2.5% + gold price', amount:'₹70,650', href:'../investments/sgb.html' },
+    { cat:'invest', title:'Apple (AAPL)', meta:'US Stock · Vested', href:'../investments/us-stocks.html' },
+    { cat:'invest', title:'ESOP — Nimbus Cloud', meta:'3 of 4 tranches vested', href:'../investments/esop.html' },
+    // Accounts & cards & loans
+    { cat:'account', title:'HDFC Bank Savings ••4821', meta:'Primary salary account', amount:'₹1,84,320', href:'../bank-accounts/detail.html' },
+    { cat:'account', title:'ICICI Bank Savings ••7756', meta:'Secondary savings', amount:'₹62,150', href:'../bank-accounts/detail.html' },
+    { cat:'account', title:'Kotak Mahindra Current ••2214', meta:'Household & freelance', amount:'₹18,940', href:'../bank-accounts/detail.html' },
+    { cat:'account', title:'SBI Fixed Deposit ••3390', meta:'FD · matures 1 Oct 2027', amount:'₹8,50,490', href:'../bank-accounts/fd-rd.html' },
+    { cat:'account', title:'India Post RD ••9012', meta:'RD · ₹5,000/mo', amount:'₹1,00,486', href:'../bank-accounts/fd-rd.html' },
+    { cat:'account', title:'HDFC Bank Regalia ••4521', meta:'Credit Card · 34.9% utilised', href:'../credit-cards/card-detail.html' },
+    { cat:'account', title:'ICICI Amazon Pay ••7788', meta:'Credit Card · 9.2% utilised', href:'../credit-cards/card-detail.html' },
+    { cat:'account', title:'HDFC Home Loan', meta:'8.5% · EMI ₹38,500/mo', amount:'₹37,86,000', href:'../loans/detail.html?loan=home' },
+    { cat:'account', title:'ICICI Car Loan', meta:'9.5% · EMI ₹12,000/mo', amount:'₹6,01,000', href:'../loans/detail.html?loan=car' },
+    // Policies & other screens
+    { cat:'other', title:'HDFC Life Term Insurance', meta:'Policy · ₹1 Cr sum assured', href:'../insurance/policy-detail.html' },
+    { cat:'other', title:'HDFC Ergo Health Floater', meta:'Policy · ₹10L family cover', href:'../insurance/index.html' },
+    { cat:'other', title:'Star Health — Mother', meta:'Policy · ₹5L senior citizen', href:'../insurance/index.html' },
+    { cat:'other', title:'Coverage Gap (HLV)', meta:'Screen · Insurance', href:'../insurance/hlv.html' },
+    { cat:'other', title:'Tax Regime Comparison', meta:'Screen · Old vs New', href:'../tax/index.html' },
+    { cat:'other', title:'Advance Tax Schedule', meta:'Screen · 4 instalments', href:'../tax/advance.html' },
+    { cat:'other', title:'Capital Gains Matrix', meta:'Screen · STCG/LTCG rates', href:'../tax/cg-matrix.html' },
+    { cat:'other', title:'Emergency Fund Runway', meta:'Screen · Tier 1 & 2', href:'../goals/runway.html' },
+    { cat:'other', title:"Child's Education Goal", meta:'Goal · ₹25L by 2038', href:'../goals/detail.html' },
+    { cat:'other', title:'Nomination Matrix', meta:'Screen · Estate Planning', href:'../estate-planning/matrix.html' },
+    { cat:'other', title:'Financial Health Score', meta:'Screen · 74/100', href:'../intelligence/health-score.html' },
+    { cat:'other', title:'SIP Calculator', meta:'Tool · What-if projections', href:'../tools/sip-calculator.html' },
+    { cat:'other', title:'EMI Calculator', meta:'Tool · Reducing balance', href:'../tools/emi-calculator.html' },
+    { cat:'other', title:'FD Calculator', meta:'Tool · Quarterly compounding', href:'../tools/fd-calculator.html' },
+    { cat:'other', title:'Monthly Summary Report', meta:'Screen · Reports', href:'../reports/monthly.html' },
+    { cat:'other', title:'Import Bank Statement', meta:'Screen · CSV / CAS import', href:'../import/index.html' },
+  ];
+
+  const GROUP_LABEL = { txn:'Transactions', envelope:'Envelopes', invest:'Investments', account:'Accounts, Cards & Loans', other:'Policies, Goals & Screens' };
+  const GROUP_ORDER = ['txn', 'envelope', 'invest', 'account', 'other'];
+
+  let activeCat = 'all';
+  const qEl = document.getElementById('q');
+  const clearEl = document.getElementById('q-clear');
+
+  function esc(s) { return s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+  function highlight(text, q) {
+    const idx = text.toLowerCase().indexOf(q.toLowerCase());
+    if (idx < 0) return esc(text);
+    return esc(text.slice(0, idx)) + '<mark>' + esc(text.slice(idx, idx + q.length)) + '</mark>' + esc(text.slice(idx + q.length));
+  }
+
+  function rowHtml(item, q) {
+    const grad = item.cat === 'txn' ? (item.pos ? GRAD.income : GRAD.expense) : GRAD[item.cat];
+    const icon = ICONS[item.cat] || ICONS.other;
+    const amtColor = item.pos ? 'var(--success)' : (item.cat === 'txn' ? 'var(--error)' : 'var(--text-primary)');
+    return `
+      <a class="result-row" href="${item.href}">
+        <div class="result-row__icon" style="background:${grad};">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${icon}</svg>
+        </div>
+        <div class="result-row__body">
+          <div class="result-row__title">${highlight(item.title, q)}</div>
+          <div class="result-row__meta">${esc(item.meta)}</div>
+        </div>
+        ${item.amount ? `<span class="result-row__amount" style="color:${amtColor};">${item.amount}</span>` : ''}
+      </a>`;
+  }
+
+  function search() {
+    const q = qEl.value.trim();
+    clearEl.classList.toggle('visible', q.length > 0);
+    const idle = document.getElementById('view-idle');
+    const results = document.getElementById('view-results');
+    if (!q) { idle.style.display = ''; results.style.display = 'none'; return; }
+    idle.style.display = 'none'; results.style.display = '';
+
+    const matches = INDEX.filter(it =>
+      (activeCat === 'all' || it.cat === activeCat) &&
+      (it.title.toLowerCase().includes(q.toLowerCase()) || it.meta.toLowerCase().includes(q.toLowerCase()))
+    );
+
+    const out = document.getElementById('results');
+    const noRes = document.getElementById('no-results');
+    if (!matches.length) { out.innerHTML = ''; noRes.style.display = ''; return; }
+    noRes.style.display = 'none';
+
+    let html = '';
+    for (const cat of GROUP_ORDER) {
+      const group = matches.filter(m => m.cat === cat);
+      if (!group.length) continue;
+      html += `<div class="result-group">
+        <div class="result-group__title">${GROUP_LABEL[cat]} <span class="result-group__count">${group.length}</span></div>
+        ${group.slice(0, 6).map(m => rowHtml(m, q)).join('')}
+      </div>`;
+    }
+    out.innerHTML = html;
+  }
+
+  qEl.addEventListener('input', search);
+  clearEl.addEventListener('click', () => { qEl.value = ''; search(); qEl.focus(); });
+
+  document.querySelectorAll('.recent-chip').forEach(chip => {
+    chip.addEventListener('click', () => { qEl.value = chip.dataset.q; search(); qEl.focus(); });
+  });
+
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+      activeCat = chip.dataset.cat;
+      search();
+    });
+  });
+
+  // Support ?q= deep links and autofocus
+  const urlQ = new URLSearchParams(location.search).get('q');
+  if (urlQ) { qEl.value = urlQ; search(); }
+  setTimeout(() => qEl.focus(), 300);
+</script>
+</body>
+</html>
