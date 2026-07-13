@@ -69,10 +69,18 @@
   function initTheme() {
     // Apply immediately (before paint) to prevent flash
     applyTheme(getTheme());
-    // Wire any element with [data-theme-toggle] attribute
-    document.querySelectorAll('[data-theme-toggle]').forEach(el => {
-      el.addEventListener('click', toggleTheme);
-    });
+    // Wire [data-theme-toggle] via a document-level capture handler.
+    // Several pages also bind their own click handler directly to the same
+    // button; two handlers each flip the theme and the toggle appears dead.
+    // Capture at the document fires before any listener on the button
+    // itself, so stopping propagation here guarantees exactly one toggle
+    // regardless of what the page script registered.
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest && e.target.closest('[data-theme-toggle]');
+      if (!btn) return;
+      e.stopPropagation();
+      toggleTheme();
+    }, true);
   }
 
   /* ───────────────────────────────────────────
