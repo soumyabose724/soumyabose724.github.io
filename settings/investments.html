@@ -89,7 +89,7 @@
   <div class="page-content" id="page-content">
 
     <p class="src-section-note">
-      Manage the brokers, AMCs, and insurers whose accounts, folios, and policies are linked to ArthaGrid for tracking. Unlinking keeps all historical records — it only stops new lookups from that source.
+      Manage the brokers, AMCs, and insurers you've added as manual reference entries for your accounts, folios, and policies. ArthaGrid never connects to these providers directly — removing an entry keeps all historical records, it just deletes the reference.
     </p>
 
     <div class="section">
@@ -100,8 +100,8 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v16h16"/><path d="m5 15 5-5 4 4 6-7"/></svg>
         </div>
         <div style="flex:1; min-width:0;">
-          <div class="manage-link-card__title">Manage Brokerage Links</div>
-          <div class="manage-link-card__sub">Link Groww, Upstox, ICICI Direct &amp; more</div>
+          <div class="manage-link-card__title">Manage Broker Accounts</div>
+          <div class="manage-link-card__sub">Add or edit your broker accounts manually</div>
         </div>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted); flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>
       </a>
@@ -156,10 +156,10 @@
   <div class="dialog-backdrop" id="unlink-source-backdrop">
     <div class="dialog">
       <div class="dialog__header">
-        <div class="dialog__title" id="unlink-title">Unlink source?</div>
+        <div class="dialog__title" id="unlink-title">Remove source?</div>
       </div>
       <div class="dialog__body">
-        This removes the connection to ArthaGrid but keeps all historical transactions and valuations intact. You can relink anytime.
+        This only removes the reference entry. All historical transactions and valuations you've recorded stay intact — you can add it back anytime.
       </div>
       <div class="dialog__footer">
         <button class="btn btn--ghost btn--sm" onclick="AG.closeDialog('unlink-source')">Cancel</button>
@@ -226,7 +226,7 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${src.icon}</svg>
         </div>
         <div class="src-row__info">
-          <div class="src-row__name">${src.name} <span class="chip chip--balanced">Linked</span></div>
+          <div class="src-row__name">${src.name} <span class="chip chip--balanced">Added</span></div>
           <div class="src-row__meta">${src.type} · ${src.ref}</div>
         </div>
         <div class="src-row__actions">

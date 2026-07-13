@@ -43,25 +43,7 @@
     .broker-row__cta--muted { background: var(--surface); color: var(--text-secondary); border-color: var(--border); }
     .broker-row__cta--muted:hover { background: var(--surface-raised); }
 
-    .oauth-mock {
-      background: var(--surface-raised); border: 1.5px dashed var(--border-strong);
-      border-radius: var(--r-lg); padding: var(--sp-5);
-      text-align: center; margin-bottom: var(--sp-4);
-    }
-    .oauth-mock__logo {
-      width: 56px; height: 56px; border-radius: var(--r-xl);
-      background: var(--grad-primary); color: #fff;
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto var(--sp-3);
-    }
-    .oauth-mock__title { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
-    .oauth-mock__sub { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
-    .scope-list { text-align: left; margin-top: var(--sp-4); }
-    .scope-item {
-      display: flex; align-items: center; gap: var(--sp-2);
-      font-size: 12px; color: var(--text-secondary); padding: 6px 0;
-    }
-    .scope-item svg { color: var(--success); flex-shrink: 0; }
+    .field-hint { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
   </style>
 </head>
 <body>
@@ -93,53 +75,46 @@
   <div class="page-content" id="page-content">
 
     <p class="src-section-note">
-      Link your demat/trading accounts to pull holdings into your investment portfolio. ArthaGrid never stores your broker password — this is a read-only reference link for tracking.
+      ArthaGrid doesn't connect to broker APIs — add your demat/trading accounts here as a manual reference, then enter holdings and trades yourself in the Investments section. Nothing leaves your device.
     </p>
 
     <div class="section">
       <div class="section-title">Your Brokers</div>
       <div id="broker-list"></div>
+      <button class="btn btn--secondary btn--full" style="margin-top:var(--sp-2);" onclick="openAdd()">+ Add Broker</button>
     </div>
 
   </div><!-- /page-content -->
 
   <!-- ═══════════════════════════════════════════
-       LINK ACCOUNT SHEET (mock, no real OAuth)
+       ADD / EDIT BROKER SHEET (manual entry)
   ═══════════════════════════════════════════ -->
-  <div class="sheet-backdrop" id="link-broker-backdrop"></div>
-  <div class="sheet" id="link-broker">
+  <div class="sheet-backdrop" id="edit-broker-backdrop"></div>
+  <div class="sheet" id="edit-broker">
     <div class="sheet__handle"></div>
     <div class="sheet__header">
-      <span class="sheet__title" id="link-broker-title">Link Broker</span>
-      <button class="sheet__close" onclick="AG.closeSheet('link-broker')" aria-label="Close">✕</button>
+      <span class="sheet__title" id="edit-broker-title">Add Broker</span>
+      <button class="sheet__close" onclick="AG.closeSheet('edit-broker')" aria-label="Close">✕</button>
     </div>
     <div class="sheet__body">
-      <div class="oauth-mock">
-        <div class="oauth-mock__logo" id="lb-logo">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        </div>
-        <div class="oauth-mock__title" id="lb-name">Connect to Groww</div>
-        <div class="oauth-mock__sub">This is a prototype — no real sign-in happens. In the production app this opens the broker's official OAuth consent screen.</div>
-        <div class="scope-list">
-          <div class="scope-item">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            View holdings &amp; ledger (read-only)
-          </div>
-          <div class="scope-item">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            No trading or withdrawal permission
-          </div>
-        </div>
+      <div class="form-group">
+        <label class="form-label" for="eb-name">Broker Name</label>
+        <input class="form-input" id="eb-name" type="text" maxlength="60" placeholder="e.g. Groww">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="eb-ref">Client ID / Reference (optional)</label>
+        <input class="form-input" id="eb-ref" type="text" maxlength="40">
+        <div class="field-hint">For your own reference only — stored on-device, never verified or synced with the broker.</div>
       </div>
     </div>
     <div class="sheet__footer">
-      <button class="btn btn--ghost" onclick="AG.closeSheet('link-broker')">Cancel</button>
-      <button class="btn btn--primary" onclick="confirmLink()">Connect</button>
+      <button class="btn btn--ghost" onclick="AG.closeSheet('edit-broker')">Cancel</button>
+      <button class="btn btn--primary" onclick="saveBroker()">Save</button>
     </div>
   </div>
 
   <!-- ═══════════════════════════════════════════
-       MANAGE LINKED BROKER SHEET
+       MANAGE BROKER SHEET
   ═══════════════════════════════════════════ -->
   <div class="sheet-backdrop" id="manage-broker-backdrop"></div>
   <div class="sheet" id="manage-broker">
@@ -149,31 +124,31 @@
       <button class="sheet__close" onclick="AG.closeSheet('manage-broker')" aria-label="Close">✕</button>
     </div>
     <div class="sheet__body">
-      <button class="sheet-option" onclick="AG.showToast('Refreshing holdings…', 'info')">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-        Refresh Holdings Now
+      <button class="sheet-option" onclick="editFromManage()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+        Edit Details
       </button>
-      <button class="sheet-option sheet-option--danger" onclick="AG.closeSheet('manage-broker'); AG.openDialog('unlink-broker');">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m18.84 12.25 1.72-1.71h-.02a5.004 5.004 0 0 0-.12-7.07 5.006 5.006 0 0 0-6.95 0l-1.72 1.71"/><path d="m5.17 11.75-1.71 1.71a5.004 5.004 0 0 0 .12 7.07 5.006 5.006 0 0 0 6.95 0l1.71-1.71"/></svg>
-        Unlink Account
+      <button class="sheet-option sheet-option--danger" onclick="AG.closeSheet('manage-broker'); AG.openDialog('remove-broker');">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+        Remove
       </button>
     </div>
   </div>
 
   <!-- ═══════════════════════════════════════════
-       UNLINK DIALOG
+       REMOVE CONFIRM DIALOG
   ═══════════════════════════════════════════ -->
-  <div class="dialog-backdrop" id="unlink-broker-backdrop">
+  <div class="dialog-backdrop" id="remove-broker-backdrop">
     <div class="dialog">
       <div class="dialog__header">
-        <div class="dialog__title">Unlink Zerodha?</div>
+        <div class="dialog__title">Remove Zerodha?</div>
       </div>
       <div class="dialog__body">
-        Your holdings history stays in ArthaGrid, but new trades won't sync automatically until you relink.
+        This only removes the reference entry. Any holdings you've already recorded under this broker stay in your Investments — they won't be deleted.
       </div>
       <div class="dialog__footer">
-        <button class="btn btn--ghost btn--sm" onclick="AG.closeDialog('unlink-broker')">Cancel</button>
-        <button class="btn btn--danger btn--sm" onclick="doUnlinkZerodha()">Unlink</button>
+        <button class="btn btn--ghost btn--sm" onclick="AG.closeDialog('remove-broker')">Cancel</button>
+        <button class="btn btn--danger btn--sm" onclick="doRemoveZerodha()">Remove</button>
       </div>
     </div>
   </div>
@@ -209,20 +184,17 @@
   AG.initBottomNav('profile');
 
   const BROKERS = [
-    { id:'zerodha', name:'Zerodha', linked:true, ref:'Client ID ZD••1234' },
-    { id:'groww', name:'Groww', linked:false, ref:'' },
-    { id:'upstox', name:'Upstox', linked:false, ref:'' },
-    { id:'icici-direct', name:'ICICI Direct', linked:false, ref:'' },
+    { id:'zerodha', name:'Zerodha', added:true, ref:'Client ID ZD••1234' },
   ];
 
   function rowHtml(b) {
-    if (b.linked) {
+    if (b.added) {
       return `
         <div class="broker-row" id="broker-row-${b.id}">
           <div class="broker-row__icon broker-row__icon--linked">${initials(b.name)}</div>
           <div class="broker-row__info">
-            <div class="broker-row__name">${b.name} <span class="chip chip--balanced">Linked</span></div>
-            <div class="broker-row__meta">${b.ref}</div>
+            <div class="broker-row__name">${b.name} <span class="chip chip--balanced">Added</span></div>
+            <div class="broker-row__meta">${b.ref || 'No reference ID saved'}</div>
           </div>
           <button class="broker-row__cta" onclick="manageBroker('${b.id}')">Manage</button>
         </div>`;
@@ -231,10 +203,10 @@
       <div class="broker-row" id="broker-row-${b.id}">
         <div class="broker-row__icon">${initials(b.name)}</div>
         <div class="broker-row__info">
-          <div class="broker-row__name">${b.name} <span class="chip chip--closed">Not Linked</span></div>
-          <div class="broker-row__meta">Not connected</div>
+          <div class="broker-row__name">${b.name}</div>
+          <div class="broker-row__meta">Not added yet</div>
         </div>
-        <button class="broker-row__cta broker-row__cta--muted" onclick="openLink('${b.id}')">Link Account</button>
+        <button class="broker-row__cta broker-row__cta--muted" onclick="openAdd('${b.id}')">Add</button>
       </div>`;
   }
 
@@ -247,37 +219,52 @@
   }
   render();
 
-  function openLink(id) {
-    const b = BROKERS.find(x => x.id === id);
-    document.getElementById('link-broker-title').textContent = 'Link ' + b.name;
-    document.getElementById('lb-name').textContent = 'Connect to ' + b.name;
-    AG.openSheet('link-broker');
-    window.__pendingLink = id;
+  function openAdd(id) {
+    window.__editingId = id || null;
+    const b = id ? BROKERS.find(x => x.id === id) : null;
+    document.getElementById('edit-broker-title').textContent = b ? 'Edit ' + b.name : 'Add Broker';
+    document.getElementById('eb-name').value = b ? b.name : '';
+    document.getElementById('eb-ref').value = b ? (b.ref || '').replace(/^Client ID /, '') : '';
+    AG.openSheet('edit-broker');
   }
 
-  function confirmLink() {
-    const id = window.__pendingLink;
-    const b = BROKERS.find(x => x.id === id);
-    AG.closeSheet('link-broker');
-    b.linked = true;
-    b.ref = 'Client ID ' + id.slice(0,2).toUpperCase() + '••' + Math.floor(1000 + Math.random()*9000);
+  function editFromManage() {
+    AG.closeSheet('manage-broker');
+    openAdd(window.__manageId);
+  }
+
+  function saveBroker() {
+    const name = document.getElementById('eb-name').value.trim();
+    if (!name) { AG.showToast('Broker name is required', 'error'); return; }
+    const ref = document.getElementById('eb-ref').value.trim();
+    const id = window.__editingId;
+    let b = id ? BROKERS.find(x => x.id === id) : null;
+    if (!b) {
+      b = { id: name.toLowerCase().replace(/\s+/g, '-'), added: true, ref: '' };
+      BROKERS.push(b);
+    }
+    b.name = name;
+    b.added = true;
+    b.ref = ref ? ('Client ID ' + ref) : '';
+    AG.closeSheet('edit-broker');
     render();
-    AG.showToast('Connected to ' + b.name + ' (demo)', 'success');
+    AG.showToast(name + ' saved ✓', 'success');
   }
 
   function manageBroker(id) {
     const b = BROKERS.find(x => x.id === id);
+    window.__manageId = id;
     document.getElementById('manage-broker-title').textContent = b.name;
     AG.openSheet('manage-broker');
   }
 
-  function doUnlinkZerodha() {
-    AG.closeDialog('unlink-broker');
-    const b = BROKERS.find(x => x.id === 'zerodha');
-    b.linked = false;
-    b.ref = '';
+  function doRemoveZerodha() {
+    AG.closeDialog('remove-broker');
+    const idx = BROKERS.findIndex(x => x.id === window.__manageId);
+    const name = BROKERS[idx].name;
+    BROKERS.splice(idx, 1);
     render();
-    AG.showToast('Zerodha unlinked', 'warning');
+    AG.showToast(name + ' removed', 'warning');
   }
 </script>
 </body>
