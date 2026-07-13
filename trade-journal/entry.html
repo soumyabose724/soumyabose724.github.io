@@ -8,6 +8,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/style.css">
   <style>
+    /* No demo-bar on this page — anchor the fixed top-bar to the true top */
+    :root { --demo-bar-h: 0px; }
     /* ── Segment segmented tabs (mirrors transactions/add.html type-tabs) ── */
     .type-tabs {
       display: flex; gap: var(--sp-2); overflow-x: auto; padding: var(--sp-1) var(--sp-1) var(--sp-2);

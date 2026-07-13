@@ -396,9 +396,9 @@
       document.getElementById('save-btn').textContent = 'Save Changes';
     } else {
       document.getElementById('page-title').textContent = 'New Recurring Rule';
-      document.getElementById('f-name').value = '';
+      document.getElementById('f-name').value = 'Salary Credit';
       document.querySelectorAll('#type-seg .seg-btn').forEach(b => b.classList.toggle('selected', b.dataset.type === 'income'));
-      document.getElementById('f-amount').value = '';
+      document.getElementById('f-amount').value = 120000;
       document.getElementById('f-frequency').value = 'monthly';
       document.getElementById('f-day').value = 'first-working';
       document.getElementById('routing-same').checked = true;
