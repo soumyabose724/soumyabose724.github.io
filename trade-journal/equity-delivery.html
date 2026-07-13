@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Equity Delivery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .chip--vcp { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
+    .holding-pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 11px; font-weight: 600; color: var(--text-secondary);
+      background: var(--surface-raised); border: 1px solid var(--border);
+      border-radius: var(--r-full); padding: 2px 8px; margin-top: var(--sp-2);
+    }
+    .segment-hero {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg);
+      padding: var(--sp-4); margin-bottom: var(--sp-5);
+    }
+    .segment-hero__label { font-size: 11px; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+    .segment-hero__value { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-size: 20px; font-weight: 700; margin-top: 2px; }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">Show</span>
+    <button class="demo-btn active" data-state="all">All</button>
+    <button class="demo-btn" data-state="open">Open</button>
+    <button class="demo-btn" data-state="closed">Closed</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Equity Delivery</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <a href="analytics.html" class="icon-btn" aria-label="Trade Analytics" title="Analytics" style="text-decoration:none;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+      </a>
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content">
+
+    <div class="segment-hero">
+      <div>
+        <div class="segment-hero__label">Realized P&amp;L · Equity Delivery</div>
+        <div class="segment-hero__value" id="segment-total" style="color:var(--success);">₹4,000</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="segment-hero__label">Trades</div>
+        <div class="segment-hero__value" id="segment-count">4</div>
+      </div>
+    </div>
+
+    <div class="section-title">Trades</div>
+    <div id="trade-list"><!-- rendered by JS --></div>
+
+    <div style="font-size:11px; color:var(--text-muted); line-height:1.6; margin-top:var(--sp-5);">
+      Delivery trades settle T+1 and are held beyond the trading day, so each position shows a <strong>Holding Period</strong> — unlike Intraday, where entry and exit always happen the same session.
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV — none active (no Trade Journal tab)
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ── Theme toggle (matches other pages) ── */
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+
+  const DEMO_TODAY = new Date('2026-07-12T00:00:00');
+
+  /* ── Vikas's Equity Delivery trades (paise) ── */
+  const TRADES = [
+    { id:'t1', instrument:'RELIANCE', qty:50, entryDate:'2026-04-08', entryPricePaise:245000, exitDate:'2026-04-26', exitPricePaise:251000, pnlPaise:300000, vcp:true, open:false },
+    { id:'t2', instrument:'INFY', qty:30, entryDate:'2026-04-14', entryPricePaise:150000, exitDate:'2026-05-29', exitPricePaise:144000, pnlPaise:-180000, vcp:false, open:false },
+    { id:'t6', instrument:'HDFCBANK', qty:40, entryDate:'2026-06-02', entryPricePaise:165000, exitDate:'2026-06-12', exitPricePaise:172000, pnlPaise:280000, vcp:true, open:false },
+    { id:'t13', instrument:'TCS', qty:20, entryDate:'2026-07-06', entryPricePaise:360000, exitDate:null, exitPricePaise:null, pnlPaise:-100000, vcp:false, open:true },
+  ];
+
+  function fmtDate(d) {
+    const dt = new Date(d + 'T00:00:00');
+    return dt.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+  function daysBetween(a, b) {
+    return Math.round((b - a) / (1000 * 60 * 60 * 24));
+  }
+
+  function tradeRowHtml(t) {
+    const pnlClass = t.pnlPaise >= 0 ? 'list-row__amount--income' : 'list-row__amount--expense';
+    const entry = new Date(t.entryDate + 'T00:00:00');
+    let holdingLabel;
+    if (t.open) {
+      holdingLabel = 'Open — held ' + daysBetween(entry, DEMO_TODAY) + 'd so far';
+    } else {
+      holdingLabel = daysBetween(entry, new Date(t.exitDate + 'T00:00:00')) + 'd holding period';
+    }
+    return `
+      <div class="list-row">
+        <div class="list-row__icon ${t.open ? 'list-row__icon--info' : ''}">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 4 3 5-7"/></svg>
+        </div>
+        <div class="list-row__info">
+          <div class="list-row__label">
+            ${t.instrument}
+            ${t.vcp ? '<span class="chip chip--vcp">VCP</span>' : ''}
+            ${t.open ? '<span class="chip chip--info">Open</span>' : ''}
+          </div>
+          <div class="list-row__meta">Qty ${t.qty} · Entry ${fmtDate(t.entryDate)} @ ${AG.formatINR(t.entryPricePaise, { showPaise: true })}${t.open ? '' : ' → Exit ' + fmtDate(t.exitDate) + ' @ ' + AG.formatINR(t.exitPricePaise, { showPaise: true })}</div>
+          <div class="holding-pill">⏱ ${holdingLabel}</div>
+        </div>
+        <div class="list-row__amount-row">
+          <div class="list-row__amount ${pnlClass}">${AG.formatINR(t.pnlPaise, { showSign: true })}</div>
+          <div class="list-row__amount-caption">${t.open ? 'Unrealized P&L' : 'Realized P&L'}</div>
+        </div>
+      </div>`;
+  }
+
+  function render(filter) {
+    let filtered = TRADES;
+    if (filter === 'open') filtered = TRADES.filter(t => t.open);
+    if (filter === 'closed') filtered = TRADES.filter(t => !t.open);
+    document.getElementById('trade-list').innerHTML = filtered.map(tradeRowHtml).join('') ||
+      '<div class="empty-state" style="padding:var(--sp-8) var(--sp-4);"><div class="empty-state__body">No trades to show.</div></div>';
+  }
+
+  const closedTotal = TRADES.filter(t => !t.open).reduce((s, t) => s + t.pnlPaise, 0);
+  const totalEl = document.getElementById('segment-total');
+  totalEl.textContent = AG.formatINR(closedTotal, { showSign: true });
+  totalEl.style.color = closedTotal >= 0 ? 'var(--success)' : 'var(--error)';
+  document.getElementById('segment-count').textContent = String(TRADES.length);
+
+  render('all');
+
+  AG.initDemoBar({
+    all: () => render('all'),
+    open: () => render('open'),
+    closed: () => render('closed'),
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Trade Analytics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* ── KPI row ── */
+    .kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-3); margin-bottom: var(--sp-5); }
+    .kpi-tile {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg);
+      padding: var(--sp-3); text-align: center;
+    }
+    .kpi-tile__label { font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+    .kpi-tile__value { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-size: 17px; font-weight: 700; color: var(--text-primary); }
+    .kpi-tile__value--pos { color: var(--success); }
+    .kpi-tile__value--neg { color: var(--error); }
+    .kpi-tile__sub { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+
+    /* ── Chart card ── */
+    .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-xl); padding: var(--sp-4) var(--sp-4) var(--sp-3); margin-bottom: var(--sp-5); }
+    .chart-card__header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--sp-2); }
+    .chart-card__title { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+    .chart-card__end-value { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-size: 15px; font-weight: 700; }
+    .chart-svg-wrap { width: 100%; }
+    .chart-svg-wrap svg { width: 100%; height: auto; display: block; }
+    .chart-caption { font-size: 11px; color: var(--text-muted); line-height: 1.55; margin-top: var(--sp-2); }
+
+    /* ── Segment breakdown table ── */
+    .bd-table { width: 100%; border-collapse: collapse; }
+    .bd-table th {
+      font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+      color: var(--text-muted); text-align: left; padding: 0 var(--sp-2) var(--sp-2);
+      border-bottom: 1px solid var(--border);
+    }
+    .bd-table th:not(:first-child), .bd-table td:not(:first-child) { text-align: right; }
+    .bd-table td {
+      font-size: 13px; padding: var(--sp-3) var(--sp-2); border-bottom: 1px solid var(--border);
+      color: var(--text-primary);
+    }
+    .bd-table tr:last-child td { border-bottom: none; }
+    .bd-table td.mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-weight: 600; }
+    .bd-table__segment { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+    .bd-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: var(--primary); }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">Equity Curve</span>
+    <button class="demo-btn active" data-state="all">All Segments</button>
+    <button class="demo-btn" data-state="ex-crypto">Ex-Crypto</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Trade Analytics</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content">
+
+    <div class="section-title">FY 2026-27 Performance</div>
+
+    <!-- KPI row -->
+    <div class="kpi-row">
+      <div class="kpi-tile">
+        <div class="kpi-tile__label">Win Rate</div>
+        <div class="kpi-tile__value" id="kpi-winrate">66.7%</div>
+        <div class="kpi-tile__sub" id="kpi-winrate-sub">8W / 4L</div>
+      </div>
+      <div class="kpi-tile">
+        <div class="kpi-tile__label">Expectancy</div>
+        <div class="kpi-tile__value kpi-tile__value--pos" id="kpi-expectancy">+2.65R</div>
+        <div class="kpi-tile__sub">avg R-multiple</div>
+      </div>
+      <div class="kpi-tile">
+        <div class="kpi-tile__label">Max Drawdown</div>
+        <div class="kpi-tile__value kpi-tile__value--neg" id="kpi-drawdown">₹7,400</div>
+        <div class="kpi-tile__sub" id="kpi-drawdown-sub">46.7% of peak</div>
+      </div>
+    </div>
+
+    <!-- Equity Curve chart -->
+    <div class="chart-card">
+      <div class="chart-card__header">
+        <span class="chart-card__title">Cumulative P&amp;L</span>
+        <span class="chart-card__end-value" id="chart-end-value" style="color:var(--success);">₹1,10,300</span>
+      </div>
+      <div class="chart-svg-wrap">
+        <svg id="equity-svg" viewBox="0 0 380 170" preserveAspectRatio="none"></svg>
+      </div>
+      <div class="chart-caption" id="chart-caption">
+        One outsized crypto trade (BTC, +₹90,000) dominates the cumulative curve — a reminder to size speculative crypto positions independently from your equity/F&amp;O trading capital. Toggle "Ex-Crypto" above to see the underlying trading discipline on its own.
+      </div>
+    </div>
+
+    <div class="section-title">Breakdown by Segment</div>
+    <div class="surface-card" style="padding:var(--sp-3) var(--sp-4);">
+      <table class="bd-table" id="breakdown-table">
+        <thead>
+          <tr><th>Segment</th><th>Trades</th><th>Win Rate</th><th>P&amp;L</th></tr>
+        </thead>
+        <tbody id="breakdown-tbody"><!-- rendered by JS --></tbody>
+      </table>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV — none active (no Trade Journal tab)
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ── Theme toggle (matches other pages) ── */
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+    renderChart(); // repaint SVG stroke/fill for theme-dependent colors if needed
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+
+  /* ── Vikas Sharma's closed trades — FY 2026-27, ordered by exit date (paise) ── */
+  const CLOSED_TRADES = [
+    { segment:'equity',    label:'RELIANCE',            exitDate:'2026-04-26', pnlPaise:300000 },
+    { segment:'commodity', label:'Gold Mini',           exitDate:'2026-05-11', pnlPaise:620000 },
+    { segment:'intraday',  label:'TATAMOTORS',          exitDate:'2026-05-15', pnlPaise:215000 },
+    { segment:'fno',       label:'NIFTY 24800 CE',      exitDate:'2026-05-27', pnlPaise:450000 },
+    { segment:'equity',    label:'INFY',                exitDate:'2026-05-29', pnlPaise:-180000 },
+    { segment:'intraday',  label:'ADANIENT',            exitDate:'2026-06-05', pnlPaise:-250000 },
+    { segment:'commodity', label:'Crude Oil Mini',      exitDate:'2026-06-10', pnlPaise:-310000 },
+    { segment:'equity',    label:'HDFCBANK',            exitDate:'2026-06-12', pnlPaise:280000 },
+    { segment:'intraday',  label:'SBIN',                exitDate:'2026-06-15', pnlPaise:430000 },
+    { segment:'crypto',    label:'BTC · CoinDCX',       exitDate:'2026-06-24', pnlPaise:9000000 },
+    { segment:'crypto',    label:'ETH · WazirX',        exitDate:'2026-07-08', pnlPaise:-650000 },
+    { segment:'fno',       label:'NIFTY FUT',           exitDate:'2026-07-09', pnlPaise:1125000 },
+  ];
+  const SEGMENT_LABELS = { equity:'Equity Delivery', intraday:'Intraday', fno:'F&O', commodity:'Commodity', crypto:'Crypto' };
+  const SEGMENT_ORDER = ['equity','intraday','fno','commodity','crypto'];
+
+  function computeStats(trades) {
+    const wins = trades.filter(t => t.pnlPaise > 0);
+    const losses = trades.filter(t => t.pnlPaise < 0);
+    const winRate = trades.length ? (wins.length / trades.length) * 100 : 0;
+    const avgWin = wins.length ? wins.reduce((s, t) => s + t.pnlPaise, 0) / wins.length : 0;
+    const avgLossAbs = losses.length ? Math.abs(losses.reduce((s, t) => s + t.pnlPaise, 0)) / losses.length : 0;
+    const expectancyPaise = (wins.length / trades.length) * avgWin - (losses.length / trades.length) * avgLossAbs;
+    const expectancyR = avgLossAbs ? expectancyPaise / avgLossAbs : 0;
+
+    // Cumulative curve + max drawdown
+    let cum = 0, peak = 0, maxDD = 0, peakAtDD = 0;
+    const curve = [0];
+    trades.forEach(t => {
+      cum += t.pnlPaise;
+      curve.push(cum);
+      if (cum > peak) peak = cum;
+      const dd = peak - cum;
+      if (dd > maxDD) { maxDD = dd; peakAtDD = peak; }
+    });
+    return { wins, losses, winRate, expectancyR, curve, maxDD, peakAtDD, total: cum };
+  }
+
+  const svg = document.getElementById('equity-svg');
+  const W = 380, H = 170, PAD_L = 8, PAD_R = 8, PAD_T = 16, PAD_B = 20;
+
+  function niceMax(v) {
+    if (v <= 0) return 10000;
+    const mag = Math.pow(10, Math.floor(Math.log10(v)));
+    const steps = [1, 2, 2.5, 5, 10];
+    for (const s of steps) { if (v <= s * mag) return s * mag; }
+    return 10 * mag;
+  }
+
+  function renderChart() {
+    const excludeCrypto = document.querySelector('.demo-btn.active') && document.querySelector('.demo-btn.active').dataset.state === 'ex-crypto';
+    const trades = excludeCrypto ? CLOSED_TRADES.filter(t => t.segment !== 'crypto') : CLOSED_TRADES;
+    const stats = computeStats(trades);
+
+    /* KPIs */
+    document.getElementById('kpi-winrate').textContent = stats.winRate.toFixed(1) + '%';
+    document.getElementById('kpi-winrate-sub').textContent = stats.wins.length + 'W / ' + stats.losses.length + 'L';
+    const expEl = document.getElementById('kpi-expectancy');
+    expEl.textContent = (stats.expectancyR >= 0 ? '+' : '') + stats.expectancyR.toFixed(2) + 'R';
+    expEl.className = 'kpi-tile__value ' + (stats.expectancyR >= 0 ? 'kpi-tile__value--pos' : 'kpi-tile__value--neg');
+    document.getElementById('kpi-drawdown').textContent = AG.formatINR(stats.maxDD * 100);
+    document.getElementById('kpi-drawdown-sub').textContent = stats.peakAtDD ? ((stats.maxDD / stats.peakAtDD) * 100).toFixed(1) + '% of peak' : '—';
+    const endEl = document.getElementById('chart-end-value');
+    endEl.textContent = AG.formatINR(stats.total * 100, { showSign: true });
+    endEl.style.color = stats.total >= 0 ? 'var(--success)' : 'var(--error)';
+
+    /* Chart */
+    const curve = stats.curve;
+    const domainMax = niceMax(Math.max(...curve, 1));
+    const domainMin = Math.min(0, Math.min(...curve));
+    const plotW = W - PAD_L - PAD_R;
+    const plotH = H - PAD_T - PAD_B;
+    const xStep = plotW / (curve.length - 1);
+    const yOf = v => PAD_T + plotH - ((v - domainMin) / (domainMax - domainMin)) * plotH;
+    const xOf = i => PAD_L + i * xStep;
+
+    const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--border').trim() || '#E7E5E4';
+    const primary = '#0D9488';
+    const success = getComputedStyle(document.documentElement).getPropertyValue('--success').trim() || '#22C55E';
+    const error = getComputedStyle(document.documentElement).getPropertyValue('--error').trim() || '#E94560';
+
+    let gridlines = '';
+    const gridSteps = 4;
+    for (let i = 0; i <= gridSteps; i++) {
+      const val = domainMin + ((domainMax - domainMin) / gridSteps) * i;
+      const y = yOf(val);
+      gridlines += `<line x1="${PAD_L}" y1="${y}" x2="${W - PAD_R}" y2="${y}" stroke="${gridColor}" stroke-width="1"/>`;
+      gridlines += `<text x="${PAD_L}" y="${y - 3}" font-size="7" fill="var(--text-muted)">${AG.formatINR(Math.round(val) * 100, { compact: true })}</text>`;
+    }
+
+    const points = curve.map((v, i) => `${xOf(i)},${yOf(v)}`).join(' ');
+    const areaPath = `M${xOf(0)},${yOf(domainMin)} L` + curve.map((v, i) => `${xOf(i)},${yOf(v)}`).join(' L') + ` L${xOf(curve.length - 1)},${yOf(domainMin)} Z`;
+
+    const lastVal = curve[curve.length - 1];
+    const lastColor = lastVal >= 0 ? success : error;
+    const endX = xOf(curve.length - 1), endY = yOf(lastVal);
+
+    svg.innerHTML = `
+      ${gridlines}
+      <path d="${areaPath}" fill="${primary}" opacity="0.10"/>
+      <polyline points="${points}" fill="none" stroke="${primary}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="${endX}" cy="${endY}" r="4.5" fill="${lastColor}" stroke="var(--surface)" stroke-width="2"/>
+    `;
+
+    /* Breakdown table */
+    const tbody = document.getElementById('breakdown-tbody');
+    tbody.innerHTML = SEGMENT_ORDER.map(seg => {
+      const segTrades = trades.filter(t => t.segment === seg);
+      if (!segTrades.length) return '';
+      const segStats = computeStats(segTrades);
+      const total = segTrades.reduce((s, t) => s + t.pnlPaise, 0);
+      const color = total >= 0 ? 'var(--success)' : 'var(--error)';
+      return `
+        <tr>
+          <td><div class="bd-table__segment"><span class="bd-dot"></span>${SEGMENT_LABELS[seg]}</div></td>
+          <td>${segTrades.length}</td>
+          <td>${segStats.winRate.toFixed(0)}%</td>
+          <td class="mono" style="color:${color};">${AG.formatINR(total * 100, { showSign: true })}</td>
+        </tr>`;
+    }).join('');
+  }
+
+  document.querySelectorAll('.demo-btn[data-state]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.demo-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderChart();
+    });
+  });
+
+  renderChart();
+</script>
+</body>
+</html>
