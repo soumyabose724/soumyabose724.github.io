@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Danger Zone</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .danger-banner {
+      display: flex; align-items: flex-start; gap: var(--sp-3);
+      background: var(--error-light); border: 1px solid rgba(233,69,96,.3);
+      border-radius: var(--r-lg); padding: var(--sp-4);
+      font-size: 12.5px; color: var(--error); font-weight: 500; line-height: 1.6;
+      margin-bottom: var(--sp-5);
+    }
+    .danger-banner svg { flex-shrink: 0; margin-top: 2px; }
+
+    .danger-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: var(--sp-4);
+      margin-bottom: var(--sp-3);
+    }
+    .danger-card--critical { border-color: rgba(233,69,96,.35); background: var(--error-light); }
+
+    .danger-card__row {
+      display: flex; align-items: center; gap: var(--sp-3);
+    }
+    .danger-card__icon {
+      width: 40px; height: 40px; border-radius: var(--r-lg); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .danger-card__icon--export { background: var(--primary-xlight); color: var(--primary); }
+    .danger-card__icon--deactivate { background: var(--warning-light); color: var(--warning); }
+    .danger-card__icon--delete { background: rgba(233,69,96,.16); color: var(--error); }
+    .danger-card__info { flex: 1; min-width: 0; }
+    .danger-card__title { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+    .danger-card__sub { font-size: 12px; color: var(--text-secondary); margin-top: 3px; line-height: 1.55; }
+
+    /* Type-to-confirm */
+    .confirm-type-label {
+      font-size: 12px; color: var(--text-secondary); line-height: 1.6; margin-bottom: var(--sp-3);
+    }
+    .confirm-type-label strong { color: var(--error); font-family: 'JetBrains Mono', monospace; }
+    .confirm-type-input {
+      width: 100%; height: 48px; padding: 0 var(--sp-4);
+      background: var(--surface); color: var(--text-primary);
+      border: 1.5px solid var(--border-strong); border-radius: var(--r-md);
+      font-size: 15px; font-family: 'JetBrains Mono', monospace;
+      text-align: center; letter-spacing: .12em; font-weight: 700;
+      transition: border-color var(--dur-fast), box-shadow var(--dur-fast);
+    }
+    .confirm-type-input:focus { border-color: var(--error); box-shadow: var(--ring-danger); outline: none; }
+    .confirm-type-input.matched { border-color: var(--success); }
+
+    .delete-scope-list {
+      margin-top: var(--sp-4); padding-top: var(--sp-4); border-top: 1px solid var(--border);
+    }
+    .delete-scope-item {
+      display: flex; align-items: center; gap: var(--sp-2);
+      font-size: 12px; color: var(--text-secondary); padding: 4px 0;
+    }
+    .delete-scope-item svg { color: var(--error); flex-shrink: 0; }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <div class="demo-bar">
+    <span class="demo-bar__label">Settings</span>
+    <button class="icon-btn" data-theme-toggle style="margin-left:auto;" aria-label="Toggle theme">
+      <span data-theme-icon style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Danger Zone</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <div class="page-content" id="page-content">
+
+    <div class="danger-banner">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <div>These actions are irreversible or highly disruptive. Everything in ArthaGrid lives only on this device — once deleted, local data cannot be recovered unless you've exported or backed it up to Drive.</div>
+    </div>
+
+    <div class="danger-card">
+      <div class="danger-card__row">
+        <div class="danger-card__icon danger-card__icon--export">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </div>
+        <div class="danger-card__info">
+          <div class="danger-card__title">Export Before Deleting</div>
+          <div class="danger-card__sub">Save a full local snapshot before you deactivate or delete anything.</div>
+        </div>
+      </div>
+      <a href="export.html" class="btn btn--secondary btn--full" style="margin-top:var(--sp-4); text-decoration:none;">Go to Export &amp; Backup</a>
+    </div>
+
+    <div class="danger-card">
+      <div class="danger-card__row">
+        <div class="danger-card__icon danger-card__icon--deactivate">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+        </div>
+        <div class="danger-card__info">
+          <div class="danger-card__title">Deactivate Account</div>
+          <div class="danger-card__sub">Pauses reminders, scheduled entries, and Drive sync. Your data stays on-device and you can reactivate anytime by unlocking with your PIN.</div>
+        </div>
+      </div>
+      <button class="btn btn--secondary btn--full" style="margin-top:var(--sp-4);" onclick="AG.openDialog('deactivate-confirm')">Deactivate Account</button>
+    </div>
+
+    <div class="danger-card danger-card--critical">
+      <div class="danger-card__row">
+        <div class="danger-card__icon danger-card__icon--delete">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </div>
+        <div class="danger-card__info">
+          <div class="danger-card__title" style="color:var(--error);">Delete All Data</div>
+          <div class="danger-card__sub">Permanently erases every transaction, budget, loan, investment, and setting stored on this device. This cannot be undone.</div>
+        </div>
+      </div>
+      <button class="btn btn--danger btn--full" style="margin-top:var(--sp-4);" onclick="openDeleteAll()">Delete All Data</button>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       DEACTIVATE CONFIRM DIALOG
+  ═══════════════════════════════════════════ -->
+  <div class="dialog-backdrop" id="deactivate-confirm-backdrop">
+    <div class="dialog">
+      <div class="dialog__header">
+        <div class="dialog__title">Deactivate your account?</div>
+      </div>
+      <div class="dialog__body">
+        Reminders, EMI/SIP schedules, and Drive auto-export will pause. Nothing is deleted — unlock with your PIN or biometric anytime to reactivate.
+      </div>
+      <div class="dialog__footer">
+        <button class="btn btn--ghost btn--sm" onclick="AG.closeDialog('deactivate-confirm')">Cancel</button>
+        <button class="btn btn--danger btn--sm" onclick="confirmDeactivate()">Deactivate</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       DELETE ALL DATA — TYPE-TO-CONFIRM DIALOG
+  ═══════════════════════════════════════════ -->
+  <div class="dialog-backdrop" id="delete-all-backdrop">
+    <div class="dialog" style="max-width:380px;">
+      <div class="dialog__header">
+        <div class="dialog__title" style="color:var(--error);">Delete all ArthaGrid data?</div>
+      </div>
+      <div class="dialog__body">
+        <div class="delete-scope-list" style="margin-top:0; padding-top:0; border-top:none;">
+          <div class="delete-scope-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            All transactions, budgets &amp; envelopes
+          </div>
+          <div class="delete-scope-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            All loans, investments &amp; insurance records
+          </div>
+          <div class="delete-scope-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Your PIN, linked sources &amp; settings
+          </div>
+        </div>
+        <div class="confirm-type-label" style="margin-top:var(--sp-4);">
+          Type <strong>DELETE</strong> to confirm. This action is permanent and cannot be undone.
+        </div>
+        <input type="text" class="confirm-type-input" id="delete-confirm-input" placeholder="DELETE" autocomplete="off" oninput="onDeleteInput(this.value)">
+      </div>
+      <div class="dialog__footer">
+        <button class="btn btn--ghost btn--sm" onclick="closeDeleteAll()">Cancel</button>
+        <button class="btn btn--danger btn--sm" id="delete-all-confirm-btn" disabled style="opacity:.45; pointer-events:none;" onclick="confirmDeleteAll()">Delete Everything</button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2"/></svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      <span>Transactions</span>
+    </a>
+    <a href="../investments/index.html" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span>Invest</span>
+    </a>
+    <a href="index.html" class="nav-tab active" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  AG.initBottomNav('profile');
+
+  function confirmDeactivate() {
+    AG.closeDialog('deactivate-confirm');
+    AG.showToast('Account deactivated — unlock with PIN to reactivate', 'warning');
+  }
+
+  function openDeleteAll() {
+    document.getElementById('delete-confirm-input').value = '';
+    onDeleteInput('');
+    AG.openDialog('delete-all');
+    setTimeout(() => document.getElementById('delete-confirm-input').focus(), 250);
+  }
+
+  function closeDeleteAll() {
+    AG.closeDialog('delete-all');
+  }
+
+  function onDeleteInput(value) {
+    const input = document.getElementById('delete-confirm-input');
+    const btn = document.getElementById('delete-all-confirm-btn');
+    const matched = value === 'DELETE';
+    input.classList.toggle('matched', matched);
+    btn.disabled = !matched;
+    btn.style.opacity = matched ? '1' : '.45';
+    btn.style.pointerEvents = matched ? 'auto' : 'none';
+  }
+
+  function confirmDeleteAll() {
+    AG.closeDialog('delete-all');
+    AG.showToast('All local ArthaGrid data deleted (prototype simulation)', 'error');
+  }
+</script>
+</body>
+</html>

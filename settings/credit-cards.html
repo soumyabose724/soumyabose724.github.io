@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Manage Credit Cards</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .cc-row {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-xl); padding: var(--sp-4);
+      animation: card-in var(--dur-med) var(--ease-out) both;
+    }
+    .cc-row + .cc-row { margin-top: var(--sp-3); }
+    .cc-row__top { display: flex; align-items: flex-start; gap: var(--sp-3); margin-bottom: var(--sp-3); }
+    .cc-row__logo {
+      width: 44px; height: 44px; border-radius: var(--r-lg); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 10px; font-weight: 800;
+    }
+    .cc-row__logo--hdfc { background: linear-gradient(135deg, #1C1917 0%, #3F3527 55%, #6B5730 100%); }
+    .cc-row__logo--icici { background: linear-gradient(135deg, #131A22 0%, #232F3E 55%, #2E3B4E 100%); }
+    .cc-row__info { flex: 1; min-width: 0; }
+    .cc-row__bank { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+    .cc-row__product { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+    .cc-row__number { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+    .cc-row__actions { display: flex; gap: 4px; flex-shrink: 0; }
+    .cc-row__stats {
+      display: flex; justify-content: space-between;
+      padding-top: var(--sp-3); border-top: 1px solid var(--border);
+    }
+    .cc-row__stat-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; }
+    .cc-row__stat-val {
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+      font-size: 14px; font-weight: 700; color: var(--text-primary); margin-top: 2px;
+    }
+    .cc-row__stat--right { text-align: right; }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">Settings</span>
+    <button class="icon-btn" data-theme-toggle style="margin-left:auto;" aria-label="Toggle theme">
+      <span data-theme-icon style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Credit Cards</span>
+    <div class="top-bar__actions">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content" id="page-content">
+
+    <div class="form-helper" style="margin-bottom:var(--sp-4);">
+      ⓘ Manage your linked credit cards. Archiving keeps history but hides the card from new transactions.
+    </div>
+
+    <!-- HDFC Regalia -->
+    <div class="cc-row">
+      <div class="cc-row__top">
+        <div class="cc-row__logo cc-row__logo--hdfc">VISA</div>
+        <div class="cc-row__info">
+          <div class="cc-row__bank">HDFC Bank Regalia</div>
+          <div class="cc-row__product">Visa Infinite · Credit Card</div>
+          <div class="cc-row__number">•••• •••• •••• 4521</div>
+        </div>
+        <div class="cc-row__actions">
+          <button class="list-row__action-btn" onclick="AG.openSheet('edit-hdfc-cc')" aria-label="Edit">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="list-row__action-btn" onclick="archiveCard(this, 'HDFC Bank Regalia')" aria-label="Archive">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="cc-row__stats">
+        <div>
+          <div class="cc-row__stat-label">Credit Limit</div>
+          <div class="cc-row__stat-val">₹3,00,000</div>
+        </div>
+        <div class="cc-row__stat--right">
+          <div class="cc-row__stat-label">Outstanding</div>
+          <div class="cc-row__stat-val">₹1,04,650</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ICICI Amazon Pay -->
+    <div class="cc-row" style="animation-delay:45ms;">
+      <div class="cc-row__top">
+        <div class="cc-row__logo cc-row__logo--icici" style="color:#FF9900;">RuPay</div>
+        <div class="cc-row__info">
+          <div class="cc-row__bank">ICICI Bank Amazon Pay</div>
+          <div class="cc-row__product">RuPay Signature · Credit Card</div>
+          <div class="cc-row__number">•••• •••• •••• 7788</div>
+        </div>
+        <div class="cc-row__actions">
+          <button class="list-row__action-btn" onclick="AG.openSheet('edit-icici-cc')" aria-label="Edit">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="list-row__action-btn" onclick="archiveCard(this, 'ICICI Bank Amazon Pay')" aria-label="Archive">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="cc-row__stats">
+        <div>
+          <div class="cc-row__stat-label">Credit Limit</div>
+          <div class="cc-row__stat-val">₹2,00,000</div>
+        </div>
+        <div class="cc-row__stat--right">
+          <div class="cc-row__stat-label">Outstanding</div>
+          <div class="cc-row__stat-val">₹18,320</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add card -->
+    <button class="btn btn--secondary btn--full" style="margin-top:var(--sp-5);" onclick="AG.openSheet('add-card')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Add Credit Card
+    </button>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       FAB
+  ═══════════════════════════════════════════ -->
+  <button class="fab" aria-label="Add Card" onclick="AG.openSheet('add-card')">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+  </button>
+
+  <!-- ═══════════════════════════════════════════
+       ADD CARD SHEET
+  ═══════════════════════════════════════════ -->
+  <div class="sheet-backdrop" id="add-card-backdrop"></div>
+  <div class="sheet" id="add-card">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <span class="sheet__title">Link a Credit Card</span>
+      <button class="sheet__close" onclick="AG.closeSheet('add-card')" aria-label="Close">✕</button>
+    </div>
+    <div class="sheet__body">
+      <div class="form-group">
+        <label class="form-label">Issuing Bank</label>
+        <select class="form-select">
+          <option>HDFC Bank</option>
+          <option>ICICI Bank</option>
+          <option>SBI Card</option>
+          <option>Axis Bank</option>
+          <option>Kotak Mahindra Bank</option>
+          <option>American Express</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Card Name</label>
+        <input class="form-input" type="text" placeholder="e.g. Millennia, Diners Black">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Credit Limit (₹)</label>
+        <div class="form-input-wrap has-prefix">
+          <span class="input-prefix">₹</span>
+          <input class="form-input inr-input" type="text" inputmode="numeric" placeholder="3,00,000">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Last 4 Digits</label>
+        <input class="form-input" type="text" inputmode="numeric" maxlength="4" placeholder="4521">
+        <div class="form-helper">ⓘ Only the last 4 digits are stored. Full card numbers are never saved.</div>
+      </div>
+      <button class="btn btn--primary btn--full" style="margin-top:var(--sp-4);" onclick="AG.closeSheet('add-card');AG.showToast('Card linked', 'success')">Save Card</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       EDIT CARD SHEETS
+  ═══════════════════════════════════════════ -->
+  <div class="sheet-backdrop" id="edit-hdfc-cc-backdrop"></div>
+  <div class="sheet" id="edit-hdfc-cc">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <span class="sheet__title">Edit Card</span>
+      <button class="sheet__close" onclick="AG.closeSheet('edit-hdfc-cc')" aria-label="Close">✕</button>
+    </div>
+    <div class="sheet__body">
+      <div class="form-group">
+        <label class="form-label">Card Name</label>
+        <input class="form-input" type="text" value="HDFC Bank Regalia">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Credit Limit (₹)</label>
+        <div class="form-input-wrap has-prefix">
+          <span class="input-prefix">₹</span>
+          <input class="form-input inr-input" type="text" inputmode="numeric" value="3,00,000">
+        </div>
+      </div>
+      <button class="btn btn--primary btn--full" style="margin-top:var(--sp-4);" onclick="AG.closeSheet('edit-hdfc-cc');AG.showToast('Card updated', 'success')">Save</button>
+    </div>
+  </div>
+
+  <div class="sheet-backdrop" id="edit-icici-cc-backdrop"></div>
+  <div class="sheet" id="edit-icici-cc">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <span class="sheet__title">Edit Card</span>
+      <button class="sheet__close" onclick="AG.closeSheet('edit-icici-cc')" aria-label="Close">✕</button>
+    </div>
+    <div class="sheet__body">
+      <div class="form-group">
+        <label class="form-label">Card Name</label>
+        <input class="form-input" type="text" value="ICICI Bank Amazon Pay">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Credit Limit (₹)</label>
+        <div class="form-input-wrap has-prefix">
+          <span class="input-prefix">₹</span>
+          <input class="form-input inr-input" type="text" inputmode="numeric" value="2,00,000">
+        </div>
+      </div>
+      <button class="btn btn--primary btn--full" style="margin-top:var(--sp-4);" onclick="AG.closeSheet('edit-icici-cc');AG.showToast('Card updated', 'success')">Save</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="../investments/index.html" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="index.html" class="nav-tab active" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    AG.initBottomNav('profile');
+  });
+
+  function archiveCard(btn, name) {
+    const row = btn.closest('.cc-row');
+    row.style.opacity = '.6';
+    AG.showToast(name + ' archived', 'success');
+  }
+</script>
+</body>
+</html>

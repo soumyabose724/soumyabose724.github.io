@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — 5-Year Cash Flow Forecast</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .assume-strip {
+      background:var(--surface-raised); border:1px solid var(--border);
+      border-radius:var(--r-lg); padding:var(--sp-3) var(--sp-4);
+      font-size:12px; color:var(--text-secondary); line-height:1.5;
+      margin-bottom:var(--sp-5);
+    }
+    .assume-strip strong { color:var(--text-primary); }
+
+    /* ── Chart card ── */
+    .chart-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-xl); padding:var(--sp-4) var(--sp-4) var(--sp-3); margin-bottom:var(--sp-5); }
+    .chart-card__header { display:flex; align-items:center; justify-content:space-between; margin-bottom:var(--sp-3); }
+    .chart-card__title { font-size:14px; font-weight:700; color:var(--text-primary); }
+    .chart-svg-wrap { width:100%; }
+    .chart-svg-wrap svg { width:100%; height:auto; display:block; }
+    .chart-legend { display:flex; gap:var(--sp-4); margin-top:var(--sp-3); flex-wrap:wrap; }
+    .chart-legend__item { display:flex; align-items:center; gap:6px; font-size:11px; color:var(--text-secondary); font-weight:600; }
+    .chart-legend__dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+    .chart-caption { font-size:11px; color:var(--text-muted); line-height:1.55; margin-top:var(--sp-3); }
+
+    /* ── Scenario stat tiles ── */
+    .kpi-row { display:grid; grid-template-columns:repeat(3, 1fr); gap:var(--sp-3); margin-bottom:var(--sp-5); }
+    .kpi-tile { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg); padding:var(--sp-3); text-align:center; }
+    .kpi-tile__label { font-size:10px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px; }
+    .kpi-tile__value { font-family:'JetBrains Mono', monospace; font-variant-numeric:tabular-nums; font-size:17px; font-weight:700; }
+    .kpi-tile__sub { font-size:10px; color:var(--text-muted); margin-top:2px; }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">Assumptions</span>
+    <button class="demo-btn active" data-state="conservative">Conservative</button>
+    <button class="demo-btn" data-state="optimistic">Optimistic</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">5-Year Forecast</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content">
+
+    <div class="assume-strip" id="assume-strip">Loading assumptions…</div>
+
+    <!-- Chart -->
+    <div class="chart-card">
+      <div class="chart-card__header">
+        <span class="chart-card__title">Projected Net Worth · Jun 2026 – Jun 2031</span>
+      </div>
+      <div class="chart-svg-wrap">
+        <svg id="forecast-svg" viewBox="0 0 380 200" preserveAspectRatio="none"></svg>
+      </div>
+      <div class="chart-legend">
+        <span class="chart-legend__item"><span class="chart-legend__dot" style="background:var(--success);"></span>Best Case</span>
+        <span class="chart-legend__item"><span class="chart-legend__dot" style="background:#0D9488;"></span>Base Case</span>
+        <span class="chart-legend__item"><span class="chart-legend__dot" style="background:var(--error);"></span>Worst Case</span>
+      </div>
+      <div class="chart-caption">
+        Starting from your current net worth of ₹52,34,000 (Dashboard) and continuing your ₹20,650/month savings surplus (Transactions, June 2026), each line compounds monthly at a different assumed annual return. This is an illustrative projection, not a guarantee — actual markets will not follow a straight compounding curve.
+      </div>
+    </div>
+
+    <!-- Year-5 scenario callouts -->
+    <div class="section-title">Where You Land By June 2031</div>
+    <div class="kpi-row">
+      <div class="kpi-tile">
+        <div class="kpi-tile__label">Best Case</div>
+        <div class="kpi-tile__value" id="kpi-best" style="color:var(--success);">—</div>
+        <div class="kpi-tile__sub" id="kpi-best-rate">— p.a.</div>
+      </div>
+      <div class="kpi-tile">
+        <div class="kpi-tile__label">Base Case</div>
+        <div class="kpi-tile__value" id="kpi-base" style="color:#0D9488;">—</div>
+        <div class="kpi-tile__sub" id="kpi-base-rate">— p.a.</div>
+      </div>
+      <div class="kpi-tile">
+        <div class="kpi-tile__label">Worst Case</div>
+        <div class="kpi-tile__value" id="kpi-worst" style="color:var(--error);">—</div>
+        <div class="kpi-tile__sub" id="kpi-worst-rate">— p.a.</div>
+      </div>
+    </div>
+
+    <div style="font-size:11px; color:var(--text-muted); line-height:1.6;">
+      Net worth today (₹52,34,000) is carried forward at the return band shown above, plus a steady ₹20,650/month net savings addition. Loan EMIs, SIPs and envelope spending are assumed to continue as currently scheduled — this does not account for a job change, windfall, or a major one-off expense.
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV — none active (no Intelligence tab)
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="../investments/index.html" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ── Theme toggle (matches other pages) ── */
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+    renderChart();
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+
+  /* ── Vikas's cash-flow forecast model (paise) ──
+     Starting net worth from Dashboard (₹52,34,000), compounding monthly at a scenario
+     return rate, plus his steady ₹20,650/month net savings surplus (Transactions). */
+  const START_NET_WORTH = 523400000; // ₹52,34,000
+  const MONTHLY_SURPLUS  = 2065000;  // ₹20,650/month
+  const MONTHS = 60;
+
+  const PRESETS = {
+    conservative: {
+      best: 11, base: 8, worst: 4,
+      note: 'Conservative assumes a muted 4–11% p.a. return band — a plausible outcome if equity markets cool off or a downturn hits mid-way through the 5 years.',
+    },
+    optimistic: {
+      best: 16, base: 12, worst: 8,
+      note: 'Optimistic assumes a stronger 8–16% p.a. return band, consistent with a sustained bull run across Vikas’s equity-heavy portfolio.',
+    },
+  };
+
+  function projectSeries(annualRatePct, months) {
+    const r = (annualRatePct / 100) / 12;
+    const series = [START_NET_WORTH];
+    let val = START_NET_WORTH;
+    for (let m = 1; m <= months; m++) {
+      val = val * (1 + r) + MONTHLY_SURPLUS;
+      series.push(Math.round(val));
+    }
+    return series;
+  }
+
+  const svg = document.getElementById('forecast-svg');
+  const W = 380, H = 200, PAD_L = 8, PAD_R = 8, PAD_T = 14, PAD_B = 22;
+
+  function niceMax(v) {
+    if (v <= 0) return 1000000;
+    const mag = Math.pow(10, Math.floor(Math.log10(v)));
+    const steps = [1, 2, 2.5, 5, 10];
+    for (const s of steps) { if (v <= s * mag) return s * mag; }
+    return 10 * mag;
+  }
+
+  function monthLabel(m) {
+    const startYear = 2026, startMonthIdx = 5; // June = index 5
+    const totalIdx = startMonthIdx + m;
+    const year = startYear + Math.floor(totalIdx / 12);
+    const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return monthNames[totalIdx % 12] + ' ' + String(year).slice(2);
+  }
+
+  function currentPreset() {
+    const active = document.querySelector('.demo-btn.active[data-state]');
+    return active ? active.dataset.state : 'conservative';
+  }
+
+  function renderChart() {
+    const key = currentPreset();
+    const preset = PRESETS[key];
+
+    const bestSeries  = projectSeries(preset.best, MONTHS);
+    const baseSeries  = projectSeries(preset.base, MONTHS);
+    const worstSeries = projectSeries(preset.worst, MONTHS);
+
+    const allValues = bestSeries.concat(baseSeries, worstSeries);
+    const domainMax = niceMax(Math.max(...allValues));
+    const domainMin = 0;
+    const plotW = W - PAD_L - PAD_R;
+    const plotH = H - PAD_T - PAD_B;
+    const xStep = plotW / MONTHS;
+    const yOf = v => PAD_T + plotH - ((v - domainMin) / (domainMax - domainMin)) * plotH;
+    const xOf = i => PAD_L + i * xStep;
+
+    const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--border').trim() || '#E7E5E4';
+    const success = getComputedStyle(document.documentElement).getPropertyValue('--success').trim() || '#22C55E';
+    const error   = getComputedStyle(document.documentElement).getPropertyValue('--error').trim() || '#E94560';
+    const primary = '#0D9488';
+
+    let gridlines = '';
+    const gridSteps = 4;
+    for (let i = 0; i <= gridSteps; i++) {
+      const val = domainMin + ((domainMax - domainMin) / gridSteps) * i;
+      const y = yOf(val);
+      gridlines += `<line x1="${PAD_L}" y1="${y}" x2="${W - PAD_R}" y2="${y}" stroke="${gridColor}" stroke-width="1"/>`;
+      gridlines += `<text x="${PAD_L}" y="${y - 3}" font-size="7" fill="var(--text-muted)">${AG.formatINR(Math.round(val), { compact: true })}</text>`;
+    }
+
+    let xLabels = '';
+    [0, 12, 24, 36, 48, 60].forEach(m => {
+      xLabels += `<text x="${xOf(m)}" y="${H - 4}" font-size="7" fill="var(--text-muted)" text-anchor="${m === 0 ? 'start' : (m === 60 ? 'end' : 'middle')}">${monthLabel(m)}</text>`;
+    });
+
+    function polyline(series, color) {
+      const pts = series.map((v, i) => `${xOf(i)},${yOf(v)}`).join(' ');
+      return `<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/>`;
+    }
+    function endDot(series, color) {
+      const i = series.length - 1;
+      return `<circle cx="${xOf(i)}" cy="${yOf(series[i])}" r="3.5" fill="${color}" stroke="var(--surface)" stroke-width="1.5"/>`;
+    }
+
+    svg.innerHTML = `
+      ${gridlines}
+      ${xLabels}
+      <line x1="${xOf(0)}" y1="${PAD_T}" x2="${xOf(0)}" y2="${H - PAD_B}" stroke="${gridColor}" stroke-width="1" stroke-dasharray="2,2"/>
+      ${polyline(worstSeries, error)}
+      ${polyline(baseSeries, primary)}
+      ${polyline(bestSeries, success)}
+      ${endDot(worstSeries, error)}
+      ${endDot(baseSeries, primary)}
+      ${endDot(bestSeries, success)}
+    `;
+
+    document.getElementById('kpi-best').textContent  = AG.formatINR(bestSeries[MONTHS], { compact: true });
+    document.getElementById('kpi-base').textContent  = AG.formatINR(baseSeries[MONTHS], { compact: true });
+    document.getElementById('kpi-worst').textContent = AG.formatINR(worstSeries[MONTHS], { compact: true });
+    document.getElementById('kpi-best-rate').textContent  = preset.best + '% p.a.';
+    document.getElementById('kpi-base-rate').textContent  = preset.base + '% p.a.';
+    document.getElementById('kpi-worst-rate').textContent = preset.worst + '% p.a.';
+
+    document.getElementById('assume-strip').innerHTML =
+      `<strong>${key === 'optimistic' ? 'Optimistic' : 'Conservative'} assumptions active.</strong> ${preset.note} All three lines assume the same ₹20,650/month savings surplus continues — only the assumed annual return differs.`;
+  }
+
+  document.querySelectorAll('.demo-btn[data-state]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.demo-btn[data-state]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderChart();
+    });
+  });
+
+  renderChart();
+</script>
+</body>
+</html>

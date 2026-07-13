@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Spend Anomaly Detection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .ml-banner {
+      width:100%; display:flex; align-items:center; gap:var(--sp-3);
+      background:var(--warning-light); border:1px solid rgba(245,158,11,.32);
+      border-radius:var(--r-lg); padding:var(--sp-3) var(--sp-4);
+      margin-bottom:var(--sp-5);
+    }
+    .ml-banner__icon { font-size:18px; flex-shrink:0; }
+    .ml-banner__text { flex:1; font-size:12.5px; color:var(--text-primary); line-height:1.45; }
+    .ml-banner__text strong { color:var(--warning); }
+
+    /* ── Anomaly card ── */
+    .anom-card {
+      background:var(--surface); border:1.5px solid var(--border); border-radius:var(--r-xl);
+      padding:var(--sp-4); margin-bottom:var(--sp-4);
+      animation:card-in var(--dur-med) var(--ease-out) both;
+    }
+    .anom-card--warning { border-color:rgba(233,69,96,.30); }
+    .anom-card--positive { border-color:rgba(34,197,94,.28); }
+
+    .anom-card__top { display:flex; align-items:center; gap:var(--sp-3); margin-bottom:var(--sp-3); }
+    .anom-card__icon {
+      width:40px; height:40px; border-radius:var(--r-lg); flex-shrink:0; font-size:18px;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .anom-card__title { font-size:14px; font-weight:700; color:var(--text-primary); }
+    .anom-card__dev {
+      margin-left:auto; flex-shrink:0; font-size:12px; font-weight:700;
+      padding:3px 9px; border-radius:var(--r-full);
+    }
+    .anom-card__dev--warning { background:var(--error-light); color:var(--error); }
+    .anom-card__dev--positive { background:var(--success-light); color:var(--success); }
+
+    .anom-card__body { display:flex; align-items:center; gap:var(--sp-4); }
+    .anom-card__stats { flex:1; min-width:0; }
+    .anom-card__current {
+      font-family:'JetBrains Mono', monospace; font-variant-numeric:tabular-nums;
+      font-size:20px; font-weight:700; color:var(--text-primary);
+    }
+    .anom-card__vs { font-size:12px; color:var(--text-secondary); margin-top:2px; }
+    .anom-card__vs strong { color:var(--text-primary); font-family:'JetBrains Mono', monospace; }
+    .anom-card__spark { width:110px; height:38px; flex-shrink:0; }
+    .anom-card__spark svg { width:100%; height:100%; display:block; }
+    .anom-card__note {
+      font-size:12px; color:var(--text-secondary); line-height:1.5;
+      margin-top:var(--sp-3); padding-top:var(--sp-3); border-top:1px solid var(--border);
+    }
+    .anom-card__note a { color:var(--primary); font-weight:500; }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">Period</span>
+    <button class="demo-btn active" data-state="jun2026">June 2026</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Spend Anomalies</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content">
+
+    <div class="ml-banner">
+      <span class="ml-banner__icon">✨</span>
+      <span class="ml-banner__text">
+        <strong>4 categories</strong> compared against their trailing 3-month average this period · ArthaGrid only flags — it never changes your budget or category automatically
+        <span class="chip chip--info" style="margin-left:4px;">ML</span>
+      </span>
+    </div>
+
+    <div id="anom-list"><!-- rendered by JS --></div>
+
+    <div style="font-size:11px; color:var(--text-muted); line-height:1.6;">
+      Baselines use the trailing 3-month average spend per category. A category is flagged when current-month spend deviates more than ±20% from that baseline. Figures are computed client-side for this prototype.
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV — none active (no Intelligence tab)
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="../investments/index.html" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ── Theme toggle (matches other pages) ── */
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+    renderAnomalies();
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+
+  /* ── Category spend vs 3-month baseline (paise) — Jan through Jun 2026 ──
+     Baseline = average of Mar/Apr/May (the trailing 3 months before June). */
+  const CATEGORIES = [
+    {
+      key: 'dining', label: 'Dining Out', icon: '🍽️', iconBg: '#FEF3C7', kind: 'warning',
+      current: 675000, baseline: 450000,
+      history: [420000, 430000, 450000, 440000, 460000, 675000],
+      note: 'Flagged because June spend is more than 20% above the 3-month baseline — and the baseline itself has climbed 22% over the last two quarters. Your Dining Out envelope is allocated ₹6,000; this puts you ₹750 over. See <a href="../budget/period.html">Budget Period</a>.',
+    },
+    {
+      key: 'mobile', label: 'Mobile & Internet', icon: '📱', iconBg: '#FCE7F3', kind: 'warning',
+      current: 185000, baseline: 140000,
+      history: [130000, 135000, 140000, 145000, 135000, 185000],
+      note: 'Flagged because spend is 32% above baseline — and separately, this envelope is already at 93% of its ₹2,000 allocation with days left in the period. See the related recommendation on <a href="recommendations.html">Recommendations</a>.',
+    },
+    {
+      key: 'groceries', label: 'Groceries', icon: '🛒', iconBg: '#D1FAE5', kind: 'positive',
+      current: 820000, baseline: 950000,
+      history: [920000, 970000, 950000, 940000, 960000, 820000],
+      note: 'Comfortably under baseline and only 68% of your ₹12,000 Groceries envelope used — no action needed.',
+    },
+    {
+      key: 'fuel', label: 'Fuel & Transport', icon: '🚗', iconBg: '#F1F5F9', kind: 'positive',
+      current: 120000, baseline: 360000,
+      history: [350000, 370000, 360000, 350000, 370000, 120000],
+      note: 'Well below baseline this month — possibly fewer commutes or trips. Nice job keeping this one lean.',
+    },
+  ];
+
+  function buildSparkline(history, color) {
+    const W = 110, H = 38, PAD = 3;
+    const max = Math.max(...history);
+    const min = Math.min(...history) * 0.9; // small headroom below the lowest point
+    const span = Math.max(max - min, 1);
+    const step = (W - PAD * 2) / (history.length - 1);
+    const yOf = v => PAD + (H - PAD * 2) * (1 - (v - min) / span);
+    const pts = history.map((v, i) => `${PAD + i * step},${yOf(v)}`).join(' ');
+    const lastX = PAD + (history.length - 1) * step;
+    const lastY = yOf(history[history.length - 1]);
+    return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+      <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="${lastX}" cy="${lastY}" r="3" fill="${color}"/>
+    </svg>`;
+  }
+
+  function renderAnomalies() {
+    const success = getComputedStyle(document.documentElement).getPropertyValue('--success').trim() || '#22C55E';
+    const error   = getComputedStyle(document.documentElement).getPropertyValue('--error').trim() || '#E94560';
+
+    document.getElementById('anom-list').innerHTML = CATEGORIES.map(c => {
+      const devPct = ((c.current - c.baseline) / c.baseline) * 100;
+      const devLabel = (devPct >= 0 ? '+' : '') + devPct.toFixed(1) + '%';
+      const sparkColor = c.kind === 'warning' ? error : success;
+      return `
+        <div class="anom-card anom-card--${c.kind}">
+          <div class="anom-card__top">
+            <div class="anom-card__icon" style="background:${c.iconBg};">${c.icon}</div>
+            <div class="anom-card__title">${c.label}</div>
+            <span class="anom-card__dev anom-card__dev--${c.kind}">${devLabel} ${c.kind === 'warning' ? 'above' : 'below'} baseline</span>
+          </div>
+          <div class="anom-card__body">
+            <div class="anom-card__stats">
+              <div class="anom-card__current">${AG.formatINR(c.current)}</div>
+              <div class="anom-card__vs">this month vs <strong>${AG.formatINR(c.baseline)}</strong> 3-month average${c.kind === 'positive' ? ' — nice job!' : ''}</div>
+            </div>
+            <div class="anom-card__spark">${buildSparkline(c.history, sparkColor)}</div>
+          </div>
+          <div class="anom-card__note">${c.note}</div>
+        </div>`;
+    }).join('');
+  }
+
+  renderAnomalies();
+</script>
+</body>
+</html>
