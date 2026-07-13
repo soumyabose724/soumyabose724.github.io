@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Net Worth Trend</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* ── Line chart ── */
+    .line-chart-wrap { position: relative; }
+    .line-chart-wrap svg { width: 100%; height: 140px; display: block; }
+    .line-chart__labels {
+      display: flex; justify-content: space-between; margin-top: 4px;
+    }
+    .line-chart__labels span { font-size: 9px; color: var(--text-muted); font-weight: 600; }
+
+    /* ── Compare bars (assets vs liabilities) ── */
+    .compare-row { margin-bottom: var(--sp-4); }
+    .compare-row:last-child { margin-bottom: 0; }
+    .compare-row__top { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+    .compare-row__name { font-weight: 600; color: var(--text-primary); }
+    .compare-row__amt  { font-family:'JetBrains Mono',monospace; font-variant-numeric: tabular-nums; font-weight: 700; }
+    .compare-track { height: 14px; background: var(--border); border-radius: var(--r-full); overflow: hidden; }
+    .compare-fill  { height: 100%; border-radius: var(--r-full); }
+
+    /* ── Breakdown bars (asset class / liability class) ── */
+    .bd-row { margin-bottom: var(--sp-3); }
+    .bd-row:last-child { margin-bottom: 0; }
+    .bd-row__top { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; margin-bottom: 5px; }
+    .bd-row__name { display: flex; align-items: center; gap: 6px; font-weight: 600; color: var(--text-primary); }
+    .bd-row__dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .bd-row__amt { font-family:'JetBrains Mono',monospace; font-variant-numeric: tabular-nums; color: var(--text-secondary); font-size: 12px; }
+    .bd-track { height: 10px; background: var(--border); border-radius: var(--r-full); overflow: hidden; }
+    .bd-fill { height: 100%; border-radius: var(--r-full); }
+
+    .net-worth-caption {
+      font-size: 12px; color: var(--text-muted); text-align: center; margin-top: var(--sp-2);
+    }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- Demo Bar -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">Net Worth Trend</span>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Net Worth Trend</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- Page Content -->
+  <div class="page-content">
+
+    <!-- Hero: current net worth -->
+    <div class="glass-card glass-card--hero" style="margin-bottom: var(--sp-4);">
+      <div style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-secondary);margin-bottom:var(--sp-2);">Net Worth · June 2026</div>
+      <div class="amount-text--display gradient-text" style="font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;">₹52,34,000</div>
+      <div style="margin-top:var(--sp-2);"><span class="delta delta--pos">▲ +₹1,24,000 (+2.4%) this month</span></div>
+      <div style="font-size:12px;color:var(--text-muted);margin-top:var(--sp-3);">
+        Assets <span style="color:var(--text-secondary);font-weight:500;">₹1,03,74,000</span> &nbsp;·&nbsp; Liabilities <span style="color:var(--error);">₹51,40,000</span>
+      </div>
+      <div class="line-chart-wrap" style="margin-top: var(--sp-4);">
+        <svg id="nw-line" viewBox="0 0 320 100" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="nwStroke" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#0D9488; stop-opacity:0.6"/>
+              <stop offset="100%" style="stop-color:#14B8A6; stop-opacity:1"/>
+            </linearGradient>
+            <linearGradient id="nwFill" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color:#0D9488; stop-opacity:0.22"/>
+              <stop offset="100%" style="stop-color:#0D9488; stop-opacity:0"/>
+            </linearGradient>
+          </defs>
+          <path id="nw-area" fill="url(#nwFill)"/>
+          <path id="nw-path" fill="none" stroke="url(#nwStroke)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="line-chart__labels" id="nw-labels"></div>
+      </div>
+      <div class="net-worth-caption">12-month trend · Jul 2025 – Jun 2026</div>
+    </div>
+
+    <!-- Assets vs Liabilities -->
+    <div class="section-title">Assets vs Liabilities</div>
+    <div class="glass-card" style="margin-bottom: var(--sp-4);">
+      <div class="compare-row">
+        <div class="compare-row__top">
+          <span class="compare-row__name">Assets</span>
+          <span class="compare-row__amt" style="color:var(--success);">₹1,03,74,000</span>
+        </div>
+        <div class="compare-track"><div class="compare-fill" style="width:100%; background:var(--grad-success);"></div></div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-row__top">
+          <span class="compare-row__name">Liabilities</span>
+          <span class="compare-row__amt" style="color:var(--error);">₹51,40,000</span>
+        </div>
+        <div class="compare-track"><div class="compare-fill" style="width:49.5%; background:var(--grad-danger);"></div></div>
+      </div>
+      <div class="compare-row" style="margin-bottom:0;">
+        <div class="compare-row__top">
+          <span class="compare-row__name">Net Worth</span>
+          <span class="compare-row__amt gradient-text">₹52,34,000</span>
+        </div>
+        <div class="compare-track"><div class="compare-fill" style="width:50.5%; background:var(--grad-primary);"></div></div>
+      </div>
+    </div>
+
+    <!-- Asset class breakdown -->
+    <div class="section-title">Assets by Class</div>
+    <div class="glass-card" style="margin-bottom: var(--sp-4);">
+      <div id="asset-breakdown"></div>
+    </div>
+
+    <!-- Liability breakdown -->
+    <div class="section-title">Liabilities by Type</div>
+    <div class="glass-card">
+      <div id="liability-breakdown"></div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="../investments/index.html" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ── Theme toggle (matches other pages) ── */
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+
+  /* ── 12-month net worth trend (paise) — ends at dashboard's current figure ── */
+  const NW_TREND = [
+    { label: 'Jul', value: 4380000000 },
+    { label: 'Aug', value: 4440000000 },
+    { label: 'Sep', value: 4500000000 },
+    { label: 'Oct', value: 4560000000 },
+    { label: 'Nov', value: 4620000000 },
+    { label: 'Dec', value: 4690000000 },
+    { label: 'Jan', value: 4760000000 },
+    { label: 'Feb', value: 4840000000 },
+    { label: 'Mar', value: 4920000000 },
+    { label: 'Apr', value: 5010000000 },
+    { label: 'May', value: 5110000000 },
+    { label: 'Jun', value: 5234000000 },
+  ];
+
+  /* Asset class breakdown (paise) — reconciles to dashboard's Assets ₹1,03,74,000 */
+  const ASSETS = [
+    { name: 'Bank Accounts',                  amount: 1216386_00 / 100 | 0, color: 'linear-gradient(135deg,#2563EB,#3B82F6)' },
+    { name: 'Investments (MF / Equities)',    amount: 371100,   color: 'var(--grad-primary)' },
+    { name: 'Retirement Corpus & Other',      amount: 8786514,  color: 'var(--grad-success)' },
+  ];
+
+  /* Liability breakdown (paise) — reconciles to dashboard's Liabilities ₹51,40,000 */
+  const LIABILITIES = [
+    { name: 'Home Loan (HDFC)',   amount: 3786000, color: 'var(--grad-danger)' },
+    { name: 'Car Loan (ICICI)',   amount: 601000,  color: 'linear-gradient(135deg,#D97706,#F59E0B)' },
+    { name: 'Credit Cards',       amount: 122970,  color: 'linear-gradient(135deg,#8B5CF6,#A78BFA)' },
+    { name: 'Other Liabilities',  amount: 630030,  color: 'var(--surface-raised)' },
+  ];
+
+  function renderLineChart() {
+    const values = NW_TREND.map(p => p.value);
+    const min = Math.min(...values), max = Math.max(...values);
+    const range = max - min || 1;
+    const w = 320, h = 100, pad = 6;
+    const stepX = w / (NW_TREND.length - 1);
+    const pts = values.map((v, i) => {
+      const x = i * stepX;
+      const y = pad + (1 - (v - min) / range) * (h - pad * 2);
+      return [x, y];
+    });
+    const pathD = pts.map((p, i) => (i === 0 ? 'M' : 'L') + p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+    const areaD = pathD + ` L${w},${h} L0,${h} Z`;
+    document.getElementById('nw-path').setAttribute('d', pathD);
+    document.getElementById('nw-area').setAttribute('d', areaD);
+
+    const labelsWrap = document.getElementById('nw-labels');
+    labelsWrap.innerHTML = NW_TREND.map((p, i) => (i % 2 === 0 || i === NW_TREND.length - 1) ? `<span>${p.label}</span>` : `<span></span>`).join('');
+  }
+
+  function renderBreakdown(elId, items, total) {
+    const wrap = document.getElementById(elId);
+    wrap.innerHTML = items.map(it => {
+      const pct = (it.amount / total * 100).toFixed(1);
+      return `
+        <div class="bd-row">
+          <div class="bd-row__top">
+            <span class="bd-row__name"><span class="bd-row__dot" style="background:${it.color};"></span>${it.name}</span>
+            <span class="bd-row__amt">${AG.formatINR(it.amount * 100)} · ${pct}%</span>
+          </div>
+          <div class="bd-track"><div class="bd-fill" style="width:${pct}%; background:${it.color};"></div></div>
+        </div>`;
+    }).join('');
+  }
+
+  renderLineChart();
+  renderBreakdown('asset-breakdown', ASSETS, ASSETS.reduce((s, a) => s + a.amount, 0));
+  renderBreakdown('liability-breakdown', LIABILITIES, LIABILITIES.reduce((s, l) => s + l.amount, 0));
+</script>
+</body>
+</html>

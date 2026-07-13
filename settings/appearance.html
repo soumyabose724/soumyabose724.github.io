@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Appearance</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .appearance-note {
+      font-size: 12px; color: var(--text-secondary); line-height: 1.6;
+      margin-bottom: var(--sp-4);
+    }
+    .segmented {
+      display: flex; background: var(--surface-raised);
+      border: 1px solid var(--border); border-radius: var(--r-full);
+      padding: 3px; gap: 2px;
+    }
+    .segmented-btn {
+      flex: 1; height: 40px; border-radius: var(--r-full);
+      font-size: 13px; font-weight: 600; color: var(--text-secondary);
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      transition: background var(--dur-fast), color var(--dur-fast);
+      white-space: nowrap;
+    }
+    .segmented-btn.active { background: var(--grad-primary); color: #fff; box-shadow: 0 2px 8px rgba(13,148,136,.28); }
+
+    .font-segmented .segmented-btn { font-size: 13px; }
+    .font-segmented .segmented-btn[data-size="small"]   { font-size: 12px; }
+    .font-segmented .segmented-btn[data-size="medium"]  { font-size: 14px; }
+    .font-segmented .segmented-btn[data-size="large"]   { font-size: 16px; }
+
+    /* Live preview card — mirrors an envelope list row */
+    .preview-wrap { transition: font-size var(--dur-base) var(--ease-out); }
+    .preview-envelope {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: var(--sp-4);
+    }
+    .preview-envelope__top {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: var(--sp-2);
+    }
+    .preview-envelope__name { font-weight: 600; color: var(--text-primary); }
+    .preview-envelope__amt {
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+      font-weight: 600; color: var(--text-primary);
+    }
+    .preview-envelope__sub { color: var(--text-muted); margin-top: var(--sp-2); }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <div class="demo-bar">
+    <span class="demo-bar__label">Settings</span>
+    <button class="icon-btn" data-theme-toggle style="margin-left:auto;" aria-label="Toggle theme">
+      <span data-theme-icon style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Appearance</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <div class="page-content" id="page-content">
+
+    <p class="appearance-note">
+      These settings control how ArthaGrid looks on this device. Dark mode is built from the same brand palette as light mode — only surfaces and shadows change.
+    </p>
+
+    <div class="section">
+      <div class="section-title">Theme</div>
+      <div class="segmented" id="theme-segmented">
+        <button class="segmented-btn" data-mode="light" onclick="setThemeMode('light')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          Light
+        </button>
+        <button class="segmented-btn" data-mode="dark" onclick="setThemeMode('dark')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          Dark
+        </button>
+        <button class="segmented-btn" data-mode="system" onclick="setThemeMode('system')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          System
+        </button>
+      </div>
+      <div class="form-helper" style="margin-top:var(--sp-2);" id="theme-mode-desc">Follows your device's system setting.</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Font Size</div>
+      <div class="segmented font-segmented" id="font-segmented">
+        <button class="segmented-btn" data-size="small" onclick="setFontSize('small')">Small</button>
+        <button class="segmented-btn" data-size="medium" onclick="setFontSize('medium')">Medium</button>
+        <button class="segmented-btn" data-size="large" onclick="setFontSize('large')">Large</button>
+      </div>
+      <div class="form-helper" style="margin-top:var(--sp-2);">Applies to text sizing across the whole app.</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Live Preview</div>
+      <div class="preview-wrap" id="preview-wrap">
+        <div class="preview-envelope">
+          <div class="preview-envelope__top">
+            <span class="preview-envelope__name">Groceries Envelope</span>
+            <span class="preview-envelope__amt">₹6,800 <span style="color:var(--text-muted); font-weight:400;">/ ₹10,000</span></span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-bar__fill" style="width:68%;"></div>
+          </div>
+          <div class="preview-envelope__sub t-caption">68% used · ₹3,200 remaining this month</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2"/></svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      <span>Transactions</span>
+    </a>
+    <a href="../investments/index.html" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span>Invest</span>
+    </a>
+    <a href="index.html" class="nav-tab active" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  AG.initBottomNav('profile');
+
+  const THEME_MODE_KEY = 'ag-theme-mode';
+  const FONT_SIZE_KEY  = 'ag-font-size';
+
+  const THEME_DESCRIPTIONS = {
+    light: 'Always use light mode, regardless of device setting.',
+    dark: 'Always use dark mode, regardless of device setting.',
+    system: "Follows your device's system setting.",
+  };
+
+  function effectiveTheme(mode) {
+    if (mode === 'system') {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    return mode;
+  }
+
+  function applyThemeMode(mode, { silent } = {}) {
+    localStorage.setItem(THEME_MODE_KEY, mode);
+    const theme = effectiveTheme(mode);
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('ag-theme', theme);
+    document.querySelectorAll('[data-theme-icon]').forEach(el => {
+      el.textContent = theme === 'dark' ? '☀️' : '🌙';
+    });
+    document.querySelectorAll('#theme-segmented .segmented-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.mode === mode);
+    });
+    document.getElementById('theme-mode-desc').textContent = THEME_DESCRIPTIONS[mode];
+    if (!silent) AG.showToast('Theme set to ' + mode.charAt(0).toUpperCase() + mode.slice(1), 'success');
+  }
+
+  function setThemeMode(mode) { applyThemeMode(mode); }
+
+  function applyFontSize(size, { silent } = {}) {
+    localStorage.setItem(FONT_SIZE_KEY, size);
+    const scale = { small: '13px', medium: '15px', large: '17px' }[size];
+    document.getElementById('preview-wrap').style.fontSize = scale;
+    document.querySelectorAll('#font-segmented .segmented-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.size === size);
+    });
+    if (!silent) AG.showToast('Font size set to ' + size.charAt(0).toUpperCase() + size.slice(1), 'success');
+  }
+
+  function setFontSize(size) { applyFontSize(size); }
+
+  // Initialise from storage on load
+  const savedMode = localStorage.getItem(THEME_MODE_KEY) || 'system';
+  applyThemeMode(savedMode, { silent: true });
+  const savedFont = localStorage.getItem(FONT_SIZE_KEY) || 'medium';
+  applyFontSize(savedFont, { silent: true });
+
+  // If the quick theme-toggle icon buttons are used on this page, treat that
+  // as an explicit light/dark choice and keep the segmented control in sync.
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      setTimeout(() => {
+        const current = document.documentElement.getAttribute('data-theme');
+        applyThemeMode(current, { silent: true });
+      }, 0);
+    });
+  });
+
+  // Keep in sync with OS-level theme changes while in "system" mode
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if ((localStorage.getItem(THEME_MODE_KEY) || 'system') === 'system') {
+      applyThemeMode('system', { silent: true });
+    }
+  });
+</script>
+</body>
+</html>

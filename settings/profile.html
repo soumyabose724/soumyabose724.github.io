@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Profile</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .avatar-block {
+      display: flex; flex-direction: column; align-items: center;
+      padding: var(--sp-4) 0 var(--sp-6);
+    }
+    .avatar-block__photo {
+      width: 88px; height: 88px; border-radius: 50%;
+      background: var(--grad-primary); color: #fff;
+      font-size: 30px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: var(--sp-3);
+      box-shadow: 0 8px 24px rgba(13,148,136,.28);
+      position: relative;
+    }
+    .avatar-block__edit {
+      position: absolute; bottom: -2px; right: -2px;
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--surface); border: 2px solid var(--bg);
+      color: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: var(--sh-sm);
+    }
+    .avatar-block__change {
+      font-size: 13px; font-weight: 600; color: var(--primary);
+    }
+
+    .field-mask-hint {
+      font-size: 12px; color: var(--text-muted); margin-top: 6px;
+      display: flex; align-items: center; gap: 5px;
+    }
+
+    .fy-toggle-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: var(--sp-4); background: var(--surface);
+      border: 1px solid var(--border); border-radius: var(--r-lg);
+    }
+    .fy-toggle-row + .fy-toggle-row { margin-top: var(--sp-3); }
+
+    .residency-pills { display: flex; gap: var(--sp-2); flex-wrap: wrap; }
+    .residency-pill {
+      flex: 1; min-width: 90px; text-align: center;
+      padding: var(--sp-3) var(--sp-2);
+      border-radius: var(--r-md); border: 1.5px solid var(--border-strong);
+      font-size: 13px; font-weight: 600; color: var(--text-secondary);
+      cursor: pointer; transition: all var(--dur-fast);
+    }
+    .residency-pill.selected {
+      border-color: var(--primary); background: var(--primary-xlight); color: var(--primary);
+    }
+    .residency-pill__hint { display: block; font-size: 10px; font-weight: 400; margin-top: 2px; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">Settings</span>
+    <button class="icon-btn" data-theme-toggle style="margin-left:auto;" aria-label="Toggle theme">
+      <span data-theme-icon style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Profile</span>
+    <div class="top-bar__actions">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content" id="page-content">
+
+    <!-- Avatar -->
+    <div class="avatar-block">
+      <div class="avatar-block__photo">
+        VS
+        <button class="avatar-block__edit" onclick="AG.showToast('Photo upload coming soon', 'info')" aria-label="Change photo">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        </button>
+      </div>
+      <button class="avatar-block__change" onclick="AG.showToast('Photo upload coming soon', 'info')">Change Photo</button>
+    </div>
+
+    <!-- Basic details -->
+    <div class="section-title">Basic Details</div>
+    <div class="glass-card glass-card--compact" style="margin-bottom:var(--sp-5);">
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input class="form-input" type="text" value="Vikas Sharma">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mobile Number</label>
+        <input class="form-input t-mono" type="text" value="+91 ••••••3210" disabled>
+        <div class="field-mask-hint">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Masked for privacy · verify to change
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input class="form-input" type="email" value="vikas.sharma@example.com">
+      </div>
+    </div>
+
+    <!-- Residency status -->
+    <div class="section-title">Residency Status</div>
+    <div class="glass-card glass-card--compact" style="margin-bottom:var(--sp-5);">
+      <div class="residency-pills">
+        <div class="residency-pill selected" id="pill-resident" onclick="setResidency('resident')">
+          Resident
+          <span class="residency-pill__hint">RESIDENT</span>
+        </div>
+        <div class="residency-pill" id="pill-nri" onclick="setResidency('nri')">
+          NRI
+          <span class="residency-pill__hint">Non-Resident</span>
+        </div>
+        <div class="residency-pill" id="pill-rnor" onclick="setResidency('rnor')">
+          RNOR
+          <span class="residency-pill__hint">Returning NRI</span>
+        </div>
+      </div>
+      <div class="form-helper" style="margin-top:var(--sp-3);">
+        ⓘ Controls visibility of NRE/NRO/FCNR account types and LRS/TCS features.
+      </div>
+    </div>
+
+    <!-- PAN -->
+    <div class="section-title">PAN Details</div>
+    <div class="glass-card glass-card--compact" style="margin-bottom:var(--sp-5);">
+      <div class="form-group">
+        <label class="form-label">PAN Number</label>
+        <input class="form-input t-mono" type="text" value="•••••1234F" disabled>
+        <div class="field-mask-hint">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Stored AES-256-GCM encrypted on-device · masked in UI
+        </div>
+      </div>
+      <button class="btn btn--secondary btn--full" onclick="AG.showToast('Re-authenticate to update PAN', 'info')">Update PAN</button>
+    </div>
+
+    <!-- Preferred FY view -->
+    <div class="section-title">Preferences</div>
+    <div class="fy-toggle-row">
+      <div>
+        <div class="toggle-label">Preferred FY View</div>
+        <div class="toggle-sublabel">Show reports by Financial Year (Apr–Mar), e.g. FY 2026-27</div>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="fy-toggle" checked onchange="toggleFY()">
+        <span class="toggle-track"></span>
+        <span class="toggle-thumb"></span>
+      </label>
+    </div>
+    <div class="fy-toggle-row">
+      <div>
+        <div class="toggle-label">Current Financial Year</div>
+        <div class="toggle-sublabel" id="fy-sub">FY 2026-27 (1 Apr 2026 – 31 Mar 2027)</div>
+      </div>
+      <span class="chip chip--locked">FY 2026-27</span>
+    </div>
+
+    <div style="margin-top:var(--sp-6);">
+      <button class="btn btn--primary btn--full" onclick="AG.showToast('Profile updated', 'success')">Save Changes</button>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="../investments/index.html" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="index.html" class="nav-tab active" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    AG.initBottomNav('profile');
+  });
+
+  function setResidency(val) {
+    document.querySelectorAll('.residency-pill').forEach(p => p.classList.remove('selected'));
+    document.getElementById('pill-' + val).classList.add('selected');
+  }
+
+  function toggleFY() {
+    const on = document.getElementById('fy-toggle').checked;
+    AG.showToast(on ? 'Reports will show Financial Year' : 'Reports will show Calendar Year', 'info');
+  }
+</script>
+</body>
+</html>

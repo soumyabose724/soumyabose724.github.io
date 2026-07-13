@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Family Members</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .member-row {
+      display: flex; align-items: flex-start; gap: var(--sp-3);
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-xl); padding: var(--sp-4);
+      animation: card-in var(--dur-med) var(--ease-out) both;
+    }
+    .member-row + .member-row { margin-top: var(--sp-3); }
+    .member-row__avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 14px; font-weight: 700; flex-shrink: 0;
+    }
+    .member-row__body { flex: 1; min-width: 0; }
+    .member-row__top { display: flex; align-items: center; gap: var(--sp-2); margin-bottom: 2px; }
+    .member-row__name { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+    .member-row__role {
+      font-size: 9px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+      padding: 2px 7px; border-radius: var(--r-full);
+      background: var(--primary-light); color: var(--primary); flex-shrink: 0;
+    }
+    .member-row__meta { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+    .member-row__grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 4px var(--sp-3);
+      margin-top: var(--sp-3); padding-top: var(--sp-3); border-top: 1px solid var(--border);
+    }
+    .member-row__stat-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; }
+    .member-row__stat-val { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-top: 1px; }
+    .member-row__actions { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
+    .member-row__action-btn {
+      width: 32px; height: 32px; border-radius: var(--r-full);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-muted); transition: background var(--dur-fast), color var(--dur-fast);
+    }
+    .member-row__action-btn:hover { background: var(--surface-raised); color: var(--text-primary); }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">Settings</span>
+    <button class="icon-btn" data-theme-toggle style="margin-left:auto;" aria-label="Toggle theme">
+      <span data-theme-icon style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Family Members</span>
+    <div class="top-bar__actions">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content" id="page-content">
+
+    <!-- Vikas — Self / Primary -->
+    <div class="member-row">
+      <div class="member-row__avatar" style="background:var(--grad-primary);">VS</div>
+      <div class="member-row__body">
+        <div class="member-row__top">
+          <span class="member-row__name">Vikas Sharma</span>
+          <span class="member-row__role">Primary</span>
+        </div>
+        <div class="member-row__meta">Self · Salary earner</div>
+        <div class="member-row__grid">
+          <div>
+            <div class="member-row__stat-label">Relationship</div>
+            <div class="member-row__stat-val">Self</div>
+          </div>
+          <div>
+            <div class="member-row__stat-label">DOB / Age</div>
+            <div class="member-row__stat-val">15 Mar 1992 · 34 yrs</div>
+          </div>
+          <div>
+            <div class="member-row__stat-label">Separately Assessed</div>
+            <div class="member-row__stat-val">Yes</div>
+          </div>
+          <div>
+            <div class="member-row__stat-label">Income</div>
+            <div class="member-row__stat-val t-mono">₹1,20,000/mo</div>
+          </div>
+        </div>
+      </div>
+      <div class="member-row__actions">
+        <button class="member-row__action-btn" onclick="AG.openSheet('edit-vikas')" aria-label="Edit">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Priya Sharma — Spouse -->
+    <div class="member-row" style="animation-delay:45ms;">
+      <div class="member-row__avatar" style="background:linear-gradient(135deg,#7C3AED,#9F67FF);">PS</div>
+      <div class="member-row__body">
+        <div class="member-row__top">
+          <span class="member-row__name">Priya Sharma</span>
+          <span class="member-row__role" style="background:var(--surface-raised); color:var(--text-secondary);">Spouse</span>
+        </div>
+        <div class="member-row__meta">Homemaker · No independent income</div>
+        <div class="member-row__grid">
+          <div>
+            <div class="member-row__stat-label">Relationship</div>
+            <div class="member-row__stat-val">Spouse</div>
+          </div>
+          <div>
+            <div class="member-row__stat-label">DOB / Age</div>
+            <div class="member-row__stat-val">20 Jun 1996 · 30 yrs</div>
+          </div>
+          <div>
+            <div class="member-row__stat-label">Separately Assessed</div>
+            <div class="member-row__stat-val">No</div>
+          </div>
+          <div>
+            <div class="member-row__stat-label">Income</div>
+            <div class="member-row__stat-val t-mono">—</div>
+          </div>
+        </div>
+      </div>
+      <div class="member-row__actions">
+        <button class="member-row__action-btn" onclick="AG.openSheet('edit-priya')" aria-label="Edit">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Aarav Sharma — Child -->
+    <div class="member-row" style="animation-delay:90ms;">
+      <div class="member-row__avatar" style="background:var(--primary-xlight); color:var(--primary);">AS</div>
+      <div class="member-row__body">
+        <div class="member-row__top">
+          <span class="member-row__name">Aarav Sharma</span>
+          <span class="member-row__role" style="background:var(--surface-raised); color:var(--text-secondary);">Child</span>
+        </div>
+        <div class="member-row__meta">Son · Dependent</div>
+        <div class="member-row__grid">
+          <div>
+            <div class="member-row__stat-label">Relationship</div>
+            <div class="member-row__stat-val">Child (Son)</div>
+          </div>
+          <div>
+            <div class="member-row__stat-label">DOB / Age</div>
+            <div class="member-row__stat-val">10 Apr 2021 · 5 yrs</div>
+          </div>
+          <div>
+            <div class="member-row__stat-label">Separately Assessed</div>
+            <div class="member-row__stat-val">No · Clubbed with parent</div>
+          </div>
+          <div>
+            <div class="member-row__stat-label">Income</div>
+            <div class="member-row__stat-val t-mono">—</div>
+          </div>
+        </div>
+      </div>
+      <div class="member-row__actions">
+        <button class="member-row__action-btn" onclick="AG.openSheet('edit-aarav')" aria-label="Edit">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Sunita Sharma — Mother -->
+    <div class="member-row" style="animation-delay:135ms;">
+      <div class="member-row__avatar" style="background:linear-gradient(135deg,#D97706,#F59E0B);">SS</div>
+      <div class="member-row__body">
+        <div class="member-row__top">
+          <span class="member-row__name">Sunita Sharma</span>
+          <span class="member-row__role" style="background:var(--surface-raised); color:var(--text-secondary);">Dependent</span>
+        </div>
+        <div class="member-row__meta">Mother · Pension &amp; interest income</div>
+        <div class="member-row__grid">
+          <div>
+            <div class="member-row__stat-label">Relationship</div>
+            <div class="member-row__stat-val">Mother</div>
+          </div>
+          <div>
+            <div class="member-row__stat-label">DOB / Age</div>
+            <div class="member-row__stat-val">10 Aug 1962 · 63 yrs</div>
+          </div>
+          <div>
+            <div class="member-row__stat-label">Separately Assessed</div>
+            <div class="member-row__stat-val">Yes</div>
+          </div>
+          <div>
+            <div class="member-row__stat-label">Income</div>
+            <div class="member-row__stat-val t-mono">₹11,000/mo</div>
+          </div>
+        </div>
+      </div>
+      <div class="member-row__actions">
+        <button class="member-row__action-btn" onclick="AG.openSheet('edit-sunita')" aria-label="Edit">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Add family member -->
+    <button class="btn btn--secondary btn--full" style="margin-top:var(--sp-5);" onclick="AG.openSheet('add-member')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+        <line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>
+      </svg>
+      Add Family Member
+    </button>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       FAB
+  ═══════════════════════════════════════════ -->
+  <button class="fab" aria-label="Add Family Member" onclick="AG.openSheet('add-member')">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+  </button>
+
+  <!-- ═══════════════════════════════════════════
+       ADD FAMILY MEMBER SHEET
+  ═══════════════════════════════════════════ -->
+  <div class="sheet-backdrop" id="add-member-backdrop"></div>
+  <div class="sheet" id="add-member">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <span class="sheet__title">Add Family Member</span>
+      <button class="sheet__close" onclick="AG.closeSheet('add-member')" aria-label="Close">✕</button>
+    </div>
+    <div class="sheet__body">
+      <div class="form-group">
+        <label class="form-label">Full Name <span class="required">*</span></label>
+        <input class="form-input" type="text" placeholder="e.g. Rohan Sharma">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Relationship <span class="required">*</span></label>
+        <select class="form-select">
+          <option value="">Select relationship</option>
+          <option>Spouse</option>
+          <option>Child</option>
+          <option>Parent</option>
+          <option>Sibling</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Date of Birth</label>
+        <input class="form-input" type="date">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Separately Assessed for Tax?</label>
+        <select class="form-select">
+          <option>No</option>
+          <option>Yes</option>
+        </select>
+      </div>
+      <button class="btn btn--primary btn--full" style="margin-top:var(--sp-4);" onclick="AG.closeSheet('add-member');AG.showToast('Family member added', 'success')">Save</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       EDIT MEMBER SHEETS (shared structure)
+  ═══════════════════════════════════════════ -->
+  <div class="sheet-backdrop" id="edit-vikas-backdrop"></div>
+  <div class="sheet" id="edit-vikas">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <span class="sheet__title">Edit Vikas Sharma</span>
+      <button class="sheet__close" onclick="AG.closeSheet('edit-vikas')" aria-label="Close">✕</button>
+    </div>
+    <div class="sheet__body">
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input class="form-input" type="text" value="Vikas Sharma">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Date of Birth</label>
+        <input class="form-input" type="date" value="1992-03-15">
+      </div>
+      <div class="form-helper">Primary account holder cannot be removed.</div>
+      <button class="btn btn--primary btn--full" style="margin-top:var(--sp-4);" onclick="AG.closeSheet('edit-vikas');AG.showToast('Profile updated', 'success')">Save</button>
+    </div>
+  </div>
+
+  <div class="sheet-backdrop" id="edit-priya-backdrop"></div>
+  <div class="sheet" id="edit-priya">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <span class="sheet__title">Edit Priya Sharma</span>
+      <button class="sheet__close" onclick="AG.closeSheet('edit-priya')" aria-label="Close">✕</button>
+    </div>
+    <div class="sheet__body">
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input class="form-input" type="text" value="Priya Sharma">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Date of Birth</label>
+        <input class="form-input" type="date" value="1996-06-20">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Separately Assessed for Tax?</label>
+        <select class="form-select">
+          <option selected>No</option>
+          <option>Yes</option>
+        </select>
+      </div>
+      <button class="btn btn--primary btn--full" style="margin-top:var(--sp-4);" onclick="AG.closeSheet('edit-priya');AG.showToast('Profile updated', 'success')">Save</button>
+      <button class="btn btn--ghost btn--full" style="margin-top:var(--sp-2); color:var(--error);" onclick="AG.closeSheet('edit-priya');AG.showToast('Priya Sharma removed', 'success')">Remove Family Member</button>
+    </div>
+  </div>
+
+  <div class="sheet-backdrop" id="edit-aarav-backdrop"></div>
+  <div class="sheet" id="edit-aarav">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <span class="sheet__title">Edit Aarav Sharma</span>
+      <button class="sheet__close" onclick="AG.closeSheet('edit-aarav')" aria-label="Close">✕</button>
+    </div>
+    <div class="sheet__body">
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input class="form-input" type="text" value="Aarav Sharma">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Date of Birth</label>
+        <input class="form-input" type="date" value="2021-04-10">
+      </div>
+      <button class="btn btn--primary btn--full" style="margin-top:var(--sp-4);" onclick="AG.closeSheet('edit-aarav');AG.showToast('Profile updated', 'success')">Save</button>
+      <button class="btn btn--ghost btn--full" style="margin-top:var(--sp-2); color:var(--error);" onclick="AG.closeSheet('edit-aarav');AG.showToast('Aarav Sharma removed', 'success')">Remove Family Member</button>
+    </div>
+  </div>
+
+  <div class="sheet-backdrop" id="edit-sunita-backdrop"></div>
+  <div class="sheet" id="edit-sunita">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <span class="sheet__title">Edit Sunita Sharma</span>
+      <button class="sheet__close" onclick="AG.closeSheet('edit-sunita')" aria-label="Close">✕</button>
+    </div>
+    <div class="sheet__body">
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input class="form-input" type="text" value="Sunita Sharma">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Date of Birth</label>
+        <input class="form-input" type="date" value="1962-08-10">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Separately Assessed for Tax?</label>
+        <select class="form-select">
+          <option selected>Yes</option>
+          <option>No</option>
+        </select>
+      </div>
+      <button class="btn btn--primary btn--full" style="margin-top:var(--sp-4);" onclick="AG.closeSheet('edit-sunita');AG.showToast('Profile updated', 'success')">Save</button>
+      <button class="btn btn--ghost btn--full" style="margin-top:var(--sp-2); color:var(--error);" onclick="AG.closeSheet('edit-sunita');AG.showToast('Sunita Sharma removed', 'success')">Remove Family Member</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="../investments/index.html" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="index.html" class="nav-tab active" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    AG.initBottomNav('profile');
+  });
+</script>
+</body>
+</html>

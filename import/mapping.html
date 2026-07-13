@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Map Columns</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .icon-btn {
+      width: 40px; height: 40px; border-radius: var(--r-full);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-secondary);
+      transition: background var(--dur-fast), color var(--dur-fast);
+      cursor: pointer;
+    }
+    .icon-btn:hover { background: var(--surface-raised); color: var(--text-primary); }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--grad-primary); color: #fff;
+      font-size: 13px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .step-caption {
+      font-size: 12px; font-weight: 600; color: var(--text-muted);
+      text-align: center; margin-bottom: var(--sp-5);
+      letter-spacing: .03em; text-transform: uppercase;
+    }
+
+    .mapping-note {
+      display: flex; align-items: flex-start; gap: var(--sp-2);
+      background: var(--info-light); border: 1px solid rgba(59,130,246,.28);
+      border-radius: var(--r-lg); padding: var(--sp-3) var(--sp-4);
+      font-size: 12px; color: var(--text-secondary); line-height: 1.5;
+      margin-bottom: var(--sp-5);
+    }
+    .mapping-note strong { color: var(--info); }
+
+    /* ── Mapping rows (table-like, stacked cards for mobile width) ── */
+    .map-row {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: var(--sp-4);
+      margin-bottom: var(--sp-3);
+      animation: item-in var(--dur-med) var(--ease-out) both;
+    }
+    .map-row.flagged { border-color: rgba(245,158,11,.4); background: var(--warning-light); }
+    .map-row__top {
+      display: flex; align-items: center; gap: var(--sp-2);
+      margin-bottom: var(--sp-3);
+    }
+    .map-row__source {
+      flex: 1; min-width: 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px; font-weight: 600; color: var(--text-primary);
+      background: var(--surface-raised); border: 1px solid var(--border);
+      border-radius: var(--r-md); padding: 6px 10px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .map-row__arrow { color: var(--text-muted); flex-shrink: 0; }
+    .map-row__confidence {
+      display: inline-flex; align-items: center; gap: 3px;
+      font-size: 10px; font-weight: 700; letter-spacing: .02em;
+      padding: 2px 8px; border-radius: var(--r-full); flex-shrink: 0;
+      white-space: nowrap;
+    }
+    .map-row__confidence--high { background: var(--success-light); color: var(--success); border: 1px solid var(--success); }
+    .map-row__confidence--mid  { background: var(--info-light);    color: var(--info);    border: 1px solid var(--info); }
+    .map-row__confidence--low  { background: var(--warning-light); color: var(--warning); border: 1px solid var(--warning); }
+    .map-row__label {
+      font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: 6px;
+    }
+    .map-row__flag-note {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11px; color: var(--warning); font-weight: 600; margin-top: var(--sp-2);
+    }
+
+    .page-content--mapping { padding-bottom: calc(var(--bottom-nav-h) + 76px + var(--sp-6)); }
+    .form-footer-bar {
+      position: fixed; bottom: var(--bottom-nav-h); left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: var(--page-max);
+      background: var(--surface); border-top: 1px solid var(--border);
+      padding: var(--sp-3) var(--sp-4); display: flex; gap: var(--sp-3);
+      z-index: 40;
+    }
+    .form-footer-bar .btn { flex: 1; }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="upload.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Map Columns</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content page-content--mapping">
+
+    <!-- Step indicator -->
+    <div class="step-indicator">
+      <div class="step-dot done"></div>
+      <div class="step-line done"></div>
+      <div class="step-dot current"></div>
+      <div class="step-line"></div>
+      <div class="step-dot"></div>
+    </div>
+    <div class="step-caption">Step 2 of 3 — Column Mapping</div>
+
+    <div class="mapping-note">
+      <span>ℹ️</span>
+      <span>ArthaGrid auto-detected these columns from the file's header row and sample values. <strong>Review the confidence badge</strong> on each and override with the dropdown if anything looks wrong.</span>
+    </div>
+
+    <div id="mapping-rows">
+      <!-- rendered by JS -->
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- Footer action bar -->
+  <div class="form-footer-bar">
+    <button class="btn btn--ghost" onclick="location.href='upload.html'">Back</button>
+    <button class="btn btn--primary" style="flex:2;" onclick="goToPreview()">Continue to Preview</button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="../investments/index.html" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  const params = new URLSearchParams(location.search);
+  const source = params.get('source') || 'bank-csv';
+
+  const FIELD_OPTIONS = ['Date', 'Description', 'Debit', 'Credit', 'Balance', 'Reference / UPI ID', 'Ignore this column'];
+
+  const MAPPING_SETS = {
+    'bank-csv': [
+      { src: 'Txn Date',          field: 'Date',        confidence: 98 },
+      { src: 'Narration',         field: 'Description',  confidence: 95 },
+      { src: 'Withdrawal Amt.',   field: 'Debit',         confidence: 91 },
+      { src: 'Deposit Amt.',      field: 'Credit',        confidence: 91 },
+      { src: 'Closing Balance',   field: 'Balance',       confidence: 99 },
+      { src: 'Chq/Ref No.',       field: 'Reference / UPI ID', confidence: 54 },
+    ],
+    'bank-pdf': [
+      { src: 'Date',              field: 'Date',        confidence: 93 },
+      { src: 'Transaction Details', field: 'Description', confidence: 88 },
+      { src: 'Debit',              field: 'Debit',        confidence: 90 },
+      { src: 'Credit',             field: 'Credit',       confidence: 90 },
+      { src: 'Balance',            field: 'Balance',      confidence: 97 },
+      { src: 'Ref No./Cheque No.', field: 'Reference / UPI ID', confidence: 49 },
+    ],
+    'cas': [
+      { src: 'Transaction Date',  field: 'Date',        confidence: 97 },
+      { src: 'Description',       field: 'Description',  confidence: 94 },
+      { src: 'Debit Units/Amount',field: 'Debit',         confidence: 86 },
+      { src: 'Credit Units/Amount',field: 'Credit',       confidence: 86 },
+      { src: 'Closing Balance/Units', field: 'Balance',   confidence: 95 },
+      { src: 'Folio/Client ID',   field: 'Reference / UPI ID', confidence: 61 },
+    ],
+  };
+
+  function confidenceClass(pct) {
+    if (pct >= 90) return 'map-row__confidence--high';
+    if (pct >= 70) return 'map-row__confidence--mid';
+    return 'map-row__confidence--low';
+  }
+
+  function fieldOptionsHtml(selected) {
+    return FIELD_OPTIONS.map(f => `<option value="${f}" ${f === selected ? 'selected' : ''}>${f}</option>`).join('');
+  }
+
+  function renderRows() {
+    const rows = MAPPING_SETS[source] || MAPPING_SETS['bank-csv'];
+    const html = rows.map((row, i) => {
+      const flagged = row.confidence < 70;
+      return `
+        <div class="map-row ${flagged ? 'flagged' : ''}">
+          <div class="map-row__label">Mapping ${i + 1} of ${rows.length}</div>
+          <div class="map-row__top">
+            <span class="map-row__source">${row.src}</span>
+            <svg class="map-row__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            <span class="map-row__confidence ${confidenceClass(row.confidence)}">${row.confidence}% confidence</span>
+          </div>
+          <select class="form-select" data-row="${i}">
+            ${fieldOptionsHtml(row.field)}
+          </select>
+          ${flagged ? `<div class="map-row__flag-note">⚠ Low confidence — please confirm this mapping is correct.</div>` : ''}
+        </div>`;
+    }).join('');
+    document.getElementById('mapping-rows').innerHTML = html;
+  }
+
+  function goToPreview() {
+    location.href = 'preview.html?source=' + encodeURIComponent(source);
+  }
+
+  renderRows();
+</script>
+</body>
+</html>

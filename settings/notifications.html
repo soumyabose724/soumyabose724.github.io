@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Notification Preferences</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .notif-note {
+      font-size: 12px; color: var(--text-secondary); line-height: 1.6;
+      margin-bottom: var(--sp-4);
+    }
+    .notif-col-header {
+      display: flex; align-items: center;
+      padding: 0 var(--sp-4) var(--sp-2);
+      gap: var(--sp-3);
+    }
+    .notif-col-header__spacer { flex: 1; }
+    .notif-col-header__label {
+      width: 64px; text-align: center;
+      font-size: 10px; font-weight: 700; letter-spacing: .06em;
+      text-transform: uppercase; color: var(--text-muted);
+    }
+    .notif-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: var(--sp-4);
+      display: flex; align-items: center; gap: var(--sp-3);
+      margin-bottom: var(--sp-2);
+      animation: item-in var(--dur-med) var(--ease-out) both;
+    }
+    .notif-card__icon {
+      width: 40px; height: 40px; border-radius: var(--r-lg); flex-shrink: 0;
+      background: var(--primary-xlight); color: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .notif-card__info { flex: 1; min-width: 0; }
+    .notif-card__label { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+    .notif-card__sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .notif-toggle-col {
+      width: 64px; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <div class="demo-bar">
+    <span class="demo-bar__label">Settings</span>
+    <button class="icon-btn" data-theme-toggle style="margin-left:auto;" aria-label="Toggle theme">
+      <span data-theme-icon style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Notifications</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <div class="page-content" id="page-content">
+
+    <p class="notif-note">
+      Choose which alerts ArthaGrid shows in-app and which it also emails you. All alerts are generated on-device — nothing is sent to a server to decide when to notify you.
+    </p>
+
+    <div class="notif-col-header">
+      <span class="notif-col-header__spacer"></span>
+      <span class="notif-col-header__label">In-App</span>
+      <span class="notif-col-header__label">Email</span>
+    </div>
+
+    <div id="notif-list"></div>
+
+  </div><!-- /page-content -->
+
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2"/></svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      <span>Transactions</span>
+    </a>
+    <a href="../investments/index.html" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span>Invest</span>
+    </a>
+    <a href="index.html" class="nav-tab active" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  AG.initBottomNav('profile');
+
+  const TRIGGERS = [
+    {
+      id: 'envelope90', label: 'Budget envelope >90% spent', sub: 'Warns before you overspend an envelope',
+      icon: '<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2"/>',
+      inApp: true, email: false,
+    },
+    {
+      id: 'billdue3', label: 'Bill due in 3 days', sub: 'Electricity, rent, subscriptions & more',
+      icon: '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+      inApp: true, email: true,
+    },
+    {
+      id: 'emitomorrow', label: 'EMI due tomorrow', sub: 'Home, car, and personal loan EMIs',
+      icon: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+      inApp: true, email: true,
+    },
+    {
+      id: 'mlcategorise', label: 'ML categorisation needs confirmation', sub: 'Low-confidence auto-categorised transactions',
+      icon: '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+      inApp: true, email: false,
+    },
+    {
+      id: 'taxdeadline', label: 'Tax deadline approaching', sub: 'Advance tax, ITR filing, 80C proof submission',
+      icon: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>',
+      inApp: true, email: true,
+    },
+    {
+      id: 'goalmilestone', label: 'Goal milestone reached', sub: '25%, 50%, 75%, and 100% funded checkpoints',
+      icon: '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+      inApp: true, email: false,
+    },
+  ];
+
+  function toggleHtml(triggerId, kind, checked) {
+    return `
+      <label class="toggle" style="width:40px;height:22px;">
+        <input type="checkbox" ${checked ? 'checked' : ''} onchange="onToggle('${triggerId}','${kind}',this.checked)">
+        <span class="toggle-track" style="border-radius:var(--r-full);"></span>
+        <span class="toggle-thumb" style="width:16px;height:16px;top:3px;left:3px;"></span>
+      </label>`;
+  }
+
+  function rowHtml(t) {
+    return `
+      <div class="notif-card">
+        <div class="notif-card__icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${t.icon}</svg>
+        </div>
+        <div class="notif-card__info">
+          <div class="notif-card__label">${t.label}</div>
+          <div class="notif-card__sub">${t.sub}</div>
+        </div>
+        <div class="notif-toggle-col">${toggleHtml(t.id, 'inApp', t.inApp)}</div>
+        <div class="notif-toggle-col">${toggleHtml(t.id, 'email', t.email)}</div>
+      </div>`;
+  }
+
+  document.getElementById('notif-list').innerHTML = TRIGGERS.map(rowHtml).join('');
+
+  function onToggle(id, kind, checked) {
+    const t = TRIGGERS.find(x => x.id === id);
+    t[kind] = checked;
+    const label = kind === 'inApp' ? 'In-app' : 'Email';
+    AG.showToast(`${label} alerts ${checked ? 'enabled' : 'disabled'} for "${t.label}"`, checked ? 'success' : 'info');
+  }
+</script>
+</body>
+</html>

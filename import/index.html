@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Data Import</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .icon-btn {
+      width: 40px; height: 40px; border-radius: var(--r-full);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-secondary);
+      transition: background var(--dur-fast), color var(--dur-fast);
+      cursor: pointer;
+    }
+    .icon-btn:hover { background: var(--surface-raised); color: var(--text-primary); }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--grad-primary); color: #fff;
+      font-size: 13px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* ── Intro copy ── */
+    .import-intro {
+      font-size: 13px; color: var(--text-secondary); line-height: 1.55;
+      margin-bottom: var(--sp-5);
+    }
+
+    /* ── Source-type cards ── */
+    .import-card {
+      display: flex; align-items: center; gap: var(--sp-4);
+      padding: var(--sp-5); background: var(--surface);
+      border: 1px solid var(--border); border-radius: var(--r-xl);
+      text-decoration: none; color: inherit;
+      margin-bottom: var(--sp-3);
+      transition: background var(--dur-fast), box-shadow var(--dur-fast), transform var(--dur-fast);
+      animation: card-in var(--dur-med) var(--ease-out) both;
+    }
+    .import-card:hover { background: var(--primary-xlight); box-shadow: var(--sh-md); }
+    .import-card:active { transform: scale(0.99); }
+    .import-card__icon {
+      width: 52px; height: 52px; border-radius: var(--r-lg); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; color: #fff;
+    }
+    .import-card__body { flex: 1; min-width: 0; }
+    .import-card__title { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+    .import-card__desc { font-size: 12px; color: var(--text-secondary); margin-top: 3px; line-height: 1.5; }
+    .import-card__chevron { color: var(--text-muted); flex-shrink: 0; }
+
+    /* ── Recent imports history row ── */
+    .import-history-row {
+      display: flex; align-items: center; gap: var(--sp-3);
+      padding: var(--sp-4); background: var(--surface);
+      border: 1px solid var(--border); border-radius: var(--r-lg);
+      margin-bottom: var(--sp-2);
+      animation: item-in var(--dur-med) var(--ease-out) both;
+    }
+    .import-history-row__icon {
+      width: 40px; height: 40px; border-radius: var(--r-lg); flex-shrink: 0;
+      background: var(--surface-raised); color: var(--text-secondary);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .import-history-row__info { flex: 1; min-width: 0; }
+    .import-history-row__title { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+    .import-history-row__meta {
+      font-size: 11px; color: var(--text-muted); margin-top: 2px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .import-history-row__right { flex-shrink: 0; }
+
+    /* ── Footer links row ── */
+    .import-footer-links {
+      display: flex; gap: var(--sp-4); justify-content: center;
+      margin-top: var(--sp-6); padding-top: var(--sp-4);
+      border-top: 1px solid var(--border);
+    }
+    .import-footer-links a {
+      font-size: 12px; font-weight: 600; color: var(--primary);
+      text-decoration: none;
+    }
+    .import-footer-links a:hover { text-decoration: underline; }
+
+    /* ── Empty state (compact) ── */
+    .history-empty {
+      display: flex; flex-direction: column; align-items: center; text-align: center;
+      padding: var(--sp-8) var(--sp-4);
+    }
+    .history-empty__icon { font-size: 34px; margin-bottom: var(--sp-3); }
+    .history-empty__title { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: var(--sp-1); }
+    .history-empty__sub { font-size: 12px; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">State</span>
+    <button class="demo-btn active" data-state="history">With History</button>
+    <button class="demo-btn" data-state="empty">First Import</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="../dashboard/index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Data Import</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <a href="templates.html" class="icon-btn" aria-label="Import Templates" title="Saved Templates" style="text-decoration:none;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+        </svg>
+      </a>
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content" id="page-content">
+
+    <div class="section-title">Import Your Data</div>
+    <div class="import-intro">
+      Bring in bank transactions or mutual fund &amp; equity holdings without typing every row by hand. Choose a source below to get started.
+    </div>
+
+    <!-- Source-type cards -->
+    <a href="upload.html?source=bank-csv" class="import-card">
+      <div class="import-card__icon" style="background:var(--grad-primary);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/>
+        </svg>
+      </div>
+      <div class="import-card__body">
+        <div class="import-card__title">Bank Statement (CSV / Excel)</div>
+        <div class="import-card__desc">Upload a CSV or XLSX export from your bank's net-banking portal — HDFC, ICICI, Kotak, SBI or India Post.</div>
+      </div>
+      <svg class="import-card__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+
+    <a href="upload.html?source=cas" class="import-card">
+      <div class="import-card__icon" style="background:linear-gradient(135deg,#2563EB,#3B82F6);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+      </div>
+      <div class="import-card__body">
+        <div class="import-card__title">CAS — Mutual Funds &amp; Equities</div>
+        <div class="import-card__desc">Import your Consolidated Account Statement (CDSL / NSDL / CAMS / KFintech) covering MF folios and your Zerodha demat holdings.</div>
+      </div>
+      <svg class="import-card__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+
+    <a href="upload.html?source=bank-pdf" class="import-card">
+      <div class="import-card__icon" style="background:linear-gradient(135deg,#D97706,#F59E0B);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/><line x1="9" y1="11" x2="11" y2="11"/>
+        </svg>
+      </div>
+      <div class="import-card__body">
+        <div class="import-card__title">Direct Bank Statement (PDF)</div>
+        <div class="import-card__desc">Upload a password-protected PDF statement straight from your bank — no manual re-typing needed.</div>
+      </div>
+      <svg class="import-card__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+
+    <!-- Recent Imports -->
+    <div class="section-title" style="margin-top:var(--sp-6);">Recent Imports</div>
+
+    <div id="view-history">
+      <div class="import-history-row">
+        <div class="import-history-row__icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+        </div>
+        <div class="import-history-row__info">
+          <div class="import-history-row__title">HDFC Bank Statement CSV</div>
+          <div class="import-history-row__meta">8 Jul 2026 · 42 transactions</div>
+        </div>
+        <div class="import-history-row__right">
+          <span class="chip chip--confirmed">CONFIRMED</span>
+        </div>
+      </div>
+
+      <div class="import-history-row">
+        <div class="import-history-row__icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="import-history-row__info">
+          <div class="import-history-row__title">Zerodha CAS — Jun 2026</div>
+          <div class="import-history-row__meta">1 Jul 2026 · 18 holdings</div>
+        </div>
+        <div class="import-history-row__right">
+          <span class="chip chip--confirmed">CONFIRMED</span>
+        </div>
+      </div>
+
+      <div class="import-history-row">
+        <div class="import-history-row__icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div class="import-history-row__info">
+          <div class="import-history-row__title">SBI Bank Statement PDF</div>
+          <div class="import-history-row__meta">15 Jun 2026 · 27 transactions</div>
+        </div>
+        <div class="import-history-row__right">
+          <span class="chip chip--confirmed">CONFIRMED</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="view-history-empty" style="display:none;">
+      <div class="history-empty">
+        <div class="history-empty__icon">📥</div>
+        <div class="history-empty__title">No Imports Yet</div>
+        <div class="history-empty__sub">Your imported statements will show up here once you complete your first import.</div>
+      </div>
+    </div>
+
+    <div class="import-footer-links">
+      <a href="templates.html">Saved Templates</a>
+      <a href="../settings/index.html">Import Settings</a>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="../investments/index.html" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ── Theme toggle (matches other pages) ── */
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  /* Note: the top-bar's [data-theme-toggle] button is already wired by nav.js's
+     initTheme(); only the demo-bar's plain id="theme-toggle" icon (above) needs
+     its own listener since nav.js only targets [data-theme-toggle]. */
+
+  /* ── Demo bar: With History / First Import ── */
+  AG.initDemoBar({
+    history: () => {
+      document.getElementById('view-history').style.display = '';
+      document.getElementById('view-history-empty').style.display = 'none';
+    },
+    empty: () => {
+      document.getElementById('view-history').style.display = 'none';
+      document.getElementById('view-history-empty').style.display = '';
+    },
+  });
+</script>
+</body>
+</html>

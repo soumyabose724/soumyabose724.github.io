@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Annual Report</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .stat-grid {
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--sp-3); margin-bottom: var(--sp-2);
+    }
+    .stat-cell {
+      background: var(--surface-raised); border-radius: var(--r-lg);
+      padding: var(--sp-3); text-align: center;
+    }
+    .stat-cell__label {
+      font-size: 10px; font-weight: 700; letter-spacing: .06em;
+      text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px;
+    }
+    .stat-cell__val {
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+      font-size: 15px; font-weight: 700; color: var(--text-primary);
+    }
+    .stat-cell__val--income  { color: var(--success); }
+    .stat-cell__val--expense { color: var(--error); }
+
+    /* ── Legend ── */
+    .chart-legend { display: flex; gap: var(--sp-4); margin-bottom: var(--sp-4); flex-wrap: wrap; }
+    .chart-legend__item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+    .chart-legend__swatch { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+    .chart-legend__swatch--projected { border: 1.5px dashed var(--text-muted); background: transparent; }
+
+    /* ── 12-month grouped bar chart ── */
+    .bar-chart {
+      display: flex; align-items: flex-end; gap: 6px;
+      height: 150px; padding: 0 2px var(--sp-2);
+      overflow-x: auto;
+    }
+    .bar-chart__month {
+      flex: 1; min-width: 24px; display: flex; flex-direction: column; align-items: center; height: 100%;
+    }
+    .bar-chart__bars {
+      flex: 1; width: 100%; display: flex; align-items: flex-end; justify-content: center; gap: 2px;
+    }
+    .bar-chart__bar {
+      width: 7px; border-radius: 3px 3px 0 0;
+      transition: height var(--dur-med) var(--ease-out);
+    }
+    .bar-chart__bar--income  { background: var(--success); }
+    .bar-chart__bar--expense { background: var(--error); }
+    .bar-chart__bar--projected { opacity: .45; }
+    .bar-chart__label {
+      font-size: 9px; color: var(--text-muted); margin-top: 6px; font-weight: 600;
+      white-space: nowrap;
+    }
+    .bar-chart__label--current { color: var(--primary); }
+
+    /* ── Top category rows ── */
+    .top-cat-row {
+      display: flex; align-items: center; gap: var(--sp-3);
+      padding: var(--sp-3) 0; border-bottom: 1px solid var(--border);
+    }
+    .top-cat-row:last-child { border-bottom: none; }
+    .top-cat-row__rank {
+      width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+      background: var(--primary-light); color: var(--primary);
+      font-size: 11px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .top-cat-row__name { flex: 1; font-size: 13px; font-weight: 600; color: var(--text-primary); }
+    .top-cat-row__pct { font-size: 11px; color: var(--text-muted); }
+    .top-cat-row__amt {
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+      font-size: 13px; font-weight: 700; color: var(--text-primary); flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- Demo Bar -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">Annual Report</span>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Annual Report</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- Page Content -->
+  <div class="page-content">
+
+    <div class="section-title">FY 2026-27 · Apr 2026 – Mar 2027</div>
+
+    <!-- FY-so-far summary -->
+    <div class="glass-card glass-card--hero" style="margin-bottom: var(--sp-4);">
+      <div style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-secondary);margin-bottom:var(--sp-2);">FY So Far · Apr – Jun 2026</div>
+      <div class="amount-text--display gradient-text" style="font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;">₹31,350</div>
+      <div style="margin-top:var(--sp-2);"><span class="delta delta--pos">▲ 8.7% savings rate</span></div>
+      <div class="stat-grid" style="margin-top:var(--sp-5);">
+        <div class="stat-cell">
+          <div class="stat-cell__label">Income</div>
+          <div class="stat-cell__val stat-cell__val--income">₹3,60,000</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-cell__label">Expenses</div>
+          <div class="stat-cell__val stat-cell__val--expense">₹3,28,650</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-cell__label">Net Saved</div>
+          <div class="stat-cell__val stat-cell__val--income">₹31,350</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 12-month chart -->
+    <div class="section-title">Income vs Expense · Full Year</div>
+    <div class="glass-card" style="margin-bottom: var(--sp-4);">
+      <div class="chart-legend">
+        <span class="chart-legend__item"><span class="chart-legend__swatch" style="background:var(--success);"></span>Income</span>
+        <span class="chart-legend__item"><span class="chart-legend__swatch" style="background:var(--error);"></span>Expense</span>
+        <span class="chart-legend__item"><span class="chart-legend__swatch chart-legend__swatch--projected"></span>Projected</span>
+      </div>
+      <div class="bar-chart" id="bar-chart"></div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:var(--sp-2);text-align:center;">Apr &amp; May actual · Jun current (est.) · Jul–Mar projected at ~₹99,350/mo</div>
+    </div>
+
+    <!-- Full-year projection totals -->
+    <div class="section-title">Full-Year Projection</div>
+    <div class="glass-card" style="margin-bottom: var(--sp-4);">
+      <div class="stat-grid">
+        <div class="stat-cell">
+          <div class="stat-cell__label">Income</div>
+          <div class="stat-cell__val stat-cell__val--income">₹14,40,000</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-cell__label">Expenses</div>
+          <div class="stat-cell__val stat-cell__val--expense">₹12,22,800</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-cell__label">Savings Rate</div>
+          <div class="stat-cell__val stat-cell__val--income">15.1%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top spending categories -->
+    <div class="section-title">Top Spending Categories · FY Projected</div>
+    <div class="glass-card">
+      <div id="top-cats"></div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="../investments/index.html" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ── Theme toggle (matches other pages) ── */
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+
+  /* ── FY 2026-27 monthly data (paise) ── */
+  const MONTHS = [
+    { label: 'Apr', income: 12000000, expense: 11750000, status: 'actual' },
+    { label: 'May', income: 12000000, expense: 11180000, status: 'actual' },
+    { label: 'Jun', income: 12000000, expense: 9935000,  status: 'current' },
+    { label: 'Jul', income: 12000000, expense: 9935000,  status: 'projected' },
+    { label: 'Aug', income: 12000000, expense: 9935000,  status: 'projected' },
+    { label: 'Sep', income: 12000000, expense: 9935000,  status: 'projected' },
+    { label: 'Oct', income: 12000000, expense: 9935000,  status: 'projected' },
+    { label: 'Nov', income: 12000000, expense: 9935000,  status: 'projected' },
+    { label: 'Dec', income: 12000000, expense: 9935000,  status: 'projected' },
+    { label: 'Jan', income: 12000000, expense: 9935000,  status: 'projected' },
+    { label: 'Feb', income: 12000000, expense: 9935000,  status: 'projected' },
+    { label: 'Mar', income: 12000000, expense: 9935000,  status: 'projected' },
+  ];
+
+  const TOP_CATS = [
+    { name: 'Housing EMI',      amount: 46200000 },
+    { name: 'Groceries',        amount: 14400000 },
+    { name: 'Dining Out',       amount: 7200000 },
+    { name: 'Utilities',        amount: 6000000 },
+    { name: 'Fuel & Transport', amount: 4800000 },
+  ];
+
+  function renderBarChart() {
+    const maxVal = Math.max(...MONTHS.map(m => Math.max(m.income, m.expense)));
+    const wrap = document.getElementById('bar-chart');
+    wrap.innerHTML = MONTHS.map(m => {
+      const incH = (m.income / maxVal * 100).toFixed(1);
+      const expH = (m.expense / maxVal * 100).toFixed(1);
+      const projClass = m.status === 'projected' ? ' bar-chart__bar--projected' : '';
+      const labelClass = m.status === 'current' ? ' bar-chart__label--current' : '';
+      return `
+        <div class="bar-chart__month">
+          <div class="bar-chart__bars">
+            <div class="bar-chart__bar bar-chart__bar--income${projClass}" style="height:${incH}%;" title="${m.label} Income ${AG.formatINR(m.income)}"></div>
+            <div class="bar-chart__bar bar-chart__bar--expense${projClass}" style="height:${expH}%;" title="${m.label} Expense ${AG.formatINR(m.expense)}"></div>
+          </div>
+          <div class="bar-chart__label${labelClass}">${m.label}</div>
+        </div>`;
+    }).join('');
+  }
+
+  function renderTopCats() {
+    const total = TOP_CATS.reduce((s, c) => s + c.amount, 0);
+    const wrap = document.getElementById('top-cats');
+    wrap.innerHTML = TOP_CATS.map((c, i) => {
+      const pct = (c.amount / total * 100).toFixed(1);
+      return `
+        <div class="top-cat-row">
+          <div class="top-cat-row__rank">${i + 1}</div>
+          <div style="flex:1;min-width:0;">
+            <div class="top-cat-row__name">${c.name}</div>
+            <div class="top-cat-row__pct">${pct}% of top-5 spend</div>
+          </div>
+          <div class="top-cat-row__amt">${AG.formatINR(c.amount)}</div>
+        </div>`;
+    }).join('');
+  }
+
+  renderBarChart();
+  renderTopCats();
+</script>
+</body>
+</html>

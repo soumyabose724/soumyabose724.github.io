@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Upload Statement</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .icon-btn {
+      width: 40px; height: 40px; border-radius: var(--r-full);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-secondary);
+      transition: background var(--dur-fast), color var(--dur-fast);
+      cursor: pointer;
+    }
+    .icon-btn:hover { background: var(--surface-raised); color: var(--text-primary); }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--grad-primary); color: #fff;
+      font-size: 13px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .step-caption {
+      font-size: 12px; font-weight: 600; color: var(--text-muted);
+      text-align: center; margin-bottom: var(--sp-5);
+      letter-spacing: .03em; text-transform: uppercase;
+    }
+
+    /* ── Drop zone ── */
+    .drop-zone {
+      border: 2px dashed var(--border-strong); border-radius: var(--r-xl);
+      background: var(--surface-raised);
+      padding: var(--sp-10) var(--sp-5);
+      display: flex; flex-direction: column; align-items: center; text-align: center;
+      cursor: pointer;
+      transition: border-color var(--dur-fast), background var(--dur-fast);
+    }
+    .drop-zone:hover, .drop-zone.drag-over {
+      border-color: var(--primary);
+      background: var(--primary-xlight);
+    }
+    .drop-zone__icon {
+      width: 64px; height: 64px; border-radius: var(--r-2xl);
+      background: var(--primary-xlight); color: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: var(--sp-4);
+    }
+    .drop-zone__title { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: var(--sp-1); }
+    .drop-zone__sub { font-size: 12px; color: var(--text-muted); margin-bottom: var(--sp-4); }
+
+    /* ── Selected file chip ── */
+    .file-chip {
+      display: none;
+      align-items: center; gap: var(--sp-3);
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: var(--sp-3) var(--sp-4);
+      margin-top: var(--sp-4);
+    }
+    .file-chip.visible { display: flex; animation: item-in var(--dur-med) var(--ease-out) both; }
+    .file-chip__icon {
+      width: 36px; height: 36px; border-radius: var(--r-md); flex-shrink: 0;
+      background: var(--grad-primary); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .file-chip__info { flex: 1; min-width: 0; }
+    .file-chip__name { font-size: 13px; font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .file-chip__meta { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+    .file-chip__remove {
+      width: 28px; height: 28px; border-radius: var(--r-full); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-muted);
+      transition: background var(--dur-fast), color var(--dur-fast);
+    }
+    .file-chip__remove:hover { background: var(--error-light); color: var(--error); }
+
+    /* ── Analyzing state ── */
+    .analyzing-row {
+      display: none; align-items: center; gap: var(--sp-3);
+      margin-top: var(--sp-4); padding: var(--sp-3) var(--sp-4);
+      background: var(--info-light); border: 1px solid rgba(59,130,246,.25);
+      border-radius: var(--r-lg); font-size: 12px; color: var(--text-secondary);
+    }
+    .analyzing-row.visible { display: flex; }
+
+    /* ── Detection callout ── */
+    .detection-callout {
+      display: none;
+      margin-top: var(--sp-4); padding: var(--sp-4);
+      background: var(--success-light); border: 1px solid rgba(34,197,94,.3);
+      border-radius: var(--r-lg);
+    }
+    .detection-callout.visible { display: block; animation: card-in var(--dur-med) var(--ease-out) both; }
+    .detection-callout__head { display: flex; align-items: center; gap: var(--sp-2); margin-bottom: var(--sp-2); }
+    .detection-callout__head svg { color: var(--success); flex-shrink: 0; }
+    .detection-callout__title { font-size: 13px; font-weight: 700; color: var(--success); }
+    .detection-callout__body { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+    .detection-callout__body strong { color: var(--text-primary); }
+    .detection-callout__confidence {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 11px; font-weight: 700; color: var(--success);
+      background: rgba(34,197,94,.14); padding: 2px 8px; border-radius: var(--r-full);
+      margin-top: var(--sp-2);
+    }
+
+    /* ── Form section ── */
+    .upload-form-section { margin-top: var(--sp-6); }
+
+    /* ── Footer action bar ── */
+    .page-content--upload { padding-bottom: calc(var(--bottom-nav-h) + 76px + var(--sp-6)); }
+    .form-footer-bar {
+      position: fixed; bottom: var(--bottom-nav-h); left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: var(--page-max);
+      background: var(--surface); border-top: 1px solid var(--border);
+      padding: var(--sp-3) var(--sp-4); display: flex; gap: var(--sp-3);
+      z-index: 40;
+    }
+    .form-footer-bar .btn { flex: 1; }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Upload Statement</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content page-content--upload">
+
+    <!-- Step indicator -->
+    <div class="step-indicator">
+      <div class="step-dot current"></div>
+      <div class="step-line"></div>
+      <div class="step-dot"></div>
+      <div class="step-line"></div>
+      <div class="step-dot"></div>
+    </div>
+    <div class="step-caption">Step 1 of 3 — Upload File</div>
+
+    <!-- Drop zone -->
+    <div class="drop-zone" id="drop-zone" onclick="simulateSelectFile()"
+         ondragover="event.preventDefault(); this.classList.add('drag-over');"
+         ondragleave="this.classList.remove('drag-over');"
+         ondrop="event.preventDefault(); this.classList.remove('drag-over'); simulateSelectFile();">
+      <div class="drop-zone__icon">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+      </div>
+      <div class="drop-zone__title">Drag &amp; drop your file here</div>
+      <div class="drop-zone__sub">or tap to browse — CSV, XLSX or PDF, up to 10 MB</div>
+      <button type="button" class="btn btn--secondary btn--sm" onclick="event.stopPropagation(); simulateSelectFile();">Browse Files</button>
+    </div>
+
+    <!-- Selected file chip -->
+    <div class="file-chip" id="file-chip">
+      <div class="file-chip__icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      </div>
+      <div class="file-chip__info">
+        <div class="file-chip__name" id="file-chip-name">HDFC_Statement_Jun2026.csv</div>
+        <div class="file-chip__meta" id="file-chip-meta">128 KB · selected just now</div>
+      </div>
+      <button class="file-chip__remove" onclick="removeFile()" aria-label="Remove file">✕</button>
+    </div>
+
+    <!-- Analyzing -->
+    <div class="analyzing-row" id="analyzing-row">
+      <span class="spinner"></span>
+      <span>Analyzing file structure and headers…</span>
+    </div>
+
+    <!-- Detection callout -->
+    <div class="detection-callout" id="detection-callout">
+      <div class="detection-callout__head">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <span class="detection-callout__title">Detected: <span id="detected-label">HDFC Bank Statement CSV</span></span>
+      </div>
+      <div class="detection-callout__body">
+        Column headers and sample values match <strong id="detected-label-2">HDFC Bank</strong>'s net-banking export format. We'll pre-fill the column mapping for you on the next step.
+      </div>
+      <span class="detection-callout__confidence" id="detected-confidence">✓ 96% match confidence</span>
+    </div>
+
+    <!-- File type / encoding selectors -->
+    <div class="upload-form-section">
+      <div class="form-group">
+        <label class="form-label" for="file-type">File Type</label>
+        <select class="form-select" id="file-type">
+          <option value="csv" selected>CSV (Comma-separated)</option>
+          <option value="xlsx">Excel (.xlsx)</option>
+          <option value="pdf">PDF Statement</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="file-encoding">Encoding</label>
+        <select class="form-select" id="file-encoding">
+          <option value="utf-8" selected>UTF-8</option>
+          <option value="iso-8859-1">ISO-8859-1 (Latin-1)</option>
+          <option value="windows-1252">Windows-1252</option>
+        </select>
+        <div class="form-helper">Leave as UTF-8 unless the preview shows garbled characters.</div>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- Footer action bar -->
+  <div class="form-footer-bar">
+    <button class="btn btn--ghost" onclick="location.href='index.html'">Cancel</button>
+    <button class="btn btn--primary" id="continue-btn" style="flex:2;" disabled onclick="goToMapping()">Continue to Column Mapping</button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="../investments/index.html" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* Which source type was picked on the hub page */
+  const params = new URLSearchParams(location.search);
+  const source = params.get('source') || 'bank-csv';
+
+  const SOURCE_PROFILES = {
+    'bank-csv': {
+      fileName: 'HDFC_Statement_Jun2026.csv',
+      fileMeta: '128 KB · selected just now',
+      label: 'HDFC Bank Statement CSV',
+      bank: 'HDFC Bank',
+      confidence: '96% match confidence',
+    },
+    'cas': {
+      fileName: 'CAS_Apr2026_Jun2026.pdf',
+      fileMeta: '312 KB · selected just now',
+      label: 'CAMS/KFintech Consolidated Account Statement',
+      bank: 'CDSL/NSDL (Zerodha demat + MF folios)',
+      confidence: '91% match confidence',
+    },
+    'bank-pdf': {
+      fileName: 'SBI_eStatement_Jun2026.pdf',
+      fileMeta: '204 KB · selected just now',
+      label: 'SBI Bank Statement PDF',
+      bank: 'State Bank of India',
+      confidence: '89% match confidence',
+    },
+  };
+
+  function simulateSelectFile() {
+    const profile = SOURCE_PROFILES[source] || SOURCE_PROFILES['bank-csv'];
+    document.getElementById('file-chip-name').textContent = profile.fileName;
+    document.getElementById('file-chip-meta').textContent = profile.fileMeta;
+    document.getElementById('file-chip').classList.add('visible');
+    document.getElementById('detection-callout').classList.remove('visible');
+    document.getElementById('continue-btn').disabled = true;
+
+    const analyzing = document.getElementById('analyzing-row');
+    analyzing.classList.add('visible');
+
+    setTimeout(() => {
+      analyzing.classList.remove('visible');
+      document.getElementById('detected-label').textContent = profile.label;
+      document.getElementById('detected-label-2').textContent = profile.bank;
+      document.getElementById('detected-confidence').textContent = '✓ ' + profile.confidence;
+      document.getElementById('detection-callout').classList.add('visible');
+      document.getElementById('continue-btn').disabled = false;
+    }, 900);
+  }
+
+  function removeFile() {
+    document.getElementById('file-chip').classList.remove('visible');
+    document.getElementById('detection-callout').classList.remove('visible');
+    document.getElementById('analyzing-row').classList.remove('visible');
+    document.getElementById('continue-btn').disabled = true;
+  }
+
+  function goToMapping() {
+    if (document.getElementById('continue-btn').disabled) return;
+    location.href = 'mapping.html?source=' + encodeURIComponent(source);
+  }
+
+  /* Theme toggling for the top-bar's [data-theme-toggle] button is already
+     wired by nav.js's initTheme() — no extra script needed here. */
+</script>
+</body>
+</html>

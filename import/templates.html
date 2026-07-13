@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Import Templates</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .icon-btn {
+      width: 40px; height: 40px; border-radius: var(--r-full);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-secondary);
+      transition: background var(--dur-fast), color var(--dur-fast);
+      cursor: pointer;
+    }
+    .icon-btn:hover { background: var(--surface-raised); color: var(--text-primary); }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--grad-primary); color: #fff;
+      font-size: 13px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .templates-intro {
+      font-size: 13px; color: var(--text-secondary); line-height: 1.55;
+      margin-bottom: var(--sp-5);
+    }
+
+    /* ── Template row ── */
+    .template-row {
+      display: flex; align-items: center; gap: var(--sp-3);
+      padding: var(--sp-4); background: var(--surface);
+      border: 1px solid var(--border); border-radius: var(--r-lg);
+      margin-bottom: var(--sp-3);
+      animation: item-in var(--dur-med) var(--ease-out) both;
+    }
+    .template-row__icon {
+      width: 44px; height: 44px; border-radius: var(--r-lg); flex-shrink: 0;
+      background: var(--grad-primary); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .template-row__info { flex: 1; min-width: 0; }
+    .template-row__title { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+    .template-row__meta { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+    .template-row__more {
+      width: 36px; height: 36px; border-radius: var(--r-full); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-muted);
+      transition: background var(--dur-fast), color var(--dur-fast);
+    }
+    .template-row__more:hover { background: var(--surface-raised); color: var(--text-primary); }
+
+    .templates-empty {
+      display: flex; flex-direction: column; align-items: center; text-align: center;
+      padding: var(--sp-10) var(--sp-6);
+    }
+    .templates-empty__icon { font-size: 40px; margin-bottom: var(--sp-4); }
+    .templates-empty__title { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: var(--sp-2); }
+    .templates-empty__sub { font-size: 13px; color: var(--text-muted); line-height: 1.55; }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">State</span>
+    <button class="demo-btn active" data-state="populated">Saved Templates</button>
+    <button class="demo-btn" data-state="empty">None Saved Yet</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Import Templates</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content" id="page-content">
+
+    <div id="view-populated">
+      <div class="section-title">Saved Mapping Templates</div>
+      <div class="templates-intro">
+        Column mappings you've confirmed before are saved here so future imports from the same source can skip straight to preview.
+      </div>
+
+      <div class="template-row">
+        <div class="template-row__icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+        </div>
+        <div class="template-row__info">
+          <div class="template-row__title">HDFC Bank Savings CSV</div>
+          <div class="template-row__meta">Used 8 times · last used 8 Jul 2026</div>
+        </div>
+        <button class="template-row__more" aria-label="More options" onclick="openTemplateSheet('HDFC Bank Savings CSV')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
+        </button>
+      </div>
+
+      <div class="template-row">
+        <div class="template-row__icon" style="background:linear-gradient(135deg,#2563EB,#3B82F6);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="template-row__info">
+          <div class="template-row__title">Zerodha CAS</div>
+          <div class="template-row__meta">Used 3 times · last used 1 Jul 2026</div>
+        </div>
+        <button class="template-row__more" aria-label="More options" onclick="openTemplateSheet('Zerodha CAS')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
+        </button>
+      </div>
+
+      <div class="template-row">
+        <div class="template-row__icon" style="background:linear-gradient(135deg,#D97706,#F59E0B);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div class="template-row__info">
+          <div class="template-row__title">SBI Bank Statement PDF</div>
+          <div class="template-row__meta">Used 2 times · last used 15 Jun 2026</div>
+        </div>
+        <button class="template-row__more" aria-label="More options" onclick="openTemplateSheet('SBI Bank Statement PDF')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
+        </button>
+      </div>
+    </div><!-- /view-populated -->
+
+    <div id="view-empty" style="display:none;">
+      <div class="templates-empty">
+        <div class="templates-empty__icon">🗂️</div>
+        <div class="templates-empty__title">No Saved Templates Yet</div>
+        <div class="templates-empty__sub">Complete an import and confirm its column mapping — ArthaGrid will offer to save it as a reusable template.</div>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       TEMPLATE OPTIONS SHEET
+  ═══════════════════════════════════════════ -->
+  <div class="sheet-backdrop" id="template-sheet-backdrop"></div>
+  <div class="sheet" id="template-sheet">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <span class="sheet__title" id="template-sheet-title">Template</span>
+      <button class="sheet__close" onclick="AG.closeSheet('template-sheet')" aria-label="Close">✕</button>
+    </div>
+    <div class="sheet__body" style="padding-top:var(--sp-2);">
+      <button class="sheet-option" onclick="templateAction('edit')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
+        Edit Mapping
+      </button>
+      <button class="sheet-option" onclick="templateAction('duplicate')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Duplicate
+      </button>
+      <button class="sheet-option" onclick="templateAction('test')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Run Test Import
+      </button>
+      <button class="sheet-option sheet-option--danger" onclick="templateAction('delete')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        Delete Template
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       DELETE CONFIRM DIALOG
+  ═══════════════════════════════════════════ -->
+  <div class="dialog-backdrop" id="delete-dialog-backdrop">
+    <div class="dialog">
+      <div class="dialog__header">
+        <div class="dialog__title">Delete Template?</div>
+      </div>
+      <div class="dialog__body">
+        <span id="delete-dialog-body">This removes the saved column mapping. Future imports from this source will need to be re-mapped.</span>
+      </div>
+      <div class="dialog__footer">
+        <button class="btn btn--ghost" onclick="AG.closeDialog('delete-dialog')">Cancel</button>
+        <button class="btn btn--danger" onclick="confirmDelete()">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="../investments/index.html" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ── Demo bar's own icon (id="theme-toggle") needs its own listener since
+     nav.js only auto-wires [data-theme-toggle] elements. ── */
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+
+  /* ── Demo bar: Saved Templates / None Saved Yet ── */
+  AG.initDemoBar({
+    populated: () => {
+      document.getElementById('view-populated').style.display = '';
+      document.getElementById('view-empty').style.display = 'none';
+    },
+    empty: () => {
+      document.getElementById('view-populated').style.display = 'none';
+      document.getElementById('view-empty').style.display = '';
+    },
+  });
+
+  /* ── Template options sheet ── */
+  let activeTemplate = null;
+
+  function openTemplateSheet(name) {
+    activeTemplate = name;
+    document.getElementById('template-sheet-title').textContent = name;
+    AG.openSheet('template-sheet');
+  }
+
+  function templateAction(action) {
+    if (action === 'delete') {
+      AG.closeSheet('template-sheet');
+      document.getElementById('delete-dialog-body').textContent =
+        `Delete "${activeTemplate}"? This removes the saved column mapping — future imports from this source will need to be re-mapped.`;
+      AG.openDialog('delete-dialog');
+      return;
+    }
+    AG.closeSheet('template-sheet');
+    const messages = {
+      edit: `Opening mapping editor for "${activeTemplate}"…`,
+      duplicate: `"${activeTemplate}" duplicated as a new template.`,
+      test: `Running a test import using "${activeTemplate}" — no data will be saved.`,
+    };
+    AG.showToast(messages[action] || 'Done', 'info');
+  }
+
+  function confirmDelete() {
+    AG.closeDialog('delete-dialog');
+    AG.showToast(`"${activeTemplate}" deleted.`, 'success');
+  }
+</script>
+</body>
+</html>

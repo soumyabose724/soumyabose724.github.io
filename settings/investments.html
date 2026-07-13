@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Investment Data Sources</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .src-section-note {
+      font-size: 12px; color: var(--text-secondary); line-height: 1.6;
+      margin-bottom: var(--sp-4);
+    }
+    .src-row {
+      display: flex; align-items: center; gap: var(--sp-3);
+      padding: var(--sp-4); background: var(--surface);
+      border: 1px solid var(--border); border-radius: var(--r-lg);
+      margin-bottom: var(--sp-2);
+      animation: item-in var(--dur-med) var(--ease-out) both;
+    }
+    .src-row__icon {
+      width: 42px; height: 42px; border-radius: var(--r-lg); flex-shrink: 0;
+      background: var(--grad-primary); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .src-row__icon--mf { background: linear-gradient(135deg,#2563EB,#3B82F6); }
+    .src-row__icon--ins { background: linear-gradient(135deg,#D97706,#F59E0B); }
+    .src-row__info { flex: 1; min-width: 0; }
+    .src-row__name {
+      font-size: 14px; font-weight: 600; color: var(--text-primary);
+      display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap;
+    }
+    .src-row__meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; font-family: 'JetBrains Mono', monospace; }
+    .src-row__actions { display: flex; gap: 2px; flex-shrink: 0; }
+    .src-action-btn {
+      width: 34px; height: 34px; border-radius: var(--r-full);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-muted); transition: background var(--dur-fast), color var(--dur-fast);
+    }
+    .src-action-btn:hover { background: var(--surface-raised); color: var(--primary); }
+    .src-action-btn--danger:hover { background: var(--error-light); color: var(--error); }
+
+    .manage-link-card {
+      display: flex; align-items: center; gap: var(--sp-3);
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: var(--sp-4);
+      margin-top: var(--sp-2); margin-bottom: var(--sp-2); text-decoration: none;
+      transition: background var(--dur-fast), box-shadow var(--dur-fast);
+    }
+    .manage-link-card:hover { background: var(--primary-xlight); box-shadow: var(--sh-sm); }
+    .manage-link-card__icon {
+      width: 40px; height: 40px; border-radius: var(--r-lg); flex-shrink: 0;
+      background: var(--grad-primary); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .manage-link-card__title { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    .manage-link-card__sub { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+
+    .field-hint { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <div class="demo-bar">
+    <span class="demo-bar__label">Settings</span>
+    <button class="icon-btn" data-theme-toggle style="margin-left:auto;" aria-label="Toggle theme">
+      <span data-theme-icon style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Investment Data Sources</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <div class="page-content" id="page-content">
+
+    <p class="src-section-note">
+      Manage the brokers, AMCs, and insurers whose accounts, folios, and policies are linked to ArthaGrid for tracking. Unlinking keeps all historical records — it only stops new lookups from that source.
+    </p>
+
+    <div class="section">
+      <div class="section-title">Equity &amp; Trading</div>
+      <div id="broker-list"></div>
+      <a href="brokerages.html" class="manage-link-card">
+        <div class="manage-link-card__icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v16h16"/><path d="m5 15 5-5 4 4 6-7"/></svg>
+        </div>
+        <div style="flex:1; min-width:0;">
+          <div class="manage-link-card__title">Manage Brokerage Links</div>
+          <div class="manage-link-card__sub">Link Groww, Upstox, ICICI Direct &amp; more</div>
+        </div>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted); flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Mutual Fund AMCs</div>
+      <div id="amc-list"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Insurance Providers</div>
+      <div id="ins-list"></div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       EDIT SOURCE SHEET
+  ═══════════════════════════════════════════ -->
+  <div class="sheet-backdrop" id="edit-source-backdrop"></div>
+  <div class="sheet" id="edit-source">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <span class="sheet__title" id="edit-source-title">Edit Source</span>
+      <button class="sheet__close" onclick="AG.closeSheet('edit-source')" aria-label="Close">✕</button>
+    </div>
+    <div class="sheet__body">
+      <div class="form-group">
+        <label class="form-label" for="es-name">Display Name</label>
+        <input class="form-input" id="es-name" type="text" maxlength="60">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="es-ref">Reference ID</label>
+        <input class="form-input" id="es-ref" type="text" maxlength="40">
+        <div class="field-hint">Client ID, folio number, or policy number — stored on-device only.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="es-notes">Notes (optional)</label>
+        <input class="form-input" id="es-notes" type="text" maxlength="120" placeholder="e.g. Joint account with spouse">
+      </div>
+    </div>
+    <div class="sheet__footer">
+      <button class="btn btn--ghost" onclick="AG.closeSheet('edit-source')">Cancel</button>
+      <button class="btn btn--primary" onclick="saveSource()">Save Changes</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       UNLINK CONFIRM DIALOG
+  ═══════════════════════════════════════════ -->
+  <div class="dialog-backdrop" id="unlink-source-backdrop">
+    <div class="dialog">
+      <div class="dialog__header">
+        <div class="dialog__title" id="unlink-title">Unlink source?</div>
+      </div>
+      <div class="dialog__body">
+        This removes the connection to ArthaGrid but keeps all historical transactions and valuations intact. You can relink anytime.
+      </div>
+      <div class="dialog__footer">
+        <button class="btn btn--ghost btn--sm" onclick="AG.closeDialog('unlink-source')">Cancel</button>
+        <button class="btn btn--danger btn--sm" onclick="confirmUnlink()">Unlink</button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2"/></svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      <span>Transactions</span>
+    </a>
+    <a href="../investments/index.html" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span>Invest</span>
+    </a>
+    <a href="index.html" class="nav-tab active" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  AG.initBottomNav('profile');
+
+  const ICON_BUILDING = '<path d="M4 4v16h16"/><path d="M8 4v16"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h8"/>';
+  const ICON_CHART = '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>';
+  const ICON_SHIELD = '<path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6z"/>';
+
+  const BROKERS = [
+    { id:'zerodha', name:'Zerodha', icon:ICON_CHART, cls:'', ref:'AB1234••', type:'Equity broker' },
+  ];
+  const AMCS = [
+    { id:'hdfc-amc', name:'HDFC Mutual Fund', icon:ICON_BUILDING, cls:'src-row__icon--mf', ref:'Folio 4482••••', type:'AMC' },
+    { id:'axis-amc', name:'Axis Mutual Fund', icon:ICON_BUILDING, cls:'src-row__icon--mf', ref:'Folio 9021••••', type:'AMC' },
+    { id:'sbi-amc', name:'SBI Mutual Fund', icon:ICON_BUILDING, cls:'src-row__icon--mf', ref:'Folio 5537••••', type:'AMC' },
+    { id:'ppfas-amc', name:'PPFAS Mutual Fund', icon:ICON_BUILDING, cls:'src-row__icon--mf', ref:'Folio 1180••••', type:'AMC (Parag Parikh)' },
+  ];
+  const INSURERS = [
+    { id:'hdfc-life', name:'HDFC Life', icon:ICON_SHIELD, cls:'src-row__icon--ins', ref:'Policy HL••••2291', type:'Term insurance' },
+    { id:'hdfc-ergo', name:'HDFC Ergo', icon:ICON_SHIELD, cls:'src-row__icon--ins', ref:'Policy HE••••0417', type:'Health &amp; motor' },
+    { id:'star-health', name:'Star Health Insurance', icon:ICON_SHIELD, cls:'src-row__icon--ins', ref:'Policy SH••••8802', type:'Health insurance' },
+  ];
+
+  const ALL = [...BROKERS, ...AMCS, ...INSURERS];
+
+  function rowHtml(src) {
+    return `
+      <div class="src-row" id="row-${src.id}">
+        <div class="src-row__icon ${src.cls}">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${src.icon}</svg>
+        </div>
+        <div class="src-row__info">
+          <div class="src-row__name">${src.name} <span class="chip chip--balanced">Linked</span></div>
+          <div class="src-row__meta">${src.type} · ${src.ref}</div>
+        </div>
+        <div class="src-row__actions">
+          <button class="src-action-btn" aria-label="Edit ${src.name}" onclick="openEdit('${src.id}')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+          </button>
+          <button class="src-action-btn src-action-btn--danger" aria-label="Unlink ${src.name}" onclick="openUnlink('${src.id}')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m18.84 12.25 1.72-1.71h-.02a5.004 5.004 0 0 0-.12-7.07 5.006 5.006 0 0 0-6.95 0l-1.72 1.71"/><path d="m5.17 11.75-1.71 1.71a5.004 5.004 0 0 0 .12 7.07 5.006 5.006 0 0 0 6.95 0l1.71-1.71"/><line x1="8" y1="2" x2="8" y2="5"/><line x1="2" y1="8" x2="5" y2="8"/><line x1="16" y1="19" x2="16" y2="22"/><line x1="19" y1="16" x2="22" y2="16"/></svg>
+          </button>
+        </div>
+      </div>`;
+  }
+
+  document.getElementById('broker-list').innerHTML = BROKERS.map(rowHtml).join('');
+  document.getElementById('amc-list').innerHTML = AMCS.map(rowHtml).join('');
+  document.getElementById('ins-list').innerHTML = INSURERS.map(rowHtml).join('');
+
+  let activeId = null;
+
+  function openEdit(id) {
+    const src = ALL.find(s => s.id === id);
+    activeId = id;
+    document.getElementById('edit-source-title').textContent = 'Edit ' + src.name;
+    document.getElementById('es-name').value = src.name;
+    document.getElementById('es-ref').value = src.ref.replace(/•+$/, '').trim();
+    document.getElementById('es-notes').value = '';
+    AG.openSheet('edit-source');
+  }
+
+  function saveSource() {
+    const name = document.getElementById('es-name').value.trim();
+    if (!name) { AG.showToast('Display name is required', 'error'); return; }
+    AG.closeSheet('edit-source');
+    AG.showToast(name + ' updated ✓', 'success');
+  }
+
+  function openUnlink(id) {
+    const src = ALL.find(s => s.id === id);
+    activeId = id;
+    document.getElementById('unlink-title').textContent = 'Unlink ' + src.name + '?';
+    AG.openDialog('unlink-source');
+  }
+
+  function confirmUnlink() {
+    const src = ALL.find(s => s.id === activeId);
+    AG.closeDialog('unlink-source');
+    const row = document.getElementById('row-' + activeId);
+    if (row) row.style.opacity = '0.4';
+    AG.showToast(src.name + ' unlinked', 'warning');
+  }
+</script>
+</body>
+</html>
