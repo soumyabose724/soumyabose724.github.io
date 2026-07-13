@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Recommendations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .ml-banner {
+      width:100%; display:flex; align-items:center; gap:var(--sp-3);
+      background:var(--warning-light); border:1px solid rgba(245,158,11,.32);
+      border-radius:var(--r-lg); padding:var(--sp-3) var(--sp-4);
+      margin-bottom:var(--sp-5);
+    }
+    .ml-banner__icon { font-size:18px; flex-shrink:0; }
+    .ml-banner__text { flex:1; font-size:12.5px; color:var(--text-primary); line-height:1.45; }
+    .ml-banner__text strong { color:var(--warning); }
+
+    /* ── Domain chip ── */
+    .domain-chip {
+      display:inline-flex; align-items:center; font-size:10px; font-weight:700;
+      letter-spacing:.04em; text-transform:uppercase; padding:2px 8px; border-radius:var(--r-full);
+      flex-shrink:0;
+    }
+    .domain-chip--budget      { background:var(--primary-light); color:var(--primary); }
+    .domain-chip--tax         { background:var(--info-light);    color:var(--info); }
+    .domain-chip--investment  { background:var(--success-light); color:var(--success); }
+    .domain-chip--insurance   { background:var(--error-light);   color:var(--error); }
+    .domain-chip--debt        { background:rgba(245,158,11,.14); color:var(--warning); }
+    .domain-chip--spending    { background:rgba(245,158,11,.14); color:var(--warning); }
+    .domain-chip--goals       { background:var(--primary-light); color:var(--primary); }
+
+    /* ── Recommendation card ── */
+    .rec-card {
+      position:relative;
+      background:var(--surface); border:1px solid var(--border); border-radius:var(--r-xl);
+      padding:var(--sp-4); margin-bottom:var(--sp-3);
+      animation:card-in var(--dur-med) var(--ease-out) both;
+    }
+    .rec-card__top { display:flex; align-items:flex-start; gap:var(--sp-3); padding-right:var(--sp-6); }
+    .rec-card__icon {
+      width:40px; height:40px; border-radius:var(--r-lg); flex-shrink:0; font-size:18px;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .rec-card__body { flex:1; min-width:0; }
+    .rec-card__domain-row { display:flex; align-items:center; gap:var(--sp-2); margin-bottom:4px; }
+    .rec-card__title { font-size:14px; font-weight:700; color:var(--text-primary); }
+    .rec-card__desc { font-size:12.5px; color:var(--text-secondary); line-height:1.5; }
+    .rec-card__dismiss {
+      position:absolute; top:var(--sp-2); right:var(--sp-2); width:28px; height:28px;
+      border-radius:50%; display:flex; align-items:center; justify-content:center;
+      color:var(--text-muted); font-size:14px; transition:background var(--dur-fast), color var(--dur-fast);
+      z-index:2;
+    }
+    .rec-card__dismiss:hover { background:var(--surface-raised); color:var(--text-primary); }
+    .rec-card.dismissing {
+      opacity:0; transform:translateX(24px) scale(.97); margin-bottom:0; max-height:0; padding-top:0; padding-bottom:0; overflow:hidden;
+      transition:opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out),
+                 max-height var(--dur-base) var(--ease-out), margin var(--dur-base) var(--ease-out),
+                 padding var(--dur-base) var(--ease-out);
+    }
+
+    .rec-card__why-toggle {
+      display:flex; align-items:center; gap:5px; font-size:12px; font-weight:600;
+      color:var(--primary); margin-top:var(--sp-3); padding-top:var(--sp-3);
+      border-top:1px solid var(--border);
+    }
+    .rec-card__why-toggle svg { transition:transform var(--dur-fast) var(--ease-out); }
+    .rec-card__why-toggle.open svg { transform:rotate(180deg); }
+    .rec-card__why-panel {
+      display:none; margin-top:var(--sp-3); background:var(--surface-raised);
+      border:1px solid var(--border); border-radius:var(--r-md);
+      padding:var(--sp-3); font-size:12px; color:var(--text-secondary); line-height:1.55;
+    }
+    .rec-card__why-panel.open { display:block; }
+    .rec-card__why-panel strong { color:var(--text-primary); }
+
+    .rec-empty {
+      text-align:center; padding:var(--sp-8) var(--sp-4); color:var(--text-muted);
+      font-size:13px; display:none;
+    }
+    .rec-empty.visible { display:block; }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">Vikas Sharma</span>
+    <button class="demo-btn active" data-state="jun2026">June 2026</button>
+    <button class="demo-btn" onclick="location.reload()">↺ Reset Dismissed</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Recommendations</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content">
+
+    <div class="ml-banner">
+      <span class="ml-banner__icon">✨</span>
+      <span class="ml-banner__text">
+        <strong id="rec-count-text">8 recommendations</strong> generated from your budget, tax, investment, insurance and debt data · ArthaGrid never applies any of these automatically — review and act only if useful
+        <span class="chip chip--info" style="margin-left:4px;">ML</span>
+      </span>
+    </div>
+
+    <div id="rec-list"><!-- rendered by JS --></div>
+    <div class="rec-empty" id="rec-empty">All caught up — no open recommendations right now. Use "Reset Dismissed" above to bring them back.</div>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV — none active (no Intelligence tab)
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="../investments/index.html" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ── Theme toggle (matches other pages) ── */
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+
+  /* ── All proactive recommendations — budget, tax, investment, insurance, debt, spending, goals ── */
+  const RECS = [
+    {
+      id: 'mobile-envelope', domain: 'budget', domainLabel: 'Budget',
+      icon: '📱', iconBg: '#FCE7F3',
+      title: 'Mobile & Internet envelope is at 93%',
+      desc: 'You’ve used ₹1,850 of your ₹2,000 allocation with days still left in June — ₹150 remaining. Consider reviewing your data plan or moving some spend to July.',
+      rule: 'Triggered because <strong>Envelope spend &gt; 90% of allocation with 8 days remaining in period</strong>. Source: Budget Period, June 2026 — Mobile &amp; Internet envelope.',
+      href: '../budget/period.html',
+    },
+    {
+      id: '80c-limit', domain: 'tax', domainLabel: 'Tax',
+      icon: '🧾', iconBg: 'var(--primary-light)',
+      title: 'You’re 86.9% toward your 80C limit',
+      desc: '₹1,30,400 of ₹1,50,000 used this FY — just ₹19,600 more to max it out before FY 2026-27 closes on 31 Mar 2027.',
+      rule: 'Triggered because <strong>Section 80C utilisation &lt; 100% of ₹1,50,000</strong> with the financial year closing in under 9 months. Source: Tax-Saving (80C), FY 2026-27.',
+      href: '../investments/tax-saving.html',
+    },
+    {
+      id: 'diversification', domain: 'investment', domainLabel: 'Investment',
+      icon: '📊', iconBg: '#DBEAFE',
+      title: 'Your portfolio is 83% equity-linked',
+      desc: 'Mutual Funds (56.0%) + Equities (27.0%) make up 83% of your ₹3,71,100 portfolio, with only 9.4% in Fixed Income and 4.1% in Gold. Consider rebalancing toward a steadier mix.',
+      rule: 'Triggered because <strong>equity-linked allocation (Mutual Funds + Equities) exceeds 75% of total portfolio value</strong>. Source: Investments, Asset Allocation.',
+      href: '../investments/index.html',
+    },
+    {
+      id: 'insurance-gap', domain: 'insurance', domainLabel: 'Insurance',
+      icon: '🛡️', iconBg: 'var(--error-light)',
+      title: 'Your term cover falls short by ₹2.45Cr',
+      desc: 'Required Human Life Value is ₹3,44,79,514; you currently hold ₹1,00,00,000 in term cover — only 29% of the real need. This is your single largest rupee-value gap.',
+      rule: 'Triggered because <strong>held term cover &lt; 50% of computed Human Life Value (HLV)</strong>. Source: Insurance, Coverage Gap (HLV) worksheet.',
+      href: '../insurance/hlv.html',
+    },
+    {
+      id: 'dti-high', domain: 'debt', domainLabel: 'Debt',
+      icon: '⚖️', iconBg: '#FEF3C7',
+      title: 'Your debt-to-income ratio is 42.1%',
+      desc: 'Combined EMI of ₹50,500/month (Home ₹38,500 + Car ₹12,000) against ₹1,20,000 income is above the commonly-used 40% caution threshold. Both loans are current — an Avalanche-first extra payment would bring this down fastest.',
+      rule: 'Triggered because <strong>combined EMI-to-income ratio exceeds 40%</strong>. Source: Loans, hero summary.',
+      href: '../loans/comparator.html',
+    },
+    {
+      id: 'dining-habit', domain: 'spending', domainLabel: 'Spending',
+      icon: '🍽️', iconBg: '#FEF3C7',
+      title: 'Dining Out spend is trending up',
+      desc: 'This month’s ₹6,750 is 50% above your ₹4,500 3-month average, and the average itself is up 22% over the last two quarters. Worth a look before it becomes the new normal.',
+      rule: 'Triggered because <strong>category spend exceeds its trailing 3-month average by more than 20%</strong> for a second consecutive month. Source: Spend Anomaly Detection, Dining Out.',
+      href: 'anomaly.html',
+    },
+    {
+      id: 'ef-tier1', domain: 'budget', domainLabel: 'Emergency Fund',
+      icon: '🏦', iconBg: 'var(--info-light)',
+      title: 'Your emergency fund is halfway there',
+      desc: 'Tier 1 (3-month reserve) is 50% funded — ₹1,49,000 of a ₹2,98,050 target. Keep the ₹10,000/month contribution going; you’re on pace to finish around Oct 2027.',
+      rule: 'Triggered because <strong>Emergency Fund Tier 1 (3-month reserve) is funded below 75% of target</strong>. Source: Goals, Emergency Fund Runway.',
+      href: '../goals/runway.html',
+    },
+    {
+      id: 'sip-stepup', domain: 'goals', domainLabel: 'Investment',
+      icon: '📈', iconBg: 'var(--success-light)',
+      title: 'Consider a SIP step-up',
+      desc: 'Your combined ₹18,000/month SIPs haven’t increased in the last 12 months while your income has stayed the same or grown. A modest annual step-up (e.g. 10%) compounds significantly by retirement.',
+      rule: 'Triggered because <strong>no SIP step-up detected in the trailing 12 months</strong> while monthly income is unchanged or higher. Source: Investments, SIPs.',
+      href: '../investments/sips.html',
+    },
+  ];
+
+  const DOMAIN_CLASS = {
+    budget: 'domain-chip--budget', tax: 'domain-chip--tax', investment: 'domain-chip--investment',
+    insurance: 'domain-chip--insurance', debt: 'domain-chip--debt', spending: 'domain-chip--spending',
+    goals: 'domain-chip--goals',
+  };
+
+  function renderRecs() {
+    document.getElementById('rec-list').innerHTML = RECS.map(r => `
+      <div class="rec-card" id="rec-${r.id}">
+        <div class="rec-card__top">
+          <div class="rec-card__icon" style="background:${r.iconBg};">${r.icon}</div>
+          <div class="rec-card__body">
+            <div class="rec-card__domain-row">
+              <span class="domain-chip ${DOMAIN_CLASS[r.domain]}">${r.domainLabel}</span>
+            </div>
+            <div class="rec-card__title">${r.title}</div>
+            <div class="rec-card__desc">${r.desc}</div>
+          </div>
+        </div>
+        <button class="rec-card__dismiss" title="Dismiss" onclick="dismissRec('${r.id}')">✕</button>
+        <button class="rec-card__why-toggle" id="why-toggle-${r.id}" onclick="toggleWhy('${r.id}')">
+          Why am I seeing this?
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="rec-card__why-panel" id="why-panel-${r.id}">${r.rule} Tap the card title above to open <a href="${r.href}" style="color:var(--primary); font-weight:600;">${r.title.length > 28 ? 'the related screen' : r.title}</a> for details.</div>
+      </div>`).join('');
+    updateCount();
+  }
+
+  function toggleWhy(id) {
+    const toggle = document.getElementById('why-toggle-' + id);
+    const panel = document.getElementById('why-panel-' + id);
+    const nowOpen = !panel.classList.contains('open');
+    panel.classList.toggle('open', nowOpen);
+    toggle.classList.toggle('open', nowOpen);
+  }
+
+  function updateCount() {
+    const remaining = document.querySelectorAll('#rec-list .rec-card:not(.dismissing)').length;
+    document.getElementById('rec-count-text').textContent = remaining + (remaining === 1 ? ' recommendation' : ' recommendations');
+    document.getElementById('rec-empty').classList.toggle('visible', remaining === 0);
+  }
+
+  function dismissRec(id) {
+    const el = document.getElementById('rec-' + id);
+    if (!el) return;
+    el.classList.add('dismissing');
+    updateCount();
+    setTimeout(() => el.remove(), 260);
+  }
+
+  renderRecs();
+</script>
+</body>
+</html>

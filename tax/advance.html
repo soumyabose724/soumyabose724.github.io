@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Advance Tax Schedule</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .inst-card { margin-bottom: var(--sp-4); }
+    .inst-card__header { display:flex; align-items:center; justify-content:space-between; margin-bottom:var(--sp-3); }
+    .inst-card__title { font-size:14px; font-weight:700; color:var(--text-primary); }
+    .inst-card__due { font-size:11.5px; color:var(--text-muted); margin-top:2px; }
+    .inst-row { display:flex; justify-content:space-between; align-items:baseline; padding:5px 0; border-bottom:1px solid var(--border); font-size:13px; }
+    .inst-row:last-child { border-bottom:none; }
+    .inst-row .k { color:var(--text-secondary); }
+    .inst-row .v { font-family:'JetBrains Mono',monospace; font-weight:600; color:var(--text-primary); }
+    .inst-progress-labels { display:flex; justify-content:space-between; font-size:10.5px; color:var(--text-muted); margin-top:4px; }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <div class="demo-bar">
+    <span class="demo-bar__label">FY</span>
+    <button class="demo-btn active" data-state="fy2627">2026-27</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Advance Tax Schedule</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <div class="page-content" id="page-content">
+
+    <div class="glass-card glass-card--hero">
+      <div class="t-label text-muted">Total Estimated Tax Liability (FY 2026-27)</div>
+      <div class="amount-text amount-text--display gradient-text" style="margin-top:4px;">₹2,25,703</div>
+      <div class="t-caption text-muted mt-2">Old Regime, from <a href="computation.html" style="color:var(--primary); font-weight:500;">Tax Computation</a>. Compared against cumulative TDS + TCS credits at each instalment due date.</div>
+    </div>
+
+    <div class="section-title mt-6">4 Instalments</div>
+
+    <div class="glass-card glass-card--compact inst-card">
+      <div class="inst-card__header">
+        <div><div class="inst-card__title">Instalment 1 · 15%</div><div class="inst-card__due">Due 15 Jun 2026</div></div>
+        <span class="chip chip--balanced">Surplus</span>
+      </div>
+      <div class="inst-row"><span class="k">Required (cumulative)</span><span class="v">₹33,855</span></div>
+      <div class="inst-row"><span class="k">Credits available (TDS + TCS)</span><span class="v">₹4,90,076</span></div>
+      <div class="inst-row"><span class="k">Surplus</span><span class="v" style="color:var(--success);">+₹4,56,221</span></div>
+      <div class="progress-bar progress-bar--thick mt-2"><div class="progress-bar__fill progress-bar__fill--success" style="width:100%;"></div></div>
+      <div class="inst-progress-labels"><span>Employer TDS (25%) + Bank TDS (25%) accrued</span><span>Full TCS + Crypto TDS available</span></div>
+    </div>
+
+    <div class="glass-card glass-card--compact inst-card">
+      <div class="inst-card__header">
+        <div><div class="inst-card__title">Instalment 2 · 45%</div><div class="inst-card__due">Due 15 Sep 2026</div></div>
+        <span class="chip chip--balanced">Surplus</span>
+      </div>
+      <div class="inst-row"><span class="k">Required (cumulative)</span><span class="v">₹1,01,566</span></div>
+      <div class="inst-row"><span class="k">Credits available (TDS + TCS)</span><span class="v">₹5,18,381</span></div>
+      <div class="inst-row"><span class="k">Surplus</span><span class="v" style="color:var(--success);">+₹4,16,815</span></div>
+      <div class="progress-bar progress-bar--thick mt-2"><div class="progress-bar__fill progress-bar__fill--success" style="width:100%;"></div></div>
+      <div class="inst-progress-labels"><span>Employer + Bank TDS 50% accrued</span><span>Full TCS + Crypto TDS available</span></div>
+    </div>
+
+    <div class="glass-card glass-card--compact inst-card">
+      <div class="inst-card__header">
+        <div><div class="inst-card__title">Instalment 3 · 75%</div><div class="inst-card__due">Due 15 Dec 2026</div></div>
+        <span class="chip chip--balanced">Surplus</span>
+      </div>
+      <div class="inst-row"><span class="k">Required (cumulative)</span><span class="v">₹1,69,277</span></div>
+      <div class="inst-row"><span class="k">Credits available (TDS + TCS)</span><span class="v">₹5,46,687</span></div>
+      <div class="inst-row"><span class="k">Surplus</span><span class="v" style="color:var(--success);">+₹3,77,410</span></div>
+      <div class="progress-bar progress-bar--thick mt-2"><div class="progress-bar__fill progress-bar__fill--success" style="width:100%;"></div></div>
+      <div class="inst-progress-labels"><span>Employer + Bank TDS 75% accrued</span><span>Full TCS + Crypto TDS available</span></div>
+    </div>
+
+    <div class="glass-card glass-card--compact inst-card">
+      <div class="inst-card__header">
+        <div><div class="inst-card__title">Instalment 4 · 100%</div><div class="inst-card__due">Due 15 Mar 2027</div></div>
+        <span class="chip chip--balanced">Surplus</span>
+      </div>
+      <div class="inst-row"><span class="k">Required (cumulative)</span><span class="v">₹2,25,703</span></div>
+      <div class="inst-row"><span class="k">Credits available (TDS + TCS)</span><span class="v">₹5,74,992</span></div>
+      <div class="inst-row"><span class="k">Surplus</span><span class="v" style="color:var(--success);">+₹3,49,289</span></div>
+      <div class="progress-bar progress-bar--thick mt-2"><div class="progress-bar__fill progress-bar__fill--success" style="width:100%;"></div></div>
+      <div class="inst-progress-labels"><span>Full-year TDS accrued</span><span>Matches final refund on <a href="computation.html" style="color:var(--primary);">Tax Computation</a></span></div>
+    </div>
+
+    <div class="info-note" style="font-size:12px; line-height:1.6; color:var(--text-secondary); background:var(--success-light); border:1px solid rgba(34,197,94,.3); border-radius:var(--r-md); padding:var(--sp-3) var(--sp-4); margin-top:var(--sp-2);">
+      <strong>No advance tax payment needed this FY.</strong> The ₹4,50,935 LRS TCS credit (already collected on Vikas's foreign remittances, see <a href="../investments/tcs.html" style="color:var(--primary); font-weight:500;">TCS Monitor</a>) alone exceeds every instalment's cumulative requirement — combined with employer/bank/crypto TDS, credits stay ahead of liability at every due date. Full detail on <a href="tds.html" style="color:var(--primary); font-weight:500;">TDS / TCS Credits</a>.
+    </div>
+
+    <div style="margin-top:var(--sp-6); text-align:center;">
+      <a href="index.html" style="font-size:13px; color:var(--primary); font-weight:600; text-decoration:none;">← Back to Tax &amp; Compliance</a>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="../investments/index.html" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+</script>
+</body>
+</html>
