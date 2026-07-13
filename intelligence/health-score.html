@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Financial Health Score</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .score-hero { text-align:center; }
+    .score-hero__ring-wrap { display:flex; justify-content:center; margin: var(--sp-2) 0 var(--sp-3); }
+    .score-hero__band {
+      display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700;
+      letter-spacing:.06em; text-transform:uppercase; padding:4px 12px; border-radius:var(--r-full);
+    }
+    .score-hero__note { font-size:12.5px; color:var(--text-secondary); margin-top:var(--sp-3); line-height:1.55; }
+
+    /* ── Dimension row ── */
+    .dim-card {
+      background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg);
+      padding:var(--sp-4); margin-bottom:var(--sp-3);
+      animation:card-in var(--dur-med) var(--ease-out) both;
+    }
+    .dim-card__top { display:flex; align-items:center; gap:var(--sp-3); margin-bottom:var(--sp-3); }
+    .dim-card__icon {
+      width:38px; height:38px; border-radius:var(--r-md); flex-shrink:0; font-size:17px;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .dim-card__title-wrap { flex:1; min-width:0; }
+    .dim-card__title { font-size:14px; font-weight:700; color:var(--text-primary); }
+    .dim-card__weight { font-size:11px; color:var(--text-muted); margin-top:1px; }
+    .dim-card__score {
+      font-family:'JetBrains Mono', monospace; font-variant-numeric:tabular-nums;
+      font-size:18px; font-weight:700; flex-shrink:0;
+    }
+    .dim-card__desc { font-size:12.5px; color:var(--text-secondary); line-height:1.55; margin-top:var(--sp-3); }
+    .dim-card__desc a { color:var(--primary); font-weight:500; }
+
+    /* ── Formula / weighting table ── */
+    .formula-strip {
+      background:var(--surface-raised); border:1px solid var(--border); border-radius:var(--r-lg);
+      padding:var(--sp-3) var(--sp-4); font-size:12.5px; color:var(--text-secondary);
+      line-height:1.6; margin-top:var(--sp-3);
+    }
+    .weight-table { width:100%; border-collapse:collapse; margin-top:var(--sp-2); }
+    .weight-table th {
+      font-size:10px; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
+      color:var(--text-muted); text-align:left; padding:0 var(--sp-2) var(--sp-2);
+      border-bottom:1px solid var(--border);
+    }
+    .weight-table th:not(:first-child), .weight-table td:not(:first-child) { text-align:right; }
+    .weight-table td {
+      font-size:12.5px; padding:var(--sp-2) var(--sp-2); border-bottom:1px solid var(--border);
+      color:var(--text-primary);
+    }
+    .weight-table tr:last-child td { border-bottom:none; }
+    .weight-table td.mono { font-family:'JetBrains Mono', monospace; font-variant-numeric:tabular-nums; font-weight:600; }
+    .weight-table tfoot td { font-weight:700; border-top:1.5px solid var(--border-strong); padding-top:var(--sp-3); }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">Vikas Sharma</span>
+    <button class="demo-btn active" data-state="fy2627">FY 2026-27</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Financial Health Score</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content" id="page-content">
+
+    <!-- Overall Score Hero -->
+    <div class="glass-card glass-card--hero score-hero">
+      <div class="card-header" style="margin-bottom:var(--sp-2); justify-content:center;">
+        <div class="card-icon card-icon--info">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 1 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+        </div>
+        <div class="card-title" style="flex:none;">Overall Score</div>
+      </div>
+      <div class="score-hero__ring-wrap">
+        <div class="progress-ring" id="score-ring">
+          <svg width="140" height="140" viewBox="0 0 112 112">
+            <circle class="progress-ring__track"></circle>
+            <circle class="progress-ring__fill" id="score-ring-fill"></circle>
+          </svg>
+          <div class="progress-ring__label" id="score-ring-label" style="font-size:32px;">—</div>
+        </div>
+      </div>
+      <span class="score-hero__band" id="score-band">Good</span>
+      <div class="score-hero__note">
+        A weighted average across 6 dimensions of your financial life — day-to-day habits (budgeting, savings, debt) count for more than tail-risk protection (insurance), which is why a large insurance gap doesn't collapse the whole score.
+      </div>
+    </div>
+
+    <!-- Dimension breakdown -->
+    <div class="section-title" style="margin-top:var(--sp-6);">The 6 Dimensions</div>
+    <div id="dim-list"><!-- rendered by JS --></div>
+
+    <!-- How it's calculated -->
+    <div class="section-title" style="margin-top:var(--sp-2);">How This Is Calculated</div>
+    <div class="formula-strip">
+      Overall Score = Σ (Dimension Score × Weight) ÷ Σ Weight — a weighted average, not a simple mean. Weight reflects how much each dimension matters to your day-to-day financial stability.
+      <table class="weight-table" id="weight-table">
+        <thead>
+          <tr><th>Dimension</th><th>Score</th><th>Weight</th><th>Contribution</th></tr>
+        </thead>
+        <tbody id="weight-tbody"><!-- rendered by JS --></tbody>
+        <tfoot>
+          <tr><td colspan="3">Overall (rounded)</td><td class="mono" id="weight-total">—</td></tr>
+        </tfoot>
+      </table>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV — none active (no Intelligence tab)
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="../investments/index.html" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ── Theme toggle (matches other pages) ── */
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+
+  /* ── The 6 weighted dimensions — same model as index.html ── */
+  const DIMENSIONS = [
+    {
+      key: 'budget', label: 'Budget Adherence', score: 92, weight: 25,
+      icon: '📋', iconBg: 'var(--primary-light)',
+      desc: '10 of 11 envelopes are within budget this period. Only <strong>Mobile &amp; Internet</strong> is near its limit (93% spent — ₹1,850 of ₹2,000, ₹150 remaining). No envelope has been breached; Housing EMI, SIP, Education and Emergency Fund are all fully on schedule. See <a href="../budget/period.html">Budget Period</a>.',
+    },
+    {
+      key: 'diversification', label: 'Investment Diversification', score: 80, weight: 20,
+      icon: '📊', iconBg: '#DBEAFE',
+      desc: 'Your ₹3,71,100 portfolio spans 5 asset classes — Mutual Funds (56.0%), Equities (27.0%), Fixed Income/EPF-PPF (9.4%), Gold (4.1%) and Other (3.5%) — but 83% still sits in equity-linked instruments (Mutual Funds + Equities). Shifting 10-15% toward Fixed Income and Gold would improve balance. See <a href="../investments/index.html">Investments</a>.',
+    },
+    {
+      key: 'savings', label: 'Savings Rate', score: 80, weight: 15,
+      icon: '💰', iconBg: 'var(--success-light)',
+      desc: 'A monthly surplus of ₹20,650 on ₹1,20,000 income = 17.2% savings rate. Comfortably positive, but below the 20% benchmark commonly used for long-term goal funding. See <a href="../transactions/index.html">Transactions</a>.',
+    },
+    {
+      key: 'dti', label: 'Debt-to-Income Ratio', score: 75, weight: 15,
+      icon: '⚖️', iconBg: '#FEF3C7',
+      desc: 'Combined EMI outflow of ₹50,500/month (Home ₹38,500 + Car ₹12,000) against ₹1,20,000 income = 42.1% DTI — above the 40% caution threshold, though both loans are current and already on the Avalanche payoff plan. See <a href="../loans/index.html">Loans</a>.',
+    },
+    {
+      key: 'emergency', label: 'Emergency Fund Coverage', score: 58, weight: 15,
+      icon: '🏦', iconBg: 'var(--info-light)',
+      desc: '₹1,49,000 saved = 1.5 months of the ₹99,350 monthly burn rate. Tier 1 (3-month, ₹2,98,050 target) is 50% funded; Tier 2 (12-month reserve) hasn’t started yet. Fed by the ₹10,000/month Emergency Fund envelope. See <a href="../goals/runway.html">Emergency Fund Runway</a>.',
+    },
+    {
+      key: 'insurance', label: 'Insurance Adequacy', score: 30, weight: 10,
+      icon: '🛡️', iconBg: 'var(--error-light)',
+      desc: 'Human Life Value (HLV) analysis shows a required cover of ₹3,44,79,514 against a held term cover of only ₹1,00,00,000 — a ₹2,44,79,514 shortfall, just 29% of the real need. This is your single largest rupee-value gap, even though it carries a smaller weight in the blended score since it reflects tail risk rather than day-to-day cash flow health. See <a href="../insurance/hlv.html">Coverage Gap (HLV)</a>.',
+    },
+  ];
+
+  function computeOverall(dims) {
+    const totalWeight = dims.reduce((s, d) => s + d.weight, 0);
+    const weighted = dims.reduce((s, d) => s + d.score * d.weight, 0);
+    return { totalWeight, weighted, rounded: Math.round(weighted / totalWeight), raw: weighted / totalWeight };
+  }
+  const RESULT = computeOverall(DIMENSIONS);
+
+  document.getElementById('score-ring-label').textContent = RESULT.rounded;
+  AG.animateRing(document.getElementById('score-ring'), RESULT.rounded, 44);
+
+  const bandEl = document.getElementById('score-band');
+  let band, bandColor;
+  if (RESULT.rounded >= 90)      { band = 'Excellent';       bandColor = 'success'; }
+  else if (RESULT.rounded >= 75) { band = 'Very Good';        bandColor = 'success'; }
+  else if (RESULT.rounded >= 60) { band = 'Good';             bandColor = 'info'; }
+  else if (RESULT.rounded >= 40) { band = 'Fair';             bandColor = 'warning'; }
+  else                           { band = 'Needs Attention';  bandColor = 'error'; }
+  bandEl.textContent = band + ' · ' + RESULT.rounded + ' / 100';
+  bandEl.style.background = 'var(--' + bandColor + '-light)';
+  bandEl.style.color = 'var(--' + bandColor + ')';
+
+  function barClassFor(score) {
+    if (score >= 75) return '';
+    if (score >= 50) return 'progress-bar__fill--warning';
+    return 'progress-bar__fill--danger';
+  }
+
+  document.getElementById('dim-list').innerHTML = DIMENSIONS.map(d => `
+    <div class="dim-card">
+      <div class="dim-card__top">
+        <div class="dim-card__icon" style="background:${d.iconBg};">${d.icon}</div>
+        <div class="dim-card__title-wrap">
+          <div class="dim-card__title">${d.label}</div>
+          <div class="dim-card__weight">Weight ${d.weight}% of overall score</div>
+        </div>
+        <div class="dim-card__score">${d.score}<span style="font-size:11px;color:var(--text-muted);font-weight:500;">/100</span></div>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-bar__fill ${barClassFor(d.score)}" style="width:${d.score}%;"></div>
+      </div>
+      <div class="dim-card__desc">${d.desc}</div>
+    </div>`).join('');
+
+  document.getElementById('weight-tbody').innerHTML = DIMENSIONS.map(d => `
+    <tr>
+      <td>${d.label}</td>
+      <td class="mono">${d.score}</td>
+      <td class="mono">${d.weight}%</td>
+      <td class="mono">${(d.score * d.weight / 100).toFixed(2)}</td>
+    </tr>`).join('');
+  document.getElementById('weight-total').textContent = RESULT.raw.toFixed(2) + ' → ' + RESULT.rounded;
+</script>
+</body>
+</html>

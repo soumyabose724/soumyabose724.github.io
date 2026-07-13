@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Export Data</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* ── Module checkbox list ── */
+    .module-row {
+      display: flex; align-items: center; gap: var(--sp-3);
+      padding: var(--sp-3) 0; border-bottom: 1px solid var(--border);
+      cursor: pointer;
+    }
+    .module-row:last-child { border-bottom: none; }
+    .module-row__check {
+      width: 22px; height: 22px; border-radius: var(--r-sm); flex-shrink: 0;
+      border: 1.5px solid var(--border-strong); background: var(--surface);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; transition: background var(--dur-fast), border-color var(--dur-fast);
+    }
+    .module-row__check.checked { background: var(--primary); border-color: var(--primary); }
+    .module-row__icon {
+      width: 36px; height: 36px; border-radius: var(--r-md); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; color: #fff;
+    }
+    .module-row__body { flex: 1; min-width: 0; }
+    .module-row__name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    .module-row__meta { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+
+    .select-all-row {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: var(--sp-2);
+    }
+    .select-all-link { font-size: 12px; color: var(--primary); font-weight: 600; }
+
+    /* ── Format selector ── */
+    .format-row { display: flex; gap: var(--sp-2); }
+    .format-btn {
+      flex: 1; height: 56px; border-radius: var(--r-lg);
+      background: var(--surface-raised); border: 1.5px solid var(--border);
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+      font-size: 12px; font-weight: 600; color: var(--text-secondary);
+      cursor: pointer; transition: background var(--dur-fast), border-color var(--dur-fast), color var(--dur-fast);
+    }
+    .format-btn span.fmt-icon { font-size: 18px; }
+    .format-btn.selected {
+      background: var(--primary-light); border-color: var(--primary); color: var(--primary);
+    }
+
+    /* ── Date range ── */
+    .date-range-row { display: flex; gap: var(--sp-3); }
+    .date-range-row .form-group { flex: 1; }
+    .preset-row { display: flex; gap: var(--sp-2); flex-wrap: wrap; margin-top: var(--sp-3); }
+    .preset-btn {
+      height: 30px; padding: 0 var(--sp-3); border-radius: var(--r-full);
+      background: var(--surface-raised); border: 1.5px solid var(--border);
+      font-size: 12px; font-weight: 600; color: var(--text-secondary);
+      cursor: pointer; transition: background var(--dur-fast), color var(--dur-fast), border-color var(--dur-fast);
+    }
+    .preset-btn.selected { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+    .export-summary {
+      font-size: 12px; color: var(--text-secondary); text-align: center;
+      margin: var(--sp-3) 0 var(--sp-4); line-height: 1.5;
+    }
+    .export-summary strong { color: var(--text-primary); }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- Demo Bar -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">Export Data</span>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Export Data</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- Page Content -->
+  <div class="page-content">
+
+    <!-- Modules -->
+    <div class="select-all-row">
+      <div class="section-title" style="margin-bottom:0;">Modules to Export</div>
+      <span class="select-all-link" id="select-all-link">Select All</span>
+    </div>
+    <div class="glass-card" style="margin-bottom: var(--sp-5);">
+      <div id="module-list"></div>
+    </div>
+
+    <!-- Format -->
+    <div class="section-title">Format</div>
+    <div class="glass-card" style="margin-bottom: var(--sp-5);">
+      <div class="format-row" id="format-row">
+        <button class="format-btn selected" data-format="csv">
+          <span class="fmt-icon">📄</span>CSV
+        </button>
+        <button class="format-btn" data-format="excel">
+          <span class="fmt-icon">📊</span>Excel
+        </button>
+        <button class="format-btn" data-format="pdf">
+          <span class="fmt-icon">🧾</span>PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- Date range -->
+    <div class="section-title">Date Range</div>
+    <div class="glass-card" style="margin-bottom: var(--sp-5);">
+      <div class="date-range-row">
+        <div class="form-group">
+          <label class="form-label" for="from-date">From</label>
+          <input type="date" class="form-input" id="from-date" value="2026-04-01">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="to-date">To</label>
+          <input type="date" class="form-input" id="to-date" value="2026-06-23">
+        </div>
+      </div>
+      <div class="preset-row" id="preset-row">
+        <button class="preset-btn" data-preset="month">This Month</button>
+        <button class="preset-btn selected" data-preset="fy">This FY (Apr–Mar)</button>
+        <button class="preset-btn" data-preset="year">Last 12 Months</button>
+        <button class="preset-btn" data-preset="all">All Time</button>
+      </div>
+    </div>
+
+    <div class="export-summary" id="export-summary">
+      Exporting <strong id="summary-count">8</strong> modules as <strong id="summary-format">CSV</strong> for <strong id="summary-range">Apr 1 – Jun 23, 2026</strong>
+    </div>
+
+    <button class="btn btn--primary btn--full btn--lg" id="export-btn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export
+    </button>
+
+  </div><!-- /page-content -->
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="../investments/index.html" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ── Theme toggle (matches other pages) ── */
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+
+  /* ── Exportable modules ── */
+  const MODULES = [
+    { id: 'transactions', name: 'Transactions',   meta: '412 records · Jun 2026',        icon: 'txn',    bg: 'linear-gradient(135deg,#3B82F6,#60A5FA)', checked: true },
+    { id: 'budget',       name: 'Budget',          meta: '12 envelopes · June 2026',       icon: 'budget', bg: 'var(--grad-primary)',                     checked: true },
+    { id: 'bank',         name: 'Bank Accounts',   meta: '5 accounts · ₹12,16,386',        icon: 'bank',   bg: 'linear-gradient(135deg,#2563EB,#3B82F6)', checked: true },
+    { id: 'cards',        name: 'Credit Cards',    meta: '2 cards · ₹1,22,970 outstanding',icon: 'card',   bg: 'linear-gradient(135deg,#8B5CF6,#A78BFA)', checked: true },
+    { id: 'loans',        name: 'Loans',           meta: '2 loans · ₹43,87,000 outstanding',icon: 'loan',  bg: 'var(--grad-danger)',                      checked: true },
+    { id: 'investments',  name: 'Investments',     meta: 'MF, SIPs, NPS, PPF &amp; more',   icon: 'invest', bg: 'var(--grad-success)',                     checked: true },
+    { id: 'insurance',    name: 'Insurance',       meta: 'Life &amp; health policies',      icon: 'shield', bg: 'linear-gradient(135deg,#D97706,#F59E0B)', checked: false },
+    { id: 'goals',        name: 'Goals',           meta: 'Savings &amp; investment goals',  icon: 'goal',   bg: 'linear-gradient(135deg,#EC4899,#F472B6)', checked: false },
+  ];
+
+  const ICONS = {
+    txn:    '<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>',
+    budget: '<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2"/>',
+    bank:   '<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>',
+    card:   '<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>',
+    loan:   '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+    invest: '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
+    shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+    goal:   '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+  };
+
+  let format = 'csv';
+  let range = 'This FY (Apr 1 – Jun 23, 2026)';
+
+  function renderModules() {
+    document.getElementById('module-list').innerHTML = MODULES.map(m => `
+      <div class="module-row" data-id="${m.id}">
+        <div class="module-row__check${m.checked ? ' checked' : ''}">${m.checked ? '✓' : ''}</div>
+        <div class="module-row__icon" style="background:${m.bg};">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${ICONS[m.icon]}</svg>
+        </div>
+        <div class="module-row__body">
+          <div class="module-row__name">${m.name}</div>
+          <div class="module-row__meta">${m.meta}</div>
+        </div>
+      </div>`).join('');
+
+    document.querySelectorAll('.module-row').forEach(row => {
+      row.addEventListener('click', () => {
+        const m = MODULES.find(x => x.id === row.dataset.id);
+        m.checked = !m.checked;
+        renderModules();
+        updateSummary();
+      });
+    });
+  }
+
+  function updateSummary() {
+    const count = MODULES.filter(m => m.checked).length;
+    document.getElementById('summary-count').textContent = count;
+    document.getElementById('summary-format').textContent = format.toUpperCase();
+    document.getElementById('summary-range').textContent = document.getElementById('range-label') ? document.getElementById('range-label').textContent : range;
+  }
+
+  document.getElementById('select-all-link').addEventListener('click', () => {
+    const allChecked = MODULES.every(m => m.checked);
+    MODULES.forEach(m => m.checked = !allChecked);
+    document.getElementById('select-all-link').textContent = allChecked ? 'Select All' : 'Deselect All';
+    renderModules();
+    updateSummary();
+  });
+
+  document.querySelectorAll('.format-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.format-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      format = btn.dataset.format;
+      updateSummary();
+    });
+  });
+
+  const PRESET_LABELS = {
+    month: 'June 2026 (Jun 1 – Jun 23)',
+    fy:    'Apr 1 – Jun 23, 2026',
+    year:  'Jul 2025 – Jun 2026',
+    all:   'All Time',
+  };
+  const PRESET_DATES = {
+    month: ['2026-06-01', '2026-06-23'],
+    fy:    ['2026-04-01', '2026-06-23'],
+    year:  ['2025-07-01', '2026-06-23'],
+    all:   ['2020-01-01', '2026-06-23'],
+  };
+
+  document.querySelectorAll('.preset-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      const preset = btn.dataset.preset;
+      range = PRESET_LABELS[preset];
+      const [from, to] = PRESET_DATES[preset];
+      document.getElementById('from-date').value = from;
+      document.getElementById('to-date').value = to;
+      document.getElementById('summary-range').textContent = range;
+    });
+  });
+
+  document.getElementById('export-btn').addEventListener('click', () => {
+    const count = MODULES.filter(m => m.checked).length;
+    if (count === 0) {
+      AG.showToast('Select at least one module to export', 'warning');
+      return;
+    }
+    AG.showToast(`Generating a ${count}-sheet ${format.toUpperCase()} workbook for ${range} (prototype)`, 'success');
+  });
+
+  renderModules();
+  updateSummary();
+</script>
+</body>
+</html>

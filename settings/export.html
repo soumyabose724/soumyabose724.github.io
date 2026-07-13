@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Export &amp; Backup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .exp-note {
+      font-size: 12px; color: var(--text-secondary); line-height: 1.6;
+      margin-bottom: var(--sp-4);
+    }
+    .exp-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: var(--sp-4);
+      margin-bottom: var(--sp-3);
+    }
+    .exp-drive-row {
+      display: flex; align-items: center; gap: var(--sp-3);
+    }
+    .exp-drive-row__icon {
+      width: 40px; height: 40px; border-radius: var(--r-lg); flex-shrink: 0;
+      background: var(--primary-xlight); color: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .exp-sub-row {
+      display: none; margin-top: var(--sp-4); padding-top: var(--sp-4);
+      border-top: 1px solid var(--border);
+    }
+    .exp-sub-row.visible { display: block; }
+    .exp-next-run {
+      font-size: 12px; color: var(--text-secondary); margin-top: var(--sp-3);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .exp-next-run svg { color: var(--text-muted); flex-shrink: 0; }
+
+    .exp-progress-wrap { display: none; margin-top: var(--sp-3); }
+    .exp-progress-wrap.visible { display: block; }
+    .exp-progress-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
+
+    .backup-disclosure {
+      display: flex; align-items: flex-start; gap: var(--sp-3);
+      background: var(--info-light); border: 1px solid rgba(59,130,246,.28);
+      border-radius: var(--r-lg); padding: var(--sp-4);
+      font-size: 12px; color: var(--text-secondary); line-height: 1.6;
+    }
+    .backup-disclosure svg { color: var(--info); flex-shrink: 0; margin-top: 2px; }
+    .backup-disclosure strong { color: var(--text-primary); }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <div class="demo-bar">
+    <span class="demo-bar__label">Settings</span>
+    <button class="icon-btn" data-theme-toggle style="margin-left:auto;" aria-label="Toggle theme">
+      <span data-theme-icon style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Export &amp; Backup</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <div class="page-content" id="page-content">
+
+    <p class="exp-note">
+      All your data lives on this device. Export a copy anytime, or opt in to automatic Google Drive backup so you can restore on a new phone.
+    </p>
+
+    <div class="section">
+      <div class="section-title">Export Preferences</div>
+      <div class="exp-card">
+        <div class="form-group" style="margin:0;">
+          <label class="form-label" for="export-format">Default Export Format</label>
+          <select class="form-select" id="export-format" onchange="onFormatChange(this.value)">
+            <option value="csv" selected>CSV (spreadsheet-friendly)</option>
+            <option value="pdf">PDF (printable report)</option>
+            <option value="xlsx">XLSX (Excel workbook)</option>
+          </select>
+          <div class="form-helper">Used as the default when exporting reports, statements, or full data dumps.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Google Drive Auto-Export</div>
+      <div class="exp-card">
+        <div class="exp-drive-row">
+          <div class="exp-drive-row__icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12A10 10 0 1 1 12 2"/><path d="M22 2 12 12"/><path d="M17 2h5v5"/></svg>
+          </div>
+          <div style="flex:1; min-width:0;">
+            <div class="toggle-label">Auto-Export to Drive</div>
+            <div class="toggle-sublabel">Uploads a compressed backup to your Drive on a schedule</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="auto-export-toggle" checked onchange="onAutoExportToggle(this.checked)">
+            <span class="toggle-track"></span>
+            <span class="toggle-thumb"></span>
+          </label>
+        </div>
+
+        <div class="exp-sub-row visible" id="auto-export-sub">
+          <div class="form-group" style="margin:0;">
+            <label class="form-label" for="export-frequency">Frequency</label>
+            <select class="form-select" id="export-frequency" onchange="onFrequencyChange(this.value)">
+              <option value="weekly">Weekly</option>
+              <option value="monthly" selected>Monthly</option>
+            </select>
+          </div>
+          <div class="exp-next-run" id="next-run-row">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Next export: <strong style="color:var(--text-primary); margin-left:2px;">1 Aug 2026</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="backup-disclosure">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <div>
+          <strong>Your backup is secured by your Google account.</strong><br>
+          ArthaGrid uploads only to a private app folder (<code style="font-family:'JetBrains Mono',monospace;">ArthaGrid/arthagrid_backup.db.gz</code>) using the <code style="font-family:'JetBrains Mono',monospace;">drive.file</code> scope — it never sees the rest of your Drive. The backup file itself isn't separately encrypted beyond your Google account's own security. Sync is fully optional — ArthaGrid works offline without ever signing in.
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Manual Export</div>
+      <div class="exp-card">
+        <div style="font-size:13px; color:var(--text-secondary); margin-bottom:var(--sp-3); line-height:1.6;">
+          Export a full local snapshot — transactions, budgets, loans, investments, and settings — as a single file for backup or migration.
+        </div>
+        <button class="btn btn--primary btn--full" id="export-now-btn" onclick="startExport()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export All Data Now
+        </button>
+        <div class="exp-progress-wrap" id="export-progress-wrap">
+          <div class="exp-progress-label" id="export-progress-label">Preparing export…</div>
+          <div class="progress-bar"><div class="progress-bar__fill" id="export-progress-fill" style="width:0%;"></div></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2"/></svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      <span>Transactions</span>
+    </a>
+    <a href="../investments/index.html" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span>Invest</span>
+    </a>
+    <a href="index.html" class="nav-tab active" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  AG.initBottomNav('profile');
+
+  function onFormatChange(fmt) {
+    AG.showToast('Default export format set to ' + fmt.toUpperCase(), 'success');
+  }
+
+  function onAutoExportToggle(checked) {
+    document.getElementById('auto-export-sub').classList.toggle('visible', checked);
+    AG.showToast(checked ? 'Auto-export to Drive enabled' : 'Auto-export to Drive disabled', checked ? 'success' : 'info');
+  }
+
+  function onFrequencyChange(freq) {
+    const next = document.querySelector('#next-run-row strong');
+    next.textContent = freq === 'weekly' ? '20 Jul 2026' : '1 Aug 2026';
+    AG.showToast('Auto-export frequency set to ' + freq, 'success');
+  }
+
+  let exportRunning = false;
+  function startExport() {
+    if (exportRunning) return;
+    exportRunning = true;
+    const btn = document.getElementById('export-now-btn');
+    const wrap = document.getElementById('export-progress-wrap');
+    const label = document.getElementById('export-progress-label');
+    const fill = document.getElementById('export-progress-fill');
+    btn.disabled = true;
+    wrap.classList.add('visible');
+    label.textContent = 'Preparing export…';
+    fill.style.width = '0%';
+
+    const steps = [
+      { pct: 30, label: 'Collecting transactions, budgets & loans…' },
+      { pct: 65, label: 'Collecting investments & tax records…' },
+      { pct: 100, label: 'Packaging file…' },
+    ];
+    let i = 0;
+    const tick = () => {
+      if (i < steps.length) {
+        fill.style.width = steps[i].pct + '%';
+        label.textContent = steps[i].label;
+        i++;
+        setTimeout(tick, 550);
+      } else {
+        label.textContent = 'arthagrid_export_2026-07-13.zip ready';
+        btn.disabled = false;
+        exportRunning = false;
+        AG.showToast('Export complete — saved to Downloads', 'success');
+      }
+    };
+    setTimeout(tick, 300);
+  }
+</script>
+</body>
+</html>

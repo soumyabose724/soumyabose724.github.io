@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Income Sources</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .income-row {
+      display:flex; align-items:flex-start; gap:var(--sp-3);
+      padding:var(--sp-4); background:var(--surface); border:1px solid var(--border);
+      border-radius:var(--r-lg); margin-bottom:var(--sp-3);
+      animation: item-in var(--dur-med) var(--ease-out) both;
+    }
+    .income-row__icon {
+      width:42px; height:42px; border-radius:var(--r-lg); flex-shrink:0;
+      background:var(--grad-primary); color:#fff;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .income-row__body { flex:1; min-width:0; }
+    .income-row__top { display:flex; justify-content:space-between; align-items:flex-start; gap:var(--sp-2); }
+    .income-row__name { font-size:14px; font-weight:700; color:var(--text-primary); }
+    .income-row__amt { font-family:'JetBrains Mono',monospace; font-weight:700; font-size:15px; color:var(--text-primary); white-space:nowrap; }
+    .income-row__meta { font-size:12px; color:var(--text-secondary); margin-top:2px; line-height:1.5; }
+    .income-row__tags { display:flex; gap:5px; flex-wrap:wrap; margin-top:6px; }
+    .itag { font-size:10px; font-weight:600; padding:2px 7px; border-radius:var(--r-sm); background:var(--primary-xlight); color:var(--primary); border:1px solid var(--primary-light); }
+    .itag--special { background:var(--warning-light); color:var(--warning); border-color:rgba(245,158,11,.3); }
+    .itag--flat { background:var(--error-light); color:var(--error); border-color:rgba(233,69,96,.3); }
+    .total-strip {
+      display:flex; justify-content:space-between; align-items:baseline;
+      padding:var(--sp-4) 0 0; border-top:1.5px solid var(--border-strong); margin-top:var(--sp-2);
+      font-size:14px; font-weight:700; color:var(--text-primary);
+    }
+    .total-strip .val { font-family:'JetBrains Mono',monospace; font-size:17px; color:var(--primary); }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <div class="demo-bar">
+    <span class="demo-bar__label">FY</span>
+    <button class="demo-btn active" data-state="fy2627">2026-27</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Income Sources</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <div class="page-content" id="page-content">
+
+    <div class="t-caption text-muted mb-4">All income sources feeding into FY 2026-27 tax computation. Salary, rent, interest, dividends and F&amp;O business income are taxed at slab rate; capital gains and crypto are taxed separately at special rates.</div>
+
+    <div class="section-title">Taxed at Slab Rate</div>
+
+    <div class="income-row">
+      <div class="income-row__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2"/></svg></div>
+      <div class="income-row__body">
+        <div class="income-row__top"><span class="income-row__name">Salary</span><span class="income-row__amt">₹14,40,000</span></div>
+        <div class="income-row__meta">₹1,20,000/mo gross, before any deductions. Reported on Form 16.</div>
+        <div class="income-row__tags"><span class="itag">Slab Rate</span><span class="itag">Section 15</span></div>
+      </div>
+    </div>
+
+    <div class="income-row">
+      <div class="income-row__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div>
+      <div class="income-row__body">
+        <div class="income-row__top"><span class="income-row__name">Rental Income (let-out property)</span><span class="income-row__amt">₹2,10,000</span></div>
+        <div class="income-row__meta">₹25,000/mo × 12 = ₹3,00,000 gross rent, less 30% standard deduction (Section 24(a)) = ₹90,000. Net ₹2,10,000 taxed as Income from House Property. Distinct from the HDFC home loan, which is on Vikas's self-occupied residence.</div>
+        <div class="income-row__tags"><span class="itag">Slab Rate</span><span class="itag">House Property</span></div>
+      </div>
+    </div>
+
+    <div class="income-row">
+      <div class="income-row__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+      <div class="income-row__body">
+        <div class="income-row__top"><span class="income-row__name">Interest Income</span><span class="income-row__amt">₹60,000</span></div>
+        <div class="income-row__meta">SBI FD ₹46,250 + India Post RD ₹7,643 + 2 Savings accounts ₹6,107 (see Bank Accounts). Savings portion (₹6,107) is eligible for the ₹10,000 80TTA deduction — Old Regime only.</div>
+        <div class="income-row__tags"><span class="itag">Slab Rate</span><span class="itag">Other Sources</span></div>
+      </div>
+    </div>
+
+    <div class="income-row">
+      <div class="income-row__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+      <div class="income-row__body">
+        <div class="income-row__top"><span class="income-row__name">Dividend Income</span><span class="income-row__amt">₹8,500</span></div>
+        <div class="income-row__meta">From equity &amp; mutual fund holdings. Fully taxable at slab rate since dividend-distribution tax was abolished — no separate DDT. TDS @10% applies if a single payer distributes &gt;₹5,000/yr.</div>
+        <div class="income-row__tags"><span class="itag">Slab Rate</span><span class="itag">Other Sources</span></div>
+      </div>
+    </div>
+
+    <div class="income-row">
+      <div class="income-row__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></div>
+      <div class="income-row__body">
+        <div class="income-row__top"><span class="income-row__name">F&amp;O Trading P&amp;L</span><span class="income-row__amt">₹15,750</span></div>
+        <div class="income-row__meta">Net realised P&amp;L from futures &amp; options this FY (see Trade Journal). Taxed as Business Income (non-speculative), not capital gains — reportable under ITR-3, business-expense deductions already netted in.</div>
+        <div class="income-row__tags"><span class="itag">Slab Rate</span><span class="itag">Business Income</span></div>
+      </div>
+    </div>
+
+    <div class="total-strip">
+      <span>Gross Total Income (slab-taxable)</span>
+      <span class="val">₹17,34,250</span>
+    </div>
+
+    <div class="section-title mt-6">Taxed at Special Rate (Regime-Neutral)</div>
+
+    <div class="income-row">
+      <div class="income-row__icon" style="background:var(--grad-success);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+      <div class="income-row__body">
+        <div class="income-row__top"><span class="income-row__name">Capital Gains (Equity + MF)</span><span class="income-row__amt">₹56,000</span></div>
+        <div class="income-row__meta">LTCG ₹40,000 (within ₹1,25,000 exemption, ₹0 tax) + STCG ₹16,000 (@20%, ₹3,200 tax). Full breakdown in <a href="cg-matrix.html" style="color:var(--primary); font-weight:500;">Capital Gains Matrix</a>.</div>
+        <div class="income-row__tags"><span class="itag itag--special">Special Rate</span><span class="itag itag--special">Same in Both Regimes</span></div>
+      </div>
+    </div>
+
+    <div class="income-row">
+      <div class="income-row__icon" style="background:var(--grad-danger);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.5 8.5h3.2a1.8 1.8 0 0 1 0 3.6H9.5m0-3.6v7.2m0-3.6h3.6a1.8 1.8 0 0 1 0 3.6H9.5m0-7.2V7m0 9v1.5"/></svg></div>
+      <div class="income-row__body">
+        <div class="income-row__top"><span class="income-row__name">Crypto (VDA) Trading</span><span class="income-row__amt">₹83,500 net</span></div>
+        <div class="income-row__meta">BTC gain ₹90,000 + ETH loss −₹6,500 (see Trade Journal). The ETH loss cannot offset the BTC gain — each VDA transaction is taxed independently. Taxable VDA income = ₹90,000 @ flat 30% = ₹27,000 tax. 1% TDS already deducted at source (₹10,835 total, see TDS/TCS Credits).</div>
+        <div class="income-row__tags"><span class="itag itag--flat">Flat 30%</span><span class="itag itag--flat">No Loss Set-Off</span></div>
+      </div>
+    </div>
+
+    <div style="margin-top:var(--sp-6); text-align:center;">
+      <a href="index.html" style="font-size:13px; color:var(--primary); font-weight:600; text-decoration:none;">← Back to Tax &amp; Compliance</a>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="../investments/index.html" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+</script>
+</body>
+</html>

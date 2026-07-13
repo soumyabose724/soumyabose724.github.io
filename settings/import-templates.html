@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Import Templates</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .tmpl-note {
+      font-size: 12px; color: var(--text-secondary); line-height: 1.6;
+      margin-bottom: var(--sp-4);
+    }
+    .tmpl-row {
+      display: flex; align-items: center; gap: var(--sp-3);
+      padding: var(--sp-4); background: var(--surface);
+      border: 1px solid var(--border); border-radius: var(--r-lg);
+      margin-bottom: var(--sp-2);
+      animation: item-in var(--dur-med) var(--ease-out) both;
+    }
+    .tmpl-row__icon {
+      width: 42px; height: 42px; border-radius: var(--r-lg); flex-shrink: 0;
+      background: var(--surface-raised); color: var(--text-secondary);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .tmpl-row__info { flex: 1; min-width: 0; }
+    .tmpl-row__name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    .tmpl-row__meta { font-size: 11.5px; color: var(--text-muted); margin-top: 3px; line-height: 1.5; }
+    .tmpl-row__meta .cols {
+      font-family: 'JetBrains Mono', monospace; color: var(--text-secondary);
+    }
+    .tmpl-row__used { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+    .tmpl-delete-btn {
+      width: 36px; height: 36px; border-radius: var(--r-full); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-muted); transition: background var(--dur-fast), color var(--dur-fast);
+    }
+    .tmpl-delete-btn:hover { background: var(--error-light); color: var(--error); }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <div class="demo-bar">
+    <span class="demo-bar__label">Settings</span>
+    <button class="icon-btn" data-theme-toggle style="margin-left:auto;" aria-label="Toggle theme">
+      <span data-theme-icon style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Import Templates</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <div class="page-content" id="page-content">
+
+    <p class="tmpl-note">
+      Saved column mappings for CSV/XLS statement imports. These are the same templates offered inside Transactions → Import — deleting one here removes it from that list too. This action can't be undone.
+    </p>
+
+    <div class="section">
+      <div class="section-title">Saved Templates</div>
+      <div id="tmpl-list"></div>
+    </div>
+
+    <div id="tmpl-empty" class="empty-state" style="display:none;">
+      <div class="empty-state__icon">🗂️</div>
+      <div class="empty-state__title">No Saved Templates</div>
+      <div class="empty-state__body">Column mappings you save while importing bank or credit card statements will appear here.</div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       DELETE TEMPLATE DIALOG
+  ═══════════════════════════════════════════ -->
+  <div class="dialog-backdrop" id="delete-template-backdrop">
+    <div class="dialog">
+      <div class="dialog__header">
+        <div class="dialog__title" id="delete-template-title">Delete this template?</div>
+      </div>
+      <div class="dialog__body">
+        This removes the saved column mapping. You'll need to re-map columns manually next time you import a statement in this format.
+      </div>
+      <div class="dialog__footer">
+        <button class="btn btn--ghost btn--sm" onclick="AG.closeDialog('delete-template')">Cancel</button>
+        <button class="btn btn--danger btn--sm" onclick="confirmDeleteTemplate()">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2"/></svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      <span>Transactions</span>
+    </a>
+    <a href="../investments/index.html" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span>Invest</span>
+    </a>
+    <a href="index.html" class="nav-tab active" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  AG.initBottomNav('profile');
+
+  const TEMPLATES = [
+    {
+      id: 'hdfc-savings', name: 'HDFC Bank Statement', format: 'XLS',
+      cols: 'Date, Narration, Withdrawal Amt, Deposit Amt, Closing Balance',
+      used: 'Last used 5 Jul 2026',
+    },
+    {
+      id: 'icici-cc', name: 'ICICI Credit Card Statement', format: 'CSV',
+      cols: 'Date, Description, Amount, DR/CR',
+      used: 'Last used 28 Jun 2026',
+    },
+    {
+      id: 'generic-upi', name: 'Generic UPI Export', format: 'CSV',
+      cols: 'Txn Date, Payee, Amount, Type',
+      used: 'Last used 12 Jun 2026',
+    },
+  ];
+
+  function rowHtml(t) {
+    return `
+      <div class="tmpl-row" id="tmpl-row-${t.id}">
+        <div class="tmpl-row__icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+        </div>
+        <div class="tmpl-row__info">
+          <div class="tmpl-row__name">${t.name} <span class="chip chip--info">${t.format}</span></div>
+          <div class="tmpl-row__meta"><span class="cols">${t.cols}</span></div>
+          <div class="tmpl-row__used">${t.used}</div>
+        </div>
+        <button class="tmpl-delete-btn" aria-label="Delete ${t.name}" onclick="openDelete('${t.id}')">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+        </button>
+      </div>`;
+  }
+
+  function render() {
+    const list = document.getElementById('tmpl-list');
+    if (TEMPLATES.length === 0) {
+      list.innerHTML = '';
+      document.getElementById('tmpl-empty').style.display = '';
+    } else {
+      list.innerHTML = TEMPLATES.map(rowHtml).join('');
+      document.getElementById('tmpl-empty').style.display = 'none';
+    }
+  }
+  render();
+
+  let pendingDeleteId = null;
+
+  function openDelete(id) {
+    const t = TEMPLATES.find(x => x.id === id);
+    pendingDeleteId = id;
+    document.getElementById('delete-template-title').textContent = 'Delete "' + t.name + '"?';
+    AG.openDialog('delete-template');
+  }
+
+  function confirmDeleteTemplate() {
+    const idx = TEMPLATES.findIndex(x => x.id === pendingDeleteId);
+    if (idx > -1) {
+      const t = TEMPLATES[idx];
+      TEMPLATES.splice(idx, 1);
+      AG.showToast(t.name + ' template deleted', 'warning');
+    }
+    AG.closeDialog('delete-template');
+    render();
+  }
+</script>
+</body>
+</html>

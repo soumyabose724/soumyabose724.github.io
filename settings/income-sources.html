@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Income Sources</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .is-section-label {
+      font-size: 11px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--text-muted);
+      margin: var(--sp-5) 0 var(--sp-3);
+      display: flex; align-items: center; gap: var(--sp-2);
+    }
+    .is-section-label:first-child { margin-top: 0; }
+    .is-section-label::before {
+      content: ''; width: 3px; height: 12px; border-radius: 2px;
+      background: var(--primary); flex-shrink: 0;
+    }
+    .income-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-xl); padding: var(--sp-4);
+      animation: card-in var(--dur-med) var(--ease-out) both;
+      position: relative;
+    }
+    .income-card + .income-card { margin-top: var(--sp-3); }
+    .income-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: var(--sp-3); }
+    .income-icon {
+      width: 40px; height: 40px; border-radius: var(--r-lg);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; flex-shrink: 0;
+    }
+    .income-card-name { flex: 1; font-size: 15px; font-weight: 600; color: var(--text-primary); min-width: 0; }
+    .income-card-actions { display: flex; gap: 4px; flex-shrink: 0; }
+    .icon-action {
+      width: 32px; height: 32px; border-radius: var(--r-full);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-muted); transition: all var(--dur-fast);
+    }
+    .icon-action:hover { background: var(--surface-raised); color: var(--text-primary); }
+    .income-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; }
+    .income-row + .income-row { border-top: 1px solid var(--border); }
+    .income-label { font-size: 12px; color: var(--text-secondary); }
+    .income-value { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+    .income-amount {
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+      font-size: 22px; font-weight: 700; color: var(--success);
+      margin: 4px 0 var(--sp-3);
+    }
+    .total-bar {
+      background: var(--primary-xlight); border: 1.5px solid var(--glass-border);
+      border-radius: var(--r-xl); padding: var(--sp-4) var(--sp-5);
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: var(--sp-5);
+    }
+    .total-label { font-size: 12px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: .05em; }
+    .total-amount { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-size: 20px; font-weight: 700; color: var(--primary); }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">Settings</span>
+    <button class="icon-btn" data-theme-toggle style="margin-left:auto;" aria-label="Toggle theme">
+      <span data-theme-icon style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Income Sources</span>
+    <div class="top-bar__actions">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content" id="page-content">
+
+    <!-- Vikas -->
+    <div class="is-section-label">Vikas Sharma (Self)</div>
+    <div class="income-card">
+      <div class="income-card-header">
+        <div class="income-icon" style="background:var(--grad-primary);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+          </svg>
+        </div>
+        <div style="flex:1; min-width:0;">
+          <div class="income-card-name">TechCorp Monthly Salary</div>
+          <span class="chip chip--locked" style="margin-top:4px;">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/></svg>
+            SALARY
+          </span>
+        </div>
+        <div class="income-card-actions">
+          <button class="icon-action" onclick="AG.openSheet('edit-salary')" aria-label="Edit">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="income-amount">₹1,20,000</div>
+      <div class="income-row">
+        <span class="income-label">Per month</span>
+        <span class="income-value t-mono">₹1,20,000</span>
+      </div>
+      <div class="income-row">
+        <span class="income-label">Routing</span>
+        <span class="income-value">NEXT_MONTH · Credited 1st</span>
+      </div>
+      <div class="income-row">
+        <span class="income-label">Deposit account</span>
+        <span class="income-value">HDFC •••• 4821</span>
+      </div>
+    </div>
+
+    <!-- Property Pune (Rental) -->
+    <div class="income-card" style="animation-delay:45ms;">
+      <div class="income-card-header">
+        <div class="income-icon" style="background:linear-gradient(135deg,#7C3AED,#9F67FF);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+        </div>
+        <div style="flex:1; min-width:0;">
+          <div class="income-card-name">Property, Pune</div>
+          <span class="chip chip--info" style="margin-top:4px;">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+            RENTAL
+          </span>
+        </div>
+        <div class="income-card-actions">
+          <button class="icon-action" onclick="AG.openSheet('edit-rental')" aria-label="Edit">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="icon-action" style="color:var(--error);" onclick="AG.showToast('Property, Pune archived', 'success')" aria-label="Archive">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="income-amount">₹25,000</div>
+      <div class="income-row">
+        <span class="income-label">Per month</span>
+        <span class="income-value t-mono">₹25,000</span>
+      </div>
+      <div class="income-row">
+        <span class="income-label">Routing</span>
+        <span class="income-value">SAME_MONTH · Credited 5th</span>
+      </div>
+      <div class="income-row">
+        <span class="income-label">Deposit account</span>
+        <span class="income-value">ICICI •••• 7756</span>
+      </div>
+    </div>
+
+    <!-- Mother -->
+    <div class="is-section-label">Sunita Sharma (Mother)</div>
+    <div class="income-card" style="animation-delay:90ms;">
+      <div class="income-card-header">
+        <div class="income-icon" style="background:linear-gradient(135deg,#D97706,#F59E0B);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 1 0-16 0"/>
+          </svg>
+        </div>
+        <div style="flex:1; min-width:0;">
+          <div class="income-card-name">SBI Pension</div>
+          <span class="chip chip--info" style="margin-top:4px;">PENSION</span>
+        </div>
+        <div class="income-card-actions">
+          <button class="icon-action" onclick="AG.openSheet('edit-pension')" aria-label="Edit">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="income-amount">₹11,000</div>
+      <div class="income-row">
+        <span class="income-label">Per month</span>
+        <span class="income-value t-mono">₹11,000</span>
+      </div>
+      <div class="income-row">
+        <span class="income-label">Routing</span>
+        <span class="income-value">SAME_MONTH · Credited 5th</span>
+      </div>
+      <div class="income-row">
+        <span class="income-label">Deposit account</span>
+        <span class="income-value">India Post RD •••• 9012</span>
+      </div>
+    </div>
+
+    <div class="income-card" style="animation-delay:135ms;">
+      <div class="income-card-header">
+        <div class="income-icon" style="background:linear-gradient(135deg,#2563EB,#3B82F6);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><line x1="12" y1="10" x2="12" y2="16"/><line x1="9" y1="13" x2="15" y2="13"/>
+          </svg>
+        </div>
+        <div style="flex:1; min-width:0;">
+          <div class="income-card-name">FD &amp; RD Interest</div>
+          <span class="chip chip--info" style="margin-top:4px;">OTHER</span>
+        </div>
+        <div class="income-card-actions">
+          <button class="icon-action" onclick="AG.openSheet('edit-interest')" aria-label="Edit">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="income-amount">₹1,800</div>
+      <div class="income-row">
+        <span class="income-label">Frequency</span>
+        <span class="income-value">Quarterly (avg./mo shown)</span>
+      </div>
+      <div class="income-row">
+        <span class="income-label">Routing</span>
+        <span class="income-value">SAME_MONTH · Credited 1st</span>
+      </div>
+      <div class="income-row">
+        <span class="income-label">Source</span>
+        <span class="income-value">SBI FD &amp; India Post RD</span>
+      </div>
+    </div>
+
+    <!-- Add income source -->
+    <button class="btn btn--secondary btn--full" style="margin-top:var(--sp-4);" onclick="AG.openSheet('add-income')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Add Income Source
+    </button>
+
+    <!-- Total -->
+    <div class="total-bar">
+      <div>
+        <div class="total-label">Monthly Total</div>
+        <div style="font-size:12px; color:var(--primary); margin-top:2px; opacity:.8;">4 active sources</div>
+      </div>
+      <div class="total-amount">₹1,57,800</div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       ADD INCOME SHEET
+  ═══════════════════════════════════════════ -->
+  <div class="sheet-backdrop" id="add-income-backdrop"></div>
+  <div class="sheet" id="add-income">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <span class="sheet__title">Add Income Source</span>
+      <button class="sheet__close" onclick="AG.closeSheet('add-income')" aria-label="Close">✕</button>
+    </div>
+    <div class="sheet__body">
+      <div class="form-group">
+        <label class="form-label">Source Name</label>
+        <input class="form-input" type="text" placeholder="e.g. Freelance, Dividend">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Family Member</label>
+        <select class="form-select">
+          <option>Vikas Sharma (Self)</option>
+          <option>Priya Sharma</option>
+          <option>Sunita Sharma</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Income Type</label>
+        <select class="form-select">
+          <option>Salary</option>
+          <option>Freelance</option>
+          <option>Business</option>
+          <option>Rental</option>
+          <option>Pension</option>
+          <option>Dividend</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Monthly Amount (₹)</label>
+        <input class="form-input" type="number" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Credited On (day of month)</label>
+        <input class="form-input" type="number" placeholder="1" min="1" max="28">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Routing</label>
+        <select class="form-select">
+          <option>SAME_MONTH</option>
+          <option>NEXT_MONTH</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Deposit Account</label>
+        <select class="form-select">
+          <option>HDFC •••• 4821</option>
+          <option>ICICI •••• 7756</option>
+          <option>Kotak •••• 2214</option>
+        </select>
+      </div>
+      <button class="btn btn--primary btn--full" style="margin-top:var(--sp-4);" onclick="AG.closeSheet('add-income');AG.showToast('Income source added', 'success')">Save</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       EDIT INCOME SHEETS
+  ═══════════════════════════════════════════ -->
+  <div class="sheet-backdrop" id="edit-salary-backdrop"></div>
+  <div class="sheet" id="edit-salary">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <span class="sheet__title">Edit Income Source</span>
+      <button class="sheet__close" onclick="AG.closeSheet('edit-salary')" aria-label="Close">✕</button>
+    </div>
+    <div class="sheet__body">
+      <div class="form-group">
+        <label class="form-label">Source Name</label>
+        <input class="form-input" type="text" value="TechCorp Monthly Salary">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Monthly Amount (₹)</label>
+        <input class="form-input" type="number" value="120000">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Credited On (day of month)</label>
+        <input class="form-input" type="number" value="1" min="1" max="28">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Routing</label>
+        <select class="form-select">
+          <option>SAME_MONTH</option>
+          <option selected>NEXT_MONTH</option>
+        </select>
+      </div>
+      <button class="btn btn--primary btn--full" style="margin-top:var(--sp-4);" onclick="AG.closeSheet('edit-salary');AG.showToast('Income updated', 'success')">Save</button>
+    </div>
+  </div>
+
+  <div class="sheet-backdrop" id="edit-rental-backdrop"></div>
+  <div class="sheet" id="edit-rental">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <span class="sheet__title">Edit Income Source</span>
+      <button class="sheet__close" onclick="AG.closeSheet('edit-rental')" aria-label="Close">✕</button>
+    </div>
+    <div class="sheet__body">
+      <div class="form-group">
+        <label class="form-label">Source Name</label>
+        <input class="form-input" type="text" value="Property, Pune">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Monthly Amount (₹)</label>
+        <input class="form-input" type="number" value="25000">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Credited On (day of month)</label>
+        <input class="form-input" type="number" value="5" min="1" max="28">
+      </div>
+      <button class="btn btn--primary btn--full" style="margin-top:var(--sp-4);" onclick="AG.closeSheet('edit-rental');AG.showToast('Income updated', 'success')">Save</button>
+    </div>
+  </div>
+
+  <div class="sheet-backdrop" id="edit-pension-backdrop"></div>
+  <div class="sheet" id="edit-pension">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <span class="sheet__title">Edit Income Source</span>
+      <button class="sheet__close" onclick="AG.closeSheet('edit-pension')" aria-label="Close">✕</button>
+    </div>
+    <div class="sheet__body">
+      <div class="form-group">
+        <label class="form-label">Source Name</label>
+        <input class="form-input" type="text" value="SBI Pension">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Monthly Amount (₹)</label>
+        <input class="form-input" type="number" value="11000">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Credited On (day of month)</label>
+        <input class="form-input" type="number" value="5" min="1" max="28">
+      </div>
+      <button class="btn btn--primary btn--full" style="margin-top:var(--sp-4);" onclick="AG.closeSheet('edit-pension');AG.showToast('Income updated', 'success')">Save</button>
+    </div>
+  </div>
+
+  <div class="sheet-backdrop" id="edit-interest-backdrop"></div>
+  <div class="sheet" id="edit-interest">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <span class="sheet__title">Edit Income Source</span>
+      <button class="sheet__close" onclick="AG.closeSheet('edit-interest')" aria-label="Close">✕</button>
+    </div>
+    <div class="sheet__body">
+      <div class="form-group">
+        <label class="form-label">Source Name</label>
+        <input class="form-input" type="text" value="FD & RD Interest">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Frequency</label>
+        <select class="form-select">
+          <option>Monthly</option>
+          <option selected>Quarterly</option>
+          <option>Annual</option>
+        </select>
+      </div>
+      <button class="btn btn--primary btn--full" style="margin-top:var(--sp-4);" onclick="AG.closeSheet('edit-interest');AG.showToast('Income updated', 'success')">Save</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="../investments/index.html" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="index.html" class="nav-tab active" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    AG.initBottomNav('profile');
+  });
+</script>
+</body>
+</html>

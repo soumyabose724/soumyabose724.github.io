@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Notifications</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* ── Mark all read action ── */
+    .notif-header-row {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: var(--sp-2);
+    }
+    .mark-all-link {
+      font-size: 13px; color: var(--primary); font-weight: 600;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .mark-all-link:disabled, .mark-all-link.disabled { color: var(--text-muted); cursor: default; }
+
+    /* ── Group heading ── */
+    .notif-group-heading {
+      font-size: 11px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--text-muted);
+      padding: var(--sp-4) 0 var(--sp-2);
+      display: flex; align-items: center; gap: var(--sp-2);
+    }
+    .notif-group-heading::before {
+      content: ''; width: 3px; height: 12px; border-radius: 2px;
+      background: var(--primary); flex-shrink: 0;
+    }
+    .notif-group:first-child .notif-group-heading { padding-top: 0; }
+
+    /* ── Notification row ── */
+    .notif-row {
+      display: flex; align-items: flex-start; gap: var(--sp-3);
+      padding: var(--sp-3) var(--sp-1);
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      touch-action: pan-y;
+      transition: background var(--dur-fast), transform var(--dur-fast);
+      animation: item-in var(--dur-med) var(--ease-out) both;
+    }
+    .notif-row:last-child { border-bottom: none; }
+    .notif-row.dismissing { opacity: 0; transform: translateX(-100%); }
+    .notif-row__icon {
+      width: 38px; height: 38px; border-radius: var(--r-lg); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; color: #fff;
+    }
+    .notif-row__body { flex: 1; min-width: 0; }
+    .notif-row__top { display: flex; align-items: center; gap: 6px; }
+    .notif-row__dot {
+      width: 8px; height: 8px; border-radius: 50%; background: var(--primary);
+      flex-shrink: 0; display: none;
+    }
+    .notif-row.unread .notif-row__dot { display: inline-block; }
+    .notif-row__msg {
+      font-size: 13px; color: var(--text-secondary); line-height: 1.4;
+    }
+    .notif-row.unread .notif-row__msg { font-weight: 700; color: var(--text-primary); }
+    .notif-row__time { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+    .notif-row__dismiss {
+      width: 28px; height: 28px; border-radius: var(--r-full); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-muted); transition: background var(--dur-fast), color var(--dur-fast);
+      margin-top: 2px;
+    }
+    .notif-row__dismiss:hover { background: var(--error-light); color: var(--error); }
+
+    /* ── Empty state ── */
+    .notif-empty { display: none; }
+    .notif-empty.visible { display: flex; }
+
+    /* ── Email prefs footer link ── */
+    .email-prefs-link {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      margin-top: var(--sp-6); padding: var(--sp-4);
+      font-size: 13px; color: var(--primary); font-weight: 600;
+      background: var(--primary-xlight); border: 1px solid var(--primary-light);
+      border-radius: var(--r-lg); text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- Demo Bar -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">Notifications</span>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <a href="../dashboard/index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Notifications</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- Page Content -->
+  <div class="page-content">
+
+    <div class="notif-header-row">
+      <div class="section-title" style="margin-bottom:0;" id="unread-summary">3 unread</div>
+      <span class="mark-all-link" id="mark-all-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        Mark All Read
+      </span>
+    </div>
+
+    <div id="notif-groups"></div>
+
+    <div class="empty-state notif-empty" id="notif-empty">
+      <div class="empty-state__icon">🔔</div>
+      <div class="empty-state__title">You're All Caught Up</div>
+      <div class="empty-state__body">No notifications right now. We'll let you know about budget alerts, bills, and more here.</div>
+    </div>
+
+    <a href="../settings/notifications.html" class="email-prefs-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22 6 12 13 2 6"/></svg>
+      Email Notification Preferences
+    </a>
+
+  </div><!-- /page-content -->
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="../investments/index.html" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ── Theme toggle (matches other pages) ── */
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+
+  /* ── Notification data (grouped, 3 unread — matches dashboard's "3 new alerts" badge) ── */
+  const GROUPS = ['Budget Alerts', 'Bill Reminders', 'ML Suggestions', 'Tax Deadlines', 'System'];
+
+  let NOTIFS = [
+    { id: 1,  group: 'Budget Alerts',  icon: 'dining',  bg: 'linear-gradient(135deg,#D97706,#F59E0B)', msg: 'Dining Out envelope is 75% spent — ₹1,500 remaining.', time: '2 hours ago',  unread: true },
+    { id: 2,  group: 'Budget Alerts',  icon: 'mobile',  bg: 'var(--grad-danger)',                       msg: 'Mobile &amp; Internet envelope is nearing its limit (93%).', time: 'Yesterday',    unread: false },
+    { id: 3,  group: 'Budget Alerts',  icon: 'lock',    bg: 'var(--grad-primary)',                      msg: 'June 2026 budget locked successfully.',                 time: '3 days ago',   unread: false },
+    { id: 4,  group: 'Bill Reminders', icon: 'bolt',    bg: 'var(--grad-danger)',                       msg: 'Electricity Bill (BESCOM) is overdue — ₹3,240.',        time: '6 hours ago',  unread: true },
+    { id: 5,  group: 'Bill Reminders', icon: 'home',    bg: 'var(--grad-primary)',                      msg: 'HDFC Home Loan EMI due 1 Jul 2026 — ₹38,500.',          time: '1 day ago',    unread: false },
+    { id: 6,  group: 'ML Suggestions', icon: 'sparkle', bg: 'linear-gradient(135deg,#8B5CF6,#A78BFA)',  msg: 'New recurring merchant detected: Swiggy. Categorize as Food &amp; Dining?', time: 'Yesterday', unread: false },
+    { id: 7,  group: 'ML Suggestions', icon: 'trend',   bg: 'var(--grad-success)',                      msg: 'Your Groceries spending is trending 12% lower than last month — nice!', time: '4 days ago', unread: false },
+    { id: 8,  group: 'Tax Deadlines',  icon: 'tax',     bg: 'linear-gradient(135deg,#2563EB,#3B82F6)',  msg: 'Advance Tax (Q1, FY 2026-27) was due 15 Jun 2026.',      time: '1 week ago',   unread: false },
+    { id: 9,  group: 'Tax Deadlines',  icon: 'pan',     bg: 'linear-gradient(135deg,#2563EB,#3B82F6)',  msg: 'Reminder: link your PAN with Aadhaar before the deadline.', time: '2 weeks ago', unread: false },
+    { id: 10, group: 'System',        icon: 'cloud',   bg: 'var(--grad-primary)',                      msg: 'Google Drive backup completed successfully.',           time: '3 hours ago',  unread: true },
+  ];
+
+  const ICONS = {
+    dining:  '<path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/>',
+    mobile:  '<rect x="7" y="2" width="10" height="20" rx="2"/><line x1="11" y1="18" x2="13" y2="18"/>',
+    lock:    '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+    bolt:    '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+    home:    '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+    sparkle: '<path d="M12 2l1.8 5.4L19 9l-5.2 1.6L12 16l-1.8-5.4L5 9l5.2-1.6L12 2z"/>',
+    trend:   '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
+    tax:     '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/>',
+    pan:     '<rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>',
+    cloud:   '<path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>',
+  };
+
+  function updateUnreadSummary() {
+    const unreadCount = NOTIFS.filter(n => n.unread).length;
+    document.getElementById('unread-summary').textContent = unreadCount === 0 ? 'All caught up' : `${unreadCount} unread`;
+    const markAll = document.getElementById('mark-all-link');
+    markAll.classList.toggle('disabled', unreadCount === 0);
+  }
+
+  function rowHtml(n) {
+    return `
+      <div class="notif-row${n.unread ? ' unread' : ''}" id="notif-${n.id}" data-id="${n.id}">
+        <div class="notif-row__icon" style="background:${n.bg};">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${ICONS[n.icon]}</svg>
+        </div>
+        <div class="notif-row__body">
+          <div class="notif-row__top">
+            <span class="notif-row__dot"></span>
+            <span class="notif-row__msg">${n.msg}</span>
+          </div>
+          <div class="notif-row__time">${n.time}</div>
+        </div>
+        <button class="notif-row__dismiss" aria-label="Dismiss" onclick="dismissNotif(${n.id})">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>`;
+  }
+
+  function render() {
+    const wrap = document.getElementById('notif-groups');
+    const present = GROUPS.filter(g => NOTIFS.some(n => n.group === g));
+    if (present.length === 0) {
+      wrap.innerHTML = '';
+      document.getElementById('notif-empty').classList.add('visible');
+    } else {
+      document.getElementById('notif-empty').classList.remove('visible');
+      wrap.innerHTML = present.map(g => `
+        <div class="notif-group">
+          <div class="notif-group-heading">${g}</div>
+          ${NOTIFS.filter(n => n.group === g).map(rowHtml).join('')}
+        </div>`).join('');
+    }
+    updateUnreadSummary();
+    wireSwipe();
+  }
+
+  function dismissNotif(id) {
+    const el = document.getElementById('notif-' + id);
+    if (el) {
+      el.classList.add('dismissing');
+      setTimeout(() => {
+        NOTIFS = NOTIFS.filter(n => n.id !== id);
+        render();
+      }, 180);
+    }
+  }
+  window.dismissNotif = dismissNotif;
+
+  document.getElementById('mark-all-link').addEventListener('click', () => {
+    NOTIFS.forEach(n => n.unread = false);
+    render();
+    AG.showToast('All notifications marked as read', 'success');
+  });
+
+  /* ── Lightweight swipe-to-dismiss ── */
+  function wireSwipe() {
+    document.querySelectorAll('.notif-row').forEach(row => {
+      let startX = 0, currentX = 0, dragging = false;
+      row.addEventListener('pointerdown', (e) => {
+        dragging = true; startX = e.clientX; row.style.transition = 'none';
+      });
+      row.addEventListener('pointermove', (e) => {
+        if (!dragging) return;
+        currentX = e.clientX - startX;
+        if (currentX < 0) row.style.transform = `translateX(${currentX}px)`;
+      });
+      function endDrag() {
+        if (!dragging) return;
+        dragging = false;
+        row.style.transition = '';
+        if (currentX < -80) {
+          dismissNotif(Number(row.dataset.id));
+        } else {
+          row.style.transform = '';
+        }
+        currentX = 0;
+      }
+      row.addEventListener('pointerup', endDrag);
+      row.addEventListener('pointerleave', endDrag);
+    });
+  }
+
+  render();
+</script>
+</body>
+</html>

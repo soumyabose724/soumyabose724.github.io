@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — About</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .about-hero {
+      display: flex; flex-direction: column; align-items: center;
+      text-align: center; padding: var(--sp-6) var(--sp-4) var(--sp-4);
+    }
+    .about-hero__logo {
+      width: 64px; height: 64px; border-radius: var(--r-xl);
+      background: var(--grad-primary); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 8px 24px rgba(13,148,136,.32);
+      margin-bottom: var(--sp-4);
+    }
+    .about-hero__name { font-size: 20px; font-weight: 700; color: var(--text-primary); }
+    .about-hero__version {
+      font-size: 13px; color: var(--text-muted); margin-top: 4px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .about-hero__build { font-size: 11px; color: var(--text-muted); margin-top: 8px; }
+
+    .lic-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: var(--sp-2) var(--sp-4);
+    }
+    .lic-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: var(--sp-3) 0; border-bottom: 1px solid var(--border);
+    }
+    .lic-row:last-child { border-bottom: none; }
+    .lic-name { font-size: 13.5px; font-weight: 600; color: var(--text-primary); }
+    .lic-role { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .lic-badge {
+      font-size: 10.5px; font-weight: 700; color: var(--text-secondary);
+      background: var(--surface-raised); border: 1px solid var(--border);
+      padding: 2px 8px; border-radius: var(--r-full); flex-shrink: 0;
+    }
+
+    .disclaimer-card {
+      display: flex; align-items: flex-start; gap: var(--sp-3);
+      background: var(--warning-light); border: 1px solid rgba(245,158,11,.32);
+      border-radius: var(--r-lg); padding: var(--sp-4);
+      font-size: 12.5px; color: var(--text-secondary); line-height: 1.65;
+    }
+    .disclaimer-card svg { color: var(--warning); flex-shrink: 0; margin-top: 2px; }
+    .disclaimer-card strong { color: var(--text-primary); }
+    .disclaimer-card + .disclaimer-card { margin-top: var(--sp-2); }
+
+    .about-links {
+      display: flex; flex-direction: column;
+    }
+    .about-link-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: var(--sp-4) 0; border-bottom: 1px solid var(--border);
+      color: var(--text-primary); font-size: 14px; font-weight: 500;
+    }
+    .about-link-row:last-child { border-bottom: none; }
+    .about-link-row svg:last-child { color: var(--text-muted); }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <div class="demo-bar">
+    <span class="demo-bar__label">Settings</span>
+    <button class="icon-btn" data-theme-toggle style="margin-left:auto;" aria-label="Toggle theme">
+      <span data-theme-icon style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">About ArthaGrid</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <div class="page-content" id="page-content">
+
+    <div class="about-hero">
+      <div class="about-hero__logo">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+      </div>
+      <div class="about-hero__name">ArthaGrid</div>
+      <div class="about-hero__version">v0.1.0-prototype</div>
+      <div class="about-hero__build">Build 2026.07.13 · Static HTML prototype — not a production build</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Regulatory &amp; Advisory Disclaimers</div>
+      <div class="disclaimer-card">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div><strong>Not investment advice.</strong> ArthaGrid is a personal finance tracking tool, not a SEBI-registered investment advisor. Portfolio views, XIRR, and goal projections are for tracking purposes only.</div>
+      </div>
+      <div class="disclaimer-card">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div><strong>Tax figures are illustrative.</strong> Slabs, deduction limits, and TDS thresholds shown in-app are for planning only — always consult a Chartered Accountant before filing.</div>
+      </div>
+      <div class="disclaimer-card">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div><strong>Insurance &amp; loan data is for tracking only.</strong> ArthaGrid does not sell, underwrite, or recommend specific policies or loan products.</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Licenses &amp; Attributions</div>
+      <div class="lic-card">
+        <div class="lic-row">
+          <div>
+            <div class="lic-name">Inter</div>
+            <div class="lic-role">UI typeface</div>
+          </div>
+          <span class="lic-badge">SIL OFL 1.1</span>
+        </div>
+        <div class="lic-row">
+          <div>
+            <div class="lic-name">JetBrains Mono</div>
+            <div class="lic-role">Monospace / amount typeface</div>
+          </div>
+          <span class="lic-badge">SIL OFL 1.1</span>
+        </div>
+        <div class="lic-row">
+          <div>
+            <div class="lic-name">Flutter</div>
+            <div class="lic-role">Mobile app framework</div>
+          </div>
+          <span class="lic-badge">BSD-3-Clause</span>
+        </div>
+        <div class="lic-row">
+          <div>
+            <div class="lic-name">Drift</div>
+            <div class="lic-role">On-device SQLite ORM</div>
+          </div>
+          <span class="lic-badge">MIT</span>
+        </div>
+        <div class="lic-row">
+          <div>
+            <div class="lic-name">Riverpod</div>
+            <div class="lic-role">State management</div>
+          </div>
+          <span class="lic-badge">MIT</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">More</div>
+      <div class="lic-card">
+        <div class="about-links">
+          <a href="#" class="about-link-row" onclick="AG.showToast('Privacy policy — coming soon', 'info'); return false;">
+            Privacy Policy
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+          <a href="#" class="about-link-row" onclick="AG.showToast('Terms of use — coming soon', 'info'); return false;">
+            Terms of Use
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+          <a href="#" class="about-link-row" onclick="AG.showToast('Open-source notices — coming soon', 'info'); return false;">
+            Open-Source Notices
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2"/></svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      <span>Transactions</span>
+    </a>
+    <a href="../investments/index.html" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span>Invest</span>
+    </a>
+    <a href="index.html" class="nav-tab active" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  AG.initBottomNav('profile');
+</script>
+</body>
+</html>
