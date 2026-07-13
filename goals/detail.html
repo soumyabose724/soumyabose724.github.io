@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Child's Education Goal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* ── Goal hero ── */
+    .goal-hero__amounts { display: flex; justify-content: space-between; align-items: baseline; margin: var(--sp-3) 0 var(--sp-2); }
+    .goal-hero__current { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-size: 30px; font-weight: 700; }
+    .goal-hero__target { font-size: 13px; color: var(--text-secondary); }
+    .goal-hero__meta { font-size: 12px; color: var(--text-muted); margin-top: var(--sp-2); }
+
+    /* ── Probability callout ── */
+    .prob-callout { text-align: center; padding: var(--sp-3) 0; }
+    .prob-callout__ring-wrap { display: flex; justify-content: center; margin-bottom: var(--sp-3); }
+    .prob-callout__value {
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+      font-size: 15px; font-weight: 700;
+    }
+    .prob-callout__headline { font-size: 15px; font-weight: 600; color: var(--text-primary); margin-bottom: var(--sp-2); }
+    .prob-callout__body { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+    .prob-callout__scenario-chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+      padding: 3px 9px; border-radius: var(--r-full); margin-bottom: var(--sp-3);
+    }
+    .prob-callout__scenario-chip--steady { background: var(--success-light); color: var(--success); }
+    .prob-callout__scenario-chip--volatile { background: var(--warning-light); color: var(--warning); }
+
+    /* ── Glide path ── */
+    .glide-path__bar { display: flex; height: 40px; border-radius: var(--r-md); overflow: hidden; margin-bottom: var(--sp-2); }
+    .glide-path__seg { display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; }
+    .glide-path__labels { display: flex; font-size: 10px; color: var(--text-muted); margin-bottom: var(--sp-4); }
+    .glide-path__labels span { text-align: center; }
+    .glide-path__legend { display: flex; gap: var(--sp-4); font-size: 12px; color: var(--text-secondary); }
+    .glide-path__legend-item { display: flex; align-items: center; gap: 6px; }
+    .glide-path__legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+
+    /* ── Required SIP card ── */
+    .sip-card__row { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--sp-4); }
+    .sip-card__label { font-size: 12px; color: var(--text-secondary); }
+    .sip-card__val { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-size: 24px; font-weight: 700; color: var(--primary); }
+
+    /* ── Increase SIP sheet ── */
+    .slider-display {
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+      font-size: 32px; font-weight: 700; text-align: center; color: var(--text-primary);
+      margin-bottom: var(--sp-2);
+    }
+    .slider-wrap { margin: var(--sp-4) 0 var(--sp-2); }
+    .slider-wrap input[type="range"] {
+      width: 100%; height: 6px; border-radius: 99px; background: var(--border);
+      appearance: none; -webkit-appearance: none; accent-color: var(--primary);
+    }
+    .slider-wrap input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%;
+      background: var(--primary); border: 3px solid #fff; box-shadow: var(--sh-md); cursor: pointer;
+    }
+    .slider-range-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: var(--sp-5); }
+    .sheet-prob-preview {
+      background: var(--surface-raised); border-radius: var(--r-lg);
+      padding: var(--sp-4); text-align: center; margin-bottom: var(--sp-2);
+    }
+    .sheet-prob-preview__val { font-size: 30px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+    .sheet-prob-preview__label { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+    .sheet-prob-preview__delta { font-size: 12px; font-weight: 600; margin-top: var(--sp-2); }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">Scenario</span>
+    <button class="demo-btn active" data-state="steady">Steady Market</button>
+    <button class="demo-btn" data-state="volatile">Volatile Market</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Child's Education</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content" id="page-content">
+
+    <!-- Goal Hero -->
+    <div class="glass-card glass-card--hero">
+      <div class="card-header" style="margin-bottom:var(--sp-2);">
+        <div class="card-icon" style="background:#EDE9FE; font-size:20px;">🎓</div>
+        <div class="card-title">Child's Education — Aarav</div>
+        <span class="chip chip--on-track">✓ ON TRACK</span>
+      </div>
+      <div class="goal-hero__amounts">
+        <span class="goal-hero__current gradient-text">₹4,20,000</span>
+        <span class="goal-hero__target">of ₹25,00,000 target</span>
+      </div>
+      <div class="progress-bar progress-bar--thick">
+        <div class="progress-bar__fill" style="width:16.8%;"></div>
+      </div>
+      <div class="goal-hero__meta">16.8% saved · Target by 2038 (Aarav, age 18) · ~12 years to go</div>
+    </div>
+
+    <!-- Monte Carlo Success Probability -->
+    <div class="section-title" style="margin-top:var(--sp-6);">Success Probability</div>
+    <div class="glass-card">
+      <div class="prob-callout">
+        <span class="prob-callout__scenario-chip prob-callout__scenario-chip--steady" id="scenario-chip">Steady Market Assumption</span>
+        <div class="prob-callout__ring-wrap">
+          <div class="progress-ring" id="prob-ring">
+            <svg width="112" height="112" viewBox="0 0 112 112">
+              <circle class="progress-ring__track"></circle>
+              <circle class="progress-ring__fill" id="prob-ring-fill"></circle>
+            </svg>
+            <div class="progress-ring__label" id="prob-ring-label" style="font-size:26px;">82%</div>
+          </div>
+        </div>
+        <div class="prob-callout__headline" id="prob-headline">82% probability of reaching ₹25,00,000 by 2038 at your current ₹8,500/mo SIP</div>
+        <div class="prob-callout__body">
+          This runs a Monte Carlo simulation — thousands of hypothetical market paths using historical equity/debt volatility and return ranges — and counts how many of them reach your target by the goal date. It is a probability estimate, not a guarantee; actual markets may behave better or worse than any single simulated path.
+        </div>
+      </div>
+    </div>
+
+    <!-- Glide Path -->
+    <div class="section-title" style="margin-top:var(--sp-6);">Equity Glide Path</div>
+    <div class="glass-card glass-card--compact">
+      <div style="font-size:13px; color:var(--text-secondary); margin-bottom:var(--sp-4);">
+        Equity allocation automatically steps down as 2038 approaches — reducing sequence-of-returns risk near the goal date.
+      </div>
+      <div class="glide-path__bar">
+        <div class="glide-path__seg" style="width:61.5%; background:var(--grad-primary);">80% Equity</div>
+        <div class="glide-path__seg" style="width:15.4%; background:linear-gradient(135deg,#0EA5A0,#5EEAD4); color:#0F766E;">60/40</div>
+        <div class="glide-path__seg" style="width:7.7%; background:linear-gradient(135deg,#D97706,#F59E0B);">40/60</div>
+        <div class="glide-path__seg" style="width:15.4%; background:var(--grad-danger);">80% Debt</div>
+      </div>
+      <div class="glide-path__labels">
+        <span style="width:61.5%;">2026 – 2033 (Yrs 1–8)</span>
+        <span style="width:15.4%;">2034–35</span>
+        <span style="width:7.7%;">2036</span>
+        <span style="width:15.4%;">2037–38</span>
+      </div>
+      <div class="glide-path__legend">
+        <div class="glide-path__legend-item"><span class="glide-path__legend-dot" style="background:var(--primary);"></span>Equity</div>
+        <div class="glide-path__legend-item"><span class="glide-path__legend-dot" style="background:var(--error);"></span>Debt</div>
+      </div>
+    </div>
+
+    <!-- Required SIP -->
+    <div class="section-title" style="margin-top:var(--sp-6);">Required SIP</div>
+    <div class="glass-card glass-card--compact">
+      <div class="sip-card__row">
+        <div>
+          <div class="sip-card__label">To reach ₹25,00,000 by 2038</div>
+          <div class="sip-card__val" id="required-sip-val">₹8,500/mo</div>
+        </div>
+        <button class="btn btn--primary btn--sm" onclick="AG.openSheet('increase-sip-sheet')">Increase SIP</button>
+      </div>
+      <div style="font-size:12px; color:var(--text-muted);">You are currently contributing exactly the required SIP. Increasing it raises your success probability and shortens the runway if markets underperform.</div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════
+       INCREASE SIP SHEET
+  ═══════════════════════════════════════════ -->
+  <div class="sheet-backdrop" id="increase-sip-sheet-backdrop"></div>
+  <div class="sheet" id="increase-sip-sheet">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <span class="sheet__title">Increase Monthly SIP</span>
+      <button class="sheet__close" onclick="AG.closeSheet('increase-sip-sheet')" aria-label="Close">✕</button>
+    </div>
+    <div class="sheet__body">
+      <div class="slider-display" id="slider-display">₹8,500/mo</div>
+      <div class="slider-wrap">
+        <input type="range" id="sip-slider" min="5000" max="25000" step="500" value="8500">
+      </div>
+      <div class="slider-range-labels"><span>₹5,000</span><span>₹25,000</span></div>
+
+      <div class="sheet-prob-preview">
+        <div class="sheet-prob-preview__val" id="preview-prob" style="color:var(--success);">82%</div>
+        <div class="sheet-prob-preview__label">probability of reaching ₹25,00,000 by 2038</div>
+        <div class="sheet-prob-preview__delta" id="preview-delta" style="color:var(--text-muted);">Same as your current SIP</div>
+      </div>
+      <div class="form-helper">Recalculated live from a simplified scenario model for this prototype — the production app re-runs the full Monte Carlo engine on-device.</div>
+    </div>
+    <div class="sheet__footer">
+      <button class="btn btn--ghost" onclick="AG.closeSheet('increase-sip-sheet')">Cancel</button>
+      <button class="btn btn--primary" onclick="confirmSip()">Update SIP</button>
+    </div>
+  </div>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ── Theme toggle (matches other pages) ── */
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+
+  const REQUIRED_SIP = 8500;
+  const BASE_PROB = { steady: 82, volatile: 61 };
+  let scenario = 'steady';
+
+  function calcProb(sipRupees, sc) {
+    const base = BASE_PROB[sc];
+    const diff = sipRupees - REQUIRED_SIP;
+    let prob = base + (diff / 1000) * 3;
+    return Math.round(Math.max(30, Math.min(97, prob)));
+  }
+
+  function renderRing(pct) {
+    AG.animateRing(document.getElementById('prob-ring'), pct, 44);
+    document.getElementById('prob-ring-label').textContent = pct + '%';
+  }
+
+  function applyScenario(sc) {
+    scenario = sc;
+    const pct = calcProb(REQUIRED_SIP, sc);
+    document.getElementById('scenario-chip').textContent = sc === 'steady' ? 'Steady Market Assumption' : 'Volatile Market Assumption (Stress Test)';
+    document.getElementById('scenario-chip').className = 'prob-callout__scenario-chip ' + (sc === 'steady' ? 'prob-callout__scenario-chip--steady' : 'prob-callout__scenario-chip--volatile');
+    document.getElementById('prob-headline').textContent = `${pct}% probability of reaching ₹25,00,000 by 2038 at your current ₹8,500/mo SIP`;
+    renderRing(pct);
+    // refresh sheet preview against the currently selected slider value too
+    updateSliderPreview();
+  }
+
+  function updateSliderPreview() {
+    const slider = document.getElementById('sip-slider');
+    const sip = parseInt(slider.value, 10);
+    document.getElementById('slider-display').textContent = AG.formatINR(sip * 100) + '/mo';
+    const pct = calcProb(sip, scenario);
+    const preview = document.getElementById('preview-prob');
+    preview.textContent = pct + '%';
+    preview.style.color = pct >= 75 ? 'var(--success)' : (pct >= 55 ? 'var(--warning)' : 'var(--error)');
+    const delta = document.getElementById('preview-delta');
+    const diff = sip - REQUIRED_SIP;
+    if (diff === 0) {
+      delta.textContent = 'Same as your current SIP';
+      delta.style.color = 'var(--text-muted)';
+    } else if (diff > 0) {
+      delta.textContent = `+${AG.formatINR(diff * 100)}/mo above required`;
+      delta.style.color = 'var(--success)';
+    } else {
+      delta.textContent = `${AG.formatINR(diff * 100)}/mo below required`;
+      delta.style.color = 'var(--error)';
+    }
+  }
+
+  document.getElementById('sip-slider').addEventListener('input', updateSliderPreview);
+
+  function confirmSip() {
+    const sip = parseInt(document.getElementById('sip-slider').value, 10);
+    AG.closeSheet('increase-sip-sheet');
+    AG.showToast(`SIP updated to ${AG.formatINR(sip * 100)}/mo ✓`, 'success');
+  }
+
+  /* Init */
+  renderRing(BASE_PROB.steady);
+  updateSliderPreview();
+
+  /* ── Demo bar: Steady / Volatile market scenario ── */
+  AG.initDemoBar({
+    steady: () => applyScenario('steady'),
+    volatile: () => applyScenario('volatile'),
+  });
+</script>
+</body>
+</html>

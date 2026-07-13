@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — LRS Compliance</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .stat-row { display: flex; gap: var(--sp-3); margin-top: var(--sp-4); }
+    .stat-col { flex: 1; min-width: 0; }
+    .stat-col__label { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px; }
+    .stat-col__value { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-size: 17px; font-weight: 700; color: var(--text-primary); }
+
+    .callout-note { font-size: 12.5px; line-height: 1.6; color: var(--text-secondary); margin-top: var(--sp-3); }
+    .callout-note strong { color: var(--text-primary); }
+
+    /* ── Gauge ── */
+    .gauge-wrap { margin-top: var(--sp-2); }
+    .gauge-labels { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: var(--sp-2); }
+    .gauge-used { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 700; color: var(--text-primary); }
+    .gauge-limit { font-size: 12px; color: var(--text-muted); }
+    .gauge-pct-badge {
+      font-size: 12px; font-weight: 700; padding: 2px 10px; border-radius: var(--r-full);
+    }
+    .gauge-pct-badge.ok { background: var(--success-light); color: var(--success); }
+    .gauge-pct-badge.warn { background: var(--warning-light); color: var(--warning); }
+
+    /* ── Purpose breakdown rows ── */
+    .purpose-row {
+      display: flex; align-items: center; gap: var(--sp-3);
+      padding: var(--sp-3) 0; border-bottom: 1px solid var(--border);
+    }
+    .purpose-row:last-child { border-bottom: none; }
+    .purpose-row__icon {
+      width: 38px; height: 38px; border-radius: var(--r-lg); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; color: #fff;
+    }
+    .purpose-row__info { flex: 1; min-width: 0; }
+    .purpose-row__name { font-size: 13.5px; font-weight: 600; color: var(--text-primary); }
+    .purpose-row__meta { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
+    .purpose-row__amt { text-align: right; flex-shrink: 0; }
+    .purpose-row__usd { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: var(--text-primary); }
+    .purpose-row__inr { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+    .warning-banner {
+      display: flex; gap: var(--sp-3); align-items: flex-start;
+      margin-top: var(--sp-4);
+    }
+    .warning-banner svg { flex-shrink: 0; margin-top: 2px; }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- DEMO BAR -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">State</span>
+    <button class="demo-btn active" data-state="ontrack">On Track</button>
+    <button class="demo-btn" data-state="nearlimit">Near Limit (Hypothetical)</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">LRS Compliance</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- PAGE CONTENT -->
+  <div class="page-content" id="page-content">
+
+    <!-- Hero: gauge -->
+    <div class="glass-card glass-card--hero" id="gauge-card">
+      <div class="loans-hero-label" style="font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-secondary); margin-bottom:var(--sp-2);">Liberalised Remittance Scheme · FY 2026-27</div>
+
+      <div class="gauge-wrap">
+        <div class="gauge-labels">
+          <span class="gauge-used" id="gauge-used">$63,700.00</span>
+          <span class="gauge-limit">of USD 2,50,000 limit</span>
+        </div>
+        <div class="progress-bar progress-bar--thick">
+          <div class="progress-bar__fill" id="gauge-fill" style="width:25.5%;"></div>
+        </div>
+        <div class="util-label-row mt-2">
+          <span class="gauge-pct-badge ok" id="gauge-pct-badge">25.48% used</span>
+          <span class="util-label" id="gauge-remaining">$1,86,300 headroom left</span>
+        </div>
+      </div>
+
+      <div class="loans-hero-footer" style="margin-top:var(--sp-4); padding-top:var(--sp-3); border-top:1px solid var(--glass-border); display:flex; align-items:center; gap:var(--sp-2); font-size:12px; color:var(--text-muted);">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+        </svg>
+        <span>Limit is USD 2,50,000 per person, per FY (resets 1 Apr), across all authorized dealer banks</span>
+      </div>
+    </div>
+
+    <!-- Warning banner (near-limit state only) -->
+    <div class="glass-card glass-card--warning glass-card--compact" id="warning-card" style="display:none; margin-top:var(--sp-4);">
+      <div class="warning-banner" style="margin-top:0;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div>
+          <div class="card-title" style="margin-bottom:2px;">Approaching Your Annual Limit</div>
+          <div class="callout-note" style="margin-top:0;">You've used <strong id="warn-pct">83.48%</strong> of your USD 2,50,000 LRS limit for FY 2026-27. Only <strong id="warn-remaining">$41,300</strong> of headroom remains — plan remaining remittances carefully. Exceeding the limit requires prior RBI approval.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Breakdown by purpose -->
+    <div class="section-title" style="margin-top:var(--sp-6);">Breakdown by Purpose</div>
+    <div class="surface-card" id="purpose-list">
+      <!-- rows injected by JS -->
+    </div>
+
+    <div class="form-helper mt-3">Each remittance's ₹ figure uses the FX rate snapshot at the time of transfer — never recomputed with today's rate, per the FX-snapshot rule.</div>
+
+    <!-- Related -->
+    <a href="tcs.html" class="compare-link-card" style="display:flex; align-items:center; gap:var(--sp-3); background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg); padding:var(--sp-4); margin-top:var(--sp-5); text-decoration:none;">
+      <div class="compare-link-card__icon" style="width:40px; height:40px; border-radius:var(--r-lg); flex-shrink:0; background:var(--grad-primary); color:#fff; display:flex; align-items:center; justify-content:center;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 9h20"/><path d="M7 15h3"/></svg>
+      </div>
+      <div style="flex:1; min-width:0;">
+        <div class="compare-link-card__title">TCS Threshold Monitor</div>
+        <div class="compare-link-card__sub">See TCS collected on these remittances</div>
+      </div>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted); flex-shrink:0;">
+        <polyline points="9 18 15 12 9 6"/>
+      </svg>
+    </a>
+
+  </div><!-- /page-content -->
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ── Theme toggle (matches other pages) ── */
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+
+  /* ── Vikas's LRS remittances this FY (real, "On Track" scenario) ── */
+  const ICONS = {
+    invest: '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
+    education: '<path d="M22 10v6M2 10l10-5 10 5-10 5-10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',
+    travel: '<path d="M2.5 19h19M6 19l1.5-9h9L18 19"/><path d="M9.5 10 12 3l2.5 7"/>',
+    gift: '<rect x="3" y="8" width="18" height="13" rx="1"/><path d="M12 8v13"/><path d="M3 12h18"/><path d="M12 8c-1.5 0-3-1-3-2.5A2.5 2.5 0 0 1 11.5 3c1.5 0 2.5 2 2.5 5-1 0-2.5 0-2 0Z"/><path d="M12 8c1.5 0 3-1 3-2.5A2.5 2.5 0 0 0 12.5 3c-1.5 0-2.5 2-2.5 5 1 0 2.5 0 2 0Z"/>',
+  };
+
+  const STATES = {
+    ontrack: {
+      usedUsd: 63700,
+      pct: 25.48,
+      remainingUsd: 186300,
+      badgeClass: 'ok',
+      barClass: '',
+      purposes: [
+        { name: 'Investment in US Stocks', meta: '12 Jun 2026 · ₹83.60/USD', usd: 18500, inr: '15,46,600', icon: 'invest', color: 'var(--grad-primary)' },
+        { name: 'Overseas Education (loan-funded)', meta: '25 Jun 2026 · ₹83.75/USD', usd: 35000, inr: '29,31,250', icon: 'education', color: 'linear-gradient(135deg,#2563EB,#3B82F6)' },
+        { name: 'Travel (Family vacation, Singapore)', meta: '15 Apr 2026 · ₹83.30/USD', usd: 6200, inr: '5,16,460', icon: 'travel', color: 'linear-gradient(135deg,#D97706,#F59E0B)' },
+        { name: 'Gift (to NRI relative)', meta: '20 May 2026 · ₹83.45/USD', usd: 4000, inr: '3,33,800', icon: 'gift', color: 'var(--grad-success)' },
+      ],
+    },
+    nearlimit: {
+      usedUsd: 208700,
+      pct: 83.48,
+      remainingUsd: 41300,
+      badgeClass: 'warn',
+      barClass: 'progress-bar__fill--warning',
+      purposes: [
+        { name: 'Overseas Education (loan-funded)', meta: 'Hypothetical — full year abroad tuition + living costs', usd: 180000, inr: '1,50,75,000 (approx.)', icon: 'education', color: 'linear-gradient(135deg,#2563EB,#3B82F6)' },
+        { name: 'Investment in US Stocks', meta: '12 Jun 2026 · ₹83.60/USD', usd: 18500, inr: '15,46,600', icon: 'invest', color: 'var(--grad-primary)' },
+        { name: 'Travel (Family vacation, Singapore)', meta: '15 Apr 2026 · ₹83.30/USD', usd: 6200, inr: '5,16,460', icon: 'travel', color: 'linear-gradient(135deg,#D97706,#F59E0B)' },
+        { name: 'Gift (to NRI relative)', meta: '20 May 2026 · ₹83.45/USD', usd: 4000, inr: '3,33,800', icon: 'gift', color: 'var(--grad-success)' },
+      ],
+    },
+  };
+
+  function fmtUsd(n) {
+    return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function renderPurposes(list) {
+    document.getElementById('purpose-list').innerHTML = list.map(p => `
+      <div class="purpose-row">
+        <div class="purpose-row__icon" style="background:${p.color};">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ICONS[p.icon]}</svg>
+        </div>
+        <div class="purpose-row__info">
+          <div class="purpose-row__name">${p.name}</div>
+          <div class="purpose-row__meta">${p.meta}</div>
+        </div>
+        <div class="purpose-row__amt">
+          <div class="purpose-row__usd">${fmtUsd(p.usd)}</div>
+          <div class="purpose-row__inr">₹${p.inr}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  function applyState(key) {
+    const s = STATES[key];
+    document.getElementById('gauge-used').textContent = fmtUsd(s.usedUsd);
+    document.getElementById('gauge-fill').className = 'progress-bar__fill ' + s.barClass;
+    document.getElementById('gauge-fill').style.width = s.pct + '%';
+    document.getElementById('gauge-pct-badge').className = 'gauge-pct-badge ' + s.badgeClass;
+    document.getElementById('gauge-pct-badge').textContent = s.pct.toFixed(2) + '% used';
+    document.getElementById('gauge-remaining').textContent = fmtUsd(s.remainingUsd) + ' headroom left';
+    document.getElementById('warning-card').style.display = key === 'nearlimit' ? '' : 'none';
+    if (key === 'nearlimit') {
+      document.getElementById('warn-pct').textContent = s.pct.toFixed(2) + '%';
+      document.getElementById('warn-remaining').textContent = fmtUsd(s.remainingUsd);
+    }
+    renderPurposes(s.purposes);
+  }
+
+  AG.initDemoBar({
+    ontrack:  () => applyState('ontrack'),
+    nearlimit: () => applyState('nearlimit'),
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Emergency Fund Runway</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* ── Coverage hero ── */
+    .coverage-hero__months {
+      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+      font-size: 40px; font-weight: 700; line-height: 1.1;
+    }
+    .coverage-hero__months span { font-size: 15px; font-weight: 500; color: var(--text-secondary); }
+    .coverage-hero__sub { font-size: 13px; color: var(--text-secondary); margin-top: var(--sp-2); }
+
+    /* ── Tier card ── */
+    .tier-card__top { display: flex; align-items: center; gap: var(--sp-3); margin-bottom: var(--sp-3); }
+    .tier-card__icon {
+      width: 40px; height: 40px; border-radius: var(--r-lg); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 20px;
+    }
+    .tier-card__title { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+    .tier-card__sub { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+    .tier-card__amounts { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: var(--sp-2); }
+    .tier-card__current { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-size: 20px; font-weight: 700; }
+    .tier-card__target { font-size: 12px; color: var(--text-muted); }
+    .tier-card__footer { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary); margin-top: var(--sp-2); }
+    .tier-card__liquidity {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 11px; font-weight: 600; color: var(--text-muted);
+      background: var(--surface-raised); border: 1px solid var(--border);
+      padding: 2px 8px; border-radius: var(--r-full); margin-top: var(--sp-3);
+    }
+
+    .insight-card {
+      display: flex; gap: var(--sp-3); align-items: flex-start;
+      background: var(--info-light); border: 1px solid rgba(59,130,246,.25);
+      border-radius: var(--r-lg); padding: var(--sp-4); margin-top: var(--sp-3);
+      font-size: 13px; color: var(--text-secondary); line-height: 1.5;
+    }
+    .insight-card strong { color: var(--text-primary); }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">Scenario</span>
+    <button class="demo-btn active" data-state="normal">Normal Month</button>
+    <button class="demo-btn" data-state="lean">Reduced Expenses</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Emergency Fund Runway</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content" id="page-content">
+
+    <!-- Coverage Hero -->
+    <div class="glass-card glass-card--hero">
+      <div class="card-header" style="margin-bottom:var(--sp-2);">
+        <div class="card-icon card-icon--info" style="font-size:18px;">💸</div>
+        <div class="card-title">Months of Coverage Available Today</div>
+      </div>
+      <div class="coverage-hero__months gradient-text" id="months-coverage">1.5 <span>months</span></div>
+      <div class="coverage-hero__sub" id="coverage-sub">Based on ₹1,49,000 in liquid emergency savings against a ₹99,350/mo burn rate.</div>
+    </div>
+
+    <!-- Tier 1 -->
+    <div class="section-title" style="margin-top:var(--sp-6);">Tier 1 — Instant Access</div>
+    <div class="glass-card">
+      <div class="tier-card__top">
+        <div class="tier-card__icon" style="background:var(--primary-light);">🏦</div>
+        <div style="flex:1; min-width:0;">
+          <div class="tier-card__title">3× Monthly Burn Rate</div>
+          <div class="tier-card__sub" id="tier1-formula">3 × ₹99,350 = ₹2,98,050 target</div>
+        </div>
+        <span class="chip chip--behind" id="tier1-chip">50% Funded</span>
+      </div>
+      <div class="tier-card__amounts">
+        <span class="tier-card__current">₹1,49,000</span>
+        <span class="tier-card__target" id="tier1-target-label">of ₹2,98,050</span>
+      </div>
+      <div class="progress-bar progress-bar--thick">
+        <div class="progress-bar__fill progress-bar__fill--warning" id="tier1-bar" style="width:50%;"></div>
+      </div>
+      <div class="tier-card__footer">
+        <span>Fed by the Emergency Fund envelope · ₹10,000/mo</span>
+        <span id="tier1-months-left">~15 mo to full</span>
+      </div>
+      <span class="tier-card__liquidity">⚡ Savings account · same-day access</span>
+    </div>
+
+    <!-- Tier 2 -->
+    <div class="section-title" style="margin-top:var(--sp-5);">Tier 2 — Extended Reserve</div>
+    <div class="glass-card">
+      <div class="tier-card__top">
+        <div class="tier-card__icon" style="background:var(--surface-raised);">🏛️</div>
+        <div style="flex:1; min-width:0;">
+          <div class="tier-card__title">12× Monthly Burn Rate</div>
+          <div class="tier-card__sub" id="tier2-formula">12 × ₹99,350 = ₹11,92,200 target</div>
+        </div>
+        <span class="chip chip--closed" id="tier2-chip">Not Started</span>
+      </div>
+      <div class="tier-card__amounts">
+        <span class="tier-card__current">₹0</span>
+        <span class="tier-card__target" id="tier2-target-label">of ₹11,92,200</span>
+      </div>
+      <div class="progress-bar progress-bar--thick">
+        <div class="progress-bar__fill" id="tier2-bar" style="width:0%; background:var(--border-strong);"></div>
+      </div>
+      <div class="tier-card__footer">
+        <span>Starts once Tier 1 is fully funded</span>
+        <span id="tier2-months-left">~119 mo at ₹10,000/mo</span>
+      </div>
+      <span class="tier-card__liquidity">🔒 Sweep-FD · 2–3 day access, small breakage cost</span>
+    </div>
+
+    <div class="insight-card">
+      <span style="font-size:18px;">💡</span>
+      <div>
+        <strong>Speed this up:</strong> once Tier 1 is fully funded (around Oct 2027 at the current pace), consider redirecting ₹20,000/mo into Tier 2 — that would fill the 12-month reserve in about 5 years instead of 10.
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ── Theme toggle (matches other pages) ── */
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+
+  /* ── Emergency Fund scenarios (paise) ── */
+  const TIER1_CURRENT = 14900000; // ₹1,49,000 — fed by the ₹10,000/mo Emergency Fund envelope
+  const ENVELOPE_MONTHLY = 1000000; // ₹10,000/mo
+
+  const SCENARIOS = {
+    normal: { burnPaise: 9935000, burnLabel: '₹99,350' },
+    lean:   { burnPaise: 7500000, burnLabel: '₹75,000 (after cutting discretionary spend)' },
+  };
+
+  function applyScenario(key) {
+    const s = SCENARIOS[key];
+    const tier1Target = s.burnPaise * 3;
+    const tier2Target = s.burnPaise * 12;
+    const monthsCoverage = Math.round((TIER1_CURRENT / s.burnPaise) * 10) / 10;
+    const tier1Pct = Math.min(100, Math.round((TIER1_CURRENT / tier1Target) * 1000) / 10);
+    const monthsToTier1 = Math.ceil((tier1Target - TIER1_CURRENT) / ENVELOPE_MONTHLY);
+    const monthsToTier2 = Math.ceil(tier2Target / ENVELOPE_MONTHLY);
+
+    document.getElementById('months-coverage').innerHTML = `${monthsCoverage} <span>months</span>`;
+    document.getElementById('coverage-sub').textContent = `Based on ₹1,49,000 in liquid emergency savings against a ${s.burnLabel.split(' (')[0]}/mo burn rate.`;
+
+    document.getElementById('tier1-formula').textContent = `3 × ${s.burnLabel} = ${AG.formatINR(tier1Target)} target`;
+    document.getElementById('tier1-target-label').textContent = `of ${AG.formatINR(tier1Target)}`;
+    document.getElementById('tier1-bar').style.width = tier1Pct + '%';
+    document.getElementById('tier1-chip').textContent = tier1Pct + '% Funded';
+    document.getElementById('tier1-months-left').textContent = `~${monthsToTier1} mo to full`;
+
+    document.getElementById('tier2-formula').textContent = `12 × ${s.burnLabel} = ${AG.formatINR(tier2Target)} target`;
+    document.getElementById('tier2-target-label').textContent = `of ${AG.formatINR(tier2Target)}`;
+    document.getElementById('tier2-months-left').textContent = `~${monthsToTier2} mo at ₹10,000/mo`;
+  }
+
+  /* ── Demo bar: Normal Month / Reduced Expenses ── */
+  AG.initDemoBar({
+    normal: () => applyScenario('normal'),
+    lean: () => applyScenario('lean'),
+  });
+</script>
+</body>
+</html>

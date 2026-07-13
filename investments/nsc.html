@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — National Savings Certificate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .scheme-hero-label { font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-secondary); margin-bottom:var(--sp-2); }
+    .scheme-hero-amount { font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums; font-size:32px; font-weight:700; line-height:1.1; }
+    .scheme-hero-sub { font-size:12px; color:var(--text-secondary); margin-top:var(--sp-3); }
+    .scheme-hero-sub strong { color:var(--text-primary); font-weight:600; }
+    .scheme-hero-footer { display:flex; align-items:center; gap:var(--sp-2); margin-top:var(--sp-4); padding-top:var(--sp-3); border-top:1px solid var(--glass-border); font-size:12px; color:var(--text-muted); }
+
+    .stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-3); margin-top:var(--sp-4); }
+    .stat-box { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg); padding:var(--sp-3) var(--sp-4); }
+    .stat-box__label { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.04em; margin-bottom:4px; }
+    .stat-box__value { font-family:'JetBrains Mono',monospace; font-size:16px; font-weight:700; color:var(--text-primary); }
+
+    .scheme-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-xl); padding:var(--sp-4) var(--sp-5); margin-top:var(--sp-5); }
+    .scheme-card__row { display:flex; justify-content:space-between; align-items:center; padding:6px 0; font-size:13px; }
+    .scheme-card__row + .scheme-card__row { border-top:1px solid var(--border); }
+    .scheme-card__row span:first-child { color:var(--text-secondary); }
+    .scheme-card__row span:last-child { font-family:'JetBrains Mono',monospace; font-weight:600; color:var(--text-primary); }
+
+    .toggle-row { display:flex; align-items:center; justify-content:space-between; margin-top:var(--sp-5); background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg); padding:var(--sp-3) var(--sp-4); }
+
+    .info-card { display:flex; gap:var(--sp-3); background:var(--info-light); border:1px solid rgba(59,130,246,.24); border-radius:var(--r-lg); padding:var(--sp-4); margin-top:var(--sp-5); }
+    .info-card__icon { color:var(--info); flex-shrink:0; }
+    .info-card__text { font-size:12.5px; color:var(--text-secondary); line-height:1.55; }
+    .info-card__text strong { color:var(--text-primary); }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <div class="demo-bar">
+    <span class="demo-bar__label">State</span>
+    <button class="demo-btn" data-state="populated">Populated</button>
+    <button class="demo-btn" data-state="empty">Empty (No NSC)</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">National Savings Certificate</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <div class="page-content" id="page-content">
+
+    <div id="view-populated">
+
+      <div class="glass-card glass-card--hero">
+        <div class="scheme-hero-label">Current Value</div>
+        <div class="scheme-hero-amount gradient-text" id="hero-total">₹1,08,400</div>
+        <div class="scheme-hero-sub">
+          Invested <strong>₹1,00,000</strong> · <span class="delta delta--pos">▲ +8.4%</span>
+        </div>
+        <div class="scheme-hero-footer">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+          <span>5-year tenure · matures <strong style="color:var(--text-secondary);">Jun 2030</strong></span>
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-box">
+          <div class="stat-box__label">Rate</div>
+          <div class="stat-box__value">7.7% p.a.</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box__label">80C Eligible</div>
+          <div class="stat-box__value">Yes</div>
+        </div>
+      </div>
+
+      <div class="scheme-card">
+        <div class="scheme-card__row"><span>Purchased</span><span>Jun 2025</span></div>
+        <div class="scheme-card__row"><span>Principal invested</span><span>₹1,00,000</span></div>
+        <div class="scheme-card__row"><span>Current value (est.)</span><span>₹1,08,400</span></div>
+        <div class="scheme-card__row"><span>Compounding</span><span>Annually, paid at maturity</span></div>
+        <div class="scheme-card__row"><span>Maturity date</span><span>Jun 2030</span></div>
+        <div class="scheme-card__row"><span>80C claimed (FY 2025-26)</span><span>₹1,00,000</span></div>
+      </div>
+
+      <div class="util-bar-wrap" style="margin-top:var(--sp-5);">
+        <div class="util-label-row">
+          <span class="util-label">Tenure progress · 13 of 60 months</span>
+          <span class="util-pct util-pct--safe">22%</span>
+        </div>
+        <div class="progress-bar progress-bar--thick"><div class="progress-bar__fill" style="width:22%;"></div></div>
+      </div>
+
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Auto-renewal at maturity</div>
+          <div class="toggle-sublabel">Re-invest the maturity proceeds into a fresh 5-year NSC</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" checked onchange="AG.showToast(this.checked ? 'Auto-renewal enabled (demo)' : 'Auto-renewal disabled', 'info')">
+          <span class="toggle-track"></span>
+          <span class="toggle-thumb"></span>
+        </label>
+      </div>
+
+      <div class="info-card">
+        <svg class="info-card__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <div class="info-card__text">
+          <strong>Principal qualifies for 80C</strong> (within the combined ₹1,50,000 cap shared with EPF/PPF/NSC/etc.) in the year of investment. Interest accrued each year is deemed reinvested and is itself 80C-eligible (except the final year), but the entire accrued interest is taxable annually at your slab rate — only the final maturity payout is received in cash.
+        </div>
+      </div>
+
+    </div><!-- /view-populated -->
+
+    <div id="view-empty" style="display:none;">
+      <div class="empty-state">
+        <div class="empty-state__icon">📜</div>
+        <div class="empty-state__title">No NSC Certificate Yet</div>
+        <div class="empty-state__body">National Savings Certificate is a 5-year, 80C-eligible Post Office fixed-return instrument — add a certificate to track it here.</div>
+        <button class="btn btn--primary" style="min-width:200px;" onclick="AG.showToast('Add NSC certificate — coming soon','info')">+ Add NSC Certificate</button>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+
+  AG.initDemoBar({
+    populated: () => {
+      document.getElementById('view-populated').style.display = '';
+      document.getElementById('view-empty').style.display = 'none';
+    },
+    empty: () => {
+      document.getElementById('view-populated').style.display = 'none';
+      document.getElementById('view-empty').style.display = '';
+    },
+  });
+</script>
+</body>
+</html>

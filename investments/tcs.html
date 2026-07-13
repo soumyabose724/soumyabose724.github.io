@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — TCS Monitor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .stat-row { display: flex; gap: var(--sp-3); margin-top: var(--sp-4); }
+    .stat-col { flex: 1; min-width: 0; }
+    .stat-col__label { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px; }
+    .stat-col__value { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-size: 17px; font-weight: 700; color: var(--text-primary); }
+
+    .detail-row { display: flex; justify-content: space-between; align-items: center; padding: var(--sp-3) 0; border-bottom: 1px solid var(--border); }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-row__label { font-size: 13px; color: var(--text-secondary); }
+    .detail-row__value { font-size: 13px; font-weight: 600; color: var(--text-primary); text-align: right; }
+    .detail-row__value.mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+
+    .callout-note { font-size: 12.5px; line-height: 1.6; color: var(--text-secondary); margin-top: var(--sp-3); }
+    .callout-note strong { color: var(--text-primary); }
+
+    /* ── Rate reference card ── */
+    .rate-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: var(--sp-3) 0; border-bottom: 1px solid var(--border);
+    }
+    .rate-row:last-child { border-bottom: none; }
+    .rate-row__label { font-size: 13px; color: var(--text-primary); font-weight: 500; }
+    .rate-row__sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .rate-row__pct {
+      font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 700;
+      padding: 3px 12px; border-radius: var(--r-full); flex-shrink: 0;
+    }
+    .rate-row__pct.zero { background: var(--success-light); color: var(--success); }
+    .rate-row__pct.low  { background: var(--info-light); color: var(--info); }
+    .rate-row__pct.high { background: var(--error-light); color: var(--error); }
+
+    /* ── Remittance ledger (timeline w/ threshold crossing) ── */
+    .ledger-row {
+      display: flex; align-items: flex-start; gap: var(--sp-3);
+      padding: var(--sp-3) 0; border-bottom: 1px solid var(--border);
+    }
+    .ledger-row:last-child { border-bottom: none; }
+    .ledger-row__dot {
+      width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; flex-shrink: 0;
+      background: var(--border-strong);
+    }
+    .ledger-row__dot.taxed { background: var(--error); }
+    .ledger-row__dot.exempt { background: var(--success); }
+    .ledger-row__info { flex: 1; min-width: 0; }
+    .ledger-row__title { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+    .ledger-row__meta { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; line-height: 1.5; }
+    .ledger-row__amt { text-align: right; flex-shrink: 0; }
+    .ledger-row__inr { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: var(--text-primary); }
+    .ledger-row__tcs { font-size: 11px; margin-top: 2px; font-weight: 600; }
+    .ledger-row__tcs.zero { color: var(--success); }
+    .ledger-row__tcs.charged { color: var(--error); }
+
+    .form67-link-card {
+      display: flex; align-items: center; gap: var(--sp-3);
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: var(--sp-4);
+      margin-top: var(--sp-3); text-decoration: none;
+      transition: background var(--dur-fast), box-shadow var(--dur-fast);
+    }
+    .form67-link-card:hover { background: var(--primary-xlight); box-shadow: var(--sh-sm); }
+    .form67-link-card__title { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    .form67-link-card__sub { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- DEMO BAR -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">State</span>
+    <button class="demo-btn active" data-state="populated">Remittances Made</button>
+    <button class="demo-btn" data-state="empty">No Remittances Yet</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">TCS Monitor</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- PAGE CONTENT -->
+  <div class="page-content" id="page-content">
+
+    <div id="view-populated">
+
+      <!-- Hero -->
+      <div class="glass-card glass-card--hero">
+        <div class="loans-hero-label" style="font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-secondary); margin-bottom:var(--sp-2);">TCS Collected This FY 2026-27</div>
+        <div class="amount-text amount-text--display gradient-text">₹4,50,935</div>
+        <div class="t-caption text-muted mt-1">On ₹53,28,110 (USD 63,700.00) of aggregate LRS remittances so far</div>
+        <div class="stat-row">
+          <div class="stat-col">
+            <div class="stat-col__label">Other Purposes @ 20%</div>
+            <div class="stat-col__value">₹3,39,372</div>
+          </div>
+          <div class="stat-col">
+            <div class="stat-col__label">Education Loan @ 5%</div>
+            <div class="stat-col__value">₹1,11,563</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rate reference -->
+      <div class="section-title" style="margin-top:var(--sp-5);">TCS Rates in Effect</div>
+      <div class="surface-card">
+        <div class="rate-row">
+          <div>
+            <div class="rate-row__label">Below ₹7,00,000 aggregate</div>
+            <div class="rate-row__sub">Any LRS purpose, per FY</div>
+          </div>
+          <span class="rate-row__pct zero">0%</span>
+        </div>
+        <div class="rate-row">
+          <div>
+            <div class="rate-row__label">Education, financed by a loan</div>
+            <div class="rate-row__sub">On the amount above ₹7,00,000</div>
+          </div>
+          <span class="rate-row__pct low">5%</span>
+        </div>
+        <div class="rate-row">
+          <div>
+            <div class="rate-row__label">Most other purposes</div>
+            <div class="rate-row__sub">Investment, travel, gifts, self-funded education/medical — above ₹7,00,000</div>
+          </div>
+          <span class="rate-row__pct high">20%</span>
+        </div>
+        <div class="form-helper mt-2">Rates as of the rules in effect for FY 2026-27 — TCS provisions are revised periodically via the Union Budget; re-check before large remittances.</div>
+      </div>
+
+      <!-- Running ledger -->
+      <div class="section-title" style="margin-top:var(--sp-5);">Remittance Ledger &amp; Threshold Crossing</div>
+      <div class="surface-card">
+        <div class="ledger-row">
+          <div class="ledger-row__dot exempt"></div>
+          <div class="ledger-row__info">
+            <div class="ledger-row__title">15 Apr 2026 — Travel</div>
+            <div class="ledger-row__meta">$6,200 at ₹83.30/USD · running total (other purposes): ₹5,16,460 — below ₹7L threshold</div>
+          </div>
+          <div class="ledger-row__amt">
+            <div class="ledger-row__inr">₹5,16,460</div>
+            <div class="ledger-row__tcs zero">TCS ₹0</div>
+          </div>
+        </div>
+        <div class="ledger-row">
+          <div class="ledger-row__dot taxed"></div>
+          <div class="ledger-row__info">
+            <div class="ledger-row__title">20 May 2026 — Gift to NRI Relative</div>
+            <div class="ledger-row__meta">$4,000 at ₹83.45/USD · crosses ₹7L this transaction — ₹1,83,540 exempt, ₹1,50,260 taxed @ 20%</div>
+          </div>
+          <div class="ledger-row__amt">
+            <div class="ledger-row__inr">₹3,33,800</div>
+            <div class="ledger-row__tcs charged">TCS ₹30,052</div>
+          </div>
+        </div>
+        <div class="ledger-row">
+          <div class="ledger-row__dot taxed"></div>
+          <div class="ledger-row__info">
+            <div class="ledger-row__title">12 Jun 2026 — Investment in US Stocks</div>
+            <div class="ledger-row__meta">$18,500 at ₹83.60/USD · fully above threshold, taxed @ 20%</div>
+          </div>
+          <div class="ledger-row__amt">
+            <div class="ledger-row__inr">₹15,46,600</div>
+            <div class="ledger-row__tcs charged">TCS ₹3,09,320</div>
+          </div>
+        </div>
+        <div class="ledger-row">
+          <div class="ledger-row__dot taxed"></div>
+          <div class="ledger-row__info">
+            <div class="ledger-row__title">25 Jun 2026 — Overseas Education (loan-funded)</div>
+            <div class="ledger-row__meta">$35,000 at ₹83.75/USD · own separate ₹7L threshold track — ₹7,00,000 exempt, ₹22,31,250 taxed @ 5%</div>
+          </div>
+          <div class="ledger-row__amt">
+            <div class="ledger-row__inr">₹29,31,250</div>
+            <div class="ledger-row__tcs charged">TCS ₹1,11,563</div>
+          </div>
+        </div>
+        <div class="form-helper mt-3">Education financed by a specified-institution loan gets its own ₹7,00,000 threshold, tracked separately from the shared threshold for all other LRS purposes.</div>
+      </div>
+
+      <!-- Credit note -->
+      <div class="glass-card glass-card--compact mt-5">
+        <div class="card-header" style="margin-bottom:var(--sp-2);">
+          <div class="card-icon card-icon--success">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          </div>
+          <div class="card-title">TCS Is Not Extra Tax</div>
+        </div>
+        <div class="callout-note" style="margin-top:0;">
+          The ₹4,50,935 collected this FY is <strong>not an additional cost</strong> — it can be claimed as credit against your total tax liability when filing your ITR, verified via <strong>Form 26AS / AIS</strong>. Salaried taxpayers can also ask their employer to account for this TCS credit against monthly TDS on salary.
+        </div>
+      </div>
+
+      <a href="../tax/tds.html" class="form67-link-card">
+        <div style="width:40px; height:40px; border-radius:var(--r-lg); flex-shrink:0; background:var(--grad-primary); color:#fff; display:flex; align-items:center; justify-content:center;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <div style="flex:1; min-width:0;">
+          <div class="form67-link-card__title">View in Tax Credits (Form 26AS)</div>
+          <div class="form67-link-card__sub">See how this TCS offsets your total tax due</div>
+        </div>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted); flex-shrink:0;">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </a>
+
+      <a href="lrs.html" class="form67-link-card">
+        <div style="width:40px; height:40px; border-radius:var(--r-lg); flex-shrink:0; background:linear-gradient(135deg,#2563EB,#3B82F6); color:#fff; display:flex; align-items:center; justify-content:center;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z"/></svg>
+        </div>
+        <div style="flex:1; min-width:0;">
+          <div class="form67-link-card__title">LRS Compliance Engine</div>
+          <div class="form67-link-card__sub">See the full remittance breakdown against your USD 2,50,000 limit</div>
+        </div>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted); flex-shrink:0;">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </a>
+
+    </div><!-- /view-populated -->
+
+    <!-- Empty state -->
+    <div id="view-empty" style="display:none;">
+      <div class="empty-state">
+        <div class="empty-state__icon">🧾</div>
+        <div class="empty-state__title">No LRS Remittances Yet This FY</div>
+        <div class="empty-state__body">Once you remit funds abroad under the Liberalised Remittance Scheme, ArthaGrid tracks the ₹7,00,000 TCS threshold and the tax already collected on your behalf.</div>
+        <a href="lrs.html" class="btn btn--primary" style="min-width:180px; text-decoration:none;">View LRS Compliance</a>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ── Theme toggle (matches other pages) ── */
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+
+  /* ── Demo bar: Populated / Empty ── */
+  AG.initDemoBar({
+    populated: () => {
+      document.getElementById('view-populated').style.display = '';
+      document.getElementById('view-empty').style.display = 'none';
+    },
+    empty: () => {
+      document.getElementById('view-populated').style.display = 'none';
+      document.getElementById('view-empty').style.display = '';
+    },
+  });
+</script>
+</body>
+</html>
