@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — F&amp;O</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .contract-chip {
+      display: inline-flex; align-items: center; height: 20px; padding: 0 7px; border-radius: var(--r-sm);
+      font-size: 10px; font-weight: 700; letter-spacing: .02em; margin-left: 6px;
+    }
+    .contract-chip--call   { background: var(--success-light); color: var(--success); }
+    .contract-chip--put    { background: var(--error-light);   color: var(--error); }
+    .contract-chip--future { background: var(--info-light);    color: var(--info); }
+    .fno-meta-pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 11px; font-weight: 600; color: var(--text-secondary);
+      background: var(--surface-raised); border: 1px solid var(--border);
+      border-radius: var(--r-full); padding: 2px 8px; margin: var(--sp-2) 4px 0 0;
+    }
+    .segment-hero {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg);
+      padding: var(--sp-4); margin-bottom: var(--sp-5);
+    }
+    .segment-hero__label { font-size: 11px; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+    .segment-hero__value { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-size: 20px; font-weight: 700; margin-top: 2px; }
+    .info-box {
+      display: flex; align-items: flex-start; gap: var(--sp-2);
+      background: var(--warning-light); border: 1px solid rgba(245,158,11,.3);
+      border-radius: var(--r-lg); padding: var(--sp-3) var(--sp-4);
+      font-size: 12px; color: var(--text-secondary); line-height: 1.5;
+      margin-top: var(--sp-5);
+    }
+    .info-box strong { color: var(--warning); }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">Show</span>
+    <button class="demo-btn active" data-state="all">All</button>
+    <button class="demo-btn" data-state="open">Open</button>
+    <button class="demo-btn" data-state="closed">Closed</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">F&amp;O</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <a href="analytics.html" class="icon-btn" aria-label="Trade Analytics" title="Analytics" style="text-decoration:none;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+      </a>
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content">
+
+    <div class="segment-hero">
+      <div>
+        <div class="segment-hero__label">Realized P&amp;L · F&amp;O</div>
+        <div class="segment-hero__value" id="segment-total" style="color:var(--success);">₹15,750</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="segment-hero__label">Contracts</div>
+        <div class="segment-hero__value" id="segment-count">3</div>
+      </div>
+    </div>
+
+    <div class="section-title">Contracts</div>
+    <div id="trade-list"><!-- rendered by JS --></div>
+
+    <div class="info-box">
+      <span>⚠️</span>
+      <span>F&amp;O income is taxed as <strong>Business Income</strong>, not capital gains, and is added to your total income at slab rates. A tax audit is triggered only once annual F&amp;O turnover crosses the <strong>₹10 Crore</strong> threshold — purely informational here, since Vikas's turnover is nowhere close to that level.</span>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV — none active (no Trade Journal tab)
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ── Theme toggle (matches other pages) ── */
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+
+  /* ── Vikas's F&O contracts (paise) ── */
+  const CONTRACTS = [
+    { id:'t5', underlying:'NIFTY', contractType:'call', strikePaise:2480000, expiry:'2026-05-29', lot:75, entryDate:'2026-05-18', premiumEntryPaise:12000, exitDate:'2026-05-27', premiumExitPaise:18000, pnlPaise:450000, open:false },
+    { id:'t11', underlying:'NIFTY', contractType:'future', strikePaise:null, expiry:'2026-07-31', lot:75, entryDate:'2026-07-02', premiumEntryPaise:2470000, exitDate:'2026-07-09', premiumExitPaise:2485000, pnlPaise:1125000, open:false },
+    { id:'t14', underlying:'BANKNIFTY', contractType:'put', strikePaise:5100000, expiry:'2026-07-31', lot:15, entryDate:'2026-07-10', premiumEntryPaise:21000, exitDate:null, premiumExitPaise:25000, pnlPaise:60000, open:true },
+  ];
+
+  const CONTRACT_LABEL = { call: 'CE', put: 'PE', future: 'FUT' };
+  const CONTRACT_CHIP_CLASS = { call: 'contract-chip--call', put: 'contract-chip--put', future: 'contract-chip--future' };
+
+  function fmtDate(d) {
+    const dt = new Date(d + 'T00:00:00');
+    return dt.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  function contractRowHtml(c) {
+    const pnlClass = c.pnlPaise >= 0 ? 'list-row__amount--income' : 'list-row__amount--expense';
+    const label = c.underlying + (c.strikePaise ? ' ' + (c.strikePaise / 100).toLocaleString('en-IN') : '') + ' ' + CONTRACT_LABEL[c.contractType];
+    const premiumLabel = c.contractType === 'future' ? 'Entry' : 'Premium Paid';
+    const premiumExitLabel = c.contractType === 'future' ? 'Exit' : (c.open ? 'Current' : 'Premium Received');
+    return `
+      <div class="list-row">
+        <div class="list-row__icon ${c.open ? 'list-row__icon--info' : ''}">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        </div>
+        <div class="list-row__info">
+          <div class="list-row__label">
+            ${label}
+            <span class="contract-chip ${CONTRACT_CHIP_CLASS[c.contractType]}">${CONTRACT_LABEL[c.contractType]}</span>
+            ${c.open ? '<span class="chip chip--info">Open</span>' : ''}
+          </div>
+          <div class="list-row__meta">Lot ${c.lot} · Expiry ${fmtDate(c.expiry)}</div>
+          <div>
+            <span class="fno-meta-pill">${premiumLabel} ${AG.formatINR(c.premiumEntryPaise, { showPaise: true })} · ${fmtDate(c.entryDate)}</span>
+            <span class="fno-meta-pill">${premiumExitLabel} ${AG.formatINR(c.premiumExitPaise, { showPaise: true })}${c.exitDate ? ' · ' + fmtDate(c.exitDate) : ''}</span>
+          </div>
+        </div>
+        <div class="list-row__amount-row">
+          <div class="list-row__amount ${pnlClass}">${AG.formatINR(c.pnlPaise, { showSign: true })}</div>
+          <div class="list-row__amount-caption">${c.open ? 'Unrealized P&L' : 'Realized P&L'}</div>
+        </div>
+      </div>`;
+  }
+
+  function render(filter) {
+    let filtered = CONTRACTS;
+    if (filter === 'open') filtered = CONTRACTS.filter(c => c.open);
+    if (filter === 'closed') filtered = CONTRACTS.filter(c => !c.open);
+    document.getElementById('trade-list').innerHTML = filtered.map(contractRowHtml).join('') ||
+      '<div class="empty-state" style="padding:var(--sp-8) var(--sp-4);"><div class="empty-state__body">No contracts to show.</div></div>';
+  }
+
+  const closedTotal = CONTRACTS.filter(c => !c.open).reduce((s, c) => s + c.pnlPaise, 0);
+  const totalEl = document.getElementById('segment-total');
+  totalEl.textContent = AG.formatINR(closedTotal, { showSign: true });
+  totalEl.style.color = closedTotal >= 0 ? 'var(--success)' : 'var(--error)';
+  document.getElementById('segment-count').textContent = String(CONTRACTS.length);
+
+  render('all');
+
+  AG.initDemoBar({
+    all: () => render('all'),
+    open: () => render('open'),
+    closed: () => render('closed'),
+  });
+</script>
+</body>
+</html>

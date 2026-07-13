@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Crypto</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .segment-hero {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg);
+      padding: var(--sp-4); margin-bottom: var(--sp-5);
+    }
+    .segment-hero__label { font-size: 11px; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+    .segment-hero__value { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-size: 20px; font-weight: 700; margin-top: 2px; }
+    .vda-pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 11px; font-weight: 600; color: var(--text-secondary);
+      background: var(--surface-raised); border: 1px solid var(--border);
+      border-radius: var(--r-full); padding: 2px 8px; margin-top: var(--sp-2); margin-right: 4px;
+    }
+    .tax-card {
+      background: var(--error-light); border: 1.5px solid rgba(233,69,96,.3);
+      border-radius: var(--r-xl); padding: var(--sp-4) var(--sp-5); margin-top: var(--sp-5);
+    }
+    .tax-card__title { display: flex; align-items: center; gap: var(--sp-2); font-size: 14px; font-weight: 700; color: var(--error); margin-bottom: var(--sp-3); }
+    .tax-card__row { display: flex; gap: var(--sp-2); align-items: flex-start; font-size: 12px; color: var(--text-secondary); line-height: 1.55; margin-bottom: var(--sp-3); }
+    .tax-card__row:last-child { margin-bottom: 0; }
+    .tax-card__row strong { color: var(--text-primary); }
+    .tax-card__bullet { color: var(--error); font-weight: 700; flex-shrink: 0; }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">Show</span>
+    <button class="demo-btn active" data-state="all">All</button>
+    <button class="demo-btn" data-state="wins">Wins</button>
+    <button class="demo-btn" data-state="losses">Losses</button>
+    <button class="icon-btn" id="theme-toggle" style="margin-left:auto;" aria-label="Toggle theme">
+      <span id="theme-icon" style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Crypto (VDA)</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <a href="analytics.html" class="icon-btn" aria-label="Trade Analytics" title="Analytics" style="text-decoration:none;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+      </a>
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content">
+
+    <div class="segment-hero">
+      <div>
+        <div class="segment-hero__label">Realized P&amp;L · Crypto</div>
+        <div class="segment-hero__value" id="segment-total" style="color:var(--success);">₹83,500</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="segment-hero__label">Trades</div>
+        <div class="segment-hero__value" id="segment-count">2</div>
+      </div>
+    </div>
+
+    <div class="section-title">Trades</div>
+    <div id="trade-list"><!-- rendered by JS --></div>
+
+    <div class="tax-card">
+      <div class="tax-card__title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        VDA Tax Rules — Unusually Punitive
+      </div>
+      <div class="tax-card__row"><span class="tax-card__bullet">•</span><span><strong>Flat 30% tax</strong> on every crypto gain, regardless of your income slab or holding period — there's no LTCG/STCG distinction like equity.</span></div>
+      <div class="tax-card__row"><span class="tax-card__bullet">•</span><span><strong>No loss set-off.</strong> Vikas's ₹6,500 ETH loss cannot reduce his taxable BTC gain of ₹90,000 — each VDA transaction is taxed independently, and losses can't offset gains even <em>within</em> crypto, let alone against other income.</span></div>
+      <div class="tax-card__row"><span class="tax-card__bullet">•</span><span><strong>1% TDS</strong> is deducted at source on transfers above <strong>₹50,000/year</strong> (specified persons) or <strong>₹10,000/year</strong> (everyone else) — adjustable against final tax liability via Form 26AS, but it hits cash flow immediately.</span></div>
+      <div class="tax-card__row"><span class="tax-card__bullet">•</span><span>Estimated tax on this book: <strong>30% of ₹90,000 = ₹27,000</strong> (the ETH loss gives no relief).</span></div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV — none active (no Trade Journal tab)
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="#" class="nav-tab" data-tab="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  /* ── Theme toggle (matches other pages) ── */
+  const stored = localStorage.getItem('ag-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ag-theme', next);
+    document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ag-theme', next);
+      document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = next === 'dark' ? '☀️' : '🌙'; });
+    });
+  });
+
+  /* ── Vikas's Crypto (VDA) trades (paise) ── */
+  const TRADES = [
+    { id:'t10', coin:'BTC', exchange:'CoinDCX', qty:0.15, entryDate:'2026-06-01', entryPricePaise:420000000, exitDate:'2026-06-24', exitPricePaise:480000000, pnlPaise:9000000 },
+    { id:'t12', coin:'ETH', exchange:'WazirX', qty:2, entryDate:'2026-06-20', entryPricePaise:18500000, exitDate:'2026-07-08', exitPricePaise:18175000, pnlPaise:-650000 },
+  ];
+
+  function fmtDate(d) {
+    const dt = new Date(d + 'T00:00:00');
+    return dt.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  function tradeRowHtml(t) {
+    const pnlClass = t.pnlPaise >= 0 ? 'list-row__amount--income' : 'list-row__amount--expense';
+    return `
+      <div class="list-row">
+        <div class="list-row__icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.5 8.5h3.2a1.8 1.8 0 0 1 0 3.6H9.5m0-3.6v7.2m0-3.6h3.6a1.8 1.8 0 0 1 0 3.6H9.5m0-7.2V7m0 9v1.5"/></svg>
+        </div>
+        <div class="list-row__info">
+          <div class="list-row__label">${t.coin} · ${t.exchange}</div>
+          <div class="list-row__meta">Qty ${t.qty} · Entry ${fmtDate(t.entryDate)} @ ${AG.formatINR(t.entryPricePaise)} → Exit ${fmtDate(t.exitDate)} @ ${AG.formatINR(t.exitPricePaise)}</div>
+          <div>
+            <span class="vda-pill">VDA</span>
+            <span class="vda-pill">Taxed flat 30% · no set-off</span>
+          </div>
+        </div>
+        <div class="list-row__amount-row">
+          <div class="list-row__amount ${pnlClass}">${AG.formatINR(t.pnlPaise, { showSign: true })}</div>
+          <div class="list-row__amount-caption">Realized P&amp;L</div>
+        </div>
+      </div>`;
+  }
+
+  function render(filter) {
+    let filtered = TRADES;
+    if (filter === 'wins') filtered = TRADES.filter(t => t.pnlPaise > 0);
+    if (filter === 'losses') filtered = TRADES.filter(t => t.pnlPaise < 0);
+    document.getElementById('trade-list').innerHTML = filtered.map(tradeRowHtml).join('') ||
+      '<div class="empty-state" style="padding:var(--sp-8) var(--sp-4);"><div class="empty-state__body">No trades to show.</div></div>';
+  }
+
+  const total = TRADES.reduce((s, t) => s + t.pnlPaise, 0);
+  const totalEl = document.getElementById('segment-total');
+  totalEl.textContent = AG.formatINR(total, { showSign: true });
+  totalEl.style.color = total >= 0 ? 'var(--success)' : 'var(--error)';
+  document.getElementById('segment-count').textContent = String(TRADES.length);
+
+  render('all');
+
+  AG.initDemoBar({
+    all: () => render('all'),
+    wins: () => render('wins'),
+    losses: () => render('losses'),
+  });
+</script>
+</body>
+</html>
