@@ -331,6 +331,22 @@
         <div class="form-helper">ⓘ Only the last 4 digits are stored. Full card numbers are never saved.</div>
       </div>
 
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-3);">
+        <div class="cc-field">
+          <label class="cc-field__label" for="ac-stmt-day">Statement Day</label>
+          <select class="form-select" id="ac-stmt-day">
+            <option>1</option><option>5</option><option selected>9</option><option>15</option><option>20</option><option>25</option>
+          </select>
+        </div>
+        <div class="cc-field">
+          <label class="cc-field__label" for="ac-due-day">Payment Due Day</label>
+          <select class="form-select" id="ac-due-day">
+            <option>18</option><option>20</option><option>25</option><option selected>28</option><option>3 (next month)</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-helper" style="margin-top:calc(var(--sp-2) * -1); margin-bottom:var(--sp-2);">ⓘ Needed to compute your billing cycle, TAD/MAD, and due-date reminders.</div>
+
     </div>
     <div class="sheet__footer">
       <button class="btn btn--ghost" onclick="AG.closeSheet('add-card-sheet')">Cancel</button>

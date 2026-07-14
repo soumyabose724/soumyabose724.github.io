@@ -402,13 +402,79 @@
         <div class="empty-state__icon">🛡️</div>
         <div class="empty-state__title">No Policies Tracked Yet</div>
         <div class="empty-state__body">Add your term life, health, vehicle, and property insurance policies to track renewals, premiums, and coverage adequacy in one place.</div>
-        <button class="btn btn--primary" style="min-width:180px;" onclick="AG.showToast('Add Policy flow — coming soon','info')">
+        <button class="btn btn--primary" style="min-width:180px;" onclick="AG.openSheet('add-policy')">
           + Add Your First Policy
         </button>
       </div>
     </div>
 
   </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       FAB — Add Policy
+  ═══════════════════════════════════════════ -->
+  <button class="fab" style="display:flex;" aria-label="Add Policy" onclick="AG.openSheet('add-policy')">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </button>
+
+  <!-- ═══════════════════════════════════════════
+       ADD POLICY SHEET
+  ═══════════════════════════════════════════ -->
+  <div class="sheet-backdrop" id="add-policy-backdrop"></div>
+  <div class="sheet" id="add-policy">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <span class="sheet__title">Add Policy</span>
+      <button class="sheet__close" onclick="AG.closeSheet('add-policy')" aria-label="Close">✕</button>
+    </div>
+    <div class="sheet__body">
+      <div class="form-group">
+        <label class="form-label" for="ap-type">Policy Type<span class="required">*</span></label>
+        <select class="form-select" id="ap-type">
+          <option>Term Life</option>
+          <option>Health</option>
+          <option>Vehicle</option>
+          <option>Property</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="ap-insurer">Insurer<span class="required">*</span></label>
+        <input class="form-input" id="ap-insurer" type="text" placeholder="e.g. HDFC Life, Star Health">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="ap-insured">Insured Member<span class="required">*</span></label>
+        <select class="form-select" id="ap-insured">
+          <option>Vikas (Self)</option>
+          <option>Priya (Spouse)</option>
+          <option>Aarav (Child)</option>
+          <option>Sunita (Mother)</option>
+          <option>Family Floater</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="ap-sum">Sum Assured / Insured<span class="required">*</span></label>
+        <div class="form-input-wrap has-prefix">
+          <span class="input-prefix">₹</span>
+          <input class="form-input inr-input" id="ap-sum" type="text" inputmode="numeric" placeholder="1,00,00,000">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="ap-premium">Annual Premium<span class="required">*</span></label>
+        <div class="form-input-wrap has-prefix">
+          <span class="input-prefix">₹</span>
+          <input class="form-input inr-input" id="ap-premium" type="text" inputmode="numeric" placeholder="15,000">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="ap-renewal">Renewal Date<span class="required">*</span></label>
+        <input class="form-input" id="ap-renewal" type="date" value="2027-04-01">
+      </div>
+    </div>
+    <div class="sheet__footer">
+      <button class="btn btn--ghost" onclick="AG.closeSheet('add-policy')">Cancel</button>
+      <button class="btn btn--primary" onclick="savePolicy()">Save Policy</button>
+    </div>
+  </div>
 
   <!-- ═══════════════════════════════════════════
        BOTTOM NAV — none active (no Insurance tab)
@@ -486,6 +552,15 @@
       document.getElementById('view-empty').style.display = '';
     },
   });
+
+  function savePolicy() {
+    const insurer = document.getElementById('ap-insurer').value.trim();
+    const sum = document.getElementById('ap-sum').value.trim();
+    if (!insurer) { AG.showToast('Insurer is required', 'error'); return; }
+    if (!sum) { AG.showToast('Sum assured is required', 'error'); return; }
+    AG.closeSheet('add-policy');
+    AG.showToast(insurer + ' policy saved ✓', 'success');
+  }
 </script>
 </body>
 </html>

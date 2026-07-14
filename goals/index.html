@@ -164,11 +164,68 @@
         <div class="empty-state__icon">🎯</div>
         <div class="empty-state__title">No Goals Yet</div>
         <div class="empty-state__body">Set a target for Child's Education, a Vacation, or a big purchase — ArthaGrid will work out the monthly SIP you need and simulate your odds of getting there.</div>
-        <button class="btn btn--primary" style="min-width:180px;" onclick="AG.showToast('Goal creation — coming soon','info')">+ Create Your First Goal</button>
+        <button class="btn btn--primary" style="min-width:180px;" onclick="AG.openSheet('add-goal')">+ Create Your First Goal</button>
       </div>
     </div>
 
   </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       FAB — Add Goal
+  ═══════════════════════════════════════════ -->
+  <button class="fab" style="display:flex;" aria-label="Add Goal" onclick="AG.openSheet('add-goal')">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </button>
+
+  <!-- ═══════════════════════════════════════════
+       ADD GOAL SHEET
+  ═══════════════════════════════════════════ -->
+  <div class="sheet-backdrop" id="add-goal-backdrop"></div>
+  <div class="sheet" id="add-goal">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <span class="sheet__title">New Goal</span>
+      <button class="sheet__close" onclick="AG.closeSheet('add-goal')" aria-label="Close">✕</button>
+    </div>
+    <div class="sheet__body">
+      <div class="form-group">
+        <label class="form-label" for="ag-name">Goal Name<span class="required">*</span></label>
+        <input class="form-input" id="ag-name" type="text" placeholder="e.g. Home Down Payment">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="ag-target">Target Amount<span class="required">*</span></label>
+        <div class="form-input-wrap has-prefix">
+          <span class="input-prefix">₹</span>
+          <input class="form-input inr-input" id="ag-target" type="text" inputmode="numeric" placeholder="10,00,000">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="ag-date">Target Date<span class="required">*</span></label>
+        <input class="form-input" id="ag-date" type="month" value="2030-06">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="ag-sip">Monthly Contribution (SIP)</label>
+        <div class="form-input-wrap has-prefix">
+          <span class="input-prefix">₹</span>
+          <input class="form-input inr-input" id="ag-sip" type="text" inputmode="numeric" placeholder="Auto-suggested if left blank">
+        </div>
+        <div class="form-helper">Leave blank and ArthaGrid suggests the SIP needed to hit the target on time.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="ag-envelope">Funded From Envelope</label>
+        <select class="form-select" id="ag-envelope">
+          <option>Create a new envelope</option>
+          <option>Emergency Fund</option>
+          <option>Vacation Fund</option>
+          <option>Education</option>
+        </select>
+      </div>
+    </div>
+    <div class="sheet__footer">
+      <button class="btn btn--ghost" onclick="AG.closeSheet('add-goal')">Cancel</button>
+      <button class="btn btn--primary" onclick="saveGoal()">Create Goal</button>
+    </div>
+  </div>
 
   <!-- ═══════════════════════════════════════════
        BOTTOM NAV
@@ -302,6 +359,15 @@
       document.getElementById('view-empty').style.display = '';
     },
   });
+
+  function saveGoal() {
+    const name = document.getElementById('ag-name').value.trim();
+    const target = document.getElementById('ag-target').value.trim();
+    if (!name) { AG.showToast('Goal name is required', 'error'); return; }
+    if (!target) { AG.showToast('Target amount is required', 'error'); return; }
+    AG.closeSheet('add-goal');
+    AG.showToast('"' + name + '" goal created ✓', 'success');
+  }
 </script>
 </body>
 </html>

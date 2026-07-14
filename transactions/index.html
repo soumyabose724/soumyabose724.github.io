@@ -149,13 +149,10 @@
       align-items: flex-end; gap: 1px;
     }
     .list-row__amount { font-size: 14.5px; }
-    .list-row__amount-caption {
-      font-size: 10.5px; text-align: right;
-      max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
+    .list-row__amount-caption { font-size: 10.5px; text-align: right; white-space: nowrap; }
     /* Keep the ML chip inline with the payee — never wrap to a 2nd line */
     .list-row__label { flex-wrap: nowrap; }
-    .list-row__label .payee { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .list-row__label .payee { white-space: nowrap; }
     .list-row__label .chip {
       flex-shrink: 0; height: 17px; padding: 0 6px;
       font-size: 9.5px; letter-spacing: .01em;
@@ -300,11 +297,11 @@
             </div>
             <div class="list-row__info">
               <div class="list-row__label">Salary Credit</div>
-              <div class="list-row__meta">Income · SBI Savings ····4521</div>
+              <div class="list-row__meta">Income · SBI ····4521</div>
             </div>
             <div class="list-row__amount-row">
               <span class="list-row__amount list-row__amount--income">+₹1,20,000</span>
-              <span class="list-row__amount-caption">NEXT_MONTH routing · Regular</span>
+              <span class="list-row__amount-caption">NEXT_MONTH</span>
             </div>
           </div>
 
@@ -312,11 +309,11 @@
             <div class="list-row__icon" style="background:#DBEAFE;">🏠</div>
             <div class="list-row__info">
               <div class="list-row__label">HDFC Home Loan EMI</div>
-              <div class="list-row__meta">Loan Payment · SBI Savings ····4521</div>
+              <div class="list-row__meta">Loan Payment · SBI ····4521</div>
             </div>
             <div class="list-row__amount-row">
               <span class="list-row__amount list-row__amount--expense">−₹38,500</span>
-              <span class="list-row__amount-caption">Principal ₹22,140 + Interest ₹16,360</span>
+              
             </div>
           </div>
 
@@ -344,11 +341,11 @@
             </div>
             <div class="list-row__info">
               <div class="list-row__label">HDFC Millennia Payment</div>
-              <div class="list-row__meta">Card Payment · Full · SBI Savings ····4521</div>
+              <div class="list-row__meta">Card Payment · Full · SBI ····4521</div>
             </div>
             <div class="list-row__amount-row">
               <span class="list-row__amount list-row__amount--expense">−₹15,400</span>
-              <span class="list-row__amount-caption">HDFC Millennia ····4211</span>
+              <span class="list-row__amount-caption">to ····4211</span>
             </div>
           </div>
 
@@ -376,11 +373,11 @@
             </div>
             <div class="list-row__info">
               <div class="list-row__label">HDFC Flexicap Fund</div>
-              <div class="list-row__meta">SIP · SBI Savings ····4521</div>
+              <div class="list-row__meta">SIP · SBI ····4521</div>
             </div>
             <div class="list-row__amount-row">
               <span class="list-row__amount list-row__amount--expense">−₹12,000</span>
-              <span class="list-row__amount-caption">NAV ₹142.35 · 84.3 units</span>
+              <span class="list-row__amount-caption">84.3 units</span>
             </div>
           </div>
 
@@ -390,11 +387,11 @@
             </div>
             <div class="list-row__info">
               <div class="list-row__label">Axis Bluechip Fund</div>
-              <div class="list-row__meta">SIP · SBI Savings ····4521</div>
+              <div class="list-row__meta">SIP · SBI ····4521</div>
             </div>
             <div class="list-row__amount-row">
               <span class="list-row__amount list-row__amount--expense">−₹8,000</span>
-              <span class="list-row__amount-caption">NAV ₹58.20 · 137.5 units</span>
+              <span class="list-row__amount-caption">137.5 units</span>
             </div>
           </div>
 
@@ -420,11 +417,11 @@
             <div class="list-row__icon" style="background:#D1FAE5;">🛒</div>
             <div class="list-row__info">
               <div class="list-row__label">Big Bazaar</div>
-              <div class="list-row__meta">Groceries · HDFC Current ····8912</div>
+              <div class="list-row__meta">Groceries · HDFC ····8912</div>
             </div>
             <div class="list-row__amount-row">
               <span class="list-row__amount list-row__amount--expense">−₹8,200</span>
-              <span class="list-row__amount-caption">Weekly grocery run</span>
+              
             </div>
           </div>
 
@@ -450,11 +447,11 @@
             <div class="list-row__icon" style="background:#E0E7FF;">⚡</div>
             <div class="list-row__info">
               <div class="list-row__label">BESCOM Electricity</div>
-              <div class="list-row__meta">Utilities · HDFC Current ····8912</div>
+              <div class="list-row__meta">Utilities · HDFC ····8912</div>
             </div>
             <div class="list-row__amount-row">
               <span class="list-row__amount list-row__amount--expense">−₹1,900</span>
-              <span class="list-row__amount-caption">UPI · Auto-filled from your history</span>
+              <span class="list-row__amount-caption">UPI</span>
             </div>
           </div>
 
@@ -462,7 +459,7 @@
             <div class="list-row__icon" style="background:#E0E7FF;">⚡</div>
             <div class="list-row__info">
               <div class="list-row__label">Indane Piped Gas</div>
-              <div class="list-row__meta">Utilities · HDFC Current ····8912</div>
+              <div class="list-row__meta">Utilities · HDFC ····8912</div>
             </div>
             <div class="list-row__amount-row">
               <span class="list-row__amount list-row__amount--expense">−₹900</span>
@@ -492,7 +489,7 @@
             <div class="list-row__icon" style="background:#FCE7F3;">📱</div>
             <div class="list-row__info">
               <div class="list-row__label">Jio Postpaid</div>
-              <div class="list-row__meta">Mobile &amp; Internet · HDFC Current ····8912</div>
+              <div class="list-row__meta">Mobile &amp; Internet · HDFC ····8912</div>
             </div>
             <div class="list-row__amount-row">
               <span class="list-row__amount list-row__amount--expense">−₹850</span>
@@ -504,7 +501,7 @@
             <div class="list-row__icon" style="background:#FCE7F3;">📱</div>
             <div class="list-row__info">
               <div class="list-row__label">Airtel Broadband</div>
-              <div class="list-row__meta">Mobile &amp; Internet · HDFC Current ····8912</div>
+              <div class="list-row__meta">Mobile &amp; Internet · HDFC ····8912</div>
             </div>
             <div class="list-row__amount-row">
               <span class="list-row__amount list-row__amount--expense">−₹1,000</span>
@@ -534,14 +531,14 @@
             <div class="list-row__icon" style="background:#FEF3C7;">🍽️</div>
             <div class="list-row__info">
               <div class="list-row__label"><span class="payee">Swiggy</span> <span class="chip chip--info" id="ml-chip-swiggy">ML: Dining?</span></div>
-              <div class="list-row__meta">Suggested · Dining Out · HDFC Current ····8912</div>
+              <div class="list-row__meta">Dining Out · HDFC ····8912</div>
             </div>
             <div class="list-row__actions">
               <button class="list-row__action-btn" title="Confirm category" onclick="event.stopPropagation(); confirmRow('swiggy', 'Dining Out')" id="ml-confirm-swiggy">✓</button>
             </div>
             <div class="list-row__amount-row">
               <span class="list-row__amount list-row__amount--expense">−₹1,800</span>
-              <span class="list-row__amount-caption" id="ml-caption-swiggy">Needs category confirmation</span>
+              <span class="list-row__amount-caption" id="ml-caption-swiggy">Tap ✓ to confirm</span>
             </div>
           </div>
 
@@ -567,11 +564,11 @@
             <div class="list-row__icon" style="background:#FEF3C7;">🍽️</div>
             <div class="list-row__info">
               <div class="list-row__label">Barbeque Nation</div>
-              <div class="list-row__meta">Dining Out · HDFC Current ····8912</div>
+              <div class="list-row__meta">Dining Out · HDFC ····8912</div>
             </div>
             <div class="list-row__amount-row">
               <span class="list-row__amount list-row__amount--expense">−₹2,700</span>
-              <span class="list-row__amount-caption">Family dinner</span>
+              
             </div>
           </div>
 
@@ -597,7 +594,7 @@
             <div class="list-row__icon" style="background:#F1F5F9;">🚗</div>
             <div class="list-row__info">
               <div class="list-row__label">HP Petrol Pump</div>
-              <div class="list-row__meta">Fuel &amp; Transport · HDFC Current ····8912</div>
+              <div class="list-row__meta">Fuel &amp; Transport · ····8912</div>
             </div>
             <div class="list-row__amount-row">
               <span class="list-row__amount list-row__amount--expense">−₹2,200</span>
@@ -627,14 +624,14 @@
             <div class="list-row__icon" style="background:#F1F5F9;">🚗</div>
             <div class="list-row__info">
               <div class="list-row__label"><span class="payee">Uber</span> <span class="chip chip--info" id="ml-chip-uber">ML: Fuel?</span></div>
-              <div class="list-row__meta">Suggested · Fuel &amp; Transport · HDFC Current ····8912</div>
+              <div class="list-row__meta">Fuel &amp; Transport · ····8912</div>
             </div>
             <div class="list-row__actions">
               <button class="list-row__action-btn" title="Confirm category" onclick="event.stopPropagation(); confirmRow('uber', 'Fuel &amp; Transport')" id="ml-confirm-uber">✓</button>
             </div>
             <div class="list-row__amount-row">
               <span class="list-row__amount list-row__amount--expense">−₹900</span>
-              <span class="list-row__amount-caption" id="ml-caption-uber">Needs category confirmation</span>
+              <span class="list-row__amount-caption" id="ml-caption-uber">Tap ✓ to confirm</span>
             </div>
           </div>
 
@@ -662,11 +659,11 @@
             </div>
             <div class="list-row__info">
               <div class="list-row__label">Transfer to Spouse Joint A/c</div>
-              <div class="list-row__meta">Transfer · SBI Savings ····4521 → SBI ····2210</div>
+              <div class="list-row__meta">Transfer · SBI ····4521 → SBI ····2210</div>
             </div>
             <div class="list-row__amount-row">
               <span class="list-row__amount list-row__amount--transfer">−₹5,000</span>
-              <span class="list-row__amount-caption">Household support</span>
+              
             </div>
           </div>
 
