@@ -373,6 +373,14 @@
         </select>
       </div>
       <div class="form-group">
+        <label class="form-label" for="card-from-account">Pay From Account<span class="required">*</span></label>
+        <select class="form-select" id="card-from-account">
+          <option>SBI Savings ····4521</option>
+          <option>HDFC Current ····8912</option>
+        </select>
+        <div class="form-helper">The bill amount is debited from this bank account.</div>
+      </div>
+      <div class="form-group">
         <label class="form-label">Payment Type<span class="required">*</span></label>
         <div class="seg-row">
           <button type="button" class="seg-btn active" data-pay-type="full" onclick="selectPayType('full')">Full</button>
@@ -401,7 +409,16 @@
         <label class="form-label" for="loan-select">Loan<span class="required">*</span></label>
         <select class="form-select" id="loan-select">
           <option>HDFC Home Loan</option>
+          <option>ICICI Car Loan</option>
         </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="loan-from-account">Pay From Account<span class="required">*</span></label>
+        <select class="form-select" id="loan-from-account">
+          <option>SBI Savings ····4521</option>
+          <option>HDFC Current ····8912</option>
+        </select>
+        <div class="form-helper">The EMI is debited from this bank account.</div>
       </div>
       <div class="form-group">
         <label class="form-label" for="loan-amount">Amount<span class="required">*</span></label>
@@ -452,6 +469,14 @@
       <div class="computed-amount-row">
         <span class="computed-amount-row__label">Computed Amount</span>
         <span class="computed-amount-row__value" id="inv-computed">₹12,000</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="inv-from-account">Debit From Account<span class="required">*</span></label>
+        <select class="form-select" id="inv-from-account">
+          <option>SBI Savings ····4521</option>
+          <option>HDFC Current ····8912</option>
+        </select>
+        <div class="form-helper">The investment amount is debited from this bank account.</div>
       </div>
       <div class="form-group">
         <label class="form-label" for="inv-date">Date<span class="required">*</span></label>
