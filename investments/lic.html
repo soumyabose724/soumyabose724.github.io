@@ -19,13 +19,14 @@
     .detail-row__value { font-size: 13px; font-weight: 600; color: var(--text-primary); text-align: right; }
     .detail-row__value.mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
 
-    .irr-table { width: 100%; border-collapse: collapse; margin-top: var(--sp-3); }
-    .irr-table th, .irr-table td { text-align: left; padding: var(--sp-2) var(--sp-2); font-size: 12px; }
-    .irr-table th { color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: .03em; font-size: 10px; border-bottom: 1px solid var(--border); }
-    .irr-table td { border-bottom: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; }
-    .irr-table tr:last-child td { border-bottom: none; }
-    .irr-table td.name { font-family: 'Inter', sans-serif; font-weight: 500; }
-    .irr-highlight td { color: var(--error); font-weight: 700; }
+    .rec-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: var(--sp-3) var(--sp-4); margin-bottom: var(--sp-2); }
+    .rec-card__head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: var(--sp-2); gap: var(--sp-2); }
+    .rec-card__title { font-size: 13.5px; font-weight: 600; color: var(--text-primary); }
+    .rec-card__value { font-size: 14px; font-weight: 700; }
+    .rec-card__rows { display: flex; flex-direction: column; gap: 4px; }
+    .rec-card__row { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary); }
+    .rec-card__row .t-mono { color: var(--text-primary); font-weight: 600; }
+    .rec-card--worst { border-color: rgba(233,69,96,.35); }
 
     .callout-note { font-size: 12.5px; line-height: 1.6; color: var(--text-secondary); margin-top: var(--sp-3); }
     .callout-note strong { color: var(--text-primary); }
@@ -146,28 +147,36 @@
             </div>
             <div class="card-title">IRR vs PPF / FD</div>
           </div>
-          <table class="irr-table">
-            <thead>
-              <tr><th>Instrument</th><th>Typical Return</th><th>Risk</th></tr>
-            </thead>
-            <tbody>
-              <tr class="irr-highlight">
-                <td class="name">This LIC Policy (est. IRR)</td>
-                <td>~5.1% p.a.</td>
-                <td>Nil</td>
-              </tr>
-              <tr>
-                <td class="name">PPF</td>
-                <td>7.1% p.a.</td>
-                <td>Nil</td>
-              </tr>
-              <tr>
-                <td class="name">Bank FD (5–10 yr)</td>
-                <td>6.5–7.0% p.a.</td>
-                <td>Nil–Low</td>
-              </tr>
-            </tbody>
-          </table>
+          <div style="margin-top:var(--sp-3);">
+            <div class="rec-card rec-card--worst">
+              <div class="rec-card__head">
+                <span class="rec-card__title">This LIC Policy</span>
+                <span class="rec-card__value t-mono" style="color:var(--error);">~5.1% p.a.</span>
+              </div>
+              <div class="rec-card__rows">
+                <div class="rec-card__row"><span>Return basis</span><span class="t-mono">Est. IRR, full term</span></div>
+                <div class="rec-card__row"><span>Risk</span><span class="t-mono">Nil</span></div>
+              </div>
+            </div>
+            <div class="rec-card">
+              <div class="rec-card__head">
+                <span class="rec-card__title">PPF</span>
+                <span class="rec-card__value t-mono" style="color:var(--success);">7.1% p.a.</span>
+              </div>
+              <div class="rec-card__rows">
+                <div class="rec-card__row"><span>Risk</span><span class="t-mono">Nil</span></div>
+              </div>
+            </div>
+            <div class="rec-card">
+              <div class="rec-card__head">
+                <span class="rec-card__title">Bank FD (5–10 yr)</span>
+                <span class="rec-card__value t-mono" style="color:var(--success);">6.5–7.0% p.a.</span>
+              </div>
+              <div class="rec-card__rows">
+                <div class="rec-card__row"><span>Risk</span><span class="t-mono">Nil–Low</span></div>
+              </div>
+            </div>
+          </div>
           <div class="callout-note">
             <strong>Honest read:</strong> Traditional LIC endowment/money-back plans bundle insurance and investment together, and typically deliver <strong>5–6% IRR over the full term</strong> — below PPF, FD, and most debt mutual funds, even before tax. The insurance cover (₹10L) is also thin for the premium paid; a comparable <strong>term insurance</strong> plan would cost a fraction of ₹45,239/year for the same cover. Most fee-only advisors recommend buying <strong>pure term insurance separately</strong> and investing the premium difference in PPF/FD/index funds — that combination usually outperforms this policy on both cover and returns. Since this policy is already 10 years in, factor in surrender-value loss before deciding whether to continue, surrender, or convert to paid-up.
           </div>

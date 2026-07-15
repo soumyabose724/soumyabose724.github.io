@@ -32,12 +32,10 @@
     .fy-summary-card__amt { font-family:'JetBrains Mono',monospace; font-size:26px; font-weight:700; }
     .fy-summary-card__sub { font-size:12px; opacity:.85; margin-top:var(--sp-2); }
 
-    .fy-table { width:100%; border-collapse:collapse; margin-top:var(--sp-3); }
-    .fy-table th, .fy-table td { text-align:left; padding:var(--sp-2); font-size:12px; }
-    .fy-table th { color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:.03em; font-size:10px; border-bottom:1px solid var(--border); }
-    .fy-table td { border-bottom:1px solid var(--border); font-family:'JetBrains Mono',monospace; }
-    .fy-table td.name { font-family:'Inter',sans-serif; font-weight:500; }
-    .fy-table tr:last-child td { border-bottom:none; }
+    .fy-breakdown { margin-top:var(--sp-3); padding-top:var(--sp-3); border-top:1px solid rgba(255,255,255,.2); display:flex; flex-direction:column; gap:8px; }
+    .fy-breakdown__row { display:flex; justify-content:space-between; align-items:baseline; gap:var(--sp-2); font-size:12px; }
+    .fy-breakdown__row span:first-child { opacity:.85; }
+    .fy-breakdown__row .t-mono { font-weight:700; font-size:12.5px; }
   </style>
 </head>
 <body>
@@ -132,16 +130,11 @@
         <div class="fy-summary-card__label">Total SIPs This FY (2026-27)</div>
         <div class="fy-summary-card__amt">₹54,000</div>
         <div class="fy-summary-card__sub">9 installments across 3 SIPs · Apr, May &amp; Jun 2026</div>
-        <table class="fy-table" style="color:#fff;">
-          <thead>
-            <tr><th style="color:rgba(255,255,255,.6); border-color:rgba(255,255,255,.2);">Fund</th><th style="color:rgba(255,255,255,.6); border-color:rgba(255,255,255,.2);">Installments</th><th style="color:rgba(255,255,255,.6); border-color:rgba(255,255,255,.2);">Amount</th></tr>
-          </thead>
-          <tbody>
-            <tr><td class="name" style="color:#fff;">Axis Bluechip</td><td style="color:#fff; border-color:rgba(255,255,255,.15);">3</td><td style="color:#fff; border-color:rgba(255,255,255,.15);">₹24,000</td></tr>
-            <tr><td class="name" style="color:#fff;">Parag Parikh Flexi Cap</td><td style="color:#fff; border-color:rgba(255,255,255,.15);">3</td><td style="color:#fff; border-color:rgba(255,255,255,.15);">₹18,000</td></tr>
-            <tr><td class="name" style="color:#fff;">HDFC Nifty 50 Index</td><td style="color:#fff; border-color:rgba(255,255,255,.15);">3</td><td style="color:#fff; border-color:rgba(255,255,255,.15);">₹12,000</td></tr>
-          </tbody>
-        </table>
+        <div class="fy-breakdown">
+          <div class="fy-breakdown__row"><span>Axis Bluechip · 3 installments</span><span class="t-mono">₹24,000</span></div>
+          <div class="fy-breakdown__row"><span>Parag Parikh Flexi Cap · 3 installments</span><span class="t-mono">₹18,000</span></div>
+          <div class="fy-breakdown__row"><span>HDFC Nifty 50 Index · 3 installments</span><span class="t-mono">₹12,000</span></div>
+        </div>
       </div>
 
       <div style="font-size:11px; color:var(--text-muted); line-height:1.6;">

@@ -85,20 +85,38 @@
       font-size: 16px; font-weight: 700; color: var(--success);
     }
 
-    /* ── RD monthly table ── */
-    .rd-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: var(--sp-4); }
-    .rd-table th {
-      text-align: left; font-size: 10px; font-weight: 700; letter-spacing: .05em;
-      text-transform: uppercase; color: var(--text-muted);
-      padding: 6px 4px; border-bottom: 1px solid var(--border);
+    /* ── RD monthly cards ── */
+    .rd-cards { margin-bottom: var(--sp-4); }
+    .rec-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: var(--sp-3) var(--sp-4);
+      margin-bottom: var(--sp-2);
     }
-    .rd-table td {
-      padding: 8px 4px; border-bottom: 1px solid var(--border);
-      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+    .rec-card__head {
+      display: flex; justify-content: space-between; align-items: baseline;
+      gap: var(--sp-3); margin-bottom: var(--sp-2);
     }
-    .rd-table tr:last-child td { border-bottom: none; }
-    .rd-table td.rd-month { font-family: 'Inter', sans-serif; font-weight: 500; color: var(--text-primary); }
-    .rd-table td.rd-highlight { color: var(--primary); font-weight: 700; }
+    .rec-card__title { font-size: 13.5px; font-weight: 600; color: var(--text-primary); }
+    .rec-card__value { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+    .rec-card__value-label {
+      font-size: 10px; font-weight: 700; letter-spacing: .05em;
+      color: var(--text-muted); margin-right: 2px;
+    }
+    .rec-card__rows { display: flex; flex-direction: column; gap: 4px; }
+    .rec-card__row {
+      display: flex; justify-content: space-between; gap: var(--sp-3);
+      font-size: 12px; color: var(--text-secondary);
+    }
+    .rec-card__row .t-mono { color: var(--text-primary); font-weight: 600; }
+    .rec-card--today { border-color: var(--primary); }
+    .rec-card--today .rec-card__title,
+    .rec-card--today .rec-card__value { color: var(--primary); }
+    .rec-card--final {
+      background: var(--primary-xlight);
+      border-color: var(--primary);
+      margin-bottom: 0;
+    }
+    .rec-card--final .rec-card__value { color: var(--primary); }
 
     /* ── TDS threshold card ── */
     .tds-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
@@ -309,13 +327,48 @@
           Unlike a lump-sum FD, each RD instalment starts earning interest only from the month it's deposited. Every month the running balance (previous balance + new instalment) compounds once at the monthly rate — this mirrors the India Post / bank RD convention.
         </p>
         <div class="calc-formula" style="white-space:normal;">Balance(m) = (Balance(m−1) + ₹5,000) × (1 + 0.067/12)</div>
-        <table class="rd-table">
-          <tr><th>Month</th><th>Contributed</th><th>Running Balance</th></tr>
-          <tr><td class="rd-month">Month 1</td><td>₹5,000</td><td>₹5,028</td></tr>
-          <tr><td class="rd-month">Month 12</td><td>₹60,000</td><td>₹61,749</td></tr>
-          <tr><td class="rd-month rd-highlight">Month 19 (today)</td><td class="rd-highlight">₹95,000</td><td class="rd-highlight">₹1,00,486</td></tr>
-          <tr><td class="rd-month">Month 60 (maturity)</td><td>₹3,00,000</td><td>₹3,57,182</td></tr>
-        </table>
+        <div class="rd-cards">
+          <div class="rec-card">
+            <div class="rec-card__head">
+              <span class="rec-card__title">Month 1</span>
+              <span class="rec-card__value t-mono"><span class="rec-card__value-label">BALANCE</span>₹5,028</span>
+            </div>
+            <div class="rec-card__rows">
+              <div class="rec-card__row"><span>Deposited so far</span><span class="t-mono">₹5,000</span></div>
+              <div class="rec-card__row"><span>Interest accrued</span><span class="t-mono">₹28</span></div>
+            </div>
+          </div>
+          <div class="rec-card">
+            <div class="rec-card__head">
+              <span class="rec-card__title">Month 12</span>
+              <span class="rec-card__value t-mono"><span class="rec-card__value-label">BALANCE</span>₹61,749</span>
+            </div>
+            <div class="rec-card__rows">
+              <div class="rec-card__row"><span>Deposited so far</span><span class="t-mono">₹60,000</span></div>
+              <div class="rec-card__row"><span>Interest accrued</span><span class="t-mono">₹1,749</span></div>
+            </div>
+          </div>
+          <div class="rec-card rec-card--today">
+            <div class="rec-card__head">
+              <span class="rec-card__title">Month 19 · Today</span>
+              <span class="rec-card__value t-mono"><span class="rec-card__value-label">BALANCE</span>₹1,00,486</span>
+            </div>
+            <div class="rec-card__rows">
+              <div class="rec-card__row"><span>Deposited so far</span><span class="t-mono">₹95,000</span></div>
+              <div class="rec-card__row"><span>Interest accrued</span><span class="t-mono">₹5,486</span></div>
+            </div>
+          </div>
+          <div class="rec-card rec-card--final">
+            <div class="rec-card__head">
+              <span class="rec-card__title">Month 60 · Maturity</span>
+              <span class="rec-card__value t-mono"><span class="rec-card__value-label">BALANCE</span>₹3,57,182</span>
+            </div>
+            <div class="rec-card__rows">
+              <div class="rec-card__row"><span>Deposited so far</span><span class="t-mono">₹3,00,000</span></div>
+              <div class="rec-card__row"><span>Interest accrued</span><span class="t-mono">₹57,182</span></div>
+            </div>
+          </div>
+        </div>
         <div class="calc-result">
           <span class="calc-result__label">Maturity Value (1 Jan 2030)</span>
           <span class="calc-result__val">₹3,57,182</span>

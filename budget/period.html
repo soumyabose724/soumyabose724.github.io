@@ -323,20 +323,29 @@
       white-space: nowrap;
     }
 
-    /* ── Sweep table ── */
-    .sweep-table { width: 100%; border-collapse: collapse; margin-bottom: var(--sp-4); }
-    .sweep-table td {
-      padding: var(--sp-2) var(--sp-2);
-      font-size: 13px; vertical-align: middle;
-      border-bottom: 1px solid var(--border);
+    /* ── Sweep rule cards ── */
+    .sweep-cards { margin-bottom: var(--sp-4); }
+    .rec-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: var(--sp-3) var(--sp-4);
+      margin-bottom: var(--sp-2);
     }
-    .sweep-table tr:last-child td { border-bottom: none; }
-    .sweep-table .rule-arrow { color: var(--primary); font-weight: 700; padding: 0 var(--sp-1); }
-    .sweep-table .rule-amount {
+    .rec-card__head {
+      display: flex; justify-content: space-between; align-items: baseline;
+      gap: var(--sp-3); margin-bottom: var(--sp-2);
+    }
+    .rec-card__title { font-size: 13.5px; font-weight: 600; color: var(--text-primary); }
+    .rec-card__value {
       font-family: 'JetBrains Mono', monospace;
       font-variant-numeric: tabular-nums;
-      font-weight: 700; color: var(--primary); text-align: right;
+      font-size: 14px; font-weight: 700; color: var(--primary);
     }
+    .rec-card__rows { display: flex; flex-direction: column; gap: 4px; }
+    .rec-card__row {
+      display: flex; justify-content: space-between; gap: var(--sp-3);
+      font-size: 12px; color: var(--text-secondary);
+    }
+    .rec-card__row .t-mono { color: var(--text-primary); font-weight: 600; }
     .sweep-result {
       background: var(--success-light);
       border-radius: var(--r-lg);
@@ -494,7 +503,7 @@
         <polyline points="15 18 9 12 15 6"/>
       </svg>
     </a>
-    <span class="top-bar__title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">June 2026 Budget</span>
+    <span class="top-bar__title" style="white-space:nowrap;">June 2026</span>
     <div class="top-bar__actions" style="gap:4px;">
       <div id="top-bar-page-actions" style="display:flex;gap:4px;align-items:center;"></div>
       <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
@@ -1026,20 +1035,26 @@
       <p style="font-size:13px; color:var(--text-secondary); margin-bottom:var(--sp-4);">
         Based on your past patterns — review and confirm
       </p>
-      <table class="sweep-table">
-        <tr>
-          <td><span style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:.06em;">Rule 1</span></td>
-          <td>Top-up Groceries to ₹12,000</td>
-          <td class="rule-arrow">→</td>
-          <td class="rule-amount">+₹8,200</td>
-        </tr>
-        <tr>
-          <td><span style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:.06em;">Rule 2</span></td>
-          <td>Remainder → Emergency Fund</td>
-          <td class="rule-arrow">→</td>
-          <td class="rule-amount">₹0</td>
-        </tr>
-      </table>
+      <div class="sweep-cards">
+        <div class="rec-card">
+          <div class="rec-card__head">
+            <span class="rec-card__title">Rule 1 · Top-up Groceries</span>
+            <span class="rec-card__value">+₹8,200</span>
+          </div>
+          <div class="rec-card__rows">
+            <div class="rec-card__row"><span>Target envelope</span><span class="t-mono">Groceries → ₹12,000</span></div>
+          </div>
+        </div>
+        <div class="rec-card">
+          <div class="rec-card__head">
+            <span class="rec-card__title">Rule 2 · Remainder</span>
+            <span class="rec-card__value">₹0</span>
+          </div>
+          <div class="rec-card__rows">
+            <div class="rec-card__row"><span>Target envelope</span><span class="t-mono">Emergency Fund</span></div>
+          </div>
+        </div>
+      </div>
       <div class="sweep-result">
         <span>✓</span>
         <span>BALANCED · Unallocated ₹0</span>

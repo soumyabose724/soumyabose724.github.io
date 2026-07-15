@@ -45,32 +45,21 @@
     .cat-bar-track { height: 10px; background: var(--border); border-radius: var(--r-full); overflow: hidden; }
     .cat-bar-fill { height: 100%; border-radius: var(--r-full); }
 
-    /* ── Envelope report table ── */
-    .rep-table { width: 100%; border-collapse: collapse; }
-    .rep-table thead th {
-      font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
-      color: var(--text-muted); text-align: left; padding: 0 0 var(--sp-2);
-      border-bottom: 1px solid var(--border);
+    /* ── Envelope report cards ── */
+    .rec-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: var(--sp-3) var(--sp-4); margin-bottom: var(--sp-2); }
+    .rec-card__head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: var(--sp-2); }
+    .rec-card__title { font-size: 13.5px; font-weight: 600; color: var(--text-primary); }
+    .rec-card__value { font-size: 14px; font-weight: 700; }
+    .rec-card__rows { display: flex; flex-direction: column; gap: 4px; }
+    .rec-card__row { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary); }
+    .rec-card__row .t-mono { color: var(--text-primary); font-weight: 600; }
+    .rec-card--total { border: 1.5px solid var(--primary); background: var(--primary-xlight); margin-top: var(--sp-3); }
+    .rec-group-label {
+      font-size: 11px; font-weight: 700; letter-spacing: .06em;
+      text-transform: uppercase; color: var(--text-muted);
+      margin: var(--sp-4) 0 var(--sp-2);
     }
-    .rep-table thead th.num { text-align: right; }
-    .rep-table tbody td {
-      font-size: 13px; padding: var(--sp-2) 0; border-bottom: 1px solid var(--border);
-      color: var(--text-primary);
-    }
-    .rep-table tbody td.num {
-      text-align: right; font-family:'JetBrains Mono',monospace; font-variant-numeric: tabular-nums;
-    }
-    .rep-table tbody tr:last-child td { border-bottom: none; }
-    .rep-table tfoot td {
-      font-size: 13px; font-weight: 700; padding-top: var(--sp-2);
-      border-top: 2px solid var(--border-strong); color: var(--text-primary);
-    }
-    .rep-table tfoot td.num { text-align: right; font-family:'JetBrains Mono',monospace; }
-    .rep-section-row td {
-      padding-top: var(--sp-4); font-size: 11px; font-weight: 700; letter-spacing: .06em;
-      text-transform: uppercase; color: var(--text-muted); border-bottom: none;
-    }
-    .rep-section-row:first-child td { padding-top: var(--sp-2); }
+    .rec-group-label:first-child { margin-top: 0; }
   </style>
 </head>
 <body>
@@ -135,19 +124,9 @@
     <div class="section-title">Category Breakdown</div>
     <div class="glass-card" style="margin-bottom: var(--sp-4);" id="cat-chart"></div>
 
-    <!-- Envelope-by-envelope table -->
+    <!-- Envelope-by-envelope cards -->
     <div class="section-title">Envelope Detail</div>
-    <div class="glass-card" style="margin-bottom: var(--sp-4); overflow-x:auto;">
-      <table class="rep-table">
-        <thead>
-          <tr><th>Envelope</th><th class="num">Allocated</th><th class="num">Spent</th><th class="num">Remaining</th></tr>
-        </thead>
-        <tbody id="env-tbody"></tbody>
-        <tfoot>
-          <tr><td>Total</td><td class="num">₹1,20,000</td><td class="num">₹78,950</td><td class="num">₹41,050</td></tr>
-        </tfoot>
-      </table>
-    </div>
+    <div id="env-list" style="margin-bottom: var(--sp-4);"></div>
 
     <!-- Share / Export -->
     <button class="btn btn--primary btn--full btn--lg" id="share-pdf-btn">
@@ -246,23 +225,39 @@
   ];
 
   function renderEnvTable() {
-    const tbody = document.getElementById('env-tbody');
+    const list = document.getElementById('env-list');
     let html = '';
     let lastSection = '';
+    let tAlloc = 0, tSpent = 0;
     ENVELOPES.forEach(e => {
       if (e.section !== lastSection) {
-        html += `<tr class="rep-section-row"><td colspan="4">${e.section}</td></tr>`;
+        html += `<div style="font-size:11px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--text-muted); margin:var(--sp-4) 0 var(--sp-2);">${e.section}</div>`;
         lastSection = e.section;
       }
       const remaining = e.alloc - e.spent;
-      html += `<tr>
-        <td>${e.name}</td>
-        <td class="num">${AG.formatINR(e.alloc)}</td>
-        <td class="num">${AG.formatINR(e.spent)}</td>
-        <td class="num" style="color:${remaining === 0 ? 'var(--success)' : 'inherit'}">${AG.formatINR(remaining)}</td>
-      </tr>`;
+      tAlloc += e.alloc; tSpent += e.spent;
+      html += `<div class="rec-card">
+        <div class="rec-card__head">
+          <span class="rec-card__title">${e.name}</span>
+          <span class="rec-card__value t-mono" style="color:${remaining === 0 ? 'var(--success)' : 'var(--primary)'};">${AG.formatINR(remaining)} left</span>
+        </div>
+        <div class="rec-card__rows">
+          <div class="rec-card__row"><span>Allocated</span><span class="t-mono">${AG.formatINR(e.alloc)}</span></div>
+          <div class="rec-card__row"><span>Spent</span><span class="t-mono">${AG.formatINR(e.spent)}</span></div>
+        </div>
+      </div>`;
     });
-    tbody.innerHTML = html;
+    html += `<div class="rec-card rec-card--total">
+      <div class="rec-card__head">
+        <span class="rec-card__title">Total</span>
+        <span class="rec-card__value t-mono" style="color:var(--primary);">${AG.formatINR(tAlloc - tSpent)} left</span>
+      </div>
+      <div class="rec-card__rows">
+        <div class="rec-card__row"><span>Allocated</span><span class="t-mono">${AG.formatINR(tAlloc)}</span></div>
+        <div class="rec-card__row"><span>Spent</span><span class="t-mono">${AG.formatINR(tSpent)}</span></div>
+      </div>
+    </div>`;
+    list.innerHTML = html;
   }
 
   function renderCatChart() {

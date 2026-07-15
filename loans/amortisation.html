@@ -26,40 +26,36 @@
       font-size: 13px; font-weight: 700; color: var(--text-primary);
     }
 
-    /* ── Table ── */
-    .amort-table-wrap {
-      overflow-x: auto; border: 1px solid var(--border); border-radius: var(--r-lg);
-      margin-bottom: var(--sp-4); -webkit-overflow-scrolling: touch;
+    /* ── Schedule cards ── */
+    .rec-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: var(--sp-3) var(--sp-4);
+      margin-bottom: var(--sp-2);
     }
-    table.amort-table {
-      width: 100%; border-collapse: collapse; min-width: 460px;
-      font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+    .rec-card__head {
+      display: flex; justify-content: space-between; align-items: baseline;
+      gap: var(--sp-3); margin-bottom: var(--sp-2);
     }
-    .amort-table thead th {
-      position: sticky; top: 0; background: var(--surface-raised);
-      font-family: 'Inter', sans-serif;
-      font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
-      color: var(--text-muted); text-align: right; padding: var(--sp-2) var(--sp-3);
-      border-bottom: 1px solid var(--border);
+    .rec-card__title { font-size: 13.5px; font-weight: 600; color: var(--text-primary); }
+    .rec-card__value { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+    .rec-card__value-label {
+      font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 700;
+      letter-spacing: .05em; color: var(--text-muted); margin-right: 2px;
     }
-    .amort-table thead th:first-child { text-align: left; }
-    .amort-table tbody td {
-      font-size: 12px; text-align: right; padding: 6px var(--sp-3);
-      border-bottom: 1px solid var(--border); color: var(--text-secondary);
-      white-space: nowrap;
+    .rec-card__rows { display: flex; flex-direction: column; gap: 4px; }
+    .rec-card__row {
+      display: flex; justify-content: space-between; gap: var(--sp-3);
+      font-size: 12px; color: var(--text-secondary);
     }
-    .amort-table tbody td:first-child {
-      text-align: left; font-family: 'Inter', sans-serif; font-weight: 600; color: var(--text-primary);
+    .rec-card__row .t-mono { color: var(--text-primary); font-weight: 600; }
+    .rec-card__row .t-mono.val-principal { color: var(--success); }
+    .rec-card__row .t-mono.val-interest  { color: var(--error); }
+    .amort-divider {
+      text-align: center; font-size: 11px; color: var(--text-muted); font-weight: 500;
+      background: var(--surface-raised); border: 1px dashed var(--border);
+      border-radius: var(--r-lg); padding: var(--sp-2); margin-bottom: var(--sp-2);
     }
-    .amort-table tbody td.col-principal { color: var(--success); }
-    .amort-table tbody td.col-interest { color: var(--error); }
-    .amort-table tbody td.col-balance { color: var(--text-primary); font-weight: 600; }
-    .amort-table tbody tr:last-child td { border-bottom: none; }
-    .amort-divider td {
-      text-align: center !important; font-family: 'Inter', sans-serif !important;
-      font-size: 11px; color: var(--text-muted); font-weight: 500;
-      background: var(--surface-raised); padding: var(--sp-2);
-    }
+    #amort-cards { margin-bottom: var(--sp-4); }
 
     .show-full-btn { width: 100%; }
   </style>
@@ -121,21 +117,8 @@
       </div>
     </div>
 
-    <!-- Table -->
-    <div class="amort-table-wrap">
-      <table class="amort-table">
-        <thead>
-          <tr>
-            <th>Month</th>
-            <th>EMI</th>
-            <th>Principal</th>
-            <th>Interest</th>
-            <th>Balance</th>
-          </tr>
-        </thead>
-        <tbody id="amort-tbody"><!-- rendered by JS --></tbody>
-      </table>
-    </div>
+    <!-- Schedule cards -->
+    <div id="amort-cards"><!-- rendered by JS --></div>
 
     <button class="btn btn--secondary show-full-btn" id="toggle-full-btn" onclick="toggleFull()">Show Full Schedule</button>
 
@@ -254,13 +237,17 @@
   }
 
   function rowHtml(row, base) {
-    return `<tr>
-      <td>${row.month} · ${monthLabel(base, row.month - 1)}</td>
-      <td>${AG.formatINR(row.emi)}</td>
-      <td class="col-principal">${AG.formatINR(row.principal)}</td>
-      <td class="col-interest">${AG.formatINR(row.interest)}</td>
-      <td class="col-balance">${AG.formatINR(row.balance)}</td>
-    </tr>`;
+    return `<div class="rec-card">
+      <div class="rec-card__head">
+        <span class="rec-card__title">Month ${row.month} · ${monthLabel(base, row.month - 1)}</span>
+        <span class="rec-card__value t-mono"><span class="rec-card__value-label">EMI</span>${AG.formatINR(row.emi)}</span>
+      </div>
+      <div class="rec-card__rows">
+        <div class="rec-card__row"><span>Principal</span><span class="t-mono val-principal">${AG.formatINR(row.principal)}</span></div>
+        <div class="rec-card__row"><span>Interest</span><span class="t-mono val-interest">${AG.formatINR(row.interest)}</span></div>
+        <div class="rec-card__row"><span>Balance</span><span class="t-mono">${AG.formatINR(row.balance)}</span></div>
+      </div>
+    </div>`;
   }
 
   function truncated(rows) {
@@ -273,17 +260,17 @@
 
   function renderTable() {
     const base = LOANS[current].nextDue;
-    const tbody = document.getElementById('amort-tbody');
+    const container = document.getElementById('amort-cards');
     if (expanded) {
-      tbody.innerHTML = schedule.map(r => rowHtml(r, base)).join('');
+      container.innerHTML = schedule.map(r => rowHtml(r, base)).join('');
     } else {
       const t = truncated(schedule);
       if (t.truncatedView) {
-        tbody.innerHTML = t.head.map(r => rowHtml(r, base)).join('')
-          + `<tr class="amort-divider"><td colspan="5">⋯ ${t.hidden} more months ⋯</td></tr>`
+        container.innerHTML = t.head.map(r => rowHtml(r, base)).join('')
+          + `<div class="amort-divider">⋯ ${t.hidden} more months ⋯</div>`
           + t.tail.map(r => rowHtml(r, base)).join('');
       } else {
-        tbody.innerHTML = schedule.map(r => rowHtml(r, base)).join('');
+        container.innerHTML = schedule.map(r => rowHtml(r, base)).join('');
       }
     }
     document.getElementById('toggle-full-btn').textContent = expanded
