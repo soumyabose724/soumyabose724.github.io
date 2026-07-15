@@ -126,7 +126,7 @@
       );
     }
 
-    /* ── Envelope breakdown table ── */
+    /* ── Envelope breakdown list ── */
     .env-table-card {
       margin: 0 var(--sp-4) var(--sp-4);
       background: var(--glass-fill);
@@ -139,30 +139,11 @@
       animation: card-in var(--dur-med) var(--ease-out) 60ms both;
     }
 
-    /* Header row */
-    .env-table-header {
-      display: grid;
-      grid-template-columns: 1fr 72px 72px 58px 88px;
-      gap: 0;
-      padding: var(--sp-2) var(--sp-4);
-      border-bottom: 1px solid var(--border);
-      background: var(--surface-raised);
-    }
-    .env-table-header span {
-      font-size: 10px; font-weight: 700; letter-spacing: .07em;
-      text-transform: uppercase; color: var(--text-muted);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .env-table-header span:not(:first-child) { text-align: right; }
-
-    /* Data row */
+    /* Row: two stacked lines — name + status chip, then spend + burn% */
     .env-table-row {
-      display: grid;
-      grid-template-columns: 1fr 72px 72px 58px 88px;
-      gap: 0;
+      display: flex; flex-direction: column; gap: 6px;
       padding: var(--sp-3) var(--sp-4);
       border-bottom: 1px solid var(--border);
-      align-items: center;
       transition: background var(--dur-fast);
     }
     .env-table-row:last-child { border-bottom: none; }
@@ -170,37 +151,41 @@
     .env-table-row--over { background: rgba(233,69,96,.03); }
     .env-table-row--over:hover { background: rgba(233,69,96,.07); }
 
-    .env-table-row__name {
+    .env-table-row__top {
       display: flex; align-items: center; gap: var(--sp-2);
-      font-size: 13px; font-weight: 500; color: var(--text-primary);
-      min-width: 0;
+    }
+    .env-table-row__name {
+      flex: 1; min-width: 0;
+      display: flex; align-items: center; gap: var(--sp-2);
+      font-size: 13px; font-weight: 600; color: var(--text-primary);
     }
     .env-table-row__emoji { font-size: 16px; flex-shrink: 0; }
-    .env-table-row__label {
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      font-size: 12px;
+    .env-table-row__label { font-size: 13px; }
+    .env-table-row__bottom {
+      display: flex; justify-content: space-between; align-items: baseline;
+      gap: var(--sp-3);
+      font-size: 12px; color: var(--text-secondary);
     }
     .env-table-row__budget {
       font-family: 'JetBrains Mono', monospace;
       font-variant-numeric: tabular-nums;
-      font-size: 11px; font-weight: 500;
-      color: var(--text-muted); text-align: right;
+      font-size: 12px; font-weight: 500;
+      color: var(--text-muted);
     }
     .env-table-row__spent {
       font-family: 'JetBrains Mono', monospace;
       font-variant-numeric: tabular-nums;
       font-size: 12px; font-weight: 600;
-      color: var(--text-primary); text-align: right;
+      color: var(--text-primary);
     }
     .env-table-row__spent--over { color: var(--error); }
     .env-table-row__pct {
       font-family: 'JetBrains Mono', monospace;
       font-variant-numeric: tabular-nums;
-      font-size: 12px; font-weight: 600;
-      text-align: right;
-      padding-right: var(--sp-2);
+      font-size: 12px; font-weight: 700;
+      flex-shrink: 0;
     }
-    .env-table-row__status { text-align: right; }
+    .env-table-row__status { flex-shrink: 0; }
     .env-table-row .chip {
       font-size: 10px; height: 20px; padding: 0 6px;
     }
@@ -373,15 +358,6 @@
     <div class="section-heading">Envelope Breakdown</div>
 
     <div class="env-table-card">
-      <!-- Header -->
-      <div class="env-table-header">
-        <span>Envelope</span>
-        <span>Budget</span>
-        <span>Spent</span>
-        <span>Burn%</span>
-        <span>Status</span>
-      </div>
-
       <!-- Rows rendered by JS into #env-table-body -->
       <div id="env-table-body"></div>
     </div>
@@ -630,15 +606,18 @@ function renderTable(key) {
     const spentClass = env.over ? 'env-table-row__spent env-table-row__spent--over' : 'env-table-row__spent';
 
     row.innerHTML = `
-      <div class="env-table-row__name">
-        <span class="env-table-row__emoji">${env.emoji}</span>
-        <span class="env-table-row__label">${env.name}</span>
+      <div class="env-table-row__top">
+        <div class="env-table-row__name">
+          <span class="env-table-row__emoji">${env.emoji}</span>
+          <span class="env-table-row__label">${env.name}</span>
+        </div>
+        <div class="env-table-row__status">
+          <span class="chip ${env.chipCls}">${env.chipTxt}</span>
+        </div>
       </div>
-      <div class="env-table-row__budget">${env.budget}</div>
-      <div class="${spentClass}">${env.spent}</div>
-      <div class="env-table-row__pct" style="color:${pctColor};">${env.pct}</div>
-      <div class="env-table-row__status">
-        <span class="chip ${env.chipCls}">${env.chipTxt}</span>
+      <div class="env-table-row__bottom">
+        <span><span class="${spentClass}">${env.spent}</span> <span class="env-table-row__budget">of ${env.budget} spent</span></span>
+        <span class="env-table-row__pct" style="color:${pctColor};">${env.pct} burn</span>
       </div>
     `;
     body.appendChild(row);
