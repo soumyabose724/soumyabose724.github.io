@@ -21,6 +21,10 @@
     }
     .list-row--archived { opacity: .6; }
     .list-row--archived:hover { background: var(--surface); box-shadow: none; }
+
+    /* ── No clipped text: let label + meta wrap instead of ellipsing ── */
+    .list-row__label,
+    .list-row__meta { white-space: normal; overflow: visible; text-overflow: clip; }
   </style>
 </head>
 <body>
@@ -176,7 +180,7 @@
       <div class="list-row__icon list-row__icon--muted">YES</div>
       <div class="list-row__info">
         <div class="list-row__label">Yes Bank <span class="chip chip--closed">Closed</span></div>
-        <div class="list-row__meta">•••• 5543 · Closed 12 Mar 2024 · migrated to HDFC</div>
+        <div class="list-row__meta">•••• 5543 · Closed Mar 2024</div>
       </div>
       <div class="list-row__actions">
         <button class="list-row__action-btn" onclick="AG.showToast('Closed accounts are read-only', 'info')" aria-label="Restore">

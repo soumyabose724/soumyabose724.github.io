@@ -247,10 +247,10 @@
     const expEl = document.getElementById('kpi-expectancy');
     expEl.textContent = (stats.expectancyR >= 0 ? '+' : '') + stats.expectancyR.toFixed(2) + 'R';
     expEl.className = 'kpi-tile__value ' + (stats.expectancyR >= 0 ? 'kpi-tile__value--pos' : 'kpi-tile__value--neg');
-    document.getElementById('kpi-drawdown').textContent = AG.formatINR(stats.maxDD * 100);
+    document.getElementById('kpi-drawdown').textContent = AG.formatINR(stats.maxDD);
     document.getElementById('kpi-drawdown-sub').textContent = stats.peakAtDD ? ((stats.maxDD / stats.peakAtDD) * 100).toFixed(1) + '% of peak' : '—';
     const endEl = document.getElementById('chart-end-value');
-    endEl.textContent = AG.formatINR(stats.total * 100, { showSign: true });
+    endEl.textContent = (stats.total >= 0 ? '+' : '') + AG.formatINR(stats.total);
     endEl.style.color = stats.total >= 0 ? 'var(--success)' : 'var(--error)';
 
     /* Chart */
@@ -274,7 +274,7 @@
       const val = domainMin + ((domainMax - domainMin) / gridSteps) * i;
       const y = yOf(val);
       gridlines += `<line x1="${PAD_L}" y1="${y}" x2="${W - PAD_R}" y2="${y}" stroke="${gridColor}" stroke-width="1"/>`;
-      gridlines += `<text x="${PAD_L}" y="${y - 3}" font-size="7" fill="var(--text-muted)">${AG.formatINR(Math.round(val) * 100, { compact: true })}</text>`;
+      gridlines += `<text x="${PAD_L}" y="${y - 3}" font-size="7" fill="var(--text-muted)">${AG.formatINR(Math.round(val), { compact: true })}</text>`;
     }
 
     const points = curve.map((v, i) => `${xOf(i)},${yOf(v)}`).join(' ');
@@ -303,7 +303,7 @@
         <div class="rec-card">
           <div class="rec-card__head">
             <span class="rec-card__title"><span class="bd-dot"></span>${SEGMENT_LABELS[seg]}</span>
-            <span class="rec-card__value t-mono" style="color:${color};">${AG.formatINR(total * 100, { showSign: true })}</span>
+            <span class="rec-card__value t-mono" style="color:${color};">${(total >= 0 ? "+" : "") + AG.formatINR(total)}</span>
           </div>
           <div class="rec-card__rows">
             <div class="rec-card__row"><span>Trades</span><span class="t-mono">${segTrades.length}</span></div>

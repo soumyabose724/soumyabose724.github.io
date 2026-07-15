@@ -22,6 +22,10 @@
     }
     .segment-hero__label { font-size: 11px; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
     .segment-hero__value { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-size: 20px; font-weight: 700; margin-top: 2px; }
+
+    /* ── No clipped text: let label + meta wrap instead of ellipsing ── */
+    .list-row__label,
+    .list-row__meta { white-space: normal; overflow: visible; text-overflow: clip; }
   </style>
 </head>
 <body>
@@ -166,6 +170,10 @@
     const dt = new Date(d + 'T00:00:00');
     return dt.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
   }
+  function fmtDateShort(d) {
+    const dt = new Date(d + 'T00:00:00');
+    return dt.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+  }
   function daysBetween(a, b) {
     return Math.round((b - a) / (1000 * 60 * 60 * 24));
   }
@@ -190,7 +198,7 @@
             ${t.vcp ? '<span class="chip chip--vcp">VCP</span>' : ''}
             ${t.open ? '<span class="chip chip--info">Open</span>' : ''}
           </div>
-          <div class="list-row__meta">Qty ${t.qty} · Entry ${fmtDate(t.entryDate)} @ ${AG.formatINR(t.entryPricePaise, { showPaise: true })}${t.open ? '' : ' → Exit ' + fmtDate(t.exitDate) + ' @ ' + AG.formatINR(t.exitPricePaise, { showPaise: true })}</div>
+          <div class="list-row__meta">Qty ${t.qty} · ${t.open ? 'Entered ' + fmtDate(t.entryDate) : fmtDateShort(t.entryDate) + ' → ' + fmtDate(t.exitDate)}</div>
           <div class="holding-pill">⏱ ${holdingLabel}</div>
         </div>
         <div class="list-row__amount-row">

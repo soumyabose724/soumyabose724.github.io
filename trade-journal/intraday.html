@@ -30,6 +30,10 @@
       margin-top: var(--sp-5);
     }
     .info-box strong { color: var(--info); }
+
+    /* ── No clipped text: let label + meta wrap instead of ellipsing ── */
+    .list-row__label,
+    .list-row__meta { white-space: normal; overflow: visible; text-overflow: clip; }
   </style>
 </head>
 <body>
@@ -185,7 +189,7 @@
             ${t.instrument}
             ${t.vcp ? '<span class="chip chip--vcp">VCP</span>' : ''}
           </div>
-          <div class="list-row__meta">Qty ${t.qty} · ${fmtDate(t.date)} · Entry ${t.entryTime} @ ${AG.formatINR(t.entryPricePaise, { showPaise: true })} → Exit ${t.exitTime} @ ${AG.formatINR(t.exitPricePaise, { showPaise: true })}</div>
+          <div class="list-row__meta">Qty ${t.qty} · ${fmtDate(t.date)} · ${t.entryTime} → ${t.exitTime}</div>
           <div class="cost-pill">Gross ${AG.formatINR(t.grossPaise, { showSign: true })} − Costs ${AG.formatINR(t.costPaise)}</div>
         </div>
         <div class="list-row__amount-row">

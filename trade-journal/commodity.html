@@ -21,6 +21,10 @@
       background: var(--surface-raised); border: 1px solid var(--border);
       border-radius: var(--r-full); padding: 2px 8px; margin-top: var(--sp-2);
     }
+
+    /* ── No clipped text: let label + meta wrap instead of ellipsing ── */
+    .list-row__label,
+    .list-row__meta { white-space: normal; overflow: visible; text-overflow: clip; }
   </style>
 </head>
 <body>
@@ -161,6 +165,10 @@
     const dt = new Date(d + 'T00:00:00');
     return dt.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
   }
+  function fmtDateShort(d) {
+    const dt = new Date(d + 'T00:00:00');
+    return dt.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+  }
 
   function tradeRowHtml(t) {
     const pnlClass = t.pnlPaise >= 0 ? 'list-row__amount--income' : 'list-row__amount--expense';
@@ -171,7 +179,7 @@
         </div>
         <div class="list-row__info">
           <div class="list-row__label">${t.contract}</div>
-          <div class="list-row__meta">Lot ${t.lot} · Entry ${fmtDate(t.entryDate)} @ ${AG.formatINR(t.entryPricePaise)} → Exit ${fmtDate(t.exitDate)} @ ${AG.formatINR(t.exitPricePaise)}</div>
+          <div class="list-row__meta">Lot ${t.lot} · ${fmtDateShort(t.entryDate)} → ${fmtDate(t.exitDate)}</div>
           <div class="mcx-pill">MCX</div>
         </div>
         <div class="list-row__amount-row">

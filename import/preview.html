@@ -45,35 +45,35 @@
       background: var(--surface-raised); padding: 1px 5px; border-radius: 4px;
     }
 
-    /* ── Preview table (horizontally scrollable) ── */
-    .preview-table-wrap {
-      overflow-x: auto; border: 1px solid var(--border); border-radius: var(--r-lg);
-      -webkit-overflow-scrolling: touch;
+    /* ── Preview cards ── */
+    .imp-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: var(--sp-3) var(--sp-4); margin-bottom: var(--sp-2);
     }
-    table.preview-table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 620px; }
-    table.preview-table thead th {
-      background: var(--surface-raised); color: var(--text-secondary);
-      font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
-      text-align: left; padding: var(--sp-3); border-bottom: 1px solid var(--border);
-      white-space: nowrap; position: sticky; top: 0;
+    .imp-card.dup-row { background: var(--warning-light); border-color: rgba(245,158,11,.35); }
+    .imp-card.excluded { opacity: .5; }
+    .imp-card__head { display: flex; align-items: flex-start; gap: var(--sp-3); }
+    .imp-card__desc {
+      flex: 1; min-width: 0; font-size: 12.5px; font-weight: 600;
+      color: var(--text-primary); line-height: 1.4; word-break: break-word;
     }
-    table.preview-table tbody td {
-      padding: var(--sp-3); border-bottom: 1px solid var(--border);
-      color: var(--text-primary); white-space: nowrap;
+    .imp-card__amt {
+      flex-shrink: 0; font-size: 13px; font-weight: 700;
     }
-    table.preview-table tbody tr:last-child td { border-bottom: none; }
-    table.preview-table tbody tr.dup-row { background: var(--warning-light); }
-    table.preview-table tbody tr.excluded { opacity: .5; }
+    .imp-card__rows {
+      margin-top: var(--sp-2); padding-left: calc(18px + var(--sp-3));
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .imp-card__row { display: flex; justify-content: space-between; gap: var(--sp-3); font-size: 11.5px; color: var(--text-secondary); }
     .amt-debit  { color: var(--error); font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
     .amt-credit { color: var(--success); font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
-    .amt-balance { color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
     .dup-badge {
       display: inline-flex; align-items: center; gap: 3px;
       font-size: 9px; font-weight: 700; letter-spacing: .02em;
       padding: 2px 7px; border-radius: var(--r-full);
-      background: var(--warning); color: #fff; margin-left: 6px; white-space: nowrap;
+      background: var(--warning); color: #fff; white-space: nowrap; margin-top: 4px;
     }
-    .row-checkbox { width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer; }
+    .row-checkbox { width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer; flex-shrink: 0; margin-top: 1px; }
 
     /* ── Summary strip ── */
     .preview-summary {
@@ -159,21 +159,7 @@
         <span>Rows highlighted in amber are <strong>possible duplicates</strong> — they match an existing transaction on <code>date + amount + description + account</code> (SHA-256 hash-based dedup check). Uncheck a row to skip importing it.</span>
       </div>
 
-      <div class="preview-table-wrap">
-        <table class="preview-table">
-          <thead>
-            <tr>
-              <th></th>
-              <th>Date</th>
-              <th>Description</th>
-              <th>Debit</th>
-              <th>Credit</th>
-              <th>Balance</th>
-            </tr>
-          </thead>
-          <tbody id="preview-tbody"><!-- rendered by JS --></tbody>
-        </table>
-      </div>
+      <div id="preview-list"><!-- rendered by JS --></div>
 
       <div class="preview-summary">
         <div class="preview-summary__stat">
@@ -280,20 +266,23 @@
   }
 
   function renderTable() {
-    const rows = ROWS.map((r, i) => {
-      const debitCell  = r.debit  != null ? `<span class="amt-debit">${fmt(r.debit)}</span>` : '—';
-      const creditCell = r.credit != null ? `<span class="amt-credit">${fmt(r.credit)}</span>` : '—';
+    const cards = ROWS.map((r, i) => {
+      const amount = r.debit != null
+        ? `<span class="amt-debit">−${fmt(r.debit)}</span>`
+        : `<span class="amt-credit">+${fmt(r.credit)}</span>`;
       return `
-        <tr class="${r.dup ? 'dup-row' : ''}" data-idx="${i}">
-          <td><input type="checkbox" class="row-checkbox" data-idx="${i}" ${r.dup ? '' : 'checked'} onchange="onRowToggle(${i})"></td>
-          <td>${r.date}</td>
-          <td>${r.desc}${r.dup ? '<span class="dup-badge">Possible Duplicate</span>' : ''}</td>
-          <td>${debitCell}</td>
-          <td>${creditCell}</td>
-          <td class="amt-balance">${fmt(r.balance)}</td>
-        </tr>`;
+        <div class="imp-card ${r.dup ? 'dup-row' : ''}" data-idx="${i}">
+          <div class="imp-card__head">
+            <input type="checkbox" class="row-checkbox" data-idx="${i}" ${r.dup ? '' : 'checked'} onchange="onRowToggle(${i})">
+            <div class="imp-card__desc">${r.desc}${r.dup ? '<div><span class="dup-badge">Possible Duplicate</span></div>' : ''}</div>
+            <div class="imp-card__amt">${amount}</div>
+          </div>
+          <div class="imp-card__rows">
+            <div class="imp-card__row"><span>${r.date}</span><span>HDFC Bank Savings</span></div>
+          </div>
+        </div>`;
     }).join('');
-    document.getElementById('preview-tbody').innerHTML = rows;
+    document.getElementById('preview-list').innerHTML = cards;
     updateStats();
   }
 
@@ -313,7 +302,7 @@
   }
 
   function onRowToggle(idx) {
-    const row = document.querySelector(`tr[data-idx="${idx}"]`);
+    const row = document.querySelector(`.imp-card[data-idx="${idx}"]`);
     const checked = document.querySelector(`.row-checkbox[data-idx="${idx}"]`).checked;
     row.classList.toggle('excluded', !checked);
     updateStats();

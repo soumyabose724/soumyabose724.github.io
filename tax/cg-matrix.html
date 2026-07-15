@@ -8,18 +8,19 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/style.css">
   <style>
-    .cg-table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
-    .cg-table { width:100%; border-collapse:collapse; min-width:640px; }
-    .cg-table th, .cg-table td { text-align:left; padding:var(--sp-2) var(--sp-3); font-size:11.5px; vertical-align:top; }
-    .cg-table th {
-      color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:.03em;
-      font-size:9.5px; border-bottom:1.5px solid var(--border); white-space:nowrap;
+    .rec-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg); padding:var(--sp-3) var(--sp-4); margin-bottom:var(--sp-2); }
+    .rec-card__head { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:var(--sp-2); }
+    .rec-card__title { font-size:13.5px; font-weight:600; color:var(--text-primary); }
+    .rec-card__value { font-size:14px; font-weight:700; }
+    .rec-card__rows { display:flex; flex-direction:column; gap:4px; }
+    .rec-card__row { display:flex; justify-content:space-between; gap:var(--sp-3); font-size:12px; color:var(--text-secondary); }
+    .rec-card__row .t-mono { color:var(--text-primary); font-weight:600; flex-shrink:0; }
+    .rec-card__note {
+      font-size:11.5px; color:var(--text-secondary); line-height:1.55;
+      margin-top:var(--sp-2); padding-top:var(--sp-2); border-top:1px dashed var(--border);
     }
-    .cg-table td { border-bottom:1px solid var(--border); }
-    .cg-table td.name { font-weight:700; color:var(--text-primary); white-space:nowrap; }
-    .cg-table tr:last-child td { border-bottom:none; }
-    .cg-table td.mono { font-family:'JetBrains Mono',monospace; white-space:nowrap; }
-    .note-chip { font-size:10.5px; color:var(--text-secondary); line-height:1.5; max-width:180px; }
+    .rec-card__note strong { color:var(--text-primary); }
+    .rec-card__note a { color:var(--primary); }
     .info-note {
       font-size:12px; line-height:1.6; color:var(--text-secondary);
       background:var(--info-light); border:1px solid rgba(59,130,246,.25); border-radius:var(--r-md);
@@ -59,60 +60,71 @@
 
     <div class="t-caption text-muted mb-4">How capital gains are taxed across every asset class Vikas holds — post Budget-2024 rules, FY 2026-27.</div>
 
-    <div class="glass-card glass-card--compact">
-      <div class="card-header" style="margin-bottom:var(--sp-2);">
-        <div class="card-title">Rate &amp; Rule Matrix</div>
+    <div class="section-title">Rate &amp; Rule Matrix</div>
+
+    <div class="rec-card">
+      <div class="rec-card__head">
+        <span class="rec-card__title">Equities &amp; Equity MF</span>
       </div>
-      <div class="cg-table-wrap">
-        <table class="cg-table">
-          <thead>
-            <tr><th>Asset Class</th><th>STCG</th><th>LTCG</th><th>Rate</th><th>Grandfathering / Note</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="name">Equities &amp; Equity MF</td>
-              <td class="mono">₹16,000</td>
-              <td class="mono">₹40,000</td>
-              <td>STCG 20% · LTCG 12.5%</td>
-              <td class="note-chip">Holding &gt;12mo = LTCG. ₹1,25,000/FY LTCG exemption used (₹40,000 of it) — ₹0 tax this FY. All lots bought after 31 Jan 2018, so no grandfathering applies. See <a href="../investments/capital-gains.html" style="color:var(--primary);">Capital Gains</a>.</td>
-            </tr>
-            <tr>
-              <td class="name">Physical Gold</td>
-              <td class="mono">₹0</td>
-              <td class="mono">₹0</td>
-              <td>STCG slab · LTCG 12.5%</td>
-              <td class="note-chip">No gold sold this FY. Holding &gt;24mo = LTCG, indexation removed w.e.f. 23 Jul 2024 (Budget 2024). ≤24mo taxed at slab rate.</td>
-            </tr>
-            <tr>
-              <td class="name">Sovereign Gold Bond (SGB)</td>
-              <td class="mono">₹0</td>
-              <td class="mono">₹0</td>
-              <td>Exempt at maturity</td>
-              <td class="note-chip">Redemption via RBI at/after 5yr maturity window is <strong>fully tax-exempt</strong>. Early exit on stock exchange before that: LTCG with indexation if held &gt;3 years, else slab rate. See <a href="../investments/sgb.html" style="color:var(--primary);">SGB</a>.</td>
-            </tr>
-            <tr>
-              <td class="name">REITs / InvITs</td>
-              <td class="mono">₹0</td>
-              <td class="mono">₹0</td>
-              <td>STCG 20% · LTCG 12.5%</td>
-              <td class="note-chip">No units sold this FY (current holdings only). Listed units follow the equity-style 12-month LTCG threshold. Distribution income (dividend/interest component) is separately taxed at slab rate. See <a href="../investments/reits.html" style="color:var(--primary);">REITs</a>.</td>
-            </tr>
-            <tr>
-              <td class="name">Listed Bonds / NCDs</td>
-              <td class="mono">₹0</td>
-              <td class="mono">₹0</td>
-              <td>STCG slab · LTCG 12.5%</td>
-              <td class="note-chip">No sale this FY. Post Budget-2024, listed bonds/NCDs held &gt;12mo qualify as LTCG at 12.5% without indexation; ≤12mo taxed at slab rate. Coupon interest is always slab-rate income.</td>
-            </tr>
-            <tr>
-              <td class="name">Crypto (VDA)</td>
-              <td class="mono" colspan="2">₹90,000 gain (taxable)</td>
-              <td>Flat 30%</td>
-              <td class="note-chip">No STCG/LTCG distinction for VDA — every gain is taxed flat regardless of holding period. ₹6,500 ETH loss cannot offset the ₹90,000 BTC gain. See <a href="../trade-journal/crypto.html" style="color:var(--primary);">Crypto Journal</a>.</td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="rec-card__rows">
+        <div class="rec-card__row"><span>STCG (≤12 mo) · 20%</span><span class="t-mono">₹16,000</span></div>
+        <div class="rec-card__row"><span>LTCG (&gt;12 mo) · 12.5%</span><span class="t-mono">₹40,000</span></div>
       </div>
+      <div class="rec-card__note">₹1,25,000/FY LTCG exemption used (₹40,000 of it) — ₹0 LTCG tax this FY. All lots bought after 31 Jan 2018, so no grandfathering applies. See <a href="../investments/capital-gains.html">Capital Gains</a>.</div>
+    </div>
+
+    <div class="rec-card">
+      <div class="rec-card__head">
+        <span class="rec-card__title">Physical Gold</span>
+      </div>
+      <div class="rec-card__rows">
+        <div class="rec-card__row"><span>STCG (≤24 mo) · slab rate</span><span class="t-mono">₹0</span></div>
+        <div class="rec-card__row"><span>LTCG (&gt;24 mo) · 12.5%</span><span class="t-mono">₹0</span></div>
+      </div>
+      <div class="rec-card__note">No gold sold this FY. Indexation removed w.e.f. 23 Jul 2024 (Budget 2024).</div>
+    </div>
+
+    <div class="rec-card">
+      <div class="rec-card__head">
+        <span class="rec-card__title">Sovereign Gold Bond (SGB)</span>
+      </div>
+      <div class="rec-card__rows">
+        <div class="rec-card__row"><span>RBI maturity redemption</span><span class="t-mono">Exempt</span></div>
+        <div class="rec-card__row"><span>Sold this FY</span><span class="t-mono">₹0</span></div>
+      </div>
+      <div class="rec-card__note">Redemption via RBI at/after the 5yr maturity window is <strong>fully tax-exempt</strong>. Early exit on stock exchange before that: LTCG with indexation if held &gt;3 years, else slab rate. See <a href="../investments/sgb.html">SGB</a>.</div>
+    </div>
+
+    <div class="rec-card">
+      <div class="rec-card__head">
+        <span class="rec-card__title">REITs / InvITs</span>
+      </div>
+      <div class="rec-card__rows">
+        <div class="rec-card__row"><span>STCG (≤12 mo) · 20%</span><span class="t-mono">₹0</span></div>
+        <div class="rec-card__row"><span>LTCG (&gt;12 mo) · 12.5%</span><span class="t-mono">₹0</span></div>
+      </div>
+      <div class="rec-card__note">No units sold this FY (current holdings only). Listed units follow the equity-style 12-month LTCG threshold. Distribution income (dividend/interest component) is separately taxed at slab rate. See <a href="../investments/reits.html">REITs</a>.</div>
+    </div>
+
+    <div class="rec-card">
+      <div class="rec-card__head">
+        <span class="rec-card__title">Listed Bonds / NCDs</span>
+      </div>
+      <div class="rec-card__rows">
+        <div class="rec-card__row"><span>STCG (≤12 mo) · slab rate</span><span class="t-mono">₹0</span></div>
+        <div class="rec-card__row"><span>LTCG (&gt;12 mo) · 12.5%</span><span class="t-mono">₹0</span></div>
+      </div>
+      <div class="rec-card__note">No sale this FY. Post Budget-2024, listed bonds/NCDs held &gt;12mo qualify as LTCG at 12.5% without indexation; ≤12mo taxed at slab rate. Coupon interest is always slab-rate income.</div>
+    </div>
+
+    <div class="rec-card">
+      <div class="rec-card__head">
+        <span class="rec-card__title">Crypto (VDA)</span>
+      </div>
+      <div class="rec-card__rows">
+        <div class="rec-card__row"><span>All gains · flat 30%</span><span class="t-mono">₹90,000</span></div>
+      </div>
+      <div class="rec-card__note">No STCG/LTCG distinction for VDA — every gain is taxed flat regardless of holding period. ₹6,500 ETH loss cannot offset the ₹90,000 BTC gain. See <a href="../trade-journal/crypto.html">Crypto Journal</a>.</div>
     </div>
 
     <div class="info-note">
