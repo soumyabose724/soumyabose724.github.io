@@ -67,34 +67,40 @@
       <!-- Hero: combined gold exposure -->
       <div class="glass-card glass-card--hero">
         <div class="loans-hero-label" style="font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-secondary); margin-bottom:var(--sp-2);">Combined Gold Exposure</div>
-        <div class="amount-text amount-text--display gradient-text">₹5,50,000</div>
+        <div class="amount-text amount-text--display gradient-text" id="hero-total">₹5,50,000</div>
         <div class="stat-row">
           <div class="stat-col">
             <div class="stat-col__label">Total Weight</div>
-            <div class="stat-col__value">76.2 g</div>
+            <div class="stat-col__value" id="hero-weight">76.2 g</div>
           </div>
           <div class="stat-col">
             <div class="stat-col__label">Jewellery Share</div>
-            <div class="stat-col__value">88%</div>
+            <div class="stat-col__value" id="hero-jewellery-pct">88%</div>
           </div>
           <div class="stat-col">
             <div class="stat-col__label">Digital Share</div>
-            <div class="stat-col__value">12%</div>
+            <div class="stat-col__value" id="hero-digital-pct">12%</div>
           </div>
         </div>
         <div class="gold-split-bar">
-          <div class="gold-split-bar__seg--jewellery" style="width:88%;"></div>
-          <div class="gold-split-bar__seg--digital" style="width:12%;"></div>
+          <div class="gold-split-bar__seg--jewellery" id="hero-jewellery-bar" style="width:88%;"></div>
+          <div class="gold-split-bar__seg--digital" id="hero-digital-bar" style="width:12%;"></div>
         </div>
         <div class="gold-legend">
-          <span><span class="gold-legend__dot" style="background:var(--primary);"></span>Jewellery ₹4,86,200</span>
-          <span><span class="gold-legend__dot" style="background:#F59E0B;"></span>Digital ₹63,800</span>
+          <span><span class="gold-legend__dot" style="background:var(--primary);"></span>Jewellery <span id="hero-jewellery-val">₹4,86,200</span></span>
+          <span><span class="gold-legend__dot" style="background:#F59E0B;"></span>Digital <span id="hero-digital-val">₹63,800</span></span>
         </div>
       </div>
+
+      <button class="btn btn--secondary btn--full" style="margin-top:var(--sp-4);" onclick="openAddGoldSheet()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Gold Holding
+      </button>
 
       <!-- Jewellery -->
       <div class="section">
         <div class="section-title">Physical Jewellery</div>
+        <div id="jewellery-list"></div>
         <div class="list-row" style="cursor:default;">
           <div class="list-row__icon list-row__icon--warning">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
@@ -138,6 +144,7 @@
       <!-- Digital gold -->
       <div class="section">
         <div class="section-title">Digital Gold</div>
+        <div id="digital-list"></div>
         <div class="list-row" style="cursor:default;">
           <div class="list-row__icon" style="background:linear-gradient(135deg,#D97706,#F59E0B);">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
@@ -164,7 +171,48 @@
         <div class="empty-state__icon">🪙</div>
         <div class="empty-state__title">No Gold Holdings Tracked</div>
         <div class="empty-state__body">Add family jewellery or digital gold purchases to see your combined gold exposure alongside your other investments.</div>
-        <a href="index.html" class="btn btn--primary" style="min-width:180px; text-decoration:none;">+ Add Gold Holding</a>
+        <button class="btn btn--primary" style="min-width:180px;" onclick="openAddGoldSheet()">+ Add Gold Holding</button>
+      </div>
+    </div>
+
+    <!-- Add Gold Sheet -->
+    <div class="sheet-backdrop" id="add-gold-backdrop"></div>
+    <div class="sheet" id="add-gold">
+      <div class="sheet__handle"></div>
+      <div class="sheet__header">
+        <span class="sheet__title">Add Gold Holding</span>
+        <button class="sheet__close" onclick="AG.closeSheet('add-gold')" aria-label="Close">✕</button>
+      </div>
+      <div class="sheet__body">
+        <div class="form-group">
+          <label class="form-label">Type</label>
+          <select class="form-select" id="ag-type" onchange="updateGoldPurityDefault()">
+            <option value="jewellery">Physical Jewellery</option>
+            <option value="digital">Digital Gold</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" id="ag-name-label">Item Name</label>
+          <input class="form-input" id="ag-name" type="text" placeholder="e.g. Necklace, Groww Digital Gold">
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-3);">
+          <div class="form-group">
+            <label class="form-label">Weight (grams)</label>
+            <input class="form-input" id="ag-weight" type="text" inputmode="decimal" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Purity</label>
+            <select class="form-select" id="ag-purity">
+              <option value="24">24K</option>
+              <option value="22">22K</option>
+              <option value="18">18K</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="sheet__footer">
+        <button class="btn btn--ghost" onclick="AG.closeSheet('add-gold')">Cancel</button>
+        <button class="btn btn--primary" onclick="saveGold()">Save Holding</button>
       </div>
     </div>
 
@@ -241,6 +289,85 @@
       document.getElementById('view-empty').style.display = '';
     },
   });
+
+  const GOLD_RATES = { 24: 7780, 22: 7150, 18: 5850 };
+
+  function parseINRLocal(text) { return parseInt(text.replace(/[₹,]/g, ''), 10) || 0; }
+  function parseGramsLocal(text) { return parseFloat(text.replace(/[^\d.]/g, '')) || 0; }
+
+  function updateGoldPurityDefault() {
+    const type = document.getElementById('ag-type').value;
+    document.getElementById('ag-name-label').textContent = type === 'jewellery' ? 'Item Name' : 'Platform / Product Name';
+    document.getElementById('ag-purity').value = type === 'jewellery' ? '22' : '24';
+  }
+
+  function openAddGoldSheet() {
+    document.getElementById('ag-type').value = 'jewellery';
+    document.getElementById('ag-name').value = '';
+    document.getElementById('ag-weight').value = '';
+    document.getElementById('ag-purity').value = '22';
+    updateGoldPurityDefault();
+    AG.openSheet('add-gold');
+  }
+
+  let newGoldCount = 0;
+  function saveGold() {
+    const type = document.getElementById('ag-type').value;
+    const name = document.getElementById('ag-name').value.trim();
+    const weight = parseFloat(document.getElementById('ag-weight').value || '0');
+    const purity = parseInt(document.getElementById('ag-purity').value, 10);
+
+    if (!name) { AG.showToast('Enter a name', 'error'); return; }
+    if (!weight) { AG.showToast('Enter the weight in grams', 'error'); return; }
+
+    newGoldCount++;
+    const rate = GOLD_RATES[purity];
+    const valueRupees = Math.round(weight * rate);
+    const isJewellery = type === 'jewellery';
+
+    const rowHtml = `
+      <div class="list-row" style="cursor:default;" id="new-gold-${newGoldCount}">
+        <div class="list-row__icon ${isJewellery ? 'list-row__icon--warning' : ''}" ${isJewellery ? '' : 'style="background:linear-gradient(135deg,#D97706,#F59E0B);"'}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${isJewellery ? '<circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>' : '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>'}</svg>
+        </div>
+        <div class="list-row__info">
+          <div class="list-row__label">${name}</div>
+          <div class="list-row__meta">${weight}g · ${purity}K${isJewellery ? ' purity' : ''}</div>
+        </div>
+        <div class="list-row__amount-row">
+          <div class="list-row__amount">${AG.formatINR(valueRupees * 100)}</div>
+          <div class="list-row__amount-caption">@ ${AG.formatINR(rate * 100)}/g (${purity}K rate)</div>
+        </div>
+      </div>`;
+
+    document.getElementById(isJewellery ? 'jewellery-list' : 'digital-list').insertAdjacentHTML('beforeend', rowHtml);
+
+    const heroTotalEl = document.getElementById('hero-total');
+    const jewelleryValEl = document.getElementById('hero-jewellery-val');
+    const digitalValEl = document.getElementById('hero-digital-val');
+    const newTotal = parseINRLocal(heroTotalEl.textContent) + valueRupees;
+    const newJewelleryVal = parseINRLocal(jewelleryValEl.textContent) + (isJewellery ? valueRupees : 0);
+    const newDigitalVal = parseINRLocal(digitalValEl.textContent) + (isJewellery ? 0 : valueRupees);
+
+    heroTotalEl.textContent = AG.formatINR(newTotal * 100);
+    jewelleryValEl.textContent = AG.formatINR(newJewelleryVal * 100);
+    digitalValEl.textContent = AG.formatINR(newDigitalVal * 100);
+
+    const newWeight = parseGramsLocal(document.getElementById('hero-weight').textContent) + weight;
+    document.getElementById('hero-weight').textContent = newWeight.toFixed(1) + ' g';
+
+    const jewelleryPct = newTotal ? Math.round(newJewelleryVal / newTotal * 100) : 0;
+    const digitalPct = 100 - jewelleryPct;
+    document.getElementById('hero-jewellery-pct').textContent = jewelleryPct + '%';
+    document.getElementById('hero-digital-pct').textContent = digitalPct + '%';
+    document.getElementById('hero-jewellery-bar').style.width = jewelleryPct + '%';
+    document.getElementById('hero-digital-bar').style.width = digitalPct + '%';
+
+    document.getElementById('view-populated').style.display = '';
+    document.getElementById('view-empty').style.display = 'none';
+    AG.closeSheet('add-gold');
+    AG.showToast(name + ' added ✓', 'success');
+  }
 </script>
 </body>
 </html>
