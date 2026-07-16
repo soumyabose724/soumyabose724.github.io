@@ -36,6 +36,8 @@
       display: flex; gap: var(--sp-2); overflow-x: auto;
       padding: var(--sp-1) 0 var(--sp-3); scrollbar-width: none;
       -webkit-overflow-scrolling: touch;
+      -webkit-mask-image: linear-gradient(to right, #000 92%, transparent 100%);
+      mask-image: linear-gradient(to right, #000 92%, transparent 100%);
     }
     .filter-strip::-webkit-scrollbar { display: none; }
     .filter-chip {
@@ -231,16 +233,16 @@
 
   const INDEX = [
     // Transactions (June 2026 ledger)
-    { cat:'txn', title:'Salary Credit', meta:'Income · 1 Jun · SBI Savings', amount:'+₹1,20,000', pos:true, href:'../transactions/detail.html' },
-    { cat:'txn', title:'HDFC Home Loan EMI', meta:'Loan Payment · 1 Jun', amount:'−₹38,500', href:'../transactions/detail.html' },
-    { cat:'txn', title:'Big Bazaar', meta:'Groceries · 8 Jun · HDFC Current', amount:'−₹8,200', href:'../transactions/detail.html' },
-    { cat:'txn', title:'Swiggy', meta:'Dining Out · 15 Jun · UPI', amount:'−₹1,800', href:'../transactions/detail.html' },
-    { cat:'txn', title:'BESCOM Electricity', meta:'Utilities · 10 Jun', amount:'−₹1,900', href:'../transactions/detail.html' },
-    { cat:'txn', title:'HDFC Flexicap Fund SIP', meta:'Investment · 5 Jun', amount:'−₹12,000', href:'../transactions/detail.html' },
-    { cat:'txn', title:'Barbeque Nation', meta:'Dining Out · 18 Jun', amount:'−₹2,700', href:'../transactions/detail.html' },
-    { cat:'txn', title:'HP Petrol Pump', meta:'Fuel & Transport · 20 Jun · UPI', amount:'−₹2,200', href:'../transactions/detail.html' },
-    { cat:'txn', title:'Uber', meta:'Fuel & Transport · 22 Jun', amount:'−₹900', href:'../transactions/detail.html' },
-    { cat:'txn', title:'HDFC Millennia Payment', meta:'Card Payment · 3 Jun', amount:'−₹15,400', href:'../transactions/detail.html' },
+    { cat:'txn', title:'Salary Credit', meta:'Income · 1 Jun · SBI Savings', amount:'+₹1,20,000', pos:true, emoji:'💰', bg:'#D1FAE5', href:'../transactions/detail.html' },
+    { cat:'txn', title:'HDFC Home Loan EMI', meta:'Loan Payment · 1 Jun', amount:'−₹38,500', emoji:'🏠', bg:'#DBEAFE', href:'../transactions/detail.html' },
+    { cat:'txn', title:'Big Bazaar', meta:'Groceries · 8 Jun · HDFC Current', amount:'−₹8,200', emoji:'🛒', bg:'#D1FAE5', href:'../transactions/detail.html' },
+    { cat:'txn', title:'Swiggy', meta:'Dining Out · 15 Jun · UPI', amount:'−₹1,800', emoji:'🍽️', bg:'#FEF3C7', href:'../transactions/detail.html' },
+    { cat:'txn', title:'BESCOM Electricity', meta:'Utilities · 10 Jun', amount:'−₹1,900', emoji:'⚡', bg:'#E0E7FF', href:'../transactions/detail.html' },
+    { cat:'txn', title:'HDFC Flexicap Fund SIP', meta:'Investment · 5 Jun', amount:'−₹12,000', emoji:'📈', bg:'#EDE9FE', href:'../transactions/detail.html' },
+    { cat:'txn', title:'Barbeque Nation', meta:'Dining Out · 18 Jun', amount:'−₹2,700', emoji:'🍽️', bg:'#FEF3C7', href:'../transactions/detail.html' },
+    { cat:'txn', title:'HP Petrol Pump', meta:'Fuel & Transport · 20 Jun · UPI', amount:'−₹2,200', emoji:'🚗', bg:'#F1F5F9', href:'../transactions/detail.html' },
+    { cat:'txn', title:'Uber', meta:'Fuel & Transport · 22 Jun', amount:'−₹900', emoji:'🚗', bg:'#F1F5F9', href:'../transactions/detail.html' },
+    { cat:'txn', title:'HDFC Millennia Payment', meta:'Card Payment · 3 Jun', amount:'−₹15,400', emoji:'💳', bg:'#FCE7F3', href:'../transactions/detail.html' },
     // Envelopes (June 2026 budget)
     { cat:'envelope', title:'Housing EMI', meta:'Envelope · ₹38,500 spent of ₹38,500', href:'../budget/period.html' },
     { cat:'envelope', title:'Groceries', meta:'Envelope · ₹8,200 spent of ₹12,000', href:'../budget/period.html' },
@@ -312,14 +314,15 @@
   }
 
   function rowHtml(item, q) {
-    const grad = item.cat === 'txn' ? (item.pos ? GRAD.income : GRAD.expense) : GRAD[item.cat];
-    const icon = ICONS[item.cat] || ICONS.other;
     const amtColor = item.pos ? 'var(--success)' : (item.cat === 'txn' ? 'var(--error)' : 'var(--text-primary)');
+    const iconHtml = item.emoji
+      ? `<div class="result-row__icon" style="background:${item.bg};font-size:17px;">${item.emoji}</div>`
+      : `<div class="result-row__icon" style="background:${GRAD[item.cat]};">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${ICONS[item.cat] || ICONS.other}</svg>
+        </div>`;
     return `
       <a class="result-row" href="${item.href}">
-        <div class="result-row__icon" style="background:${grad};">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${icon}</svg>
-        </div>
+        ${iconHtml}
         <div class="result-row__body">
           <div class="result-row__title">${highlight(item.title, q)}</div>
           <div class="result-row__meta">${esc(item.meta)}</div>

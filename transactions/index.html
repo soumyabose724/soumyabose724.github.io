@@ -72,6 +72,8 @@
     .txn-chip-row {
       display: flex; gap: var(--sp-2); overflow-x: auto; padding-bottom: 2px;
       scrollbar-width: none;
+      -webkit-mask-image: linear-gradient(to right, #000 92%, transparent 100%);
+      mask-image: linear-gradient(to right, #000 92%, transparent 100%);
     }
     .txn-chip-row::-webkit-scrollbar { display: none; }
     .txn-chip {
@@ -150,6 +152,11 @@
     }
     .list-row__amount { font-size: 14.5px; }
     .list-row__amount-caption { font-size: 10.5px; text-align: right; white-space: nowrap; }
+    /* ── Scheduled chip (teal variant) ── */
+    .chip--scheduled {
+      background: var(--primary-light); color: var(--primary);
+      border-color: var(--primary);
+    }
     /* Keep the ML chip inline with the payee — never wrap to a 2nd line */
     .list-row__label { flex-wrap: nowrap; }
     .list-row__label .payee { white-space: nowrap; }
@@ -301,7 +308,7 @@
             </div>
             <div class="list-row__amount-row">
               <span class="list-row__amount list-row__amount--income">+₹1,20,000</span>
-              <span class="list-row__amount-caption">NEXT_MONTH</span>
+              <span class="chip chip--scheduled" style="font-size:9px;height:16px;padding:0 5px;">NEXT MONTH</span>
             </div>
           </div>
 

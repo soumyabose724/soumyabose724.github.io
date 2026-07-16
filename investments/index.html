@@ -55,6 +55,8 @@
     .asset-tile-row {
       display:flex; gap:var(--sp-3); overflow-x:auto; padding:2px 2px 8px;
       -webkit-overflow-scrolling:touch; scrollbar-width:none;
+      -webkit-mask-image: linear-gradient(to right, #000 94%, transparent 100%);
+      mask-image: linear-gradient(to right, #000 94%, transparent 100%);
     }
     .asset-tile-row::-webkit-scrollbar { display:none; }
     .asset-tile {
@@ -249,6 +251,7 @@
 
       <!-- Other Asset Classes (tracked elsewhere) -->
       <div class="tile-group-label">More Asset Classes</div>
+      <div style="font-size:11px;color:var(--text-muted);margin:-6px 0 var(--sp-2);">Not currently held — tap to view or add</div>
       <div class="asset-tile-row">
         <a href="sgb.html" class="asset-tile asset-tile--muted">
           <div class="asset-tile__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M8 9.5h5.5a2 2 0 1 1 0 4H9"/></svg></div>

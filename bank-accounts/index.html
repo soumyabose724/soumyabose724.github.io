@@ -75,6 +75,13 @@
     .accounts-grid {
       display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3);
     }
+    .account-tile--add {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: var(--sp-2); border-style: dashed; color: var(--text-muted);
+      background: transparent; width: 100%; font: inherit; min-height: 140px;
+    }
+    .account-tile--add:hover { color: var(--primary); border-color: var(--primary); background: var(--primary-xlight); }
+    .account-tile--add span { font-size: 13px; font-weight: 600; }
     .account-tile {
       background: var(--surface); border: 1px solid var(--border);
       border-radius: var(--r-xl); padding: var(--sp-4);
@@ -234,6 +241,11 @@
           <div class="account-tile__balance amount-text amount-text--lg">₹18,940</div>
           <div class="account-tile__caption">Household &amp; Freelance</div>
         </a>
+
+        <button class="account-tile account-tile--add" onclick="AG.openSheet('add-account')">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span>Add Account</span>
+        </button>
 
       </div>
 

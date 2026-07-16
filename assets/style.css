@@ -532,6 +532,9 @@ ul,ol { list-style:none; }
 
 /* ─────────────────────────────────────────────
    §12  STATUS CHIP
+   Outline/light-fill = ongoing state (over, at-risk, behind...).
+   Solid fill = needs action now (overdue, critical) — reserved
+   for the two most urgent variants only.
 ───────────────────────────────────────────── */
 .chip {
   display:inline-flex; align-items:center; gap:4px;
