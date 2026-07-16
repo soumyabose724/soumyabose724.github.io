@@ -71,26 +71,32 @@
       <!-- Hero -->
       <div class="glass-card glass-card--hero">
         <div class="loans-hero-label" style="font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-secondary); margin-bottom:var(--sp-2);">Current Value — REITs &amp; InvITs</div>
-        <div class="amount-text amount-text--display gradient-text">₹2,56,250</div>
+        <div class="amount-text amount-text--display gradient-text" id="hero-total">₹2,56,250</div>
         <div class="stat-row">
           <div class="stat-col">
             <div class="stat-col__label">Invested</div>
-            <div class="stat-col__value">₹2,33,750</div>
+            <div class="stat-col__value" id="hero-invested">₹2,33,750</div>
           </div>
           <div class="stat-col">
             <div class="stat-col__label">Unrealised Gain</div>
-            <div class="stat-col__value" style="color:var(--success);">+₹22,500</div>
+            <div class="stat-col__value" id="hero-gain" style="color:var(--success);">+₹22,500</div>
           </div>
           <div class="stat-col">
             <div class="stat-col__label">Units Held</div>
-            <div class="stat-col__value">750</div>
+            <div class="stat-col__value" id="hero-units">750</div>
           </div>
         </div>
       </div>
 
+      <button class="btn btn--secondary btn--full" style="margin-top:var(--sp-4);" onclick="openAddReitSheet()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add REIT / InvIT
+      </button>
+
       <!-- Holding 1: Embassy -->
       <div class="section">
         <div class="section-title">Holdings</div>
+        <div id="reit-list"></div>
         <div class="list-row" style="cursor:default;">
           <div class="list-row__icon" style="background:linear-gradient(135deg,#2563EB,#3B82F6);">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
@@ -161,7 +167,51 @@
         <div class="empty-state__icon">🏢</div>
         <div class="empty-state__title">No REIT / InvIT Holdings</div>
         <div class="empty-state__body">REITs let you invest in rent-yielding commercial real estate (offices, malls) via listed units — add a holding to track NAV and distribution income here.</div>
-        <a href="index.html" class="btn btn--primary" style="min-width:180px; text-decoration:none;">+ Add REIT / InvIT</a>
+        <button class="btn btn--primary" style="min-width:180px;" onclick="openAddReitSheet()">+ Add REIT / InvIT</button>
+      </div>
+    </div>
+
+    <!-- Add REIT Sheet -->
+    <div class="sheet-backdrop" id="add-reit-backdrop"></div>
+    <div class="sheet" id="add-reit">
+      <div class="sheet__handle"></div>
+      <div class="sheet__header">
+        <span class="sheet__title">Add REIT / InvIT</span>
+        <button class="sheet__close" onclick="AG.closeSheet('add-reit')" aria-label="Close">✕</button>
+      </div>
+      <div class="sheet__body">
+        <div class="form-group">
+          <label class="form-label">Name</label>
+          <input class="form-input" id="ar-name" type="text" placeholder="e.g. Brookfield India REIT">
+        </div>
+        <div class="form-group">
+          <label class="form-label">NSE Symbol</label>
+          <input class="form-input" id="ar-symbol" type="text" placeholder="e.g. BIRET">
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-3);">
+          <div class="form-group">
+            <label class="form-label">Units</label>
+            <input class="form-input" id="ar-units" type="text" inputmode="numeric" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Buy Price (₹/unit)</label>
+            <div class="form-input-wrap has-prefix">
+              <span class="input-prefix">₹</span>
+              <input class="form-input inr-input" id="ar-buyprice" type="text" inputmode="decimal" placeholder="0">
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Current NAV (₹/unit)</label>
+          <div class="form-input-wrap has-prefix">
+            <span class="input-prefix">₹</span>
+            <input class="form-input inr-input" id="ar-nav" type="text" inputmode="decimal" placeholder="0">
+          </div>
+        </div>
+      </div>
+      <div class="sheet__footer">
+        <button class="btn btn--ghost" onclick="AG.closeSheet('add-reit')">Cancel</button>
+        <button class="btn btn--primary" onclick="saveReit()">Save Holding</button>
       </div>
     </div>
 
@@ -238,6 +288,65 @@
       document.getElementById('view-empty').style.display = '';
     },
   });
+
+  function parseINRLocal(text) { return parseInt(text.replace(/[₹,+]/g, ''), 10) || 0; }
+
+  function openAddReitSheet() {
+    ['ar-name', 'ar-symbol', 'ar-units', 'ar-buyprice', 'ar-nav'].forEach(id => { document.getElementById(id).value = ''; });
+    AG.openSheet('add-reit');
+  }
+
+  let newReitCount = 0;
+  function saveReit() {
+    const name = document.getElementById('ar-name').value.trim();
+    const symbol = document.getElementById('ar-symbol').value.trim();
+    const units = parseInt(document.getElementById('ar-units').value || '0', 10);
+    const buyPrice = parseFloat(document.getElementById('ar-buyprice').value || '0');
+    const nav = parseFloat(document.getElementById('ar-nav').value || '0');
+
+    if (!name) { AG.showToast('Enter the REIT/InvIT name', 'error'); return; }
+    if (!units || !buyPrice || !nav) { AG.showToast('Enter units, buy price, and current NAV', 'error'); return; }
+
+    newReitCount++;
+    const investedRupees = Math.round(units * buyPrice);
+    const currentRupees = Math.round(units * nav);
+    const gainPct = ((currentRupees - investedRupees) / investedRupees * 100);
+    const gainColor = gainPct >= 0 ? 'var(--success)' : 'var(--error)';
+    const gainSign = gainPct >= 0 ? '+' : '';
+
+    const rowHtml = `
+      <div class="list-row" style="cursor:default; margin-top:var(--sp-2);" id="new-reit-${newReitCount}">
+        <div class="list-row__icon" style="background:linear-gradient(135deg,#2563EB,#3B82F6);">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+        </div>
+        <div class="list-row__info">
+          <div class="list-row__label">${name}</div>
+          <div class="list-row__meta">${units} units${symbol ? ' · NSE: ' + symbol : ''}</div>
+        </div>
+        <div class="list-row__amount-row">
+          <div class="list-row__amount">${AG.formatINR(currentRupees * 100)}</div>
+          <div class="list-row__amount-caption">NAV ₹${nav.toFixed(2)} (bought ₹${buyPrice.toFixed(2)}) · <span style="color:${gainColor};">${gainSign}${gainPct.toFixed(1)}%</span></div>
+        </div>
+      </div>`;
+
+    document.getElementById('reit-list').insertAdjacentHTML('beforeend', rowHtml);
+
+    const heroTotalEl = document.getElementById('hero-total');
+    const heroInvestedEl = document.getElementById('hero-invested');
+    const newTotal = parseINRLocal(heroTotalEl.textContent) + currentRupees;
+    const newInvested = parseINRLocal(heroInvestedEl.textContent) + investedRupees;
+    heroTotalEl.textContent = AG.formatINR(newTotal * 100);
+    heroInvestedEl.textContent = AG.formatINR(newInvested * 100);
+    const totalGain = newTotal - newInvested;
+    document.getElementById('hero-gain').textContent = (totalGain >= 0 ? '+' : '') + AG.formatINR(totalGain * 100);
+    const newUnits = parseInt(document.getElementById('hero-units').textContent.replace(/,/g, '') || '0', 10) + units;
+    document.getElementById('hero-units').textContent = newUnits;
+
+    document.getElementById('view-populated').style.display = '';
+    document.getElementById('view-empty').style.display = 'none';
+    AG.closeSheet('add-reit');
+    AG.showToast(name + ' added ✓', 'success');
+  }
 </script>
 </body>
 </html>
