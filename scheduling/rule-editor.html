@@ -179,6 +179,7 @@
       <select class="form-select" id="f-account">
         <option>SBI Savings ····4521</option>
         <option>HDFC Current ····8912</option>
+        <option>ICICI ····6634</option>
       </select>
       <span class="form-helper">The bank account this rule credits into (income) or debits from (expense).</span>
     </div>
@@ -211,7 +212,34 @@
       </div>
     </div>
 
+    <!-- Delete Rule (edit mode only) -->
+    <div class="form-group" id="delete-rule-group" style="display:none;">
+      <div class="surface-card" style="display:flex; align-items:center; justify-content:space-between;">
+        <div style="flex:1; min-width:0; padding-right:var(--sp-3);">
+          <div style="font-size:14px; font-weight:600; color:var(--error);">Delete Rule</div>
+          <div style="font-size:12px; color:var(--text-secondary); margin-top:2px;">Stops future occurrences from being projected — past occurrences stay in your ledger</div>
+        </div>
+        <button class="btn btn--danger btn--sm" onclick="AG.openDialog('delete-rule')">Delete</button>
+      </div>
+    </div>
+
   </div><!-- /page-content -->
+
+  <!-- Delete Rule Dialog -->
+  <div class="dialog-backdrop" id="delete-rule-backdrop">
+    <div class="dialog">
+      <div class="dialog__header">
+        <div class="dialog__title" id="delete-rule-title">Delete this rule?</div>
+      </div>
+      <div class="dialog__body">
+        Future occurrences of this rule will no longer be projected in Scheduling or the budget period. Past occurrences already recorded stay in your ledger.
+      </div>
+      <div class="dialog__footer">
+        <button class="btn btn--ghost btn--sm" onclick="AG.closeDialog('delete-rule')">Cancel</button>
+        <button class="btn btn--danger btn--sm" onclick="confirmDeleteRule()">Delete Rule</button>
+      </div>
+    </div>
+  </div>
 
   <!-- ═══════════════════════════════════════════
        FOOTER
@@ -380,45 +408,88 @@
   document.getElementById('f-frequency').addEventListener('change', renderPreview);
   document.getElementById('f-day').addEventListener('change', renderPreview);
 
+  /* ── Real rule data (paise), keyed to match calendar.html / list.html ── */
+  const RULES = {
+    salary:      { name: 'Salary Credit', type: 'income', amountRupees: 120000, day: 'first-working', account: 'SBI Savings ····4521', routing: 'NEXT_MONTH' },
+    pension:     { name: 'Family Pension (Mother)', type: 'income', amountRupees: 18500, day: 'day-3', account: 'SBI Savings ····4521', routing: 'SAME_MONTH' },
+    'home-emi':  { name: 'HDFC Home Loan EMI', type: 'expense', amountRupees: 38500, day: 'day-5', account: 'HDFC Current ····8912', routing: 'SAME_MONTH' },
+    sip:         { name: 'SIP — Nippon Multicap Fund', type: 'expense', amountRupees: 20000, day: 'day-5', account: 'HDFC Current ····8912', routing: 'SAME_MONTH' },
+    'car-emi':   { name: 'ICICI Car Loan EMI', type: 'expense', amountRupees: 12000, day: 'day-7', account: 'ICICI ····6634', routing: 'SAME_MONTH' },
+    netflix:     { name: 'OTT Subscription (Netflix)', type: 'expense', amountRupees: 649, day: 'day-10', account: 'HDFC Current ····8912', routing: 'SAME_MONTH' },
+    insurance:   { name: 'Insurance Premium', type: 'expense', amountRupees: 2500, day: 'day-15', account: 'HDFC Current ····8912', routing: 'SAME_MONTH' },
+    mobile:      { name: 'Mobile & Broadband (Jio)', type: 'expense', amountRupees: 2000, day: 'day-18', account: 'HDFC Current ····8912', routing: 'SAME_MONTH' },
+    electricity: { name: 'Electricity Bill (BESCOM)', type: 'expense', amountRupees: 3200, day: 'variable', account: 'HDFC Current ····8912', routing: 'SAME_MONTH' },
+    maintenance: { name: 'Society Maintenance', type: 'expense', amountRupees: 4500, day: 'last-working', account: 'HDFC Current ····8912', routing: 'SAME_MONTH' },
+  };
+
+  let currentRuleId = null;
+
+  function loadRule(id) {
+    const r = RULES[id];
+    currentRuleId = id;
+    document.getElementById('page-title').textContent = 'Edit Recurring Rule';
+    document.getElementById('f-name').value = r.name;
+    document.querySelectorAll('#type-seg .seg-btn').forEach(b => b.classList.toggle('selected', b.dataset.type === r.type));
+    document.getElementById('f-amount').value = r.amountRupees;
+    document.getElementById('f-frequency').value = 'monthly';
+    document.getElementById('f-day').value = r.day;
+    document.getElementById('f-account').value = r.account;
+    document.getElementById('routing-same').checked = r.routing === 'SAME_MONTH';
+    document.getElementById('routing-next').checked = r.routing === 'NEXT_MONTH';
+    document.getElementById('save-btn').textContent = 'Save Changes';
+    document.getElementById('delete-rule-group').style.display = '';
+    document.getElementById('delete-rule-title').textContent = `Delete "${r.name}"?`;
+    syncRoutingHighlight();
+    renderPreview();
+  }
+
+  function loadNew() {
+    currentRuleId = null;
+    document.getElementById('page-title').textContent = 'New Recurring Rule';
+    document.getElementById('f-name').value = '';
+    document.querySelectorAll('#type-seg .seg-btn').forEach(b => b.classList.toggle('selected', b.dataset.type === 'income'));
+    document.getElementById('f-amount').value = '';
+    document.getElementById('f-frequency').value = 'monthly';
+    document.getElementById('f-day').value = 'first-working';
+    document.getElementById('routing-same').checked = true;
+    document.getElementById('save-btn').textContent = 'Save Rule';
+    document.getElementById('delete-rule-group').style.display = 'none';
+    syncRoutingHighlight();
+    renderPreview();
+  }
+
   /* ── Save ── */
   document.getElementById('save-btn').addEventListener('click', () => {
     const name = document.getElementById('f-name').value.trim();
     if (!name) { AG.showToast('Rule name is required', 'error'); return; }
     if (!Number(document.getElementById('f-amount').value)) { AG.showToast('Enter a valid amount', 'error'); return; }
-    AG.showToast('Rule "' + name + '" saved ✓', 'success');
+    AG.showToast((currentRuleId ? 'Rule "' + name + '" updated ✓' : 'Rule "' + name + '" saved ✓'), 'success');
     setTimeout(() => { window.location.href = 'list.html'; }, 900);
   });
 
-  /* ── Demo bar: New Rule / Edit Rule ── */
-  function applyState(key) {
-    document.querySelectorAll('.demo-btn').forEach(b => b.classList.toggle('active', b.dataset.state === key));
-    if (key === 'edit') {
-      document.getElementById('page-title').textContent = 'Edit Recurring Rule';
-      document.getElementById('f-name').value = 'HDFC Home Loan EMI';
-      document.querySelectorAll('#type-seg .seg-btn').forEach(b => b.classList.toggle('selected', b.dataset.type === 'expense'));
-      document.getElementById('f-amount').value = 38500;
-      document.getElementById('f-frequency').value = 'monthly';
-      document.getElementById('f-day').value = 'day-5';
-      document.getElementById('routing-same').checked = true;
-      document.getElementById('save-btn').textContent = 'Save Changes';
-    } else {
-      document.getElementById('page-title').textContent = 'New Recurring Rule';
-      document.getElementById('f-name').value = 'Salary Credit';
-      document.querySelectorAll('#type-seg .seg-btn').forEach(b => b.classList.toggle('selected', b.dataset.type === 'income'));
-      document.getElementById('f-amount').value = 120000;
-      document.getElementById('f-frequency').value = 'monthly';
-      document.getElementById('f-day').value = 'first-working';
-      document.getElementById('routing-same').checked = true;
-      document.getElementById('save-btn').textContent = 'Save Rule';
-    }
-    syncRoutingHighlight();
-    renderPreview();
+  function confirmDeleteRule() {
+    const name = RULES[currentRuleId] ? RULES[currentRuleId].name : 'Rule';
+    AG.closeDialog('delete-rule');
+    AG.showToast(name + ' deleted ✓', 'success');
+    setTimeout(() => { window.location.href = 'list.html'; }, 900);
   }
+
+  /* ── Demo bar: New Rule / Edit Rule (sample) ── */
   document.querySelectorAll('.demo-btn[data-state]').forEach(btn => {
-    btn.addEventListener('click', () => applyState(btn.dataset.state));
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.demo-btn').forEach(b => b.classList.toggle('active', b === btn));
+      if (btn.dataset.state === 'edit') loadRule('home-emi'); else loadNew();
+    });
   });
 
-  applyState('new');
+  /* ── Initial load: real ?rule= deep link wins over the demo default ── */
+  const ruleParam = new URLSearchParams(location.search).get('rule');
+  if (ruleParam && RULES[ruleParam]) {
+    document.querySelectorAll('.demo-btn').forEach(b => b.classList.toggle('active', b.dataset.state === 'edit'));
+    loadRule(ruleParam);
+  } else {
+    loadNew();
+  }
 </script>
 </body>
 </html>
