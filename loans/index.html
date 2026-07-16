@@ -76,6 +76,14 @@
       font-size: 16px; font-weight: 600; color: var(--text-secondary);
     }
 
+    /* ── Add Loan sheet ── */
+    .al-field { margin-bottom: var(--sp-4); }
+    .al-field__label {
+      display: block; font-size: 11px; font-weight: 700;
+      letter-spacing: .06em; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: var(--sp-2);
+    }
+
     /* ── Compare strategies link card ── */
     .compare-link-card {
       display: flex; align-items: center; gap: var(--sp-3);
@@ -121,10 +129,83 @@
     </a>
     <span class="top-bar__title">Loans</span>
     <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" aria-label="Add loan" onclick="openAddLoanSheet()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
       <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
         <span data-theme-icon style="font-size:18px;">🌙</span>
       </button>
       <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- Add Loan Sheet -->
+  <div class="sheet-backdrop" id="add-loan-sheet-backdrop"></div>
+  <div class="sheet" id="add-loan-sheet">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <span class="sheet__title">Add a Loan</span>
+      <button class="sheet__close" aria-label="Close" onclick="AG.closeSheet('add-loan-sheet')">✕</button>
+    </div>
+    <div class="sheet__body">
+      <div class="al-field">
+        <label class="al-field__label" for="al-lender">Lender</label>
+        <input class="form-input" id="al-lender" type="text" placeholder="e.g. SBI, Bajaj Finserv">
+      </div>
+      <div class="al-field">
+        <label class="al-field__label" for="al-type">Loan Type</label>
+        <select class="form-select" id="al-type">
+          <option>Home Loan</option>
+          <option>Car Loan</option>
+          <option>Personal Loan</option>
+          <option>Education Loan</option>
+          <option>Gold Loan</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-3);">
+        <div class="al-field">
+          <label class="al-field__label" for="al-principal">Original Principal (₹)</label>
+          <div class="form-input-wrap has-prefix">
+            <span class="input-prefix">₹</span>
+            <input class="form-input inr-input" id="al-principal" type="text" inputmode="numeric" placeholder="0">
+          </div>
+        </div>
+        <div class="al-field">
+          <label class="al-field__label" for="al-outstanding">Outstanding (₹)</label>
+          <div class="form-input-wrap has-prefix">
+            <span class="input-prefix">₹</span>
+            <input class="form-input inr-input" id="al-outstanding" type="text" inputmode="numeric" placeholder="0">
+          </div>
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-3);">
+        <div class="al-field">
+          <label class="al-field__label" for="al-rate">Interest Rate (% p.a.)</label>
+          <input class="form-input" id="al-rate" type="text" inputmode="decimal" placeholder="e.g. 9.5">
+        </div>
+        <div class="al-field">
+          <label class="al-field__label" for="al-emi">EMI (₹/month)</label>
+          <div class="form-input-wrap has-prefix">
+            <span class="input-prefix">₹</span>
+            <input class="form-input inr-input" id="al-emi" type="text" inputmode="numeric" placeholder="0">
+          </div>
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-3);">
+        <div class="al-field">
+          <label class="al-field__label" for="al-remaining">Remaining Tenure (months)</label>
+          <input class="form-input" id="al-remaining" type="text" inputmode="numeric" placeholder="e.g. 60">
+        </div>
+        <div class="al-field">
+          <label class="al-field__label" for="al-due">Next EMI Date</label>
+          <input class="form-input" id="al-due" type="text" placeholder="e.g. 5 Aug 2026">
+        </div>
+      </div>
+    </div>
+    <div class="sheet__footer">
+      <button class="btn btn--ghost" onclick="AG.closeSheet('add-loan-sheet')">Cancel</button>
+      <button class="btn btn--primary" onclick="confirmAddLoan()">Save Loan</button>
     </div>
   </div>
 
@@ -281,7 +362,9 @@
   const ICONS = {
     home: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
     car:  '<rect x="1" y="3" width="15" height="13" rx="1"/><path d="m16 8 5 3v5h-5V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>',
+    other: '<path d="M6 3h12"/><path d="M6 8h12"/><path d="M9 8c4.5 0 4.5 8 0 8H6"/><path d="M6 16l9 8"/>',
   };
+  const TYPE_ICON = { 'Home Loan': 'home', 'Car Loan': 'car' };
 
   let strategy = 'snowball';
 
@@ -360,13 +443,60 @@
   }
 
   /* Hero totals */
-  const totalOutstanding = LOANS.reduce((sum, l) => sum + l.outstandingPaise, 0);
-  const totalEmi = LOANS.reduce((sum, l) => sum + l.emiPaise, 0);
-  document.getElementById('hero-total').textContent = AG.formatINR(totalOutstanding);
-  document.getElementById('hero-count').textContent = LOANS.length + ' active loans';
-  document.getElementById('hero-emi').textContent = AG.formatINR(totalEmi);
+  function updateHero() {
+    const totalOutstanding = LOANS.reduce((sum, l) => sum + l.outstandingPaise, 0);
+    const totalEmi = LOANS.reduce((sum, l) => sum + l.emiPaise, 0);
+    document.getElementById('hero-total').textContent = AG.formatINR(totalOutstanding);
+    document.getElementById('hero-count').textContent = LOANS.length + ' active loans';
+    document.getElementById('hero-emi').textContent = AG.formatINR(totalEmi);
+  }
+  updateHero();
 
   renderList();
+
+  function openAddLoanSheet() {
+    ['al-lender', 'al-principal', 'al-outstanding', 'al-rate', 'al-emi', 'al-remaining', 'al-due'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('al-type').selectedIndex = 0;
+    AG.openSheet('add-loan-sheet');
+  }
+
+  let newLoanCount = 0;
+  function confirmAddLoan() {
+    const lender = document.getElementById('al-lender').value.trim();
+    const type = document.getElementById('al-type').value;
+    const principalRupees = parseInt(document.getElementById('al-principal').value.replace(/,/g, '') || '0', 10);
+    const outstandingRupees = parseInt(document.getElementById('al-outstanding').value.replace(/,/g, '') || '0', 10);
+    const ratePct = parseFloat(document.getElementById('al-rate').value || '0');
+    const emiRupees = parseInt(document.getElementById('al-emi').value.replace(/,/g, '') || '0', 10);
+    const remainingMonths = parseInt(document.getElementById('al-remaining').value || '0', 10);
+    const nextDueLabel = document.getElementById('al-due').value.trim();
+
+    if (!lender) { AG.showToast('Enter the lender name', 'error'); return; }
+    if (!principalRupees || !outstandingRupees) { AG.showToast('Enter principal and outstanding amounts', 'error'); return; }
+    if (!ratePct || !emiRupees) { AG.showToast('Enter interest rate and EMI', 'error'); return; }
+    if (!remainingMonths) { AG.showToast('Enter remaining tenure', 'error'); return; }
+
+    newLoanCount++;
+    LOANS.push({
+      id: 'custom-' + newLoanCount,
+      lender, type,
+      icon: TYPE_ICON[type] || 'other',
+      principalPaise: principalRupees * 100,
+      outstandingPaise: outstandingRupees * 100,
+      ratePct, emiPaise: emiRupees * 100,
+      origTenureMonths: remainingMonths, remainingMonths,
+      nextDueLabel: nextDueLabel || '—',
+    });
+
+    updateHero();
+    renderList();
+    document.getElementById('view-populated').style.display = '';
+    document.getElementById('view-empty').style.display = 'none';
+    AG.closeSheet('add-loan-sheet');
+    AG.showToast(`${lender} ${type} added ✓`, 'success');
+  }
 
   /* ── Demo bar: Populated / Empty ── */
   AG.initDemoBar({

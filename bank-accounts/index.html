@@ -242,7 +242,7 @@
           <div class="account-tile__caption">Household &amp; Freelance</div>
         </a>
 
-        <button class="account-tile account-tile--add" onclick="AG.openSheet('add-account')">
+        <button class="account-tile account-tile--add" onclick="openAddAccountSheet()">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           <span>Add Account</span>
         </button>
@@ -301,7 +301,7 @@
         <div class="empty-state__icon">🏦</div>
         <div class="empty-state__title">No Bank Accounts Linked</div>
         <div class="empty-state__body">Add your savings, current, FD or RD accounts to track balances and reconcile transactions in one place.</div>
-        <button class="btn btn--primary" onclick="AG.openSheet('add-account')">+ Link Your First Account</button>
+        <button class="btn btn--primary" onclick="openAddAccountSheet()">+ Link Your First Account</button>
       </div>
     </div>
 
@@ -310,7 +310,7 @@
   <!-- ═══════════════════════════════════════════
        FAB
   ═══════════════════════════════════════════ -->
-  <button class="fab visible" aria-label="Add Account" onclick="AG.openSheet('add-account')">
+  <button class="fab visible" aria-label="Add Account" onclick="openAddAccountSheet()">
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
       <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
     </svg>
@@ -344,12 +344,17 @@
 
       <div class="ae-field">
         <label class="ae-field__label" for="aa-type">Account Type</label>
-        <select class="form-select" id="aa-type">
+        <select class="form-select" id="aa-type" onchange="updateAccountTypeFields()">
           <option>Savings</option>
           <option>Current</option>
           <option>Fixed Deposit</option>
           <option>Recurring Deposit</option>
         </select>
+      </div>
+
+      <div class="ae-field">
+        <label class="ae-field__label" for="aa-nickname">Nickname</label>
+        <input class="form-input" id="aa-nickname" type="text" placeholder="e.g. Primary Salary Account">
       </div>
 
       <div class="ae-field">
@@ -359,10 +364,30 @@
       </div>
 
       <div class="ae-field">
-        <label class="ae-field__label" for="aa-balance">Opening Balance</label>
+        <label class="ae-field__label" id="aa-balance-label" for="aa-balance">Opening Balance</label>
         <div class="form-input-wrap has-prefix">
           <span class="input-prefix">₹</span>
           <input class="form-input inr-input" id="aa-balance" type="text" inputmode="numeric" placeholder="0">
+        </div>
+      </div>
+
+      <div id="aa-fdrd-fields" style="display:none;">
+        <div class="ae-field">
+          <label class="ae-field__label" for="aa-rate">Interest Rate (% p.a.)</label>
+          <input class="form-input" id="aa-rate" type="text" inputmode="decimal" placeholder="e.g. 7.25">
+        </div>
+        <div class="ae-field">
+          <label class="ae-field__label" for="aa-compounding">Compounding</label>
+          <select class="form-select" id="aa-compounding">
+            <option>Monthly</option>
+            <option>Quarterly</option>
+            <option>Half-Yearly</option>
+            <option>Annually</option>
+          </select>
+        </div>
+        <div class="ae-field">
+          <label class="ae-field__label" for="aa-tenure">Tenure (months)</label>
+          <input class="form-input" id="aa-tenure" type="text" inputmode="numeric" placeholder="e.g. 24">
         </div>
       </div>
 
@@ -437,10 +462,95 @@
     document.getElementById('closed-section').style.display = on ? '' : 'none';
   }
 
+  function updateAccountTypeFields() {
+    const type = document.getElementById('aa-type').value;
+    const isFdRd = type === 'Fixed Deposit' || type === 'Recurring Deposit';
+    document.getElementById('aa-fdrd-fields').style.display = isFdRd ? '' : 'none';
+    document.getElementById('aa-balance-label').textContent =
+      type === 'Fixed Deposit' ? 'Principal Amount' :
+      type === 'Recurring Deposit' ? 'Monthly Deposit' : 'Opening Balance';
+  }
+
+  function resetAccountForm() {
+    document.getElementById('aa-bank').selectedIndex = 0;
+    document.getElementById('aa-type').selectedIndex = 0;
+    document.getElementById('aa-nickname').value = '';
+    document.getElementById('aa-number').value = '';
+    document.getElementById('aa-balance').value = '';
+    document.getElementById('aa-rate').value = '';
+    document.getElementById('aa-tenure').value = '';
+    document.getElementById('aa-compounding').selectedIndex = 0;
+    updateAccountTypeFields();
+  }
+
+  function openAddAccountSheet() {
+    resetAccountForm();
+    AG.openSheet('add-account');
+  }
+
+  function parseINR(text) {
+    return parseInt(text.replace(/[₹,]/g, ''), 10) * 100;
+  }
+
+  let newAccountCount = 0;
   function saveAccount() {
     const bank = document.getElementById('aa-bank').value;
+    const type = document.getElementById('aa-type').value;
+    const nickname = document.getElementById('aa-nickname').value.trim();
+    const number = document.getElementById('aa-number').value.trim();
+    const balanceRupees = parseInt(document.getElementById('aa-balance').value.replace(/,/g, '') || '0', 10);
+    const isFdRd = type === 'Fixed Deposit' || type === 'Recurring Deposit';
+
+    if (!number) {
+      document.getElementById('aa-number').focus();
+      AG.showToast('Enter the last 4 digits', 'error'); return;
+    }
+    if (!balanceRupees) {
+      document.getElementById('aa-balance').focus();
+      AG.showToast('Enter an amount', 'error'); return;
+    }
+    let rate, compounding, tenure;
+    if (isFdRd) {
+      rate = document.getElementById('aa-rate').value.trim();
+      compounding = document.getElementById('aa-compounding').value;
+      tenure = document.getElementById('aa-tenure').value.trim();
+      if (!rate || !tenure) {
+        AG.showToast('Enter interest rate and tenure', 'error'); return;
+      }
+    }
+
+    newAccountCount++;
+    const balancePaise = balanceRupees * 100;
+    const initials = bank.split(' ').map(w => w[0]).join('').slice(0, 4).toUpperCase();
+    const chipClass = isFdRd ? 'chip--locked' : (type === 'Current' ? 'chip--balanced' : 'chip--info');
+    const caption = isFdRd ? `${rate}% p.a. · ${compounding} · ${tenure} months` : (nickname || (type + ' Account'));
+
+    const tileHtml = `
+        <a href="${isFdRd ? 'fd-rd.html' : 'detail.html'}" class="account-tile" id="new-acct-${newAccountCount}" style="animation-delay:0ms;">
+          <div class="account-tile__top">
+            <div class="account-tile__logo" style="background:var(--surface-raised);color:var(--text-secondary);">${initials}</div>
+            <span class="chip ${chipClass}">${type}</span>
+          </div>
+          <div class="account-tile__bank">${bank}</div>
+          <div class="account-tile__number">•••• ${number}</div>
+          <div class="account-tile__balance amount-text amount-text--lg">${AG.formatINR(balancePaise)}</div>
+          <div class="account-tile__caption">${caption}</div>
+        </a>`;
+
+    if (isFdRd) {
+      document.querySelectorAll('.accounts-grid')[1].insertAdjacentHTML('beforeend', tileHtml);
+    } else {
+      document.querySelector('.account-tile--add').insertAdjacentHTML('beforebegin', tileHtml);
+    }
+
+    const heroTotal = document.getElementById('hero-total');
+    heroTotal.textContent = AG.formatINR(parseINR(heroTotal.textContent) + balancePaise);
+    const metaStrong = document.querySelector('.balance-hero__meta strong');
+    const newCount = parseInt(metaStrong.textContent.match(/\d+/)[0], 10) + 1;
+    metaStrong.textContent = newCount + ' linked accounts';
+
     AG.closeSheet('add-account');
-    AG.showToast(bank + ' account added ✓', 'success');
+    AG.showToast((nickname || bank) + ' account added ✓', 'success');
   }
 </script>
 </body>

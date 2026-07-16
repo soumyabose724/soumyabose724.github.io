@@ -82,6 +82,21 @@
 
     .account-line { font-size: 12px; color: var(--text-muted); margin-bottom: var(--sp-5); }
     .account-line strong { color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; }
+
+    /* ── Edit Loan sheet / Close Loan row ── */
+    .al-field { margin-bottom: var(--sp-4); }
+    .al-field__label {
+      display: block; font-size: 11px; font-weight: 700;
+      letter-spacing: .06em; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: var(--sp-2);
+    }
+    .ld-danger-row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: var(--sp-2); margin-bottom: var(--sp-5);
+    }
+    .ld-danger-row__body { flex: 1; min-width: 0; padding-right: var(--sp-3); }
+    .ld-danger-row__title { font-size: 14px; font-weight: 600; color: var(--error); }
+    .ld-danger-row__sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
   </style>
 </head>
 <body>
@@ -111,10 +126,53 @@
     </a>
     <span class="top-bar__title" id="top-title">Loan Detail</span>
     <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" aria-label="Edit loan" onclick="openEditLoanSheet()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </button>
       <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
         <span data-theme-icon style="font-size:18px;">🌙</span>
       </button>
       <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- Edit Loan Sheet -->
+  <div class="sheet-backdrop" id="edit-loan-sheet-backdrop"></div>
+  <div class="sheet" id="edit-loan-sheet">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <span class="sheet__title">Edit Loan</span>
+      <button class="sheet__close" aria-label="Close" onclick="AG.closeSheet('edit-loan-sheet')">✕</button>
+    </div>
+    <div class="sheet__body">
+      <div class="al-field">
+        <label class="al-field__label" for="el-outstanding">Outstanding (₹)</label>
+        <div class="form-input-wrap has-prefix">
+          <span class="input-prefix">₹</span>
+          <input class="form-input inr-input" id="el-outstanding" type="text" inputmode="numeric">
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-3);">
+        <div class="al-field">
+          <label class="al-field__label" for="el-rate">Interest Rate (% p.a.)</label>
+          <input class="form-input" id="el-rate" type="text" inputmode="decimal">
+        </div>
+        <div class="al-field">
+          <label class="al-field__label" for="el-emi">EMI (₹/month)</label>
+          <div class="form-input-wrap has-prefix">
+            <span class="input-prefix">₹</span>
+            <input class="form-input inr-input" id="el-emi" type="text" inputmode="numeric">
+          </div>
+        </div>
+      </div>
+      <div class="al-field">
+        <label class="al-field__label" for="el-remaining">Remaining Tenure (months)</label>
+        <input class="form-input" id="el-remaining" type="text" inputmode="numeric">
+      </div>
+    </div>
+    <div class="sheet__footer">
+      <button class="btn btn--ghost" onclick="AG.closeSheet('edit-loan-sheet')">Cancel</button>
+      <button class="btn btn--primary" onclick="saveLoanEdit()">Save Changes</button>
     </div>
   </div>
 
@@ -219,7 +277,33 @@
 
     <div class="account-line">Loan A/C <strong id="account-masked">•••• 4821</strong> · Disbursed <span id="disbursed-label">5 Jul 2020</span></div>
 
+    <!-- Close Loan -->
+    <div class="surface-card ld-danger-row">
+      <div class="ld-danger-row__body">
+        <div class="ld-danger-row__title">Close Loan</div>
+        <div class="ld-danger-row__sub">Use once fully repaid or foreclosed — history stays intact for records</div>
+      </div>
+      <button class="btn btn--danger btn--sm" onclick="AG.openDialog('close-loan')">Close</button>
+    </div>
+
   </div><!-- /page-content -->
+
+  <!-- Close Loan Dialog -->
+  <div class="dialog-backdrop" id="close-loan-backdrop">
+    <div class="dialog">
+      <div class="dialog__header">
+        <div class="dialog__title" id="close-loan-title">Close this loan?</div>
+      </div>
+      <div class="dialog__body">
+        This loan will be archived, not deleted — its EMI and payment history stays intact for records.
+        Any scheduled rules for this loan's EMI will need a new destination before their next run.
+      </div>
+      <div class="dialog__footer">
+        <button class="btn btn--ghost btn--sm" onclick="AG.closeDialog('close-loan')">Cancel</button>
+        <button class="btn btn--danger btn--sm" onclick="confirmCloseLoan()">Close Loan</button>
+      </div>
+    </div>
+  </div>
 
   <!-- ═══════════════════════════════════════════
        BOTTOM NAV — none active (no Loans tab)
@@ -385,11 +469,52 @@
     renderPayoffChart(l);
 
     document.querySelectorAll('.demo-btn').forEach(b => b.classList.toggle('active', b.dataset.state === key));
+    currentKey = key;
+    document.getElementById('close-loan-title').textContent = `Close ${l.lender} ${l.type}?`;
   }
 
   document.querySelectorAll('.demo-btn[data-state]').forEach(btn => {
     btn.addEventListener('click', () => render(btn.dataset.state));
   });
+
+  let currentKey = null;
+
+  function openEditLoanSheet() {
+    const l = LOANS[currentKey];
+    document.getElementById('el-outstanding').value = Math.round(l.outstandingPaise / 100);
+    document.getElementById('el-rate').value = l.ratePct;
+    document.getElementById('el-emi').value = Math.round(l.emiPaise / 100);
+    document.getElementById('el-remaining').value = l.remainingMonths;
+    AG.openSheet('edit-loan-sheet');
+  }
+
+  function saveLoanEdit() {
+    const outstandingRupees = parseInt(document.getElementById('el-outstanding').value.replace(/,/g, '') || '0', 10);
+    const ratePct = parseFloat(document.getElementById('el-rate').value || '0');
+    const emiRupees = parseInt(document.getElementById('el-emi').value.replace(/,/g, '') || '0', 10);
+    const remainingMonths = parseInt(document.getElementById('el-remaining').value || '0', 10);
+
+    if (!outstandingRupees || !ratePct || !emiRupees || !remainingMonths) {
+      AG.showToast('Fill in all fields', 'error'); return;
+    }
+
+    const l = LOANS[currentKey];
+    l.outstandingPaise = outstandingRupees * 100;
+    l.ratePct = ratePct;
+    l.emiPaise = emiRupees * 100;
+    l.remainingMonths = remainingMonths;
+
+    render(currentKey);
+    AG.closeSheet('edit-loan-sheet');
+    AG.showToast('Loan updated ✓', 'success');
+  }
+
+  function confirmCloseLoan() {
+    const l = LOANS[currentKey];
+    AG.closeDialog('close-loan');
+    AG.showToast(`${l.lender} ${l.type} closed ✓`, 'success');
+    setTimeout(() => { location.href = 'index.html'; }, 900);
+  }
 
   /* Initial loan from ?loan= query param, default home */
   const params = new URLSearchParams(location.search);
