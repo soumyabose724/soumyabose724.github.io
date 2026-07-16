@@ -196,6 +196,84 @@
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
   </a>
 
+  <!-- Edit Trade Sheet -->
+  <div class="sheet-backdrop" id="edit-trade-backdrop"></div>
+  <div class="sheet" id="edit-trade">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <span class="sheet__title">Edit Trade</span>
+      <button class="sheet__close" onclick="AG.closeSheet('edit-trade')" aria-label="Close">✕</button>
+    </div>
+    <div class="sheet__body">
+      <div class="form-group">
+        <label class="form-label">Instrument</label>
+        <input class="form-input" id="et-instrument" type="text">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Segment</label>
+        <select class="form-select" id="et-segment">
+          <option value="equity">Equity Delivery</option>
+          <option value="intraday">Intraday</option>
+          <option value="fno">F&amp;O</option>
+          <option value="commodity">Commodity</option>
+          <option value="crypto">Crypto</option>
+        </select>
+      </div>
+      <div class="two-col" style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3);">
+        <div class="form-group">
+          <label class="form-label">Entry Date</label>
+          <input class="form-input" id="et-entry-date" type="date">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Exit Date</label>
+          <input class="form-input" id="et-exit-date" type="date">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Still Open</label>
+        <select class="form-select" id="et-open">
+          <option value="false">No — closed</option>
+          <option value="true">Yes — open position</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">P&amp;L (₹, use − for a loss)</label>
+        <div class="form-input-wrap has-prefix">
+          <span class="input-prefix">₹</span>
+          <input class="form-input inr-input" id="et-pnl" type="text" inputmode="numeric">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tag as VCP Setup?</label>
+        <select class="form-select" id="et-vcp">
+          <option value="false">No</option>
+          <option value="true">Yes</option>
+        </select>
+      </div>
+      <button class="btn btn--ghost btn--full" style="color:var(--error);" onclick="AG.openDialog('delete-trade')">Delete Trade</button>
+    </div>
+    <div class="sheet__footer">
+      <button class="btn btn--ghost" onclick="AG.closeSheet('edit-trade')">Cancel</button>
+      <button class="btn btn--primary" onclick="saveTradeEdit()">Save Changes</button>
+    </div>
+  </div>
+
+  <!-- Delete Trade Dialog -->
+  <div class="dialog-backdrop" id="delete-trade-backdrop">
+    <div class="dialog">
+      <div class="dialog__header">
+        <div class="dialog__title" id="delete-trade-title">Delete this trade?</div>
+      </div>
+      <div class="dialog__body">
+        This removes the trade from your journal and its P&amp;L will no longer count toward your win rate or realized total.
+      </div>
+      <div class="dialog__footer">
+        <button class="btn btn--ghost btn--sm" onclick="AG.closeDialog('delete-trade')">Cancel</button>
+        <button class="btn btn--danger btn--sm" onclick="confirmDeleteTrade()">Delete Trade</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ═══════════════════════════════════════════
        BOTTOM NAV — none active (no Trade Journal tab)
   ═══════════════════════════════════════════ -->
@@ -301,7 +379,7 @@
     const pnlClass = t.pnlPaise >= 0 ? 'list-row__amount--income' : 'list-row__amount--expense';
     const iconClass = t.open ? 'list-row__icon--info' : (t.pnlPaise >= 0 ? '' : '');
     return `
-      <a href="${SEGMENT_HREF[t.segment]}" class="list-row">
+      <div class="list-row" onclick="openEditTradeSheet('${t.id}')" style="cursor:pointer;">
         <div class="list-row__icon ${iconClass}">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${ICONS[t.segment]}</svg>
         </div>
@@ -317,7 +395,7 @@
           <div class="list-row__amount ${pnlClass}">${AG.formatINR(t.pnlPaise, { showSign: true })}</div>
           <div class="list-row__amount-caption">${closed ? 'Realized P&L' : 'Unrealized P&L'}</div>
         </div>
-      </a>`;
+      </div>`;
   }
 
   let currentSegment = 'all';
@@ -337,45 +415,97 @@
     });
   });
 
-  /* ── Hero + Open Risk figures ── */
-  const closedTrades = TRADES.filter(t => !t.open);
-  const openTrades = TRADES.filter(t => t.open);
-  const totalRealized = closedTrades.reduce((s, t) => s + t.pnlPaise, 0);
-  const wins = closedTrades.filter(t => t.pnlPaise > 0).length;
-  const winRate = (wins / closedTrades.length) * 100;
-
-  document.getElementById('hero-pnl').textContent = AG.formatINR(totalRealized);
-  document.getElementById('hero-winrate').textContent = winRate.toFixed(1) + '%';
-  document.getElementById('hero-closed').textContent = String(closedTrades.length);
-  document.getElementById('hero-open').textContent = String(openTrades.length);
-
-  /* Open Risk panel — cost basis + unrealized P&L for the 2 open positions */
+  /* Open Risk panel — cost basis + unrealized P&L for open positions */
   const OPEN_DETAIL = {
     t13: { costPaise: 7200000, label: 'TCS · Equity Delivery', metaLabel: 'Entered 6 Jul · Qty 20 @ ₹3,600' },
     t14: { costPaise: 315000, label: 'BANKNIFTY 51000 PE · F&O', metaLabel: 'Entered 10 Jul · Lot 15 @ ₹210 premium' },
   };
-  const totalDeployed = openTrades.reduce((s, t) => s + OPEN_DETAIL[t.id].costPaise, 0);
-  const totalUnrealized = openTrades.reduce((s, t) => s + t.pnlPaise, 0);
-  document.getElementById('or-count').textContent = String(openTrades.length);
-  document.getElementById('or-deployed').textContent = AG.formatINR(totalDeployed);
-  const orUnrealizedEl = document.getElementById('or-unrealized');
-  orUnrealizedEl.textContent = AG.formatINR(totalUnrealized, { showSign: true });
-  orUnrealizedEl.style.color = totalUnrealized >= 0 ? 'var(--success)' : 'var(--error)';
 
-  document.getElementById('or-positions').innerHTML = openTrades.map(t => {
-    const d = OPEN_DETAIL[t.id];
-    const pnlColor = t.pnlPaise >= 0 ? 'var(--success)' : 'var(--error)';
-    return `
-      <div class="or-position-row">
-        <div>
-          <div class="or-position-row__name">${d.label}</div>
-          <div class="or-position-row__meta">${d.metaLabel}</div>
-        </div>
-        <div class="or-position-row__pnl" style="color:${pnlColor};">${AG.formatINR(t.pnlPaise, { showSign: true })}</div>
-      </div>`;
-  }).join('');
+  /* ── Hero + Open Risk figures ── */
+  function updateHeroStats() {
+    const closedTrades = TRADES.filter(t => !t.open);
+    const openTrades = TRADES.filter(t => t.open);
+    const totalRealized = closedTrades.reduce((s, t) => s + t.pnlPaise, 0);
+    const wins = closedTrades.filter(t => t.pnlPaise > 0).length;
+    const winRate = closedTrades.length ? (wins / closedTrades.length) * 100 : 0;
+
+    document.getElementById('hero-pnl').textContent = AG.formatINR(totalRealized);
+    document.getElementById('hero-winrate').textContent = winRate.toFixed(1) + '%';
+    document.getElementById('hero-closed').textContent = String(closedTrades.length);
+    document.getElementById('hero-open').textContent = String(openTrades.length);
+
+    const totalDeployed = openTrades.reduce((s, t) => s + (OPEN_DETAIL[t.id] ? OPEN_DETAIL[t.id].costPaise : 0), 0);
+    const totalUnrealized = openTrades.reduce((s, t) => s + t.pnlPaise, 0);
+    document.getElementById('or-count').textContent = String(openTrades.length);
+    document.getElementById('or-deployed').textContent = AG.formatINR(totalDeployed);
+    const orUnrealizedEl = document.getElementById('or-unrealized');
+    orUnrealizedEl.textContent = AG.formatINR(totalUnrealized, { showSign: true });
+    orUnrealizedEl.style.color = totalUnrealized >= 0 ? 'var(--success)' : 'var(--error)';
+
+    document.getElementById('or-positions').innerHTML = openTrades.map(t => {
+      const d = OPEN_DETAIL[t.id] || { label: t.instrument + ' · ' + SEGMENT_LABELS[t.segment], metaLabel: 'Entered ' + fmtDate(t.entryDate) };
+      const pnlColor = t.pnlPaise >= 0 ? 'var(--success)' : 'var(--error)';
+      return `
+        <div class="or-position-row">
+          <div>
+            <div class="or-position-row__name">${d.label}</div>
+            <div class="or-position-row__meta">${d.metaLabel}</div>
+          </div>
+          <div class="or-position-row__pnl" style="color:${pnlColor};">${AG.formatINR(t.pnlPaise, { showSign: true })}</div>
+        </div>`;
+    }).join('');
+  }
 
   renderTrades();
+  updateHeroStats();
+
+  let currentTradeId = null;
+  function openEditTradeSheet(id) {
+    const t = TRADES.find(x => x.id === id);
+    currentTradeId = id;
+    document.getElementById('et-instrument').value = t.instrument;
+    document.getElementById('et-segment').value = t.segment;
+    document.getElementById('et-entry-date').value = t.entryDate;
+    document.getElementById('et-exit-date').value = t.exitDate || '';
+    document.getElementById('et-open').value = String(t.open);
+    document.getElementById('et-pnl').value = Math.round(t.pnlPaise / 100);
+    document.getElementById('et-vcp').value = String(!!t.vcp);
+    document.getElementById('delete-trade-title').textContent = `Delete ${t.instrument}?`;
+    AG.openSheet('edit-trade');
+  }
+
+  function saveTradeEdit() {
+    const t = TRADES.find(x => x.id === currentTradeId);
+    const instrument = document.getElementById('et-instrument').value.trim();
+    const pnlRupees = parseInt(document.getElementById('et-pnl').value.replace(/,/g, '') || '0', 10);
+    if (!instrument) { AG.showToast('Instrument is required', 'error'); return; }
+
+    t.instrument = instrument;
+    t.segment = document.getElementById('et-segment').value;
+    t.entryDate = document.getElementById('et-entry-date').value;
+    const open = document.getElementById('et-open').value === 'true';
+    t.open = open;
+    t.exitDate = open ? null : (document.getElementById('et-exit-date').value || t.exitDate);
+    t.pnlPaise = pnlRupees * 100;
+    t.vcp = document.getElementById('et-vcp').value === 'true';
+
+    renderTrades();
+    updateHeroStats();
+    AG.closeSheet('edit-trade');
+    AG.showToast('Trade updated ✓', 'success');
+  }
+
+  function confirmDeleteTrade() {
+    const idx = TRADES.findIndex(x => x.id === currentTradeId);
+    if (idx === -1) return;
+    const name = TRADES[idx].instrument;
+    TRADES.splice(idx, 1);
+    renderTrades();
+    updateHeroStats();
+    AG.closeDialog('delete-trade');
+    AG.closeSheet('edit-trade');
+    AG.showToast(name + ' deleted ✓', 'success');
+  }
 
   /* ── Demo bar: Populated / Empty ── */
   AG.initDemoBar({
