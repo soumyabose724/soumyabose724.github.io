@@ -94,24 +94,28 @@
 
       <!-- Hero -->
       <div class="glass-card glass-card--hero">
-        <div class="loans-hero-label" style="font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-secondary); margin-bottom:var(--sp-2);">Nimbus Cloud Technologies Inc. · NASDAQ: NMBS</div>
-        <div class="amount-text amount-text--display gradient-text">₹8,01,600</div>
-        <div class="t-caption text-muted mt-1">$9,600.00 economic value — exercised shares held + in-the-money unexercised vested options, at current FX ₹83.50/USD</div>
+        <div class="loans-hero-label" id="esop-company-label" style="font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-secondary); margin-bottom:var(--sp-2);">Nimbus Cloud Technologies Inc. · NASDAQ: NMBS</div>
+        <div class="amount-text amount-text--display gradient-text" id="esop-hero-total">₹8,01,600</div>
+        <div class="t-caption text-muted mt-1" id="esop-hero-caption">$9,600.00 economic value — in-the-money value across all granted options, at current FX ₹83.50/USD</div>
         <div class="stat-row">
           <div class="stat-col">
             <div class="stat-col__label">Granted</div>
-            <div class="stat-col__value">400 options</div>
+            <div class="stat-col__value" id="esop-granted">400 options</div>
           </div>
           <div class="stat-col">
             <div class="stat-col__label">Strike Price</div>
-            <div class="stat-col__value">$15.00</div>
+            <div class="stat-col__value" id="esop-strike">$15.00</div>
           </div>
           <div class="stat-col">
             <div class="stat-col__label">Current FMV</div>
-            <div class="stat-col__value">$42.00</div>
+            <div class="stat-col__value" id="esop-fmv">$42.00</div>
           </div>
         </div>
       </div>
+
+      <button class="btn btn--secondary btn--full" style="margin-top:var(--sp-4);" onclick="openEditEsopSheet()">
+        Edit Grant
+      </button>
 
       <!-- Vesting schedule -->
       <div class="section-title" style="margin-top:var(--sp-5);">Vesting Schedule</div>
@@ -119,14 +123,14 @@
         <div class="util-bar-wrap" style="margin-top:0;">
           <div class="util-label-row">
             <span class="util-label">Vested to date</span>
-            <span class="util-pct util-pct--safe">300 / 400 options (75%)</span>
+            <span class="util-pct util-pct--safe" id="esop-vested-label">300 / 400 options (75%)</span>
           </div>
           <div class="progress-bar progress-bar--thick">
-            <div class="progress-bar__fill progress-bar__fill--success" style="width:75%;"></div>
+            <div class="progress-bar__fill progress-bar__fill--success" id="esop-vested-bar" style="width:75%;"></div>
           </div>
         </div>
 
-        <div class="vest-timeline">
+        <div class="vest-timeline" id="esop-vest-timeline">
           <div class="vest-step">
             <div class="vest-step__dot done">✓</div>
             <div class="vest-step__pct">25%</div>
@@ -155,7 +159,7 @@
             <span class="vest-step__tag upcoming">Upcoming</span>
           </div>
         </div>
-        <div class="form-helper mt-3">Standard 4-year vest, 25% per year, no cliff beyond the annual tranche dates. Grant date: 1 June 2023.</div>
+        <div class="form-helper mt-3" id="esop-vest-helper">Standard 4-year vest, 25% per year, no cliff beyond the annual tranche dates. Grant date: 1 June 2023.</div>
       </div>
 
       <!-- Tranche breakdown -->
@@ -246,7 +250,47 @@
         <div class="empty-state__icon">🎯</div>
         <div class="empty-state__title">No ESOP Grant on Record</div>
         <div class="empty-state__body">Add your Employee Stock Option grant details to track vesting, exercised tranches, and perquisite/capital gains tax impact.</div>
-        <a href="index.html" class="btn btn--primary" style="min-width:180px; text-decoration:none;">+ Add ESOP Grant</a>
+        <button class="btn btn--primary" style="min-width:180px;" onclick="openEditEsopSheet()">+ Add ESOP Grant</button>
+      </div>
+    </div>
+
+    <!-- Add/Edit ESOP Grant Sheet -->
+    <div class="sheet-backdrop" id="edit-esop-backdrop"></div>
+    <div class="sheet" id="edit-esop">
+      <div class="sheet__handle"></div>
+      <div class="sheet__header">
+        <span class="sheet__title">ESOP Grant</span>
+        <button class="sheet__close" onclick="AG.closeSheet('edit-esop')" aria-label="Close">✕</button>
+      </div>
+      <div class="sheet__body">
+        <div class="form-group">
+          <label class="form-label">Company Name</label>
+          <input class="form-input" id="ee-company" type="text" placeholder="e.g. Nimbus Cloud Technologies Inc.">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ticker (Exchange)</label>
+          <input class="form-input" id="ee-ticker" type="text" placeholder="e.g. NASDAQ: NMBS">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Options Granted</label>
+          <input class="form-input" id="ee-granted" type="text" inputmode="numeric" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Strike Price ($/option)</label>
+          <input class="form-input" id="ee-strike" type="text" inputmode="decimal" placeholder="0.00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Current FMV ($/share)</label>
+          <input class="form-input" id="ee-fmv" type="text" inputmode="decimal" placeholder="0.00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Grant Date</label>
+          <input class="form-input" id="ee-grant-date" type="date">
+        </div>
+      </div>
+      <div class="sheet__footer">
+        <button class="btn btn--ghost" onclick="AG.closeSheet('edit-esop')">Cancel</button>
+        <button class="btn btn--primary" onclick="saveEsop()">Save Grant</button>
       </div>
     </div>
 
@@ -323,6 +367,96 @@
       document.getElementById('view-empty').style.display = '';
     },
   });
+
+  const ESOP_FX = 83.50;
+
+  function openEditEsopSheet() {
+    const isPopulated = document.getElementById('view-populated').style.display !== 'none';
+    if (isPopulated) {
+      const label = document.getElementById('esop-company-label').textContent.split(' · ');
+      document.getElementById('ee-company').value = label[0] || '';
+      document.getElementById('ee-ticker').value = label[1] || '';
+      document.getElementById('ee-granted').value = document.getElementById('esop-granted').textContent.replace(/[^\d]/g, '');
+      document.getElementById('ee-strike').value = document.getElementById('esop-strike').textContent.replace(/[^\d.]/g, '');
+      document.getElementById('ee-fmv').value = document.getElementById('esop-fmv').textContent.replace(/[^\d.]/g, '');
+      const helperMatch = document.getElementById('esop-vest-helper').textContent.match(/Grant date:\s*([\d]+ \w+ \d{4})/);
+      if (helperMatch) {
+        const parsed = new Date(helperMatch[1]);
+        if (!isNaN(parsed)) document.getElementById('ee-grant-date').value = parsed.toISOString().slice(0, 10);
+      }
+    } else {
+      document.getElementById('ee-company').value = '';
+      document.getElementById('ee-ticker').value = '';
+      document.getElementById('ee-granted').value = '';
+      document.getElementById('ee-strike').value = '';
+      document.getElementById('ee-fmv').value = '';
+      document.getElementById('ee-grant-date').value = '';
+    }
+    AG.openSheet('edit-esop');
+  }
+
+  function saveEsop() {
+    const company = document.getElementById('ee-company').value.trim();
+    const ticker = document.getElementById('ee-ticker').value.trim();
+    const granted = parseInt(document.getElementById('ee-granted').value || '0', 10);
+    const strike = parseFloat(document.getElementById('ee-strike').value || '0');
+    const fmv = parseFloat(document.getElementById('ee-fmv').value || '0');
+    const grantDateVal = document.getElementById('ee-grant-date').value;
+    if (!company) { AG.showToast('Enter the company name', 'error'); return; }
+    if (!granted) { AG.showToast('Enter the number of options granted', 'error'); return; }
+    if (!strike) { AG.showToast('Enter the strike price', 'error'); return; }
+    if (!fmv) { AG.showToast('Enter the current FMV', 'error'); return; }
+    if (!grantDateVal) { AG.showToast('Enter the grant date', 'error'); return; }
+
+    const grantDate = new Date(grantDateVal + 'T00:00:00');
+    const now = new Date();
+    let yearsElapsed = now.getFullYear() - grantDate.getFullYear();
+    const anniversaryThisYear = new Date(now.getFullYear(), grantDate.getMonth(), grantDate.getDate());
+    if (now < anniversaryThisYear) yearsElapsed -= 1;
+    yearsElapsed = Math.max(0, Math.min(yearsElapsed, 4));
+    const vestedPct = yearsElapsed * 25;
+    const vestedOptions = Math.round(granted * vestedPct / 100);
+
+    const intrinsicPerShare = Math.max(fmv - strike, 0);
+    const totalValueUsd = intrinsicPerShare * granted;
+    const totalValueInr = Math.round(totalValueUsd * ESOP_FX);
+
+    const dateFmt = (d) => d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+
+    document.getElementById('esop-company-label').textContent = ticker ? `${company} · ${ticker}` : company;
+    document.getElementById('esop-hero-total').textContent = AG.formatINR(totalValueInr * 100);
+    document.getElementById('esop-hero-caption').textContent = `$${totalValueUsd.toFixed(2)} economic value — in-the-money value across all granted options, at current FX ₹${ESOP_FX.toFixed(2)}/USD`;
+    document.getElementById('esop-granted').textContent = `${granted} options`;
+    document.getElementById('esop-strike').textContent = `$${strike.toFixed(2)}`;
+    document.getElementById('esop-fmv').textContent = `$${fmv.toFixed(2)}`;
+
+    document.getElementById('esop-vested-label').textContent = `${vestedOptions} / ${granted} options (${vestedPct}%)`;
+    document.getElementById('esop-vested-bar').style.width = `${vestedPct}%`;
+
+    const timeline = document.getElementById('esop-vest-timeline');
+    let stepsHtml = '';
+    for (let i = 1; i <= 4; i++) {
+      const stepDate = new Date(grantDate);
+      stepDate.setFullYear(stepDate.getFullYear() + i);
+      const done = i <= yearsElapsed;
+      const isCurrent = !done && i === yearsElapsed + 1;
+      stepsHtml += `
+        <div class="vest-step">
+          ${i > 1 ? `<div class="vest-step__connector ${i - 1 <= yearsElapsed ? 'done' : ''}"></div>` : ''}
+          <div class="vest-step__dot ${done ? 'done' : (isCurrent ? 'current' : '')}">${done ? '✓' : i}</div>
+          <div class="vest-step__pct">${i * 25}%</div>
+          <div class="vest-step__date">${dateFmt(stepDate)}</div>
+          <span class="vest-step__tag ${done ? 'vested' : 'upcoming'}">${done ? 'Vested' : 'Upcoming'}</span>
+        </div>`;
+    }
+    timeline.innerHTML = stepsHtml;
+    document.getElementById('esop-vest-helper').textContent = `Standard 4-year vest, 25% per year, no cliff beyond the annual tranche dates. Grant date: ${dateFmt(grantDate)}.`;
+
+    document.getElementById('view-populated').style.display = '';
+    document.getElementById('view-empty').style.display = 'none';
+    AG.closeSheet('edit-esop');
+    AG.showToast('ESOP grant saved ✓', 'success');
+  }
 </script>
 </body>
 </html>
