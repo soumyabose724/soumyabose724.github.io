@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — More</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* No demo-bar on this page — anchor the fixed top-bar to the true top */
+    :root { --demo-bar-h: 0px; }
+
+    .more-group-label {
+      display: flex; align-items: center; gap: var(--sp-2);
+      font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+      color: var(--text-muted); margin: var(--sp-5) 0 var(--sp-2);
+    }
+    .more-group-label:first-child { margin-top: 0; }
+    .more-group-label::before {
+      content: ''; width: 3px; height: 12px; border-radius: 2px;
+      background: var(--primary); flex-shrink: 0;
+    }
+    .more-row {
+      display: flex; align-items: center; gap: var(--sp-3);
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: var(--sp-3) var(--sp-4);
+      margin-bottom: var(--sp-2); text-decoration: none; color: inherit;
+      transition: background var(--dur-fast), box-shadow var(--dur-fast);
+      animation: item-in var(--dur-med) var(--ease-out) both;
+    }
+    .more-row:hover { background: var(--primary-xlight); box-shadow: var(--sh-sm); }
+    .more-row:active { transform: scale(0.99); }
+    .more-row__icon {
+      width: 40px; height: 40px; border-radius: var(--r-md); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; color: #fff;
+    }
+    .more-row__body { flex: 1; min-width: 0; }
+    .more-row__name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    .more-row__sub { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+    .more-row__chevron { color: var(--text-muted); flex-shrink: 0; }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <div class="top-bar">
+    <a href="../dashboard/index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">More</span>
+    <div class="top-bar__actions" style="gap:4px;">
+      <a href="../search/index.html" class="top-bar__action" aria-label="Search">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </a>
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <a href="../settings/profile.html" class="avatar" style="text-decoration:none;">VS</a>
+    </div>
+  </div>
+
+  <div class="page-content">
+
+    <div class="more-group-label">Money &amp; Banking</div>
+    <a href="../bank-accounts/index.html" class="more-row">
+      <div class="more-row__icon" style="background:linear-gradient(135deg,#0EA5E9,#38BDF8);">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+      </div>
+      <div class="more-row__body">
+        <div class="more-row__name">Bank Accounts</div>
+        <div class="more-row__sub">Savings, current, FD &amp; RD</div>
+      </div>
+      <svg class="more-row__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    <a href="../credit-cards/index.html" class="more-row">
+      <div class="more-row__icon" style="background:linear-gradient(135deg,#D97706,#F59E0B);">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+      </div>
+      <div class="more-row__body">
+        <div class="more-row__name">Credit Cards</div>
+        <div class="more-row__sub">Bills, cycles &amp; EMI conversions</div>
+      </div>
+      <svg class="more-row__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    <a href="../loans/index.html" class="more-row">
+      <div class="more-row__icon" style="background:var(--grad-danger);">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9"/><path d="M21 3H3l3 6h12l3-6z"/></svg>
+      </div>
+      <div class="more-row__body">
+        <div class="more-row__name">Loans</div>
+        <div class="more-row__sub">EMIs, payoff strategy &amp; pre-closure</div>
+      </div>
+      <svg class="more-row__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    <a href="../scheduling/calendar.html" class="more-row">
+      <div class="more-row__icon" style="background:var(--grad-primary);">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </div>
+      <div class="more-row__body">
+        <div class="more-row__name">Scheduling</div>
+        <div class="more-row__sub">Recurring income, EMIs &amp; bills</div>
+      </div>
+      <svg class="more-row__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+
+    <div class="more-group-label">Grow</div>
+    <a href="../investments/index.html" class="more-row">
+      <div class="more-row__icon" style="background:var(--grad-primary);">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <div class="more-row__body">
+        <div class="more-row__name">Investments</div>
+        <div class="more-row__sub">MF, stocks, EPF/PPF, gold &amp; more</div>
+      </div>
+      <svg class="more-row__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    <a href="../trade-journal/index.html" class="more-row">
+      <div class="more-row__icon" style="background:linear-gradient(135deg,#2563EB,#3B82F6);">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 9l-5 5-4-4-4 4"/></svg>
+      </div>
+      <div class="more-row__body">
+        <div class="more-row__name">Trade Journal</div>
+        <div class="more-row__sub">Intraday, F&amp;O, commodity &amp; crypto</div>
+      </div>
+      <svg class="more-row__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    <a href="../goals/index.html" class="more-row">
+      <div class="more-row__icon" style="background:var(--grad-success);">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+      </div>
+      <div class="more-row__body">
+        <div class="more-row__name">Goals &amp; Runway</div>
+        <div class="more-row__sub">Targets, SIP plans &amp; emergency fund</div>
+      </div>
+      <svg class="more-row__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+
+    <div class="more-group-label">Protect</div>
+    <a href="../insurance/index.html" class="more-row">
+      <div class="more-row__icon" style="background:linear-gradient(135deg,#8B5CF6,#A78BFA);">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg>
+      </div>
+      <div class="more-row__body">
+        <div class="more-row__name">Insurance</div>
+        <div class="more-row__sub">Term, health, vehicle &amp; coverage gap</div>
+      </div>
+      <svg class="more-row__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    <a href="../estate-planning/matrix.html" class="more-row">
+      <div class="more-row__icon" style="background:linear-gradient(135deg,#78716C,#A8A29E);">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      </div>
+      <div class="more-row__body">
+        <div class="more-row__name">Estate Planning</div>
+        <div class="more-row__sub">Nominations &amp; document map</div>
+      </div>
+      <svg class="more-row__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+
+    <div class="more-group-label">Plan &amp; Insights</div>
+    <a href="../tax/index.html" class="more-row">
+      <div class="more-row__icon" style="background:var(--grad-deep);">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      </div>
+      <div class="more-row__body">
+        <div class="more-row__name">Tax &amp; Compliance</div>
+        <div class="more-row__sub">Regime comparison, deductions &amp; TDS</div>
+      </div>
+      <svg class="more-row__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    <a href="../intelligence/index.html" class="more-row">
+      <div class="more-row__icon" style="background:linear-gradient(135deg,#D97706,#F59E0B);">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9z"/></svg>
+      </div>
+      <div class="more-row__body">
+        <div class="more-row__name">Intelligence</div>
+        <div class="more-row__sub">Health score, forecasts &amp; anomalies</div>
+      </div>
+      <svg class="more-row__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    <a href="../reports/index.html" class="more-row">
+      <div class="more-row__icon" style="background:linear-gradient(135deg,#2563EB,#3B82F6);">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      </div>
+      <div class="more-row__body">
+        <div class="more-row__name">Reports &amp; Export</div>
+        <div class="more-row__sub">Monthly, annual &amp; net worth</div>
+      </div>
+      <svg class="more-row__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    <a href="../tools/index.html" class="more-row">
+      <div class="more-row__icon" style="background:var(--grad-primary);">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="11" x2="8" y2="11.01"/><line x1="12" y1="11" x2="12" y2="11.01"/><line x1="16" y1="11" x2="16" y2="11.01"/><line x1="8" y1="15" x2="8" y2="15.01"/><line x1="12" y1="15" x2="12" y2="15.01"/><line x1="16" y1="15" x2="16" y2="15.01"/><line x1="8" y1="19" x2="16" y2="19"/></svg>
+      </div>
+      <div class="more-row__body">
+        <div class="more-row__name">Calculators</div>
+        <div class="more-row__sub">SIP, EMI &amp; FD what-ifs</div>
+      </div>
+      <svg class="more-row__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+
+    <div class="more-group-label">Data &amp; App</div>
+    <a href="../import/index.html" class="more-row">
+      <div class="more-row__icon" style="background:linear-gradient(135deg,#0EA5E9,#38BDF8);">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      </div>
+      <div class="more-row__body">
+        <div class="more-row__name">Data Import</div>
+        <div class="more-row__sub">Bank CSV, CAS &amp; statements</div>
+      </div>
+      <svg class="more-row__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    <a href="../notifications/index.html" class="more-row">
+      <div class="more-row__icon" style="background:var(--grad-danger);">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </div>
+      <div class="more-row__body">
+        <div class="more-row__name">Notifications</div>
+        <div class="more-row__sub">Alerts, reminders &amp; suggestions</div>
+      </div>
+      <svg class="more-row__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    <a href="../settings/index.html" class="more-row">
+      <div class="more-row__icon" style="background:linear-gradient(135deg,#78716C,#A8A29E);">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </div>
+      <div class="more-row__body">
+        <div class="more-row__name">Settings</div>
+        <div class="more-row__sub">Profile, family, security &amp; backup</div>
+      </div>
+      <svg class="more-row__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+
+  </div><!-- /page-content -->
+
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2"/></svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      <span>Transactions</span>
+    </a>
+    <a href="../investments/index.html" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span>Invest</span>
+    </a>
+    <a href="index.html" class="nav-tab active" data-tab="more">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span>More</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+<script src="../assets/nav.js"></script>
+</body>
+</html>
