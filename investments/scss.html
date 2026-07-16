@@ -71,13 +71,13 @@
         <div class="scheme-hero-label">Deposit (Current Value)</div>
         <div class="scheme-hero-amount gradient-text" id="hero-total">₹2,00,000</div>
         <div class="scheme-hero-sub">
-          <strong>₹4,100/qtr</strong> auto-credited payout · principal doesn't grow
+          <strong id="hero-payout">₹4,100/qtr</strong> auto-credited payout · principal doesn't grow
         </div>
         <div class="scheme-hero-footer">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
           </svg>
-          <span>5-year tenure (extendable +3) · matures <strong style="color:var(--text-secondary);">Jan 2030</strong></span>
+          <span>5-year tenure (extendable +3) · matures <strong style="color:var(--text-secondary);" id="hero-maturity">Jan 2030</strong></span>
         </div>
       </div>
 
@@ -94,20 +94,28 @@
 
       <div class="scheme-card">
         <div class="scheme-card__row"><span>Account holder</span><span>Sunita Sharma (age 63 — pensioner)</span></div>
-        <div class="scheme-card__row"><span>Opened</span><span>Jan 2025</span></div>
-        <div class="scheme-card__row"><span>Deposit</span><span>₹2,00,000</span></div>
-        <div class="scheme-card__row"><span>Quarterly payout</span><span>₹4,100 → linked savings a/c</span></div>
-        <div class="scheme-card__row"><span>Base tenure</span><span>5 years (to Jan 2030)</span></div>
-        <div class="scheme-card__row"><span>Extension option</span><span>+3 years (once, to Jan 2033)</span></div>
+        <div class="scheme-card__row"><span>Opened</span><span id="row-opened">Jan 2025</span></div>
+        <div class="scheme-card__row"><span>Deposit</span><span id="row-deposit">₹2,00,000</span></div>
+        <div class="scheme-card__row"><span>Quarterly payout</span><span id="row-payout">₹4,100 → linked savings a/c</span></div>
+        <div class="scheme-card__row"><span>Base tenure</span><span>5 years (to <span id="row-maturity-base">Jan 2030</span>)</span></div>
+        <div class="scheme-card__row"><span>Extension option</span><span>+3 years (once, to <span id="row-maturity-ext">Jan 2033</span>)</span></div>
         <div class="scheme-card__row"><span>80C benefit</span><span>Eligible in year of deposit</span></div>
       </div>
 
       <div class="util-bar-wrap" style="margin-top:var(--sp-5);">
         <div class="util-label-row">
-          <span class="util-label">Tenure progress · 18 of 60 months</span>
-          <span class="util-pct util-pct--safe">30%</span>
+          <span class="util-label" id="util-label">Tenure progress · 18 of 60 months</span>
+          <span class="util-pct util-pct--safe" id="util-pct">30%</span>
         </div>
-        <div class="progress-bar progress-bar--thick"><div class="progress-bar__fill" style="width:30%;"></div></div>
+        <div class="progress-bar progress-bar--thick"><div class="progress-bar__fill" id="util-fill" style="width:30%;"></div></div>
+      </div>
+
+      <div class="surface-card" style="display:flex; align-items:center; justify-content:space-between; margin-top:var(--sp-4);">
+        <div style="flex:1; min-width:0; padding-right:var(--sp-3);">
+          <div style="font-size:14px; font-weight:600; color:var(--error);">Remove Account</div>
+          <div style="font-size:12px; color:var(--text-secondary); margin-top:2px;">Clears this SCSS account from your holdings</div>
+        </div>
+        <button class="btn btn--danger btn--sm" onclick="removeScss()">Remove</button>
       </div>
 
       <div class="info-card">
@@ -124,7 +132,35 @@
         <div class="empty-state__icon">🧓</div>
         <div class="empty-state__title">No SCSS Account Yet</div>
         <div class="empty-state__body">Senior Citizens' Savings Scheme offers a high, government-guaranteed quarterly payout for account holders aged 60+ — add an account to track it here.</div>
-        <button class="btn btn--primary" style="min-width:200px;" onclick="AG.showToast('Add SCSS account — coming soon','info')">+ Add SCSS Account</button>
+        <button class="btn btn--primary" style="min-width:200px;" onclick="openAddScssSheet()">+ Add SCSS Account</button>
+      </div>
+    </div>
+
+    <!-- Add SCSS Sheet -->
+    <div class="sheet-backdrop" id="add-scss-backdrop"></div>
+    <div class="sheet" id="add-scss">
+      <div class="sheet__handle"></div>
+      <div class="sheet__header">
+        <span class="sheet__title">Add SCSS Account</span>
+        <button class="sheet__close" onclick="AG.closeSheet('add-scss')" aria-label="Close">✕</button>
+      </div>
+      <div class="sheet__body">
+        <div class="form-group">
+          <label class="form-label">Deposit Amount (₹, max 30,00,000)</label>
+          <div class="form-input-wrap has-prefix">
+            <span class="input-prefix">₹</span>
+            <input class="form-input inr-input" id="as-deposit" type="text" inputmode="numeric" placeholder="0">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Opening Date</label>
+          <input class="form-input" id="as-date" type="date">
+        </div>
+        <div class="form-helper">Fixed at 8.2% p.a., paid quarterly, over the 5-year (+3 extendable) tenure.</div>
+      </div>
+      <div class="sheet__footer">
+        <button class="btn btn--ghost" onclick="AG.closeSheet('add-scss')">Cancel</button>
+        <button class="btn btn--primary" onclick="saveScss()">Save Account</button>
       </div>
     </div>
 
@@ -198,6 +234,57 @@
       document.getElementById('view-empty').style.display = '';
     },
   });
+
+  const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const DEMO_TODAY = new Date(2026, 5, 23);
+
+  function openAddScssSheet() {
+    document.getElementById('as-deposit').value = '';
+    document.getElementById('as-date').value = '';
+    AG.openSheet('add-scss');
+  }
+
+  function saveScss() {
+    const deposit = parseInt(document.getElementById('as-deposit').value.replace(/,/g, '') || '0', 10);
+    const dateVal = document.getElementById('as-date').value;
+    if (!deposit) { AG.showToast('Enter the deposit amount', 'error'); return; }
+    if (deposit > 3000000) { AG.showToast('SCSS caps at ₹30,00,000 per holder', 'error'); return; }
+    if (!dateVal) { AG.showToast('Enter the opening date', 'error'); return; }
+
+    const opened = new Date(dateVal + 'T00:00:00');
+    const maturityBase = new Date(opened);
+    maturityBase.setFullYear(maturityBase.getFullYear() + 5);
+    const maturityExt = new Date(opened);
+    maturityExt.setFullYear(maturityExt.getFullYear() + 8);
+    const monthsElapsed = Math.max(0, Math.min(60,
+      (DEMO_TODAY.getFullYear() - opened.getFullYear()) * 12 + (DEMO_TODAY.getMonth() - opened.getMonth())));
+    const quarterlyPayout = Math.round(deposit * 0.082 / 4);
+    const pct = Math.round((monthsElapsed / 60) * 100);
+    const fmtMY = d => MONTH_NAMES[d.getMonth()] + ' ' + d.getFullYear();
+
+    document.getElementById('hero-total').textContent = AG.formatINR(deposit * 100);
+    document.getElementById('hero-payout').textContent = AG.formatINR(quarterlyPayout * 100) + '/qtr';
+    document.getElementById('hero-maturity').textContent = fmtMY(maturityBase);
+    document.getElementById('row-opened').textContent = fmtMY(opened);
+    document.getElementById('row-deposit').textContent = AG.formatINR(deposit * 100);
+    document.getElementById('row-payout').textContent = AG.formatINR(quarterlyPayout * 100) + ' → linked savings a/c';
+    document.getElementById('row-maturity-base').textContent = fmtMY(maturityBase);
+    document.getElementById('row-maturity-ext').textContent = fmtMY(maturityExt);
+    document.getElementById('util-label').textContent = `Tenure progress · ${monthsElapsed} of 60 months`;
+    document.getElementById('util-pct').textContent = pct + '%';
+    document.getElementById('util-fill').style.width = pct + '%';
+
+    document.getElementById('view-populated').style.display = '';
+    document.getElementById('view-empty').style.display = 'none';
+    AG.closeSheet('add-scss');
+    AG.showToast('SCSS account added ✓', 'success');
+  }
+
+  function removeScss() {
+    document.getElementById('view-populated').style.display = 'none';
+    document.getElementById('view-empty').style.display = '';
+    AG.showToast('SCSS account removed ✓', 'success');
+  }
 </script>
 </body>
 </html>

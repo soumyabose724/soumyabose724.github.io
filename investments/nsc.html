@@ -69,13 +69,13 @@
         <div class="scheme-hero-label">Current Value</div>
         <div class="scheme-hero-amount gradient-text" id="hero-total">₹1,08,400</div>
         <div class="scheme-hero-sub">
-          Invested <strong>₹1,00,000</strong> · <span class="delta delta--pos">▲ +8.4%</span>
+          Invested <strong id="hero-invested">₹1,00,000</strong> · <span class="delta delta--pos" id="hero-delta">▲ +8.4%</span>
         </div>
         <div class="scheme-hero-footer">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
           </svg>
-          <span>5-year tenure · matures <strong style="color:var(--text-secondary);">Jun 2030</strong></span>
+          <span>5-year tenure · matures <strong style="color:var(--text-secondary);" id="hero-maturity">Jun 2030</strong></span>
         </div>
       </div>
 
@@ -91,20 +91,28 @@
       </div>
 
       <div class="scheme-card">
-        <div class="scheme-card__row"><span>Purchased</span><span>Jun 2025</span></div>
-        <div class="scheme-card__row"><span>Principal invested</span><span>₹1,00,000</span></div>
-        <div class="scheme-card__row"><span>Current value (est.)</span><span>₹1,08,400</span></div>
+        <div class="scheme-card__row"><span>Purchased</span><span id="row-purchased">Jun 2025</span></div>
+        <div class="scheme-card__row"><span>Principal invested</span><span id="row-principal">₹1,00,000</span></div>
+        <div class="scheme-card__row"><span>Current value (est.)</span><span id="row-current">₹1,08,400</span></div>
         <div class="scheme-card__row"><span>Compounding</span><span>Annually, paid at maturity</span></div>
-        <div class="scheme-card__row"><span>Maturity date</span><span>Jun 2030</span></div>
-        <div class="scheme-card__row"><span>80C claimed (FY 2025-26)</span><span>₹1,00,000</span></div>
+        <div class="scheme-card__row"><span>Maturity date</span><span id="row-maturity">Jun 2030</span></div>
+        <div class="scheme-card__row"><span>80C claimed (FY 2025-26)</span><span id="row-80c">₹1,00,000</span></div>
       </div>
 
       <div class="util-bar-wrap" style="margin-top:var(--sp-5);">
         <div class="util-label-row">
-          <span class="util-label">Tenure progress · 13 of 60 months</span>
-          <span class="util-pct util-pct--safe">22%</span>
+          <span class="util-label" id="util-label">Tenure progress · 13 of 60 months</span>
+          <span class="util-pct util-pct--safe" id="util-pct">22%</span>
         </div>
-        <div class="progress-bar progress-bar--thick"><div class="progress-bar__fill" style="width:22%;"></div></div>
+        <div class="progress-bar progress-bar--thick"><div class="progress-bar__fill" id="util-fill" style="width:22%;"></div></div>
+      </div>
+
+      <div class="surface-card" style="display:flex; align-items:center; justify-content:space-between; margin-top:var(--sp-4);">
+        <div style="flex:1; min-width:0; padding-right:var(--sp-3);">
+          <div style="font-size:14px; font-weight:600; color:var(--error);">Remove Certificate</div>
+          <div style="font-size:12px; color:var(--text-secondary); margin-top:2px;">Clears this NSC certificate from your holdings</div>
+        </div>
+        <button class="btn btn--danger btn--sm" onclick="removeNsc()">Remove</button>
       </div>
 
       <div class="toggle-row">
@@ -133,7 +141,35 @@
         <div class="empty-state__icon">📜</div>
         <div class="empty-state__title">No NSC Certificate Yet</div>
         <div class="empty-state__body">National Savings Certificate is a 5-year, 80C-eligible Post Office fixed-return instrument — add a certificate to track it here.</div>
-        <button class="btn btn--primary" style="min-width:200px;" onclick="AG.showToast('Add NSC certificate — coming soon','info')">+ Add NSC Certificate</button>
+        <button class="btn btn--primary" style="min-width:200px;" onclick="openAddNscSheet()">+ Add NSC Certificate</button>
+      </div>
+    </div>
+
+    <!-- Add NSC Sheet -->
+    <div class="sheet-backdrop" id="add-nsc-backdrop"></div>
+    <div class="sheet" id="add-nsc">
+      <div class="sheet__handle"></div>
+      <div class="sheet__header">
+        <span class="sheet__title">Add NSC Certificate</span>
+        <button class="sheet__close" onclick="AG.closeSheet('add-nsc')" aria-label="Close">✕</button>
+      </div>
+      <div class="sheet__body">
+        <div class="form-group">
+          <label class="form-label">Principal Invested (₹)</label>
+          <div class="form-input-wrap has-prefix">
+            <span class="input-prefix">₹</span>
+            <input class="form-input inr-input" id="an-principal" type="text" inputmode="numeric" placeholder="0">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Purchase Date</label>
+          <input class="form-input" id="an-date" type="date">
+        </div>
+        <div class="form-helper">Fixed at 7.7% p.a., compounded annually, over the 5-year tenure. Principal is 80C-eligible.</div>
+      </div>
+      <div class="sheet__footer">
+        <button class="btn btn--ghost" onclick="AG.closeSheet('add-nsc')">Cancel</button>
+        <button class="btn btn--primary" onclick="saveNsc()">Save Certificate</button>
       </div>
     </div>
 
@@ -207,6 +243,57 @@
       document.getElementById('view-empty').style.display = '';
     },
   });
+
+  const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const DEMO_TODAY = new Date(2026, 5, 23);
+
+  function openAddNscSheet() {
+    document.getElementById('an-principal').value = '';
+    document.getElementById('an-date').value = '';
+    AG.openSheet('add-nsc');
+  }
+
+  function saveNsc() {
+    const principal = parseInt(document.getElementById('an-principal').value.replace(/,/g, '') || '0', 10);
+    const dateVal = document.getElementById('an-date').value;
+    if (!principal) { AG.showToast('Enter the principal amount', 'error'); return; }
+    if (!dateVal) { AG.showToast('Enter the purchase date', 'error'); return; }
+
+    const purchased = new Date(dateVal + 'T00:00:00');
+    const maturity = new Date(purchased);
+    maturity.setFullYear(maturity.getFullYear() + 5);
+    const monthsElapsed = Math.max(0, Math.min(60,
+      (DEMO_TODAY.getFullYear() - purchased.getFullYear()) * 12 + (DEMO_TODAY.getMonth() - purchased.getMonth())));
+    const yearsElapsed = monthsElapsed / 12;
+    const currentVal = Math.round(principal * Math.pow(1.077, yearsElapsed));
+    const gainPct = ((currentVal - principal) / principal * 100);
+    const pct = Math.round((monthsElapsed / 60) * 100);
+    const fmtMY = d => MONTH_NAMES[d.getMonth()] + ' ' + d.getFullYear();
+
+    document.getElementById('hero-total').textContent = AG.formatINR(currentVal * 100);
+    document.getElementById('hero-invested').textContent = AG.formatINR(principal * 100);
+    document.getElementById('hero-delta').textContent = `▲ +${gainPct.toFixed(1)}%`;
+    document.getElementById('hero-maturity').textContent = fmtMY(maturity);
+    document.getElementById('row-purchased').textContent = fmtMY(purchased);
+    document.getElementById('row-principal').textContent = AG.formatINR(principal * 100);
+    document.getElementById('row-current').textContent = AG.formatINR(currentVal * 100);
+    document.getElementById('row-maturity').textContent = fmtMY(maturity);
+    document.getElementById('row-80c').textContent = AG.formatINR(Math.min(principal, 150000) * 100);
+    document.getElementById('util-label').textContent = `Tenure progress · ${monthsElapsed} of 60 months`;
+    document.getElementById('util-pct').textContent = pct + '%';
+    document.getElementById('util-fill').style.width = pct + '%';
+
+    document.getElementById('view-populated').style.display = '';
+    document.getElementById('view-empty').style.display = 'none';
+    AG.closeSheet('add-nsc');
+    AG.showToast('NSC certificate added ✓', 'success');
+  }
+
+  function removeNsc() {
+    document.getElementById('view-populated').style.display = 'none';
+    document.getElementById('view-empty').style.display = '';
+    AG.showToast('NSC certificate removed ✓', 'success');
+  }
 </script>
 </body>
 </html>

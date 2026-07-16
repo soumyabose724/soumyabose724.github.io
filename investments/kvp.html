@@ -67,13 +67,13 @@
         <div class="scheme-hero-label">Current Value</div>
         <div class="scheme-hero-amount gradient-text" id="hero-total">₹46,900</div>
         <div class="scheme-hero-sub">
-          Invested <strong>₹40,000</strong> · <span class="delta delta--pos">▲ +17.3%</span>
+          Invested <strong id="hero-invested">₹40,000</strong> · <span class="delta delta--pos" id="hero-delta">▲ +17.3%</span>
         </div>
         <div class="scheme-hero-footer">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
           </svg>
-          <span>Doubles to <strong style="color:var(--text-secondary);">₹80,000</strong> by Nov 2033</span>
+          <span>Doubles to <strong style="color:var(--text-secondary);" id="hero-maturity-val">₹80,000</strong> by <span id="hero-maturity-date">Nov 2033</span></span>
         </div>
       </div>
 
@@ -89,20 +89,28 @@
       </div>
 
       <div class="scheme-card">
-        <div class="scheme-card__row"><span>Certificate purchased</span><span>Apr 2024</span></div>
-        <div class="scheme-card__row"><span>Principal invested</span><span>₹40,000</span></div>
-        <div class="scheme-card__row"><span>Current value (est.)</span><span>₹46,900</span></div>
-        <div class="scheme-card__row"><span>Maturity value (fixed)</span><span>₹80,000</span></div>
-        <div class="scheme-card__row"><span>Maturity date</span><span>Nov 2033</span></div>
+        <div class="scheme-card__row"><span>Certificate purchased</span><span id="row-purchased">Apr 2024</span></div>
+        <div class="scheme-card__row"><span>Principal invested</span><span id="row-principal">₹40,000</span></div>
+        <div class="scheme-card__row"><span>Current value (est.)</span><span id="row-current">₹46,900</span></div>
+        <div class="scheme-card__row"><span>Maturity value (fixed)</span><span id="row-maturity-val">₹80,000</span></div>
+        <div class="scheme-card__row"><span>Maturity date</span><span id="row-maturity-date">Nov 2033</span></div>
         <div class="scheme-card__row"><span>Compounding</span><span>Annually</span></div>
       </div>
 
       <div class="util-bar-wrap" style="margin-top:var(--sp-5);">
         <div class="util-label-row">
-          <span class="util-label">Time to doubling · 27 of 115 months</span>
-          <span class="util-pct util-pct--safe">23%</span>
+          <span class="util-label" id="util-label">Time to doubling · 27 of 115 months</span>
+          <span class="util-pct util-pct--safe" id="util-pct">23%</span>
         </div>
-        <div class="progress-bar progress-bar--thick"><div class="progress-bar__fill" style="width:23%;"></div></div>
+        <div class="progress-bar progress-bar--thick"><div class="progress-bar__fill" id="util-fill" style="width:23%;"></div></div>
+      </div>
+
+      <div class="surface-card" style="display:flex; align-items:center; justify-content:space-between; margin-top:var(--sp-4);">
+        <div style="flex:1; min-width:0; padding-right:var(--sp-3);">
+          <div style="font-size:14px; font-weight:600; color:var(--error);">Remove Certificate</div>
+          <div style="font-size:12px; color:var(--text-secondary); margin-top:2px;">Clears this KVP certificate from your holdings</div>
+        </div>
+        <button class="btn btn--danger btn--sm" onclick="removeKvp()">Remove</button>
       </div>
 
       <div class="info-card">
@@ -119,7 +127,35 @@
         <div class="empty-state__icon">🌾</div>
         <div class="empty-state__title">No Kisan Vikas Patra Yet</div>
         <div class="empty-state__body">KVP is a fixed-return Post Office certificate that doubles your money in a set tenure at the prevailing rate — add a certificate to track it here.</div>
-        <button class="btn btn--primary" style="min-width:200px;" onclick="AG.showToast('Add KVP certificate — coming soon','info')">+ Add KVP Certificate</button>
+        <button class="btn btn--primary" style="min-width:200px;" onclick="openAddKvpSheet()">+ Add KVP Certificate</button>
+      </div>
+    </div>
+
+    <!-- Add KVP Sheet -->
+    <div class="sheet-backdrop" id="add-kvp-backdrop"></div>
+    <div class="sheet" id="add-kvp">
+      <div class="sheet__handle"></div>
+      <div class="sheet__header">
+        <span class="sheet__title">Add KVP Certificate</span>
+        <button class="sheet__close" onclick="AG.closeSheet('add-kvp')" aria-label="Close">✕</button>
+      </div>
+      <div class="sheet__body">
+        <div class="form-group">
+          <label class="form-label">Principal Invested (₹)</label>
+          <div class="form-input-wrap has-prefix">
+            <span class="input-prefix">₹</span>
+            <input class="form-input inr-input" id="ak-principal" type="text" inputmode="numeric" placeholder="0">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Purchase Date</label>
+          <input class="form-input" id="ak-date" type="date">
+        </div>
+        <div class="form-helper">Fixed at the current rate (7.5% p.a., doubles in 115 months) for this certificate's tenure.</div>
+      </div>
+      <div class="sheet__footer">
+        <button class="btn btn--ghost" onclick="AG.closeSheet('add-kvp')">Cancel</button>
+        <button class="btn btn--primary" onclick="saveKvp()">Save Certificate</button>
       </div>
     </div>
 
@@ -193,6 +229,60 @@
       document.getElementById('view-empty').style.display = '';
     },
   });
+
+  const KVP_DOUBLING_MONTHS = 115;
+  const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const DEMO_TODAY = new Date(2026, 5, 23);
+
+  function openAddKvpSheet() {
+    document.getElementById('ak-principal').value = '';
+    document.getElementById('ak-date').value = '';
+    AG.openSheet('add-kvp');
+  }
+
+  function saveKvp() {
+    const principal = parseInt(document.getElementById('ak-principal').value.replace(/,/g, '') || '0', 10);
+    const dateVal = document.getElementById('ak-date').value;
+    if (!principal) { AG.showToast('Enter the principal amount', 'error'); return; }
+    if (!dateVal) { AG.showToast('Enter the purchase date', 'error'); return; }
+
+    const purchased = new Date(dateVal + 'T00:00:00');
+    const maturity = new Date(purchased);
+    maturity.setMonth(maturity.getMonth() + KVP_DOUBLING_MONTHS);
+    const monthsElapsed = Math.max(0, Math.min(KVP_DOUBLING_MONTHS,
+      (DEMO_TODAY.getFullYear() - purchased.getFullYear()) * 12 + (DEMO_TODAY.getMonth() - purchased.getMonth())));
+    const monthlyRate = Math.pow(2, 1 / KVP_DOUBLING_MONTHS) - 1;
+    const currentVal = Math.round(principal * Math.pow(1 + monthlyRate, monthsElapsed));
+    const maturityVal = principal * 2;
+    const gainPct = ((currentVal - principal) / principal * 100);
+    const pct = Math.round((monthsElapsed / KVP_DOUBLING_MONTHS) * 100);
+    const fmtMY = d => MONTH_NAMES[d.getMonth()] + ' ' + d.getFullYear();
+
+    document.getElementById('hero-total').textContent = AG.formatINR(currentVal * 100);
+    document.getElementById('hero-invested').textContent = AG.formatINR(principal * 100);
+    document.getElementById('hero-delta').textContent = `▲ +${gainPct.toFixed(1)}%`;
+    document.getElementById('hero-maturity-val').textContent = AG.formatINR(maturityVal * 100);
+    document.getElementById('hero-maturity-date').textContent = fmtMY(maturity);
+    document.getElementById('row-purchased').textContent = fmtMY(purchased);
+    document.getElementById('row-principal').textContent = AG.formatINR(principal * 100);
+    document.getElementById('row-current').textContent = AG.formatINR(currentVal * 100);
+    document.getElementById('row-maturity-val').textContent = AG.formatINR(maturityVal * 100);
+    document.getElementById('row-maturity-date').textContent = fmtMY(maturity);
+    document.getElementById('util-label').textContent = `Time to doubling · ${monthsElapsed} of ${KVP_DOUBLING_MONTHS} months`;
+    document.getElementById('util-pct').textContent = pct + '%';
+    document.getElementById('util-fill').style.width = pct + '%';
+
+    document.getElementById('view-populated').style.display = '';
+    document.getElementById('view-empty').style.display = 'none';
+    AG.closeSheet('add-kvp');
+    AG.showToast('KVP certificate added ✓', 'success');
+  }
+
+  function removeKvp() {
+    document.getElementById('view-populated').style.display = 'none';
+    document.getElementById('view-empty').style.display = '';
+    AG.showToast('KVP certificate removed ✓', 'success');
+  }
 </script>
 </body>
 </html>

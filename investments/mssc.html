@@ -71,13 +71,13 @@
         <div class="scheme-hero-label">Current Value</div>
         <div class="scheme-hero-amount gradient-text" id="hero-total">₹2,10,000</div>
         <div class="scheme-hero-sub">
-          Deposited <strong>₹2,00,000</strong> (max per holder) · <span class="delta delta--pos">▲ +5.0%</span>
+          Deposited <strong id="hero-deposited">₹2,00,000</strong> (max per holder) · <span class="delta delta--pos" id="hero-delta">▲ +5.0%</span>
         </div>
         <div class="scheme-hero-footer">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
           </svg>
-          <span>2-year tenure · matures <strong style="color:var(--text-secondary);">Nov 2027</strong></span>
+          <span>2-year tenure · matures <strong style="color:var(--text-secondary);" id="hero-maturity-date">Nov 2027</strong></span>
         </div>
       </div>
 
@@ -94,19 +94,27 @@
 
       <div class="scheme-card">
         <div class="scheme-card__row"><span>Account holder</span><span>Priya Sharma (female-only scheme)</span></div>
-        <div class="scheme-card__row"><span>Opened</span><span>Nov 2025</span></div>
-        <div class="scheme-card__row"><span>Principal deposited</span><span>₹2,00,000</span></div>
+        <div class="scheme-card__row"><span>Opened</span><span id="row-opened">Nov 2025</span></div>
+        <div class="scheme-card__row"><span>Principal deposited</span><span id="row-principal">₹2,00,000</span></div>
         <div class="scheme-card__row"><span>Compounding</span><span>Quarterly, paid at maturity</span></div>
-        <div class="scheme-card__row"><span>Maturity date</span><span>Nov 2027</span></div>
+        <div class="scheme-card__row"><span>Maturity date</span><span id="row-maturity">Nov 2027</span></div>
         <div class="scheme-card__row"><span>80C benefit</span><span style="color:var(--text-muted);">Not eligible</span></div>
       </div>
 
       <div class="util-bar-wrap" style="margin-top:var(--sp-5);">
         <div class="util-label-row">
-          <span class="util-label">Tenure progress · 8 of 24 months</span>
-          <span class="util-pct util-pct--safe">33%</span>
+          <span class="util-label" id="util-label">Tenure progress · 8 of 24 months</span>
+          <span class="util-pct util-pct--safe" id="util-pct">33%</span>
         </div>
-        <div class="progress-bar progress-bar--thick"><div class="progress-bar__fill" style="width:33%;"></div></div>
+        <div class="progress-bar progress-bar--thick"><div class="progress-bar__fill" id="util-fill" style="width:33%;"></div></div>
+      </div>
+
+      <div class="surface-card" style="display:flex; align-items:center; justify-content:space-between; margin-top:var(--sp-4);">
+        <div style="flex:1; min-width:0; padding-right:var(--sp-3);">
+          <div style="font-size:14px; font-weight:600; color:var(--error);">Remove Account</div>
+          <div style="font-size:12px; color:var(--text-secondary); margin-top:2px;">Clears this MSSC account from your holdings</div>
+        </div>
+        <button class="btn btn--danger btn--sm" onclick="removeMssc()">Remove</button>
       </div>
 
       <div class="info-card">
@@ -123,7 +131,35 @@
         <div class="empty-state__icon">🌸</div>
         <div class="empty-state__title">No MSSC Account Yet</div>
         <div class="empty-state__body">Mahila Samman Savings Certificate is a 2-year, women-only Post Office scheme offering a fixed rate up to ₹2,00,000 per holder. Add one to track it here.</div>
-        <button class="btn btn--primary" style="min-width:200px;" onclick="AG.showToast('Add MSSC account — coming soon','info')">+ Add MSSC Account</button>
+        <button class="btn btn--primary" style="min-width:200px;" onclick="openAddMsscSheet()">+ Add MSSC Account</button>
+      </div>
+    </div>
+
+    <!-- Add MSSC Sheet -->
+    <div class="sheet-backdrop" id="add-mssc-backdrop"></div>
+    <div class="sheet" id="add-mssc">
+      <div class="sheet__handle"></div>
+      <div class="sheet__header">
+        <span class="sheet__title">Add MSSC Account</span>
+        <button class="sheet__close" onclick="AG.closeSheet('add-mssc')" aria-label="Close">✕</button>
+      </div>
+      <div class="sheet__body">
+        <div class="form-group">
+          <label class="form-label">Deposit Amount (₹, max 2,00,000)</label>
+          <div class="form-input-wrap has-prefix">
+            <span class="input-prefix">₹</span>
+            <input class="form-input inr-input" id="am-principal" type="text" inputmode="numeric" placeholder="0">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Opening Date</label>
+          <input class="form-input" id="am-date" type="date">
+        </div>
+        <div class="form-helper">Fixed at 7.5% p.a., compounded quarterly, over the 2-year tenure.</div>
+      </div>
+      <div class="sheet__footer">
+        <button class="btn btn--ghost" onclick="AG.closeSheet('add-mssc')">Cancel</button>
+        <button class="btn btn--primary" onclick="saveMssc()">Save Account</button>
       </div>
     </div>
 
@@ -197,6 +233,56 @@
       document.getElementById('view-empty').style.display = '';
     },
   });
+
+  const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const DEMO_TODAY = new Date(2026, 5, 23);
+
+  function openAddMsscSheet() {
+    document.getElementById('am-principal').value = '';
+    document.getElementById('am-date').value = '';
+    AG.openSheet('add-mssc');
+  }
+
+  function saveMssc() {
+    const principal = parseInt(document.getElementById('am-principal').value.replace(/,/g, '') || '0', 10);
+    const dateVal = document.getElementById('am-date').value;
+    if (!principal) { AG.showToast('Enter the deposit amount', 'error'); return; }
+    if (principal > 200000) { AG.showToast('MSSC caps at ₹2,00,000 per holder', 'error'); return; }
+    if (!dateVal) { AG.showToast('Enter the opening date', 'error'); return; }
+
+    const opened = new Date(dateVal + 'T00:00:00');
+    const maturity = new Date(opened);
+    maturity.setMonth(maturity.getMonth() + 24);
+    const monthsElapsed = Math.max(0, Math.min(24,
+      (DEMO_TODAY.getFullYear() - opened.getFullYear()) * 12 + (DEMO_TODAY.getMonth() - opened.getMonth())));
+    const quartersElapsed = monthsElapsed / 3;
+    const currentVal = Math.round(principal * Math.pow(1 + 0.075 / 4, quartersElapsed));
+    const gainPct = ((currentVal - principal) / principal * 100);
+    const pct = Math.round((monthsElapsed / 24) * 100);
+    const fmtMY = d => MONTH_NAMES[d.getMonth()] + ' ' + d.getFullYear();
+
+    document.getElementById('hero-total').textContent = AG.formatINR(currentVal * 100);
+    document.getElementById('hero-deposited').textContent = AG.formatINR(principal * 100);
+    document.getElementById('hero-delta').textContent = `▲ +${gainPct.toFixed(1)}%`;
+    document.getElementById('hero-maturity-date').textContent = fmtMY(maturity);
+    document.getElementById('row-opened').textContent = fmtMY(opened);
+    document.getElementById('row-principal').textContent = AG.formatINR(principal * 100);
+    document.getElementById('row-maturity').textContent = fmtMY(maturity);
+    document.getElementById('util-label').textContent = `Tenure progress · ${monthsElapsed} of 24 months`;
+    document.getElementById('util-pct').textContent = pct + '%';
+    document.getElementById('util-fill').style.width = pct + '%';
+
+    document.getElementById('view-populated').style.display = '';
+    document.getElementById('view-empty').style.display = 'none';
+    AG.closeSheet('add-mssc');
+    AG.showToast('MSSC account added ✓', 'success');
+  }
+
+  function removeMssc() {
+    document.getElementById('view-populated').style.display = 'none';
+    document.getElementById('view-empty').style.display = '';
+    AG.showToast('MSSC account removed ✓', 'success');
+  }
 </script>
 </body>
 </html>

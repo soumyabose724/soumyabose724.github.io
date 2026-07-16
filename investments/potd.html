@@ -66,54 +66,62 @@
     <div id="view-populated">
 
       <div class="glass-card glass-card--hero">
-        <div class="scheme-hero-label">Current Value · 3-Year POTD</div>
+        <div class="scheme-hero-label" id="scheme-hero-label">Current Value · 3-Year POTD</div>
         <div class="scheme-hero-amount gradient-text" id="hero-total">₹1,00,000</div>
         <div class="scheme-hero-sub">
-          Deposited <strong>₹1,00,000</strong> · interest paid out annually (not compounded in)
+          Deposited <strong id="hero-deposited">₹1,00,000</strong> · interest paid out annually (not compounded in)
         </div>
         <div class="scheme-hero-footer">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
           </svg>
-          <span>3-year tenure · matures <strong style="color:var(--text-secondary);">Mar 2028</strong></span>
+          <span><span id="hero-tenure-text">3-year</span> tenure · matures <strong style="color:var(--text-secondary);" id="hero-maturity">Mar 2028</strong></span>
         </div>
       </div>
 
       <div class="section-title" style="margin-top:var(--sp-5);">Current Rates by Tenure</div>
-      <div class="rate-table">
+      <div class="rate-table" id="rate-table">
         <div class="rate-row">
-          <span class="rate-row__tenure">1 Year</span>
+          <span class="rate-row__tenure" id="rate-row-1">1 Year</span>
           <span class="rate-row__rate">6.9% p.a.</span>
         </div>
         <div class="rate-row">
-          <span class="rate-row__tenure">2 Years</span>
+          <span class="rate-row__tenure" id="rate-row-2">2 Years</span>
           <span class="rate-row__rate">7.0% p.a.</span>
         </div>
         <div class="rate-row">
-          <span class="rate-row__tenure">3 Years <span class="rate-row__held">Your holding</span></span>
+          <span class="rate-row__tenure" id="rate-row-3">3 Years <span class="rate-row__held">Your holding</span></span>
           <span class="rate-row__rate">7.1% p.a.</span>
         </div>
         <div class="rate-row">
-          <span class="rate-row__tenure">5 Years <span class="rate-row__held" style="background:var(--success-light); color:var(--success);">80C eligible</span></span>
+          <span class="rate-row__tenure" id="rate-row-5">5 Years <span class="rate-row__held" style="background:var(--success-light); color:var(--success);">80C eligible</span></span>
           <span class="rate-row__rate">7.5% p.a.</span>
         </div>
       </div>
 
       <div class="scheme-card">
-        <div class="scheme-card__row"><span>Opened</span><span>Mar 2025</span></div>
-        <div class="scheme-card__row"><span>Deposit</span><span>₹1,00,000</span></div>
-        <div class="scheme-card__row"><span>Rate</span><span>7.1% p.a. (compounded quarterly, paid annually)</span></div>
-        <div class="scheme-card__row"><span>Annual interest payout</span><span>≈ ₹7,290/yr</span></div>
-        <div class="scheme-card__row"><span>Maturity date</span><span>Mar 2028</span></div>
+        <div class="scheme-card__row"><span>Opened</span><span id="row-opened">Mar 2025</span></div>
+        <div class="scheme-card__row"><span>Deposit</span><span id="row-deposit">₹1,00,000</span></div>
+        <div class="scheme-card__row"><span>Rate</span><span id="row-rate">7.1% p.a. (compounded quarterly, paid annually)</span></div>
+        <div class="scheme-card__row"><span>Annual interest payout</span><span id="row-payout">≈ ₹7,290/yr</span></div>
+        <div class="scheme-card__row"><span>Maturity date</span><span id="row-maturity">Mar 2028</span></div>
         <div class="scheme-card__row"><span>Premature closure</span><span>Allowed after 6 months</span></div>
       </div>
 
       <div class="util-bar-wrap" style="margin-top:var(--sp-5);">
         <div class="util-label-row">
-          <span class="util-label">Tenure progress · 16 of 36 months</span>
-          <span class="util-pct util-pct--safe">44%</span>
+          <span class="util-label" id="util-label">Tenure progress · 16 of 36 months</span>
+          <span class="util-pct util-pct--safe" id="util-pct">44%</span>
         </div>
-        <div class="progress-bar progress-bar--thick"><div class="progress-bar__fill" style="width:44%;"></div></div>
+        <div class="progress-bar progress-bar--thick"><div class="progress-bar__fill" id="util-fill" style="width:44%;"></div></div>
+      </div>
+
+      <div class="surface-card" style="display:flex; align-items:center; justify-content:space-between; margin-top:var(--sp-4);">
+        <div style="flex:1; min-width:0; padding-right:var(--sp-3);">
+          <div style="font-size:14px; font-weight:600; color:var(--error);">Remove Account</div>
+          <div style="font-size:12px; color:var(--text-secondary); margin-top:2px;">Clears this POTD account from your holdings</div>
+        </div>
+        <button class="btn btn--danger btn--sm" onclick="removePotd()">Remove</button>
       </div>
 
       <div class="info-card">
@@ -130,7 +138,43 @@
         <div class="empty-state__icon">🕰️</div>
         <div class="empty-state__title">No Post Office Time Deposit Yet</div>
         <div class="empty-state__body">POTD works like a bank FD across 1/2/3/5-year tenures, with the 5-year option also qualifying for 80C — add a deposit to track it here.</div>
-        <button class="btn btn--primary" style="min-width:200px;" onclick="AG.showToast('Add POTD account — coming soon','info')">+ Add POTD Account</button>
+        <button class="btn btn--primary" style="min-width:200px;" onclick="openAddPotdSheet()">+ Add POTD Account</button>
+      </div>
+    </div>
+
+    <!-- Add POTD Sheet -->
+    <div class="sheet-backdrop" id="add-potd-backdrop"></div>
+    <div class="sheet" id="add-potd">
+      <div class="sheet__handle"></div>
+      <div class="sheet__header">
+        <span class="sheet__title">Add POTD Account</span>
+        <button class="sheet__close" onclick="AG.closeSheet('add-potd')" aria-label="Close">✕</button>
+      </div>
+      <div class="sheet__body">
+        <div class="form-group">
+          <label class="form-label">Deposit Amount (₹)</label>
+          <div class="form-input-wrap has-prefix">
+            <span class="input-prefix">₹</span>
+            <input class="form-input inr-input" id="ap-deposit" type="text" inputmode="numeric" placeholder="0">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tenure</label>
+          <select class="form-select" id="ap-tenure">
+            <option value="1">1 Year · 6.9% p.a.</option>
+            <option value="2">2 Years · 7.0% p.a.</option>
+            <option value="3" selected>3 Years · 7.1% p.a.</option>
+            <option value="5">5 Years · 7.5% p.a. (80C eligible)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Opening Date</label>
+          <input class="form-input" id="ap-date" type="date">
+        </div>
+      </div>
+      <div class="sheet__footer">
+        <button class="btn btn--ghost" onclick="AG.closeSheet('add-potd')">Cancel</button>
+        <button class="btn btn--primary" onclick="savePotd()">Save Account</button>
       </div>
     </div>
 
@@ -204,6 +248,68 @@
       document.getElementById('view-empty').style.display = '';
     },
   });
+
+  const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const DEMO_TODAY = new Date(2026, 5, 23);
+  const POTD_RATES = { 1: 6.9, 2: 7.0, 3: 7.1, 5: 7.5 };
+
+  function openAddPotdSheet() {
+    document.getElementById('ap-deposit').value = '';
+    document.getElementById('ap-tenure').value = '3';
+    document.getElementById('ap-date').value = '';
+    AG.openSheet('add-potd');
+  }
+
+  function savePotd() {
+    const deposit = parseInt(document.getElementById('ap-deposit').value.replace(/,/g, '') || '0', 10);
+    const tenureYears = parseInt(document.getElementById('ap-tenure').value, 10);
+    const dateVal = document.getElementById('ap-date').value;
+    if (!deposit) { AG.showToast('Enter the deposit amount', 'error'); return; }
+    if (!dateVal) { AG.showToast('Enter the opening date', 'error'); return; }
+
+    const opened = new Date(dateVal + 'T00:00:00');
+    const maturity = new Date(opened);
+    maturity.setFullYear(maturity.getFullYear() + tenureYears);
+    const totalMonths = tenureYears * 12;
+    const monthsElapsed = Math.max(0, Math.min(totalMonths,
+      (DEMO_TODAY.getFullYear() - opened.getFullYear()) * 12 + (DEMO_TODAY.getMonth() - opened.getMonth())));
+    const rate = POTD_RATES[tenureYears];
+    const annualPayout = Math.round(deposit * (Math.pow(1 + rate / 400, 4) - 1));
+    const pct = Math.round((monthsElapsed / totalMonths) * 100);
+    const fmtMY = d => MONTH_NAMES[d.getMonth()] + ' ' + d.getFullYear();
+
+    document.getElementById('scheme-hero-label').textContent = `Current Value · ${tenureYears}-Year POTD`;
+    document.getElementById('hero-total').textContent = AG.formatINR(deposit * 100);
+    document.getElementById('hero-deposited').textContent = AG.formatINR(deposit * 100);
+    document.getElementById('hero-tenure-text').textContent = tenureYears === 1 ? '1-year' : `${tenureYears}-year`;
+    document.getElementById('hero-maturity').textContent = fmtMY(maturity);
+    document.getElementById('row-opened').textContent = fmtMY(opened);
+    document.getElementById('row-deposit').textContent = AG.formatINR(deposit * 100);
+    document.getElementById('row-rate').textContent = `${rate}% p.a. (compounded quarterly, paid annually)`;
+    document.getElementById('row-payout').textContent = `≈ ${AG.formatINR(annualPayout * 100)}/yr`;
+    document.getElementById('row-maturity').textContent = fmtMY(maturity);
+    document.getElementById('util-label').textContent = `Tenure progress · ${monthsElapsed} of ${totalMonths} months`;
+    document.getElementById('util-pct').textContent = pct + '%';
+    document.getElementById('util-fill').style.width = pct + '%';
+
+    // Move the "Your holding" badge to the matching tenure row
+    document.querySelectorAll('.rate-row__held').forEach(b => { if (!b.style.background) b.remove(); });
+    const targetRow = document.getElementById('rate-row-' + tenureYears);
+    if (targetRow && !targetRow.querySelector('.rate-row__held')) {
+      targetRow.insertAdjacentHTML('beforeend', ' <span class="rate-row__held">Your holding</span>');
+    }
+
+    document.getElementById('view-populated').style.display = '';
+    document.getElementById('view-empty').style.display = 'none';
+    AG.closeSheet('add-potd');
+    AG.showToast('POTD account added ✓', 'success');
+  }
+
+  function removePotd() {
+    document.getElementById('view-populated').style.display = 'none';
+    document.getElementById('view-empty').style.display = '';
+    AG.showToast('POTD account removed ✓', 'success');
+  }
 </script>
 </body>
 </html>
