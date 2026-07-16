@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArthaGrid — Archived</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .arch-hint { font-size: 12px; color: var(--text-muted); margin-bottom: var(--sp-4); line-height: 1.5; }
+    .arch-row {
+      display: flex; align-items: center; gap: var(--sp-3);
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: var(--sp-3) var(--sp-4);
+      animation: card-in var(--dur-med) var(--ease-out) both;
+    }
+    .arch-row + .arch-row { margin-top: var(--sp-2); }
+    .arch-row__icon {
+      width: 38px; height: 38px; border-radius: var(--r-md); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 18px;
+      background: var(--surface-raised); color: var(--text-muted);
+    }
+    .arch-row__info { flex: 1; min-width: 0; }
+    .arch-row__label { font-size: 14px; font-weight: 600; color: var(--text-primary); text-decoration: line-through; text-decoration-color: var(--text-muted); }
+    .arch-row__meta { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
+    .arch-row__amount { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+    .arch-row__restore {
+      flex-shrink: 0; height: 32px; padding: 0 var(--sp-3); border-radius: var(--r-full);
+      background: var(--primary-light); color: var(--primary); border: 1.5px solid rgba(13,148,136,.25);
+      font-size: 12px; font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="screen">
+
+  <!-- ═══════════════════════════════════════════
+       DEMO BAR
+  ═══════════════════════════════════════════ -->
+  <div class="demo-bar">
+    <span class="demo-bar__label">Settings</span>
+    <button class="icon-btn" data-theme-toggle style="margin-left:auto;" aria-label="Toggle theme">
+      <span data-theme-icon style="font-size:18px;">🌙</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="top-bar">
+    <a href="index.html" class="top-bar__back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <span class="top-bar__title">Archived</span>
+    <div class="top-bar__actions">
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <span data-theme-icon style="font-size:18px;">🌙</span>
+      </button>
+      <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE CONTENT
+  ═══════════════════════════════════════════ -->
+  <div class="page-content" id="page-content">
+
+    <div class="arch-hint">Deleted transactions land here instead of disappearing outright. Restore one back to your active ledger, or leave it archived — it never counts toward your budgets or reports either way.</div>
+
+    <div id="arch-list"></div>
+
+    <div class="empty-state" id="arch-empty" style="display:none;">
+      <div class="empty-state__icon">🗄️</div>
+      <div class="empty-state__title">Nothing Archived</div>
+      <div class="empty-state__body">Transactions you delete show up here so you can restore them if it was a mistake.</div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAV
+  ═══════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <a href="../dashboard/index.html" class="nav-tab" data-tab="dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="../budget/index.html" class="nav-tab" data-tab="budget">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+      </svg>
+      <span>Budget</span>
+    </a>
+    <a href="../transactions/index.html" class="nav-tab" data-tab="txn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Transactions</span>
+    </a>
+    <a href="../investments/index.html" class="nav-tab" data-tab="invest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Invest</span>
+    </a>
+    <a href="../more/index.html" class="nav-tab active" data-tab="more">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span>More</span>
+    </a>
+  </nav>
+
+</div><!-- /screen -->
+</div><!-- /phone-frame -->
+
+<script src="../assets/nav.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    AG.initBottomNav('more');
+  });
+
+  /* Sample archived transactions — mirrors the "Deleted transactions can be
+     restored from Settings > Archived" promise on Transactions > Delete. */
+  let ARCHIVED = [
+    { id: 'a1', payee: 'Big Bazaar', meta: 'Groceries · Deleted 20 Jun 2026', amountPaise: -820000, icon: '🛒' },
+    { id: 'a2', payee: 'Uber', meta: 'Fuel & Transport · Deleted 12 Jun 2026', amountPaise: -45000, icon: '🚗' },
+  ];
+
+  function fmtSigned(paise) {
+    const sign = paise < 0 ? '−' : '+';
+    return sign + AG.formatINR(Math.abs(paise));
+  }
+
+  function renderArchived() {
+    const list = document.getElementById('arch-list');
+    const empty = document.getElementById('arch-empty');
+    if (!ARCHIVED.length) {
+      list.innerHTML = '';
+      empty.style.display = '';
+      return;
+    }
+    empty.style.display = 'none';
+    list.innerHTML = ARCHIVED.map(a => `
+      <div class="arch-row">
+        <div class="arch-row__icon">${a.icon}</div>
+        <div class="arch-row__info">
+          <div class="arch-row__label">${a.payee}</div>
+          <div class="arch-row__meta">${a.meta}</div>
+          <div class="arch-row__amount">${fmtSigned(a.amountPaise)}</div>
+        </div>
+        <button class="arch-row__restore" onclick="restoreArchived('${a.id}')">Restore</button>
+      </div>`).join('');
+  }
+
+  function restoreArchived(id) {
+    const item = ARCHIVED.find(a => a.id === id);
+    ARCHIVED = ARCHIVED.filter(a => a.id !== id);
+    renderArchived();
+    AG.showToast((item ? item.payee : 'Transaction') + ' restored to your ledger ✓', 'success');
+  }
+
+  renderArchived();
+</script>
+</body>
+</html>
