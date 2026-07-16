@@ -67,10 +67,10 @@
     <div id="view-populated">
 
       <div class="glass-card glass-card--hero">
-        <div class="scheme-hero-label">Current Value · 2 Tranches (9g)</div>
+        <div class="scheme-hero-label" id="scheme-hero-label">Current Value · 2 Tranches (9g)</div>
         <div class="scheme-hero-amount gradient-text" id="hero-total">₹70,650</div>
         <div class="scheme-hero-sub">
-          Invested <strong>₹43,188</strong> · <span class="delta delta--pos">▲ +63.6%</span>
+          Invested <strong id="hero-invested">₹43,188</strong> · <span class="delta delta--pos" id="hero-delta">▲ +63.6%</span>
         </div>
         <div class="scheme-hero-footer">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -115,6 +115,11 @@
         <div class="tranche-card__row"><span>Next interest credit</span><span>20 Jun 2027 · ₹237</span></div>
       </div>
 
+      <button class="btn btn--secondary btn--full" style="margin-top:var(--sp-4);" onclick="openAddTrancheSheet()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add SGB Tranche
+      </button>
+
       <div class="info-card">
         <svg class="info-card__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
         <div class="info-card__text">
@@ -129,7 +134,44 @@
         <div class="empty-state__icon">🪙</div>
         <div class="empty-state__title">No Sovereign Gold Bonds Yet</div>
         <div class="empty-state__body">Track SGB tranches you've subscribed to via RBI issues — interest credits, gold-price-linked value, and maturity dates.</div>
-        <button class="btn btn--primary" style="min-width:200px;" onclick="AG.showToast('Add SGB tranche — coming soon','info')">+ Add SGB Tranche</button>
+        <button class="btn btn--primary" style="min-width:200px;" onclick="openAddTrancheSheet()">+ Add SGB Tranche</button>
+      </div>
+    </div>
+
+    <!-- Add Tranche Sheet -->
+    <div class="sheet-backdrop" id="add-tranche-backdrop"></div>
+    <div class="sheet" id="add-tranche">
+      <div class="sheet__handle"></div>
+      <div class="sheet__header">
+        <span class="sheet__title">Add SGB Tranche</span>
+        <button class="sheet__close" onclick="AG.closeSheet('add-tranche')" aria-label="Close">✕</button>
+      </div>
+      <div class="sheet__body">
+        <div class="form-group">
+          <label class="form-label">Series Name</label>
+          <input class="form-input" id="at-series" type="text" placeholder="e.g. SGB 2023-24 Series II">
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-3);">
+          <div class="form-group">
+            <label class="form-label">Grams</label>
+            <input class="form-input" id="at-grams" type="text" inputmode="decimal" placeholder="e.g. 5">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Issue Price (₹/gm)</label>
+            <div class="form-input-wrap has-prefix">
+              <span class="input-prefix">₹</span>
+              <input class="form-input inr-input" id="at-issueprice" type="text" inputmode="numeric" placeholder="0">
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Issue Date</label>
+          <input class="form-input" id="at-issuedate" type="date">
+        </div>
+      </div>
+      <div class="sheet__footer">
+        <button class="btn btn--ghost" onclick="AG.closeSheet('add-tranche')">Cancel</button>
+        <button class="btn btn--primary" onclick="saveTranche()">Save Tranche</button>
       </div>
     </div>
 
@@ -203,6 +245,84 @@
       document.getElementById('view-empty').style.display = '';
     },
   });
+
+  const GOLD_REF_PRICE = 7850;
+
+  function parseINRLocal(text) { return parseInt(text.replace(/[₹,]/g, ''), 10) || 0; }
+
+  function openAddTrancheSheet() {
+    document.getElementById('at-series').value = '';
+    document.getElementById('at-grams').value = '';
+    document.getElementById('at-issueprice').value = '';
+    document.getElementById('at-issuedate').value = '';
+    AG.openSheet('add-tranche');
+  }
+
+  let newTrancheCount = 0;
+  function saveTranche() {
+    const series = document.getElementById('at-series').value.trim();
+    const grams = parseFloat(document.getElementById('at-grams').value || '0');
+    const issuePrice = parseInt(document.getElementById('at-issueprice').value.replace(/,/g, '') || '0', 10);
+    const issueDate = document.getElementById('at-issuedate').value;
+
+    if (!series) { AG.showToast('Enter the series name', 'error'); return; }
+    if (!grams || !issuePrice) { AG.showToast('Enter grams and issue price', 'error'); return; }
+    if (!issueDate) { AG.showToast('Enter the issue date', 'error'); return; }
+
+    newTrancheCount++;
+    const investedRupees = Math.round(grams * issuePrice);
+    const currentRupees = Math.round(grams * GOLD_REF_PRICE);
+    const issued = new Date(issueDate + 'T00:00:00');
+    const maturity = new Date(issued);
+    maturity.setFullYear(maturity.getFullYear() + 8);
+    const exitWindow = new Date(issued);
+    exitWindow.setFullYear(exitWindow.getFullYear() + 5);
+    const fmt = d => d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+    const gainClass = currentRupees >= investedRupees ? 'tranche-gain' : '';
+
+    const cardHtml = `
+      <div class="tranche-card" id="new-tranche-${newTrancheCount}">
+        <div class="tranche-card__head">
+          <div class="card-icon card-icon--warning"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 12h6M12 9v6"/></svg></div>
+          <div class="tranche-card__title">${series} <span class="tranche-card__badge">${grams}g</span></div>
+        </div>
+        <div class="tranche-card__row"><span>Issue date</span><span>${fmt(issued)}</span></div>
+        <div class="tranche-card__row"><span>Issue price</span><span>${AG.formatINR(issuePrice * 100)}/gm</span></div>
+        <div class="tranche-card__row"><span>Invested</span><span>${AG.formatINR(investedRupees * 100)}</span></div>
+        <div class="tranche-card__row"><span>Current value</span><span class="${gainClass}">${AG.formatINR(currentRupees * 100)}</span></div>
+        <div class="tranche-card__row"><span>Maturity (8 yrs)</span><span>${fmt(maturity)}</span></div>
+        <div class="tranche-card__row"><span>Early exit window</span><span>Opens ${fmt(exitWindow)}</span></div>
+        <div class="tranche-card__row"><span>Next interest credit</span><span>—</span></div>
+      </div>`;
+
+    const trancheCards = document.querySelectorAll('.tranche-card');
+    if (trancheCards.length) {
+      trancheCards[trancheCards.length - 1].insertAdjacentHTML('afterend', cardHtml);
+    } else {
+      document.querySelector('.info-card').insertAdjacentHTML('beforebegin', cardHtml);
+    }
+
+    const labelEl = document.getElementById('scheme-hero-label');
+    const gramsMatch = labelEl.textContent.match(/(\d+)g\)/);
+    const tranchesMatch = labelEl.textContent.match(/(\d+) Tranches/);
+    const newTrancheTotal = (tranchesMatch ? parseInt(tranchesMatch[1], 10) : 0) + 1;
+    const newGramsTotal = (gramsMatch ? parseInt(gramsMatch[1], 10) : 0) + grams;
+    labelEl.textContent = `Current Value · ${newTrancheTotal} Tranches (${newGramsTotal}g)`;
+
+    const heroTotalEl = document.getElementById('hero-total');
+    const heroInvestedEl = document.getElementById('hero-invested');
+    const newTotal = parseINRLocal(heroTotalEl.textContent) * 100 + currentRupees * 100;
+    const newInvested = parseINRLocal(heroInvestedEl.textContent) * 100 + investedRupees * 100;
+    heroTotalEl.textContent = AG.formatINR(newTotal);
+    heroInvestedEl.textContent = AG.formatINR(newInvested);
+    const gainPct = newInvested ? ((newTotal - newInvested) / newInvested * 100) : 0;
+    document.getElementById('hero-delta').textContent = `${gainPct >= 0 ? '▲ +' : '▼ '}${gainPct.toFixed(1)}%`;
+
+    document.getElementById('view-populated').style.display = '';
+    document.getElementById('view-empty').style.display = 'none';
+    AG.closeSheet('add-tranche');
+    AG.showToast(series + ' added ✓', 'success');
+  }
 </script>
 </body>
 </html>
