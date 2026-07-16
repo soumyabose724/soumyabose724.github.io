@@ -80,7 +80,7 @@
         Direct equity via <strong>Zerodha</strong> · FIFO lot basis for cost &amp; holding period
       </div>
 
-      <div class="section-title">Holdings — 5 Stocks</div>
+      <div class="section-title" id="eq-section-title">Holdings — 5 Stocks</div>
 
       <div class="rec-card">
         <div class="rec-card__head">
@@ -149,10 +149,15 @@
 
       <div class="totals-card">
         <div class="totals-card__label">Equity Totals</div>
-        <div class="totals-row"><span class="totals-row__k">Invested</span><span class="totals-row__v">₹80,000</span></div>
-        <div class="totals-row"><span class="totals-row__k">Current Value</span><span class="totals-row__v">₹1,00,000</span></div>
-        <div class="totals-row"><span class="totals-row__k">Total P&amp;L</span><span class="totals-row__v" style="color:#86EFAC;">+₹20,000 (+25.0%)</span></div>
+        <div class="totals-row"><span class="totals-row__k">Invested</span><span class="totals-row__v" id="eq-total-invested">₹80,000</span></div>
+        <div class="totals-row"><span class="totals-row__k">Current Value</span><span class="totals-row__v" id="eq-total-current">₹1,00,000</span></div>
+        <div class="totals-row"><span class="totals-row__k">Total P&amp;L</span><span class="totals-row__v" id="eq-total-pl" style="color:#86EFAC;">+₹20,000 (+25.0%)</span></div>
       </div>
+
+      <button class="btn btn--secondary btn--full" style="margin-top:var(--sp-4);" onclick="openAddStockSheet()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Stock Holding
+      </button>
 
       <div style="font-size:11px; color:var(--text-muted); margin-top:var(--sp-4); line-height:1.6;">
         LTCG holdings (&gt;12 months) are taxed at 12.5% above the ₹1,25,000/FY exemption; STCG holdings (≤12 months) at a flat 20%. See <a href="capital-gains.html" style="color:var(--primary); font-weight:500;">Capital Gains</a> for the full breakdown.
@@ -166,9 +171,54 @@
         <div class="empty-state__icon">📉</div>
         <div class="empty-state__title">No Direct Equity Holdings</div>
         <div class="empty-state__body">Link a broker account or add stock holdings manually to track P&amp;L, XIRR and capital gains.</div>
-        <a href="../setup-wizard/step-07-investments.html" class="btn btn--primary" style="min-width:180px; text-decoration:none;">
+        <button class="btn btn--primary" style="min-width:180px;" onclick="openAddStockSheet()">
           + Add Stock Holding
-        </a>
+        </button>
+      </div>
+    </div>
+
+    <!-- Add Stock Sheet -->
+    <div class="sheet-backdrop" id="add-stock-backdrop"></div>
+    <div class="sheet" id="add-stock">
+      <div class="sheet__handle"></div>
+      <div class="sheet__header">
+        <span class="sheet__title">Add Stock Holding</span>
+        <button class="sheet__close" onclick="AG.closeSheet('add-stock')" aria-label="Close">✕</button>
+      </div>
+      <div class="sheet__body">
+        <div class="form-group">
+          <label class="form-label">Stock Name</label>
+          <input class="form-input" id="as-name" type="text" placeholder="e.g. Bajaj Finance">
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-3);">
+          <div class="form-group">
+            <label class="form-label">Quantity</label>
+            <input class="form-input" id="as-qty" type="text" inputmode="numeric" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Avg Cost (₹)</label>
+            <div class="form-input-wrap has-prefix">
+              <span class="input-prefix">₹</span>
+              <input class="form-input inr-input" id="as-avgcost" type="text" inputmode="numeric" placeholder="0">
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">LTP (Current Market Price, ₹)</label>
+          <div class="form-input-wrap has-prefix">
+            <span class="input-prefix">₹</span>
+            <input class="form-input inr-input" id="as-ltp" type="text" inputmode="numeric" placeholder="0">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Holding Period (months)</label>
+          <input class="form-input" id="as-held" type="text" inputmode="numeric" placeholder="e.g. 6">
+          <span class="form-helper">Over 12 months is taxed as LTCG; 12 or under as STCG.</span>
+        </div>
+      </div>
+      <div class="sheet__footer">
+        <button class="btn btn--ghost" onclick="AG.closeSheet('add-stock')">Cancel</button>
+        <button class="btn btn--primary" onclick="saveStock()">Save Holding</button>
       </div>
     </div>
 
@@ -243,6 +293,69 @@
       document.getElementById('view-empty').style.display = '';
     },
   });
+
+  function parseINRLocal(text) { return parseInt(text.replace(/[₹,]/g, ''), 10) || 0; }
+
+  function openAddStockSheet() {
+    ['as-name', 'as-qty', 'as-avgcost', 'as-ltp', 'as-held'].forEach(id => { document.getElementById(id).value = ''; });
+    AG.openSheet('add-stock');
+  }
+
+  let newStockCount = 0;
+  function saveStock() {
+    const name = document.getElementById('as-name').value.trim();
+    const qty = parseInt(document.getElementById('as-qty').value || '0', 10);
+    const avgCost = parseInt(document.getElementById('as-avgcost').value.replace(/,/g, '') || '0', 10);
+    const ltp = parseInt(document.getElementById('as-ltp').value.replace(/,/g, '') || '0', 10);
+    const heldMonths = parseInt(document.getElementById('as-held').value || '0', 10);
+
+    if (!name) { AG.showToast('Stock name is required', 'error'); return; }
+    if (!qty || !avgCost || !ltp) { AG.showToast('Enter quantity, avg cost, and LTP', 'error'); return; }
+
+    newStockCount++;
+    const investedRupees = qty * avgCost;
+    const currentRupees = qty * ltp;
+    const plRupees = currentRupees - investedRupees;
+    const plPct = investedRupees ? (plRupees / investedRupees * 100) : 0;
+    const plClass = plRupees >= 0 ? 'pl-pos' : 'pl-neg';
+    const plSign = plRupees >= 0 ? '+' : '';
+    const cgChip = heldMonths > 12 ? '<span class="cg-chip cg-chip--ltcg">LTCG</span>' : '<span class="cg-chip cg-chip--stcg">STCG</span>';
+
+    const cardHtml = `
+      <div class="rec-card" id="new-stock-${newStockCount}">
+        <div class="rec-card__head">
+          <span class="rec-card__title">${name} ${cgChip}</span>
+          <span class="rec-card__value t-mono ${plClass}">${plSign}${AG.formatINR(plRupees * 100)} (${plSign}${plPct.toFixed(1)}%)</span>
+        </div>
+        <div class="rec-card__rows">
+          <div class="rec-card__row"><span>Qty × Avg Cost</span><span class="t-mono">${qty} × ${AG.formatINR(avgCost * 100)}</span></div>
+          <div class="rec-card__row"><span>LTP</span><span class="t-mono">${AG.formatINR(ltp * 100)}</span></div>
+          <div class="rec-card__row"><span>Current Value</span><span class="t-mono">${AG.formatINR(currentRupees * 100)}</span></div>
+          <div class="rec-card__row"><span>Held</span><span class="t-mono">${heldMonths} mo</span></div>
+        </div>
+      </div>`;
+
+    document.querySelector('.totals-card').insertAdjacentHTML('beforebegin', cardHtml);
+
+    const titleEl = document.getElementById('eq-section-title');
+    const newCount = parseInt(titleEl.textContent.match(/\d+/)[0], 10) + 1;
+    titleEl.textContent = `Holdings — ${newCount} Stocks`;
+
+    const investedEl = document.getElementById('eq-total-invested');
+    const currentEl = document.getElementById('eq-total-current');
+    const newInvested = parseINRLocal(investedEl.textContent) * 100 + investedRupees * 100;
+    const newCurrent = parseINRLocal(currentEl.textContent) * 100 + currentRupees * 100;
+    investedEl.textContent = AG.formatINR(newInvested);
+    currentEl.textContent = AG.formatINR(newCurrent);
+    const totalPl = newCurrent - newInvested;
+    const totalPlPct = newInvested ? (totalPl / newInvested * 100) : 0;
+    document.getElementById('eq-total-pl').textContent = `${totalPl >= 0 ? '+' : ''}${AG.formatINR(totalPl)} (${totalPl >= 0 ? '+' : ''}${totalPlPct.toFixed(1)}%)`;
+
+    document.getElementById('view-populated').style.display = '';
+    document.getElementById('view-empty').style.display = 'none';
+    AG.closeSheet('add-stock');
+    AG.showToast(name + ' added ✓', 'success');
+  }
 </script>
 </body>
 </html>

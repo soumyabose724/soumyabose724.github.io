@@ -80,7 +80,7 @@
 
     <div id="view-populated">
 
-      <div class="section-title" style="margin-top:0;">Your Funds · 3 SIPs Active</div>
+      <div class="section-title" style="margin-top:0;" id="mf-section-title">Your Funds · 3 SIPs Active</div>
 
       <!-- Axis Bluechip -->
       <div class="glass-card glass-card--compact mf-card">
@@ -238,12 +238,17 @@
       <!-- Totals -->
       <div class="totals-card">
         <div class="totals-card__label">Mutual Fund Totals</div>
-        <div class="totals-row"><span class="totals-row__k">Invested</span><span class="totals-row__v">₹1,72,000</span></div>
-        <div class="totals-row"><span class="totals-row__k">Current Value</span><span class="totals-row__v">₹2,08,000</span></div>
-        <div class="totals-row"><span class="totals-row__k">Gain</span><span class="totals-row__v" style="color:#86EFAC;">+₹36,000 (+20.9%)</span></div>
-        <div class="totals-row"><span class="totals-row__k">Combined SIP</span><span class="totals-row__v">₹18,000 / mo</span></div>
+        <div class="totals-row"><span class="totals-row__k">Invested</span><span class="totals-row__v" id="mf-total-invested">₹1,72,000</span></div>
+        <div class="totals-row"><span class="totals-row__k">Current Value</span><span class="totals-row__v" id="mf-total-current">₹2,08,000</span></div>
+        <div class="totals-row"><span class="totals-row__k">Gain</span><span class="totals-row__v" id="mf-total-gain" style="color:#86EFAC;">+₹36,000 (+20.9%)</span></div>
+        <div class="totals-row"><span class="totals-row__k">Combined SIP</span><span class="totals-row__v" id="mf-total-sip">₹18,000 / mo</span></div>
         <div class="totals-row"><span class="totals-row__k">Total TER Saved (Direct)</span><span class="totals-row__v" style="color:#86EFAC;">≈ ₹1,520 / yr</span></div>
       </div>
+
+      <button class="btn btn--secondary btn--full" style="margin-top:var(--sp-4);" onclick="openAddFundSheet()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Mutual Fund
+      </button>
 
       <a href="sips.html" class="compare-link-card" style="display:flex; align-items:center; gap:var(--sp-3); background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg); padding:var(--sp-4); margin-top:var(--sp-5); text-decoration:none;">
         <div style="width:40px; height:40px; border-radius:var(--r-lg); flex-shrink:0; background:var(--grad-primary); color:#fff; display:flex; align-items:center; justify-content:center;">
@@ -266,9 +271,64 @@
         <div class="empty-state__icon">📊</div>
         <div class="empty-state__title">No Mutual Funds Tracked</div>
         <div class="empty-state__body">Add a mutual fund folio or start a SIP to see holdings, NAV, and returns here.</div>
-        <a href="../setup-wizard/step-07-investments.html" class="btn btn--primary" style="min-width:180px; text-decoration:none;">
+        <button class="btn btn--primary" style="min-width:180px;" onclick="openAddFundSheet()">
           + Add Mutual Fund
-        </a>
+        </button>
+      </div>
+    </div>
+
+    <!-- Add Fund Sheet -->
+    <div class="sheet-backdrop" id="add-fund-backdrop"></div>
+    <div class="sheet" id="add-fund">
+      <div class="sheet__handle"></div>
+      <div class="sheet__header">
+        <span class="sheet__title">Add Mutual Fund</span>
+        <button class="sheet__close" onclick="AG.closeSheet('add-fund')" aria-label="Close">✕</button>
+      </div>
+      <div class="sheet__body">
+        <div class="form-group">
+          <label class="form-label">Fund Name</label>
+          <input class="form-input" id="af-name" type="text" placeholder="e.g. Mirae Asset Large Cap Fund">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select class="form-select" id="af-category">
+            <option>Large Cap</option>
+            <option>Flexi Cap</option>
+            <option>Mid Cap</option>
+            <option>Small Cap</option>
+            <option>Index</option>
+            <option>ELSS</option>
+            <option>Debt</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Monthly SIP (₹)</label>
+          <div class="form-input-wrap has-prefix">
+            <span class="input-prefix">₹</span>
+            <input class="form-input inr-input" id="af-sip" type="text" inputmode="numeric" placeholder="0">
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-3);">
+          <div class="form-group">
+            <label class="form-label">Invested (₹)</label>
+            <div class="form-input-wrap has-prefix">
+              <span class="input-prefix">₹</span>
+              <input class="form-input inr-input" id="af-invested" type="text" inputmode="numeric" placeholder="0">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Current Value (₹)</label>
+            <div class="form-input-wrap has-prefix">
+              <span class="input-prefix">₹</span>
+              <input class="form-input inr-input" id="af-current" type="text" inputmode="numeric" placeholder="0">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sheet__footer">
+        <button class="btn btn--ghost" onclick="AG.closeSheet('add-fund')">Cancel</button>
+        <button class="btn btn--primary" onclick="saveFund()">Save Fund</button>
       </div>
     </div>
 
@@ -343,6 +403,105 @@
       document.getElementById('view-empty').style.display = '';
     },
   });
+
+  function parseINRLocal(text) { return parseInt(text.replace(/[₹,]/g, ''), 10) || 0; }
+
+  function openAddFundSheet() {
+    ['af-name', 'af-sip', 'af-invested', 'af-current'].forEach(id => { document.getElementById(id).value = ''; });
+    document.getElementById('af-category').selectedIndex = 0;
+    AG.openSheet('add-fund');
+  }
+
+  let newFundCount = 0;
+  function saveFund() {
+    const name = document.getElementById('af-name').value.trim();
+    const category = document.getElementById('af-category').value;
+    const sipRupees = parseInt(document.getElementById('af-sip').value.replace(/,/g, '') || '0', 10);
+    const investedRupees = parseInt(document.getElementById('af-invested').value.replace(/,/g, '') || '0', 10);
+    const currentRupees = parseInt(document.getElementById('af-current').value.replace(/,/g, '') || '0', 10);
+
+    if (!name) { AG.showToast('Fund name is required', 'error'); return; }
+    if (!investedRupees || !currentRupees) { AG.showToast('Enter invested and current value', 'error'); return; }
+
+    newFundCount++;
+    const gainRupees = currentRupees - investedRupees;
+    const gainPct = investedRupees ? (gainRupees / investedRupees * 100) : 0;
+    const gainColor = gainRupees >= 0 ? 'var(--success)' : 'var(--error)';
+    const gainSign = gainRupees >= 0 ? '+' : '';
+
+    const cardHtml = `
+      <div class="glass-card glass-card--compact mf-card" id="new-fund-${newFundCount}">
+        <div class="mf-card__header">
+          <div>
+            <div class="mf-card__name">${name}</div>
+            <div class="mf-card__tags">
+              <span class="mf-tag">Direct · Growth</span>
+              <span class="mf-tag mf-tag--cat">${category}</span>
+            </div>
+          </div>
+          <div class="mf-card__sip">
+            <div class="mf-card__sip-amt">${sipRupees ? AG.formatINR(sipRupees * 100) : '—'}</div>
+            <div class="mf-card__sip-label">SIP / mo</div>
+          </div>
+        </div>
+        <div class="mf-stat-row">
+          <div class="mf-stat-col">
+            <div class="mf-stat-col__label">Current Value</div>
+            <div class="mf-stat-col__value">${AG.formatINR(currentRupees * 100)}</div>
+          </div>
+          <div class="mf-stat-col">
+            <div class="mf-stat-col__label">Invested</div>
+            <div class="mf-stat-col__value" style="color:var(--text-secondary);">${AG.formatINR(investedRupees * 100)}</div>
+          </div>
+          <div class="mf-stat-col">
+            <div class="mf-stat-col__label">XIRR</div>
+            <div class="mf-stat-col__value" style="color:${gainColor};">—</div>
+          </div>
+        </div>
+        <div class="mf-detail-row">
+          <span class="mf-detail-row__label">Gain</span>
+          <span class="mf-detail-row__value" style="color:${gainColor};">${gainSign}${AG.formatINR(gainRupees * 100)} (${gainSign}${gainPct.toFixed(1)}%)</span>
+        </div>
+        <div class="mf-detail-row">
+          <span class="mf-detail-row__label">Units Held</span>
+          <span class="mf-detail-row__value">—</span>
+        </div>
+        <div class="mf-detail-row">
+          <span class="mf-detail-row__label">Latest NAV</span>
+          <span class="mf-detail-row__value">—</span>
+        </div>
+        <div class="mf-detail-row">
+          <span class="mf-detail-row__label">SIP Since</span>
+          <span class="mf-detail-row__value">Jul 2026 · 1 installment</span>
+        </div>
+      </div>`;
+
+    document.querySelector('.totals-card').insertAdjacentHTML('beforebegin', cardHtml);
+
+    const titleEl = document.getElementById('mf-section-title');
+    const newSipCount = parseInt(titleEl.textContent.match(/\d+/)[0], 10) + (sipRupees ? 1 : 0);
+    titleEl.textContent = `Your Funds · ${newSipCount} SIPs Active`;
+
+    const investedEl = document.getElementById('mf-total-invested');
+    const currentEl = document.getElementById('mf-total-current');
+    const newInvested = parseINRLocal(investedEl.textContent) * 100 + investedRupees * 100;
+    const newCurrent = parseINRLocal(currentEl.textContent) * 100 + currentRupees * 100;
+    investedEl.textContent = AG.formatINR(newInvested);
+    currentEl.textContent = AG.formatINR(newCurrent);
+    const totalGain = newCurrent - newInvested;
+    const totalGainPct = newInvested ? (totalGain / newInvested * 100) : 0;
+    document.getElementById('mf-total-gain').textContent = `${totalGain >= 0 ? '+' : ''}${AG.formatINR(totalGain)} (${totalGain >= 0 ? '+' : ''}${totalGainPct.toFixed(1)}%)`;
+    if (sipRupees) {
+      const sipEl = document.getElementById('mf-total-sip');
+      const newSipTotal = parseINRLocal(sipEl.textContent) * 100 + sipRupees * 100;
+      sipEl.textContent = AG.formatINR(newSipTotal) + ' / mo';
+    }
+
+    document.getElementById('view-populated').style.display = '';
+    document.getElementById('view-empty').style.display = 'none';
+    AG.closeSheet('add-fund');
+    AG.showToast(name + ' added ✓', 'success');
+  }
 </script>
 </body>
 </html>
