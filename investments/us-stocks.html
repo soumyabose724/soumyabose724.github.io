@@ -89,30 +89,30 @@
       <!-- Hero: combined US stock portfolio -->
       <div class="glass-card glass-card--hero">
         <div class="loans-hero-label" style="font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-secondary); margin-bottom:var(--sp-2);">US Stock Portfolio Value</div>
-        <div class="amount-text amount-text--display gradient-text">₹16,32,884</div>
-        <div class="t-caption text-muted mt-1">$19,555.50 · converted at current FX ₹83.50/USD (12 Jul 2026)</div>
+        <div class="amount-text amount-text--display gradient-text" id="us-hero-total">₹16,32,884</div>
+        <div class="t-caption text-muted mt-1" id="us-hero-caption">$19,555.50 · converted at current FX ₹83.50/USD (12 Jul 2026)</div>
         <div class="stat-row">
           <div class="stat-col">
             <div class="stat-col__label">Invested (Cost Basis)</div>
-            <div class="stat-col__value">₹14,70,614</div>
+            <div class="stat-col__value" id="us-hero-invested">₹14,70,614</div>
           </div>
           <div class="stat-col">
             <div class="stat-col__label">Total P&amp;L</div>
-            <div class="stat-col__value" style="color:var(--success);">+₹1,62,270</div>
+            <div class="stat-col__value" id="us-hero-pl" style="color:var(--success);">+₹1,62,270</div>
           </div>
           <div class="stat-col">
             <div class="stat-col__label">Return</div>
-            <div class="stat-col__value" style="color:var(--success);">+11.0%</div>
+            <div class="stat-col__value" id="us-hero-return" style="color:var(--success);">+11.0%</div>
           </div>
         </div>
         <div class="pl-split-row">
           <div class="pl-split-col">
             <div class="pl-split-col__label">Price Gain</div>
-            <div class="pl-split-col__value" style="color:var(--success);">+₹1,49,261</div>
+            <div class="pl-split-col__value" id="us-hero-pricegain" style="color:var(--success);">+₹1,49,261</div>
           </div>
           <div class="pl-split-col">
             <div class="pl-split-col__label">FX Gain / Loss</div>
-            <div class="pl-split-col__value" style="color:var(--success);">+₹13,010</div>
+            <div class="pl-split-col__value" id="us-hero-fxgain" style="color:var(--success);">+₹13,010</div>
           </div>
         </div>
         <div class="loans-hero-footer" style="margin-top:var(--sp-4); padding-top:var(--sp-3); border-top:1px solid var(--glass-border); display:flex; align-items:center; gap:var(--sp-2); font-size:12px; color:var(--text-muted);">
@@ -123,10 +123,13 @@
         </div>
       </div>
 
-      <div class="section-title" style="margin-top:var(--sp-5);">Holdings (3)</div>
+      <button class="btn btn--secondary btn--full" style="margin-top:var(--sp-4);" onclick="AG.openSheet('add-us-stock')">+ Add US Stock Holding</button>
 
+      <div class="section-title" style="margin-top:var(--sp-5);" id="us-holdings-title">Holdings (3)</div>
+
+      <div id="us-holdings-list">
       <!-- AAPL -->
-      <div class="surface-card holding-card">
+      <div class="surface-card holding-card" data-invested="607540" data-current="703070" data-pricegain="83742" data-fxgain="11788">
         <div class="card-header">
           <div class="card-icon card-icon--info">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"/><path d="M10 2c1 .5 2 2 2 5"/></svg>
@@ -160,7 +163,7 @@
       </div>
 
       <!-- MSFT -->
-      <div class="surface-card holding-card">
+      <div class="surface-card holding-card" data-invested="516986" data-current="557613" data-pricegain="37622" data-fxgain="3005">
         <div class="card-header">
           <div class="card-icon card-icon--info">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/></svg>
@@ -194,7 +197,7 @@
       </div>
 
       <!-- GOOGL -->
-      <div class="surface-card holding-card">
+      <div class="surface-card holding-card" data-invested="346088" data-current="372201" data-pricegain="27897" data-fxgain="-1783">
         <div class="card-header">
           <div class="card-icon card-icon--info">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18"/><path d="M12 8a4 4 0 0 0 0 8"/></svg>
@@ -227,6 +230,7 @@
         </div>
         <div class="form-helper mt-2">The rupee strengthened between purchase (₹83.90/USD) and today (₹83.50/USD) — this shows up as a small FX loss even though the stock price itself gained.</div>
       </div>
+      </div><!-- /us-holdings-list -->
 
       <!-- Compliance notes -->
       <div class="section" style="margin-top:var(--sp-6);">
@@ -279,7 +283,47 @@
         <div class="empty-state__icon">📈</div>
         <div class="empty-state__title">No US Stocks Tracked</div>
         <div class="empty-state__body">Add holdings from a US-investing platform (like Vested or INDmoney) to track price gain and FX gain/loss separately, plus LRS &amp; TCS impact.</div>
-        <a href="index.html" class="btn btn--primary" style="min-width:180px; text-decoration:none;">+ Add US Stock Holding</a>
+        <button class="btn btn--primary" style="min-width:180px;" onclick="AG.openSheet('add-us-stock')">+ Add US Stock Holding</button>
+      </div>
+    </div>
+
+    <!-- Add US Stock Holding Sheet -->
+    <div class="sheet-backdrop" id="add-us-stock-backdrop"></div>
+    <div class="sheet" id="add-us-stock">
+      <div class="sheet__handle"></div>
+      <div class="sheet__header">
+        <span class="sheet__title">Add US Stock Holding</span>
+        <button class="sheet__close" onclick="AG.closeSheet('add-us-stock')" aria-label="Close">✕</button>
+      </div>
+      <div class="sheet__body">
+        <div class="form-group">
+          <label class="form-label">Company Name</label>
+          <input class="form-input" id="us-name" type="text" placeholder="e.g. Amazon.com Inc.">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ticker (NASDAQ/NYSE)</label>
+          <input class="form-input" id="us-ticker" type="text" placeholder="e.g. AMZN">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Shares</label>
+          <input class="form-input" id="us-shares" type="text" inputmode="decimal" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Buy Price ($/share)</label>
+          <input class="form-input" id="us-buy-price" type="text" inputmode="decimal" placeholder="0.00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">FX Rate at Purchase (₹/USD)</label>
+          <input class="form-input" id="us-buy-fx" type="text" inputmode="decimal" placeholder="e.g. 83.00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Current Price ($/share)</label>
+          <input class="form-input" id="us-current-price" type="text" inputmode="decimal" placeholder="0.00">
+        </div>
+      </div>
+      <div class="sheet__footer">
+        <button class="btn btn--ghost" onclick="AG.closeSheet('add-us-stock')">Cancel</button>
+        <button class="btn btn--primary" onclick="addUsStock()">Add Holding</button>
       </div>
     </div>
 
@@ -356,6 +400,107 @@
       document.getElementById('view-empty').style.display = '';
     },
   });
+
+  const US_CURRENT_FX = 83.50;
+
+  function addUsStock() {
+    const name = document.getElementById('us-name').value.trim();
+    const ticker = document.getElementById('us-ticker').value.trim().toUpperCase();
+    const shares = parseFloat(document.getElementById('us-shares').value || '0');
+    const buyPrice = parseFloat(document.getElementById('us-buy-price').value || '0');
+    const buyFx = parseFloat(document.getElementById('us-buy-fx').value || '0');
+    const currentPrice = parseFloat(document.getElementById('us-current-price').value || '0');
+    if (!name) { AG.showToast('Enter the company name', 'error'); return; }
+    if (!ticker) { AG.showToast('Enter the ticker', 'error'); return; }
+    if (!shares) { AG.showToast('Enter the number of shares', 'error'); return; }
+    if (!buyPrice) { AG.showToast('Enter the buy price', 'error'); return; }
+    if (!buyFx) { AG.showToast('Enter the FX rate at purchase', 'error'); return; }
+    if (!currentPrice) { AG.showToast('Enter the current price', 'error'); return; }
+
+    const investedInr = Math.round(shares * buyPrice * buyFx);
+    const currentInr = Math.round(shares * currentPrice * US_CURRENT_FX);
+    const priceGainInr = Math.round(shares * (currentPrice - buyPrice) * buyFx);
+    const fxGainInr = Math.round(shares * currentPrice * (US_CURRENT_FX - buyFx));
+    const totalPl = priceGainInr + fxGainInr;
+    const returnPct = investedInr ? (totalPl / investedInr * 100) : 0;
+    const plSign = totalPl >= 0 ? '+' : '−';
+    const plAbs = Math.abs(totalPl);
+    const priceGainSign = priceGainInr >= 0 ? '+' : '−';
+    const fxGainSign = fxGainInr >= 0 ? '+' : '−';
+
+    const html = `
+      <div class="surface-card holding-card" data-invested="${investedInr}" data-current="${currentInr}" data-pricegain="${priceGainInr}" data-fxgain="${fxGainInr}">
+        <div class="card-header">
+          <div class="card-icon card-icon--info">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/></svg>
+          </div>
+          <div style="flex:1; min-width:0;">
+            <div class="card-title">${name}</div>
+            <div class="holding-ticker-badge">NASDAQ: ${ticker} · ${shares} shares</div>
+          </div>
+          <span class="delta ${returnPct >= 0 ? 'delta--pos' : 'delta--neg'}">${returnPct >= 0 ? '+' : ''}${returnPct.toFixed(2)}%</span>
+        </div>
+        <div class="fx-caption">
+          Bought: <strong>$${(shares * buyPrice).toFixed(2)}</strong> at <strong>₹${buyFx.toFixed(2)}/USD</strong> = <strong>${AG.formatINR(investedInr * 100)}</strong> (FX snapshot at purchase — never recomputed)
+        </div>
+        <div class="fx-caption" style="margin-top:var(--sp-2);">
+          Now: ${shares} sh × $${currentPrice.toFixed(2)} = <strong>$${(shares * currentPrice).toFixed(2)}</strong> at <strong>₹${US_CURRENT_FX.toFixed(2)}/USD</strong> = <strong>${AG.formatINR(currentInr * 100)}</strong>
+        </div>
+        <div class="pl-split-row">
+          <div class="pl-split-col">
+            <div class="pl-split-col__label">Price Gain</div>
+            <div class="pl-split-col__value" style="color:${priceGainInr >= 0 ? 'var(--success)' : 'var(--error)'};">${priceGainSign}${AG.formatINR(Math.abs(priceGainInr) * 100)}</div>
+          </div>
+          <div class="pl-split-col" style="text-align:center;">
+            <div class="pl-split-col__label">FX Gain/Loss</div>
+            <div class="pl-split-col__value" style="color:${fxGainInr >= 0 ? 'var(--success)' : 'var(--error)'};">${fxGainSign}${AG.formatINR(Math.abs(fxGainInr) * 100)}</div>
+          </div>
+          <div class="pl-split-col">
+            <div class="pl-split-col__label">Total P&amp;L</div>
+            <div class="pl-split-col__value" style="color:${totalPl >= 0 ? 'var(--success)' : 'var(--error)'};">${plSign}${AG.formatINR(plAbs * 100)}</div>
+          </div>
+        </div>
+      </div>`;
+    document.getElementById('us-holdings-list').insertAdjacentHTML('beforeend', html);
+    recomputeUsHero();
+
+    document.getElementById('view-populated').style.display = '';
+    document.getElementById('view-empty').style.display = 'none';
+    document.getElementById('us-name').value = '';
+    document.getElementById('us-ticker').value = '';
+    document.getElementById('us-shares').value = '';
+    document.getElementById('us-buy-price').value = '';
+    document.getElementById('us-buy-fx').value = '';
+    document.getElementById('us-current-price').value = '';
+    AG.closeSheet('add-us-stock');
+    AG.showToast('US stock holding added ✓', 'success');
+  }
+
+  function recomputeUsHero() {
+    const cards = document.querySelectorAll('#us-holdings-list .holding-card');
+    let invested = 0, current = 0, priceGain = 0, fxGain = 0;
+    cards.forEach(c => {
+      invested += parseInt(c.dataset.invested, 10);
+      current += parseInt(c.dataset.current, 10);
+      priceGain += parseInt(c.dataset.pricegain, 10);
+      fxGain += parseInt(c.dataset.fxgain, 10);
+    });
+    const totalPl = priceGain + fxGain;
+    const returnPct = invested ? (totalPl / invested * 100) : 0;
+
+    document.getElementById('us-hero-total').textContent = AG.formatINR(current * 100);
+    document.getElementById('us-hero-caption').textContent = `$${(current / US_CURRENT_FX).toFixed(2)} · converted at current FX ₹${US_CURRENT_FX.toFixed(2)}/USD`;
+    document.getElementById('us-hero-invested').textContent = AG.formatINR(invested * 100);
+    document.getElementById('us-hero-pl').textContent = `${totalPl >= 0 ? '+' : '−'}${AG.formatINR(Math.abs(totalPl) * 100)}`;
+    document.getElementById('us-hero-pl').style.color = totalPl >= 0 ? 'var(--success)' : 'var(--error)';
+    document.getElementById('us-hero-return').textContent = `${returnPct >= 0 ? '+' : ''}${returnPct.toFixed(1)}%`;
+    document.getElementById('us-hero-return').style.color = returnPct >= 0 ? 'var(--success)' : 'var(--error)';
+    document.getElementById('us-hero-pricegain').textContent = `${priceGain >= 0 ? '+' : '−'}${AG.formatINR(Math.abs(priceGain) * 100)}`;
+    document.getElementById('us-hero-pricegain').style.color = priceGain >= 0 ? 'var(--success)' : 'var(--error)';
+    document.getElementById('us-hero-fxgain').textContent = `${fxGain >= 0 ? '+' : '−'}${AG.formatINR(Math.abs(fxGain) * 100)}`;
+    document.getElementById('us-hero-fxgain').style.color = fxGain >= 0 ? 'var(--success)' : 'var(--error)';
+    document.getElementById('us-holdings-title').textContent = `Holdings (${cards.length})`;
+  }
 </script>
 </body>
 </html>
