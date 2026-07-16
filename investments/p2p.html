@@ -75,12 +75,12 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           </div>
           <div style="flex:1; min-width:0;">
-            <div class="card-title">LenDenClub</div>
-            <div style="font-size:12px; color:var(--text-muted);">RBI-registered NBFC-P2P · Reg. No. N-13.02316</div>
+            <div class="card-title" id="p2p-platform">LenDenClub</div>
+            <div style="font-size:12px; color:var(--text-muted);">RBI-registered NBFC-P2P</div>
           </div>
         </div>
         <div class="loans-hero-label" style="font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-secondary); margin-bottom:var(--sp-2);">Principal Lent</div>
-        <div class="amount-text amount-text--display gradient-text">₹1,20,000</div>
+        <div class="amount-text amount-text--display gradient-text" id="hero-total">₹1,20,000</div>
         <div class="stat-row">
           <div class="stat-col">
             <div class="stat-col__label">Borrowers</div>
@@ -88,7 +88,7 @@
           </div>
           <div class="stat-col">
             <div class="stat-col__label">Expected Return</div>
-            <div class="stat-col__value">~12.0% XIRR</div>
+            <div class="stat-col__value" id="p2p-expected">~12.0% XIRR</div>
           </div>
           <div class="stat-col">
             <div class="stat-col__label">Actual Return (to date)</div>
@@ -96,6 +96,11 @@
           </div>
         </div>
       </div>
+
+      <button class="btn btn--secondary btn--full" style="margin-top:var(--sp-4);" onclick="openEditP2pSheet()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Edit Platform
+      </button>
 
       <!-- Status breakdown -->
       <div class="section">
@@ -169,7 +174,38 @@
         <div class="empty-state__icon">🤝</div>
         <div class="empty-state__title">No P2P Lending Tracked</div>
         <div class="empty-state__body">Peer-to-peer lending via RBI-registered NBFC-P2P platforms offers higher yields with real default risk — add a platform to track your loan book here.</div>
-        <a href="index.html" class="btn btn--primary" style="min-width:180px; text-decoration:none;">+ Add P2P Platform</a>
+        <button class="btn btn--primary" style="min-width:180px;" onclick="openEditP2pSheet()">+ Add P2P Platform</button>
+      </div>
+    </div>
+
+    <!-- Add/Edit P2P Sheet -->
+    <div class="sheet-backdrop" id="edit-p2p-backdrop"></div>
+    <div class="sheet" id="edit-p2p">
+      <div class="sheet__handle"></div>
+      <div class="sheet__header">
+        <span class="sheet__title">P2P Platform</span>
+        <button class="sheet__close" onclick="AG.closeSheet('edit-p2p')" aria-label="Close">✕</button>
+      </div>
+      <div class="sheet__body">
+        <div class="form-group">
+          <label class="form-label">Platform Name</label>
+          <input class="form-input" id="ep-platform" type="text" placeholder="e.g. LenDenClub, Faircent">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Principal Lent (₹)</label>
+          <div class="form-input-wrap has-prefix">
+            <span class="input-prefix">₹</span>
+            <input class="form-input inr-input" id="ep-principal" type="text" inputmode="numeric" placeholder="0">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Expected Return (% XIRR)</label>
+          <input class="form-input" id="ep-return" type="text" inputmode="decimal" placeholder="e.g. 12">
+        </div>
+      </div>
+      <div class="sheet__footer">
+        <button class="btn btn--ghost" onclick="AG.closeSheet('edit-p2p')">Cancel</button>
+        <button class="btn btn--primary" onclick="saveP2p()">Save Platform</button>
       </div>
     </div>
 
@@ -246,6 +282,37 @@
       document.getElementById('view-empty').style.display = '';
     },
   });
+
+  function openEditP2pSheet() {
+    const isPopulated = document.getElementById('view-populated').style.display !== 'none';
+    if (isPopulated) {
+      document.getElementById('ep-platform').value = document.getElementById('p2p-platform').textContent;
+      document.getElementById('ep-principal').value = document.getElementById('hero-total').textContent.replace(/[₹,]/g, '');
+      document.getElementById('ep-return').value = document.getElementById('p2p-expected').textContent.replace(/[^\d.]/g, '');
+    } else {
+      document.getElementById('ep-platform').value = '';
+      document.getElementById('ep-principal').value = '';
+      document.getElementById('ep-return').value = '';
+    }
+    AG.openSheet('edit-p2p');
+  }
+
+  function saveP2p() {
+    const platform = document.getElementById('ep-platform').value.trim();
+    const principal = parseInt(document.getElementById('ep-principal').value.replace(/,/g, '') || '0', 10);
+    const expectedReturn = parseFloat(document.getElementById('ep-return').value || '0');
+    if (!platform) { AG.showToast('Enter the platform name', 'error'); return; }
+    if (!principal) { AG.showToast('Enter the principal lent', 'error'); return; }
+
+    document.getElementById('p2p-platform').textContent = platform;
+    document.getElementById('hero-total').textContent = AG.formatINR(principal * 100);
+    if (expectedReturn) document.getElementById('p2p-expected').textContent = `~${expectedReturn.toFixed(1)}% XIRR`;
+
+    document.getElementById('view-populated').style.display = '';
+    document.getElementById('view-empty').style.display = 'none';
+    AG.closeSheet('edit-p2p');
+    AG.showToast('P2P platform saved ✓', 'success');
+  }
 </script>
 </body>
 </html>
