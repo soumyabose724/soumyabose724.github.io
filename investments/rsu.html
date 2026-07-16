@@ -118,24 +118,28 @@
 
       <!-- Hero -->
       <div class="glass-card glass-card--hero">
-        <div class="loans-hero-label" style="font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-secondary); margin-bottom:var(--sp-2);">Nimbus Cloud Technologies Inc. · NASDAQ: NMBS</div>
-        <div class="amount-text amount-text--display gradient-text">₹2,38,476</div>
-        <div class="t-caption text-muted mt-1">$2,856.00 — 68 shares held (post sell-to-cover), at current FX ₹83.50/USD</div>
+        <div class="loans-hero-label" id="rsu-company-label" style="font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-secondary); margin-bottom:var(--sp-2);">Nimbus Cloud Technologies Inc. · NASDAQ: NMBS</div>
+        <div class="amount-text amount-text--display gradient-text" id="rsu-hero-total">₹2,38,476</div>
+        <div class="t-caption text-muted mt-1" id="rsu-hero-caption">$2,856.00 — gross value of vested units before any sell-to-cover, at current FX ₹83.50/USD</div>
         <div class="stat-row">
           <div class="stat-col">
             <div class="stat-col__label">Granted</div>
-            <div class="stat-col__value">400 units</div>
+            <div class="stat-col__value" id="rsu-granted">400 units</div>
           </div>
           <div class="stat-col">
             <div class="stat-col__label">Vested</div>
-            <div class="stat-col__value">100 units</div>
+            <div class="stat-col__value" id="rsu-vested">100 units</div>
           </div>
           <div class="stat-col">
             <div class="stat-col__label">Current Price</div>
-            <div class="stat-col__value">$42.00</div>
+            <div class="stat-col__value" id="rsu-price">$42.00</div>
           </div>
         </div>
       </div>
+
+      <button class="btn btn--secondary btn--full" style="margin-top:var(--sp-4);" onclick="openEditRsuSheet()">
+        Edit Grant
+      </button>
 
       <!-- Vesting schedule -->
       <div class="section-title" style="margin-top:var(--sp-5);">Vesting Schedule</div>
@@ -143,14 +147,14 @@
         <div class="util-bar-wrap" style="margin-top:0;">
           <div class="util-label-row">
             <span class="util-label">Vested to date</span>
-            <span class="util-pct util-pct--safe">100 / 400 units (25%)</span>
+            <span class="util-pct util-pct--safe" id="rsu-vested-label">100 / 400 units (25%)</span>
           </div>
           <div class="progress-bar progress-bar--thick">
-            <div class="progress-bar__fill progress-bar__fill--success" style="width:25%;"></div>
+            <div class="progress-bar__fill progress-bar__fill--success" id="rsu-vested-bar" style="width:25%;"></div>
           </div>
         </div>
 
-        <div class="vest-timeline">
+        <div class="vest-timeline" id="rsu-vest-timeline">
           <div class="vest-step">
             <div class="vest-step__dot done">✓</div>
             <div class="vest-step__pct">25%</div>
@@ -179,7 +183,7 @@
             <span class="vest-step__tag upcoming">Upcoming</span>
           </div>
         </div>
-        <div class="form-helper mt-3">Standard 4-year vest, 25% per year, 1-year cliff before first vest. Grant date: 1 April 2025.</div>
+        <div class="form-helper mt-3" id="rsu-vest-helper">Standard 4-year vest, 25% per year, 1-year cliff before first vest. Grant date: 1 April 2025.</div>
       </div>
 
       <!-- Vest event detail -->
@@ -245,7 +249,43 @@
         <div class="empty-state__icon">📦</div>
         <div class="empty-state__title">No RSU Grant on Record</div>
         <div class="empty-state__body">Add your Restricted Stock Unit grant to track vesting, sell-to-cover TDS, and cost basis for future capital gains.</div>
-        <a href="index.html" class="btn btn--primary" style="min-width:180px; text-decoration:none;">+ Add RSU Grant</a>
+        <button class="btn btn--primary" style="min-width:180px;" onclick="openEditRsuSheet()">+ Add RSU Grant</button>
+      </div>
+    </div>
+
+    <!-- Add/Edit RSU Grant Sheet -->
+    <div class="sheet-backdrop" id="edit-rsu-backdrop"></div>
+    <div class="sheet" id="edit-rsu">
+      <div class="sheet__handle"></div>
+      <div class="sheet__header">
+        <span class="sheet__title">RSU Grant</span>
+        <button class="sheet__close" onclick="AG.closeSheet('edit-rsu')" aria-label="Close">✕</button>
+      </div>
+      <div class="sheet__body">
+        <div class="form-group">
+          <label class="form-label">Company Name</label>
+          <input class="form-input" id="er-company" type="text" placeholder="e.g. Nimbus Cloud Technologies Inc.">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ticker (Exchange)</label>
+          <input class="form-input" id="er-ticker" type="text" placeholder="e.g. NASDAQ: NMBS">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Units Granted</label>
+          <input class="form-input" id="er-granted" type="text" inputmode="numeric" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Current Price ($/share)</label>
+          <input class="form-input" id="er-price" type="text" inputmode="decimal" placeholder="0.00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Grant Date</label>
+          <input class="form-input" id="er-grant-date" type="date">
+        </div>
+      </div>
+      <div class="sheet__footer">
+        <button class="btn btn--ghost" onclick="AG.closeSheet('edit-rsu')">Cancel</button>
+        <button class="btn btn--primary" onclick="saveRsu()">Save Grant</button>
       </div>
     </div>
 
@@ -322,6 +362,91 @@
       document.getElementById('view-empty').style.display = '';
     },
   });
+
+  const RSU_FX = 83.50;
+
+  function openEditRsuSheet() {
+    const isPopulated = document.getElementById('view-populated').style.display !== 'none';
+    if (isPopulated) {
+      const label = document.getElementById('rsu-company-label').textContent.split(' · ');
+      document.getElementById('er-company').value = label[0] || '';
+      document.getElementById('er-ticker').value = label[1] || '';
+      document.getElementById('er-granted').value = document.getElementById('rsu-granted').textContent.replace(/[^\d]/g, '');
+      document.getElementById('er-price').value = document.getElementById('rsu-price').textContent.replace(/[^\d.]/g, '');
+      const helperMatch = document.getElementById('rsu-vest-helper').textContent.match(/Grant date:\s*([\d]+ \w+ \d{4})/);
+      if (helperMatch) {
+        const parsed = new Date(helperMatch[1]);
+        if (!isNaN(parsed)) document.getElementById('er-grant-date').value = parsed.toISOString().slice(0, 10);
+      }
+    } else {
+      document.getElementById('er-company').value = '';
+      document.getElementById('er-ticker').value = '';
+      document.getElementById('er-granted').value = '';
+      document.getElementById('er-price').value = '';
+      document.getElementById('er-grant-date').value = '';
+    }
+    AG.openSheet('edit-rsu');
+  }
+
+  function saveRsu() {
+    const company = document.getElementById('er-company').value.trim();
+    const ticker = document.getElementById('er-ticker').value.trim();
+    const granted = parseInt(document.getElementById('er-granted').value || '0', 10);
+    const price = parseFloat(document.getElementById('er-price').value || '0');
+    const grantDateVal = document.getElementById('er-grant-date').value;
+    if (!company) { AG.showToast('Enter the company name', 'error'); return; }
+    if (!granted) { AG.showToast('Enter the number of units granted', 'error'); return; }
+    if (!price) { AG.showToast('Enter the current price', 'error'); return; }
+    if (!grantDateVal) { AG.showToast('Enter the grant date', 'error'); return; }
+
+    const grantDate = new Date(grantDateVal + 'T00:00:00');
+    const now = new Date();
+    let yearsElapsed = now.getFullYear() - grantDate.getFullYear();
+    const anniversaryThisYear = new Date(now.getFullYear(), grantDate.getMonth(), grantDate.getDate());
+    if (now < anniversaryThisYear) yearsElapsed -= 1;
+    yearsElapsed = Math.max(0, Math.min(yearsElapsed, 4));
+    const vestedPct = yearsElapsed < 1 ? 0 : yearsElapsed * 25;
+    const vestedUnits = Math.round(granted * vestedPct / 100);
+
+    const totalValueUsd = vestedUnits * price;
+    const totalValueInr = Math.round(totalValueUsd * RSU_FX);
+
+    const dateFmt = (d) => d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+
+    document.getElementById('rsu-company-label').textContent = ticker ? `${company} · ${ticker}` : company;
+    document.getElementById('rsu-hero-total').textContent = AG.formatINR(totalValueInr * 100);
+    document.getElementById('rsu-hero-caption').textContent = `$${totalValueUsd.toFixed(2)} — gross value of vested units before any sell-to-cover, at current FX ₹${RSU_FX.toFixed(2)}/USD`;
+    document.getElementById('rsu-granted').textContent = `${granted} units`;
+    document.getElementById('rsu-vested').textContent = `${vestedUnits} units`;
+    document.getElementById('rsu-price').textContent = `$${price.toFixed(2)}`;
+
+    document.getElementById('rsu-vested-label').textContent = `${vestedUnits} / ${granted} units (${vestedPct}%)`;
+    document.getElementById('rsu-vested-bar').style.width = `${vestedPct}%`;
+
+    const timeline = document.getElementById('rsu-vest-timeline');
+    let stepsHtml = '';
+    for (let i = 1; i <= 4; i++) {
+      const stepDate = new Date(grantDate);
+      stepDate.setFullYear(stepDate.getFullYear() + i);
+      const done = i <= yearsElapsed;
+      const isCurrent = !done && i === yearsElapsed + 1;
+      stepsHtml += `
+        <div class="vest-step">
+          ${i > 1 ? `<div class="vest-step__connector ${i - 1 <= yearsElapsed ? 'done' : ''}"></div>` : ''}
+          <div class="vest-step__dot ${done ? 'done' : (isCurrent ? 'current' : '')}">${done ? '✓' : i}</div>
+          <div class="vest-step__pct">${i * 25}%</div>
+          <div class="vest-step__date">${dateFmt(stepDate)}</div>
+          <span class="vest-step__tag ${done ? 'vested' : 'upcoming'}">${done ? 'Vested' : 'Upcoming'}</span>
+        </div>`;
+    }
+    timeline.innerHTML = stepsHtml;
+    document.getElementById('rsu-vest-helper').textContent = `Standard 4-year vest, 25% per year, 1-year cliff before first vest. Grant date: ${dateFmt(grantDate)}.`;
+
+    document.getElementById('view-populated').style.display = '';
+    document.getElementById('view-empty').style.display = 'none';
+    AG.closeSheet('edit-rsu');
+    AG.showToast('RSU grant saved ✓', 'success');
+  }
 </script>
 </body>
 </html>
