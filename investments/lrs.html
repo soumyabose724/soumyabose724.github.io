@@ -121,6 +121,8 @@
       </div>
     </div>
 
+    <button class="btn btn--secondary btn--full" style="margin-top:var(--sp-4);" onclick="openLogRemittanceSheet()">+ Log Remittance</button>
+
     <!-- Breakdown by purpose -->
     <div class="section-title" style="margin-top:var(--sp-6);">Breakdown by Purpose</div>
     <div class="surface-card" id="purpose-list">
@@ -128,6 +130,47 @@
     </div>
 
     <div class="form-helper mt-3">Each remittance's ₹ figure uses the FX rate snapshot at the time of transfer — never recomputed with today's rate, per the FX-snapshot rule.</div>
+
+    <!-- Log Remittance Sheet -->
+    <div class="sheet-backdrop" id="log-remittance-backdrop"></div>
+    <div class="sheet" id="log-remittance">
+      <div class="sheet__handle"></div>
+      <div class="sheet__header">
+        <span class="sheet__title">Log LRS Remittance</span>
+        <button class="sheet__close" onclick="AG.closeSheet('log-remittance')" aria-label="Close">✕</button>
+      </div>
+      <div class="sheet__body">
+        <div class="form-group">
+          <label class="form-label">Purpose</label>
+          <select class="form-input" id="lr-purpose">
+            <option value="invest">Investment in US Stocks</option>
+            <option value="education">Overseas Education</option>
+            <option value="travel">Travel</option>
+            <option value="gift">Gift (to NRI relative)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Note (optional)</label>
+          <input class="form-input" id="lr-note" type="text" placeholder="e.g. Q2 tuition installment">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Amount ($)</label>
+          <input class="form-input" id="lr-amount" type="text" inputmode="decimal" placeholder="0.00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">FX Rate at Transfer (₹/USD)</label>
+          <input class="form-input" id="lr-fx" type="text" inputmode="decimal" placeholder="e.g. 83.50">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Transfer Date</label>
+          <input class="form-input" id="lr-date" type="date">
+        </div>
+      </div>
+      <div class="sheet__footer">
+        <button class="btn btn--ghost" onclick="AG.closeSheet('log-remittance')">Cancel</button>
+        <button class="btn btn--primary" onclick="saveRemittance()">Log Remittance</button>
+      </div>
+    </div>
 
     <!-- Related -->
     <a href="tcs.html" class="compare-link-card" style="display:flex; align-items:center; gap:var(--sp-3); background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg); padding:var(--sp-4); margin-top:var(--sp-5); text-decoration:none;">
@@ -263,16 +306,20 @@
       </div>`).join('');
   }
 
+  const LRS_LIMIT_USD = 250000;
+  let currentStateKey = 'ontrack';
+
   function applyState(key) {
+    currentStateKey = key;
     const s = STATES[key];
     document.getElementById('gauge-used').textContent = fmtUsd(s.usedUsd);
     document.getElementById('gauge-fill').className = 'progress-bar__fill ' + s.barClass;
-    document.getElementById('gauge-fill').style.width = s.pct + '%';
+    document.getElementById('gauge-fill').style.width = Math.min(100, s.pct) + '%';
     document.getElementById('gauge-pct-badge').className = 'gauge-pct-badge ' + s.badgeClass;
     document.getElementById('gauge-pct-badge').textContent = s.pct.toFixed(2) + '% used';
     document.getElementById('gauge-remaining').textContent = fmtUsd(s.remainingUsd) + ' headroom left';
-    document.getElementById('warning-card').style.display = key === 'nearlimit' ? '' : 'none';
-    if (key === 'nearlimit') {
+    document.getElementById('warning-card').style.display = s.badgeClass === 'warn' ? '' : 'none';
+    if (s.badgeClass === 'warn') {
       document.getElementById('warn-pct').textContent = s.pct.toFixed(2) + '%';
       document.getElementById('warn-remaining').textContent = fmtUsd(s.remainingUsd);
     }
@@ -283,6 +330,59 @@
     ontrack:  () => applyState('ontrack'),
     nearlimit: () => applyState('nearlimit'),
   });
+
+  function openLogRemittanceSheet() {
+    document.getElementById('lr-purpose').value = 'invest';
+    document.getElementById('lr-note').value = '';
+    document.getElementById('lr-amount').value = '';
+    document.getElementById('lr-fx').value = '';
+    document.getElementById('lr-date').value = '';
+    AG.openSheet('log-remittance');
+  }
+
+  function saveRemittance() {
+    const purpose = document.getElementById('lr-purpose').value;
+    const note = document.getElementById('lr-note').value.trim();
+    const amount = parseFloat(document.getElementById('lr-amount').value || '0');
+    const fx = parseFloat(document.getElementById('lr-fx').value || '0');
+    const dateVal = document.getElementById('lr-date').value;
+    if (!amount) { AG.showToast('Enter the remittance amount', 'error'); return; }
+    if (!fx) { AG.showToast('Enter the FX rate', 'error'); return; }
+    if (!dateVal) { AG.showToast('Enter the transfer date', 'error'); return; }
+
+    const s = STATES[currentStateKey];
+    const projectedUsd = s.usedUsd + amount;
+    if (projectedUsd > LRS_LIMIT_USD) {
+      AG.showToast(`This would exceed the USD ${LRS_LIMIT_USD.toLocaleString('en-US')} LRS limit for the FY`, 'error');
+      return;
+    }
+
+    const purposeNames = { invest: 'Investment in US Stocks', education: 'Overseas Education', travel: 'Travel', gift: 'Gift (to NRI relative)' };
+    const purposeColors = { invest: 'var(--grad-primary)', education: 'linear-gradient(135deg,#2563EB,#3B82F6)', travel: 'linear-gradient(135deg,#D97706,#F59E0B)', gift: 'var(--grad-success)' };
+    const dateObj = new Date(dateVal + 'T00:00:00');
+    const dateFmt = dateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    const inrPaise = Math.round(amount * fx * 100);
+    const inrPlain = AG.formatINR(inrPaise).replace('₹', '');
+
+    s.purposes.unshift({
+      name: note ? `${purposeNames[purpose]} — ${note}` : purposeNames[purpose],
+      meta: `${dateFmt} · ₹${fx.toFixed(2)}/USD`,
+      usd: amount,
+      inr: inrPlain,
+      icon: purpose,
+      color: purposeColors[purpose],
+    });
+
+    s.usedUsd = projectedUsd;
+    s.pct = (s.usedUsd / LRS_LIMIT_USD) * 100;
+    s.remainingUsd = LRS_LIMIT_USD - s.usedUsd;
+    s.badgeClass = s.pct >= 80 ? 'warn' : 'ok';
+    s.barClass = s.pct >= 80 ? 'progress-bar__fill--warning' : '';
+
+    applyState(currentStateKey);
+    AG.closeSheet('log-remittance');
+    AG.showToast('Remittance logged ✓', 'success');
+  }
 </script>
 </body>
 </html>
