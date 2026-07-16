@@ -338,7 +338,7 @@
     </a>
     <span class="top-bar__title" id="top-bar-title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Groceries</span>
     <div class="top-bar__actions" style="gap:4px;">
-      <button class="icon-btn" id="more-btn" aria-label="More options" onclick="toast('Envelope options — coming soon')">
+      <button class="icon-btn" id="more-btn" aria-label="More options" onclick="AG.openDialog('delete-envelope')">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/>
@@ -418,10 +418,53 @@
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
         Transfer
       </button>
-      <button class="env-quick-btn" onclick="toast('Edit allocation — coming soon')">
+      <button class="env-quick-btn" onclick="openEditEnvelopeSheet()">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         Edit
       </button>
+    </div>
+
+    <!-- Edit Envelope Sheet -->
+    <div class="sheet-backdrop" id="edit-envelope-backdrop"></div>
+    <div class="sheet" id="edit-envelope">
+      <div class="sheet__handle"></div>
+      <div class="sheet__header">
+        <span class="sheet__title">Edit Envelope</span>
+        <button class="sheet__close" onclick="AG.closeSheet('edit-envelope')" aria-label="Close">✕</button>
+      </div>
+      <div class="sheet__body">
+        <div class="form-group">
+          <label class="form-label">Envelope Name</label>
+          <input class="form-input" id="ee-name" type="text">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Monthly Allocation</label>
+          <div class="form-input-wrap has-prefix">
+            <span class="input-prefix">₹</span>
+            <input class="form-input inr-input" id="ee-amount" type="text" inputmode="numeric">
+          </div>
+        </div>
+      </div>
+      <div class="sheet__footer">
+        <button class="btn btn--ghost" onclick="AG.closeSheet('edit-envelope')">Cancel</button>
+        <button class="btn btn--primary" onclick="saveEnvelopeEdit()">Save Changes</button>
+      </div>
+    </div>
+
+    <!-- Delete Envelope Dialog -->
+    <div class="dialog-backdrop" id="delete-envelope-backdrop">
+      <div class="dialog">
+        <div class="dialog__header">
+          <div class="dialog__title" id="delete-envelope-title">Delete this envelope?</div>
+        </div>
+        <div class="dialog__body">
+          This envelope will be removed from your budget period. Its past transactions stay in your ledger, but future spending here won't be tracked against a ceiling until you re-add it.
+        </div>
+        <div class="dialog__footer">
+          <button class="btn btn--ghost btn--sm" onclick="AG.closeDialog('delete-envelope')">Cancel</button>
+          <button class="btn btn--danger btn--sm" onclick="confirmDeleteEnvelope()">Delete Envelope</button>
+        </div>
+      </div>
     </div>
 
     <!-- ── THIS MONTH'S TRANSACTIONS ── -->
@@ -520,6 +563,7 @@
 </div><!-- /screen -->
 </div><!-- /phone-frame -->
 
+<script src="../assets/nav.js"></script>
 <script>
 /* ─────────────────────────────────────────────
    THEME
@@ -700,6 +744,79 @@ function applyState(key) {
   // Chart
   document.getElementById('trend-heading').textContent = s.trendPeriod;
   renderChart(key);
+
+  document.getElementById('delete-envelope-title').textContent = `Delete ${s.envName}?`;
+}
+
+function parseINRLocal(text) {
+  return parseInt(text.replace(/[₹,−-]/g, ''), 10) || 0;
+}
+
+function openEditEnvelopeSheet() {
+  const s = STATES[currentState];
+  document.getElementById('ee-name').value = s.envName;
+  document.getElementById('ee-amount').value = s.ceiling;
+  AG.openSheet('edit-envelope');
+}
+
+function saveEnvelopeEdit() {
+  const name = document.getElementById('ee-name').value.trim();
+  const ceiling = parseInt(document.getElementById('ee-amount').value.replace(/,/g, '') || '0', 10);
+  if (!name) { AG.showToast('Envelope name is required', 'error'); return; }
+  if (!ceiling) { AG.showToast('Enter a monthly allocation', 'error'); return; }
+
+  const s = STATES[currentState];
+  const spentNum = parseINRLocal(s.spent);
+  const pct = Math.round((spentNum / ceiling) * 1000) / 10;
+  const remainingNum = ceiling - spentNum;
+
+  s.envName = name;
+  s.ceiling = ceiling;
+  s.allocated = AG.formatINR(ceiling * 100);
+  s.pct = pct;
+
+  if (pct <= 90) {
+    s.remaining = AG.formatINR(remainingNum * 100);
+    s.remainingColor = '#fff';
+    s.barFillCls = 'env-hero__bar-fill--partial';
+    s.statusChipText = 'On Track';
+    s.statusChipCls = 'env-hero__status-chip--ok';
+    s.alertWarn = false;
+    s.alertDanger = false;
+    s.captionText = `Ceiling: ${s.allocated} · ${Math.round(pct)}% used`;
+  } else if (pct <= 100) {
+    s.remaining = AG.formatINR(remainingNum * 100);
+    s.remainingColor = '#FDE68A';
+    s.barFillCls = 'env-hero__bar-fill--partial';
+    s.statusChipText = 'Near Limit';
+    s.statusChipCls = 'env-hero__status-chip--warn';
+    s.alertWarn = true;
+    s.alertWarnText = `${Math.round(pct)}% used — only ${AG.formatINR(remainingNum * 100)} left this month`;
+    s.alertDanger = false;
+    s.captionText = `Ceiling: ${s.allocated} · ${Math.round(pct)}% used · ${AG.formatINR(remainingNum * 100)} left`;
+  } else {
+    const overNum = spentNum - ceiling;
+    s.remaining = '−' + AG.formatINR(overNum * 100);
+    s.remainingColor = '#FCA5A5';
+    s.barFillCls = 'env-hero__bar-fill--over';
+    s.statusChipText = 'Overspent';
+    s.statusChipCls = 'env-hero__status-chip--over';
+    s.alertWarn = false;
+    s.alertDanger = true;
+    s.alertDangerText = `Over by ${AG.formatINR(overNum * 100)} — envelope is overspent`;
+    s.captionText = `Ceiling: ${s.allocated} · Over by ${AG.formatINR(overNum * 100)} (${Math.round(pct)}%)`;
+  }
+
+  applyState(currentState);
+  AG.closeSheet('edit-envelope');
+  AG.showToast('Envelope updated ✓', 'success');
+}
+
+function confirmDeleteEnvelope() {
+  const name = STATES[currentState].envName;
+  AG.closeDialog('delete-envelope');
+  AG.showToast(name + ' deleted ✓', 'success');
+  setTimeout(() => { location.href = 'period.html'; }, 900);
 }
 
 /* ─────────────────────────────────────────────

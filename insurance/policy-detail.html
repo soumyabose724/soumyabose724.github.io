@@ -124,10 +124,43 @@
     </a>
     <span class="top-bar__title">Policy Detail</span>
     <div class="top-bar__actions" style="gap:4px;">
+      <button class="icon-btn" aria-label="Edit policy" onclick="openEditPolicySheet()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </button>
       <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
         <span data-theme-icon style="font-size:18px;">🌙</span>
       </button>
       <div class="avatar">VS</div>
+    </div>
+  </div>
+
+  <!-- Edit Policy Sheet -->
+  <div class="sheet-backdrop" id="edit-policy-backdrop"></div>
+  <div class="sheet" id="edit-policy">
+    <div class="sheet__handle"></div>
+    <div class="sheet__header">
+      <span class="sheet__title">Edit Policy</span>
+      <button class="sheet__close" aria-label="Close" onclick="AG.closeSheet('edit-policy')">✕</button>
+    </div>
+    <div class="sheet__body">
+      <div class="form-group">
+        <label class="form-label">Sum Assured</label>
+        <div class="form-input-wrap has-prefix">
+          <span class="input-prefix">₹</span>
+          <input class="form-input inr-input" id="ep-sum-assured" type="text" inputmode="numeric">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Premium (per year)</label>
+        <div class="form-input-wrap has-prefix">
+          <span class="input-prefix">₹</span>
+          <input class="form-input inr-input" id="ep-premium" type="text" inputmode="numeric">
+        </div>
+      </div>
+    </div>
+    <div class="sheet__footer">
+      <button class="btn btn--ghost" onclick="AG.closeSheet('edit-policy')">Cancel</button>
+      <button class="btn btn--primary" onclick="savePolicyEdit()">Save Changes</button>
     </div>
   </div>
 
@@ -149,11 +182,11 @@
       <div class="pd-fact-grid">
         <div>
           <div class="pd-fact-label">Sum Assured</div>
-          <div class="pd-fact-value pd-fact-value--mono pd-fact-value--lg">₹1,00,00,000</div>
+          <div class="pd-fact-value pd-fact-value--mono pd-fact-value--lg" id="pd-sum-assured">₹1,00,00,000</div>
         </div>
         <div>
           <div class="pd-fact-label">Premium</div>
-          <div class="pd-fact-value pd-fact-value--mono">₹15,000 / year</div>
+          <div class="pd-fact-value pd-fact-value--mono" id="pd-premium">₹15,000 / year</div>
         </div>
         <div>
           <div class="pd-fact-label">Payment Frequency</div>
@@ -261,7 +294,7 @@
             <div style="font-size:13px; font-weight:600;">Section 80C</div>
             <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Contributes to your 80C pool — tracked in the Tax module</div>
           </div>
-          <div class="tax-80c-amount">₹15,000/yr</div>
+          <div class="tax-80c-amount" id="pd-80c-amount">₹15,000/yr</div>
         </div>
       </div>
     </div>
@@ -397,6 +430,26 @@
   function confirmLapse() {
     AG.closeDialog('lapse-dialog');
     AG.showToast('Policy cancellation is a demo action — no changes made', 'warning');
+  }
+
+  function openEditPolicySheet() {
+    document.getElementById('ep-sum-assured').value = document.getElementById('pd-sum-assured').textContent.replace(/[₹,]/g, '');
+    document.getElementById('ep-premium').value = document.getElementById('pd-premium').textContent.replace(/[₹,]/g, '').replace(/\s*\/\s*year/, '');
+    AG.openSheet('edit-policy');
+  }
+
+  function savePolicyEdit() {
+    const sumAssured = parseInt(document.getElementById('ep-sum-assured').value.replace(/,/g, '') || '0', 10);
+    const premium = parseInt(document.getElementById('ep-premium').value.replace(/,/g, '') || '0', 10);
+    if (!sumAssured) { AG.showToast('Enter the sum assured', 'error'); return; }
+    if (!premium) { AG.showToast('Enter the premium amount', 'error'); return; }
+
+    document.getElementById('pd-sum-assured').textContent = AG.formatINR(sumAssured * 100);
+    document.getElementById('pd-premium').textContent = AG.formatINR(premium * 100) + ' / year';
+    document.getElementById('pd-80c-amount').textContent = AG.formatINR(premium * 100) + '/yr';
+
+    AG.closeSheet('edit-policy');
+    AG.showToast('Policy updated ✓', 'success');
   }
 </script>
 </body>
