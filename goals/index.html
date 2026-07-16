@@ -164,7 +164,7 @@
         <div class="empty-state__icon">🎯</div>
         <div class="empty-state__title">No Goals Yet</div>
         <div class="empty-state__body">Set a target for Child's Education, a Vacation, or a big purchase — ArthaGrid will work out the monthly SIP you need and simulate your odds of getting there.</div>
-        <button class="btn btn--primary" style="min-width:180px;" onclick="AG.openSheet('add-goal')">+ Create Your First Goal</button>
+        <button class="btn btn--primary" style="min-width:180px;" onclick="openAddGoalSheet()">+ Create Your First Goal</button>
       </div>
     </div>
 
@@ -173,7 +173,7 @@
   <!-- ═══════════════════════════════════════════
        FAB — Add Goal
   ═══════════════════════════════════════════ -->
-  <button class="fab" style="display:flex;" aria-label="Add Goal" onclick="AG.openSheet('add-goal')">
+  <button class="fab" style="display:flex;" aria-label="Add Goal" onclick="openAddGoalSheet()">
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
   </button>
 
@@ -343,7 +343,12 @@
       </a>`;
   }
 
-  document.getElementById('goal-list').innerHTML = GOALS.map(goalCardHtml).join('');
+  const GOAL_ICONS = ['🎯', '🏠', '🚗', '✈️', '🎓', '💍', '👶', '🏥'];
+
+  function renderGoals() {
+    document.getElementById('goal-list').innerHTML = GOALS.map(goalCardHtml).join('');
+  }
+  renderGoals();
 
   /* ── Demo bar: Populated / First Use ── */
   AG.initDemoBar({
@@ -357,11 +362,49 @@
     },
   });
 
+  function resetGoalForm() {
+    document.getElementById('ag-name').value = '';
+    document.getElementById('ag-target').value = '';
+    document.getElementById('ag-date').value = '2030-06';
+    document.getElementById('ag-sip').value = '';
+    document.getElementById('ag-envelope').selectedIndex = 0;
+  }
+
+  function openAddGoalSheet() {
+    resetGoalForm();
+    AG.openSheet('add-goal');
+  }
+
+  let newGoalCount = 0;
   function saveGoal() {
     const name = document.getElementById('ag-name').value.trim();
-    const target = document.getElementById('ag-target').value.trim();
+    const targetRupees = parseInt(document.getElementById('ag-target').value.replace(/,/g, '') || '0', 10);
+    const dateVal = document.getElementById('ag-date').value;
+    const sipRupees = parseInt(document.getElementById('ag-sip').value.replace(/,/g, '') || '0', 10);
+
     if (!name) { AG.showToast('Goal name is required', 'error'); return; }
-    if (!target) { AG.showToast('Target amount is required', 'error'); return; }
+    if (!targetRupees) { AG.showToast('Target amount is required', 'error'); return; }
+    if (!dateVal) { AG.showToast('Target date is required', 'error'); return; }
+
+    const targetPaise = targetRupees * 100;
+    const [y, m] = dateVal.split('-').map(Number);
+    const now = new Date(2026, 5, 23); // demo "today"
+    const months = Math.max(1, (y - now.getFullYear()) * 12 + (m - (now.getMonth() + 1)));
+    const requiredSipPaise = sipRupees ? sipRupees * 100 : Math.ceil(targetPaise / months);
+    const targetLabel = 'by ' + new Date(y, m - 1, 1).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' });
+
+    newGoalCount++;
+    GOALS.push({
+      id: 'custom-' + newGoalCount, name,
+      icon: GOAL_ICONS[newGoalCount % GOAL_ICONS.length], iconBg: '#E0E7FF',
+      targetPaise, targetLabel,
+      currentPaise: 0, requiredSipPaise,
+      status: 'on-track',
+    });
+
+    renderGoals();
+    document.getElementById('view-populated').style.display = '';
+    document.getElementById('view-empty').style.display = 'none';
     AG.closeSheet('add-goal');
     AG.showToast('"' + name + '" goal created ✓', 'success');
   }

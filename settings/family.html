@@ -82,7 +82,7 @@
   <div class="page-content" id="page-content">
 
     <!-- Vikas — Self / Primary -->
-    <div class="member-row">
+    <div class="member-row" id="row-vikas">
       <div class="member-row__avatar" style="background:var(--grad-primary);">VS</div>
       <div class="member-row__body">
         <div class="member-row__top">
@@ -117,7 +117,7 @@
     </div>
 
     <!-- Priya Sharma — Spouse -->
-    <div class="member-row" style="animation-delay:45ms;">
+    <div class="member-row" id="row-priya" style="animation-delay:45ms;">
       <div class="member-row__avatar" style="background:linear-gradient(135deg,#7C3AED,#9F67FF);">PS</div>
       <div class="member-row__body">
         <div class="member-row__top">
@@ -152,7 +152,7 @@
     </div>
 
     <!-- Aarav Sharma — Child -->
-    <div class="member-row" style="animation-delay:90ms;">
+    <div class="member-row" id="row-aarav" style="animation-delay:90ms;">
       <div class="member-row__avatar" style="background:var(--primary-xlight); color:var(--primary);">AS</div>
       <div class="member-row__body">
         <div class="member-row__top">
@@ -187,7 +187,7 @@
     </div>
 
     <!-- Sunita Sharma — Mother -->
-    <div class="member-row" style="animation-delay:135ms;">
+    <div class="member-row" id="row-sunita" style="animation-delay:135ms;">
       <div class="member-row__avatar" style="background:linear-gradient(135deg,#D97706,#F59E0B);">SS</div>
       <div class="member-row__body">
         <div class="member-row__top">
@@ -254,11 +254,11 @@
     <div class="sheet__body">
       <div class="form-group">
         <label class="form-label">Full Name <span class="required">*</span></label>
-        <input class="form-input" type="text" placeholder="e.g. Rohan Sharma">
+        <input class="form-input" id="am-name" type="text" placeholder="e.g. Rohan Sharma">
       </div>
       <div class="form-group">
         <label class="form-label">Relationship <span class="required">*</span></label>
-        <select class="form-select">
+        <select class="form-select" id="am-relationship">
           <option value="">Select relationship</option>
           <option>Spouse</option>
           <option>Child</option>
@@ -269,16 +269,16 @@
       </div>
       <div class="form-group">
         <label class="form-label">Date of Birth</label>
-        <input class="form-input" type="date">
+        <input class="form-input" id="am-dob" type="date">
       </div>
       <div class="form-group">
         <label class="form-label">Separately Assessed for Tax?</label>
-        <select class="form-select">
+        <select class="form-select" id="am-assessed">
           <option>No</option>
           <option>Yes</option>
         </select>
       </div>
-      <button class="btn btn--primary btn--full" style="margin-top:var(--sp-4);" onclick="AG.closeSheet('add-member');AG.showToast('Family member added', 'success')">Save</button>
+      <button class="btn btn--primary btn--full" style="margin-top:var(--sp-4);" onclick="saveMember()">Save</button>
     </div>
   </div>
 
@@ -302,7 +302,7 @@
         <input class="form-input" type="date" value="1992-03-15">
       </div>
       <div class="form-helper">Primary account holder cannot be removed.</div>
-      <button class="btn btn--primary btn--full" style="margin-top:var(--sp-4);" onclick="AG.closeSheet('edit-vikas');AG.showToast('Profile updated', 'success')">Save</button>
+      <button class="btn btn--primary btn--full" style="margin-top:var(--sp-4);" onclick="saveMemberEdit('vikas')">Save</button>
     </div>
   </div>
 
@@ -329,8 +329,8 @@
           <option>Yes</option>
         </select>
       </div>
-      <button class="btn btn--primary btn--full" style="margin-top:var(--sp-4);" onclick="AG.closeSheet('edit-priya');AG.showToast('Profile updated', 'success')">Save</button>
-      <button class="btn btn--ghost btn--full" style="margin-top:var(--sp-2); color:var(--error);" onclick="AG.closeSheet('edit-priya');AG.showToast('Priya Sharma removed', 'success')">Remove Family Member</button>
+      <button class="btn btn--primary btn--full" style="margin-top:var(--sp-4);" onclick="saveMemberEdit('priya')">Save</button>
+      <button class="btn btn--ghost btn--full" style="margin-top:var(--sp-2); color:var(--error);" onclick="removeMember('priya','Priya Sharma')">Remove Family Member</button>
     </div>
   </div>
 
@@ -350,8 +350,8 @@
         <label class="form-label">Date of Birth</label>
         <input class="form-input" type="date" value="2021-04-10">
       </div>
-      <button class="btn btn--primary btn--full" style="margin-top:var(--sp-4);" onclick="AG.closeSheet('edit-aarav');AG.showToast('Profile updated', 'success')">Save</button>
-      <button class="btn btn--ghost btn--full" style="margin-top:var(--sp-2); color:var(--error);" onclick="AG.closeSheet('edit-aarav');AG.showToast('Aarav Sharma removed', 'success')">Remove Family Member</button>
+      <button class="btn btn--primary btn--full" style="margin-top:var(--sp-4);" onclick="saveMemberEdit('aarav')">Save</button>
+      <button class="btn btn--ghost btn--full" style="margin-top:var(--sp-2); color:var(--error);" onclick="removeMember('aarav','Aarav Sharma')">Remove Family Member</button>
     </div>
   </div>
 
@@ -378,8 +378,8 @@
           <option>No</option>
         </select>
       </div>
-      <button class="btn btn--primary btn--full" style="margin-top:var(--sp-4);" onclick="AG.closeSheet('edit-sunita');AG.showToast('Profile updated', 'success')">Save</button>
-      <button class="btn btn--ghost btn--full" style="margin-top:var(--sp-2); color:var(--error);" onclick="AG.closeSheet('edit-sunita');AG.showToast('Sunita Sharma removed', 'success')">Remove Family Member</button>
+      <button class="btn btn--primary btn--full" style="margin-top:var(--sp-4);" onclick="saveMemberEdit('sunita')">Save</button>
+      <button class="btn btn--ghost btn--full" style="margin-top:var(--sp-2); color:var(--error);" onclick="removeMember('sunita','Sunita Sharma')">Remove Family Member</button>
     </div>
   </div>
 
@@ -428,6 +428,114 @@
   document.addEventListener('DOMContentLoaded', () => {
     AG.initBottomNav('more');
   });
+
+  const DEMO_TODAY = new Date(2026, 5, 23);
+  function calcAge(dobStr) {
+    const dob = new Date(dobStr + 'T00:00:00');
+    let age = DEMO_TODAY.getFullYear() - dob.getFullYear();
+    const m = DEMO_TODAY.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && DEMO_TODAY.getDate() < dob.getDate())) age--;
+    return age;
+  }
+  function formatDob(dobStr) {
+    const d = new Date(dobStr + 'T00:00:00');
+    return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  function saveMemberEdit(key) {
+    const sheet = document.getElementById('edit-' + key);
+    const name = sheet.querySelector('input[type="text"]').value.trim();
+    const dobInput = sheet.querySelector('input[type="date"]');
+    if (!name) { AG.showToast('Name is required', 'error'); return; }
+
+    const row = document.getElementById('row-' + key);
+    row.querySelector('.member-row__name').textContent = name;
+    row.querySelector('.member-row__avatar').textContent = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    if (dobInput && dobInput.value) {
+      const statVals = row.querySelectorAll('.member-row__stat-val');
+      if (statVals[1]) statVals[1].textContent = formatDob(dobInput.value) + ' · ' + calcAge(dobInput.value) + ' yrs';
+    }
+    AG.closeSheet('edit-' + key);
+    AG.showToast('Profile updated', 'success');
+  }
+
+  function removeMember(key, displayName) {
+    document.getElementById('row-' + key).remove();
+    AG.closeSheet('edit-' + key);
+    AG.showToast(displayName + ' removed', 'success');
+  }
+
+  let newMemberCount = 0;
+  function saveMember() {
+    const name = document.getElementById('am-name').value.trim();
+    const relationship = document.getElementById('am-relationship').value;
+    const dob = document.getElementById('am-dob').value;
+    const assessed = document.getElementById('am-assessed').value;
+
+    if (!name) { AG.showToast('Name is required', 'error'); return; }
+    if (!relationship) { AG.showToast('Relationship is required', 'error'); return; }
+
+    newMemberCount++;
+    const key = 'custom-' + newMemberCount;
+    const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    const dobLine = dob ? `${formatDob(dob)} · ${calcAge(dob)} yrs` : '—';
+
+    const rowHtml = `
+      <div class="member-row" id="row-${key}">
+        <div class="member-row__avatar" style="background:linear-gradient(135deg,#0EA5A0,#5EEAD4);">${initials}</div>
+        <div class="member-row__body">
+          <div class="member-row__top">
+            <span class="member-row__name">${name}</span>
+            <span class="member-row__role" style="background:var(--surface-raised); color:var(--text-secondary);">${relationship}</span>
+          </div>
+          <div class="member-row__meta">${relationship}</div>
+          <div class="member-row__grid">
+            <div><div class="member-row__stat-label">Relationship</div><div class="member-row__stat-val">${relationship}</div></div>
+            <div><div class="member-row__stat-label">DOB / Age</div><div class="member-row__stat-val">${dobLine}</div></div>
+            <div><div class="member-row__stat-label">Separately Assessed</div><div class="member-row__stat-val">${assessed}</div></div>
+            <div><div class="member-row__stat-label">Income</div><div class="member-row__stat-val t-mono">—</div></div>
+          </div>
+        </div>
+        <div class="member-row__actions">
+          <button class="member-row__action-btn" onclick="AG.openSheet('edit-${key}')" aria-label="Edit">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+        </div>
+      </div>`;
+
+    const sheetHtml = `
+      <div class="sheet-backdrop" id="edit-${key}-backdrop"></div>
+      <div class="sheet" id="edit-${key}">
+        <div class="sheet__handle"></div>
+        <div class="sheet__header">
+          <span class="sheet__title">Edit ${name}</span>
+          <button class="sheet__close" onclick="AG.closeSheet('edit-${key}')" aria-label="Close">✕</button>
+        </div>
+        <div class="sheet__body">
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input class="form-input" type="text" value="${name}">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date of Birth</label>
+            <input class="form-input" type="date" value="${dob}">
+          </div>
+          <button class="btn btn--primary btn--full" style="margin-top:var(--sp-4);" onclick="saveMemberEdit('${key}')">Save</button>
+          <button class="btn btn--ghost btn--full" style="margin-top:var(--sp-2); color:var(--error);" onclick="removeMember('${key}','${name}')">Remove Family Member</button>
+        </div>
+      </div>`;
+
+    document.querySelector('.btn--secondary.btn--full').insertAdjacentHTML('beforebegin', rowHtml);
+    document.body.insertAdjacentHTML('beforeend', sheetHtml);
+
+    document.getElementById('am-name').value = '';
+    document.getElementById('am-relationship').selectedIndex = 0;
+    document.getElementById('am-dob').value = '';
+    document.getElementById('am-assessed').selectedIndex = 0;
+
+    AG.closeSheet('add-member');
+    AG.showToast(name + ' added ✓', 'success');
+  }
 </script>
 </body>
 </html>
