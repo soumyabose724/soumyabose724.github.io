@@ -78,13 +78,13 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
           </div>
           <div style="flex:1; min-width:0;">
-            <div class="card-title">REC Capital Gains Bonds — Series XI</div>
+            <div class="card-title" id="bond-name">REC Capital Gains Bonds — Series XI</div>
             <div style="font-size:12px; color:var(--text-muted);">Rural Electrification Corporation · AAA rated</div>
           </div>
           <span class="chip chip--locked">Locked-in</span>
         </div>
         <div class="loans-hero-label" style="font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-secondary); margin-bottom:var(--sp-2);">Amount Invested</div>
-        <div class="amount-text amount-text--display gradient-text">₹25,00,000</div>
+        <div class="amount-text amount-text--display gradient-text" id="hero-total">₹25,00,000</div>
         <div class="stat-row">
           <div class="stat-col">
             <div class="stat-col__label">Interest Rate</div>
@@ -96,10 +96,15 @@
           </div>
           <div class="stat-col">
             <div class="stat-col__label">Maturity</div>
-            <div class="stat-col__value">18 Jan 2031</div>
+            <div class="stat-col__value" id="bond-maturity">18 Jan 2031</div>
           </div>
         </div>
       </div>
+
+      <button class="btn btn--secondary btn--full" style="margin-top:var(--sp-4);" onclick="openEditBondSheet()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Edit Bond
+      </button>
 
       <!-- Annual cap utilisation -->
       <div class="section">
@@ -107,11 +112,11 @@
         <div class="surface-card">
           <div class="cap-util-wrap">
             <div class="cap-util-label-row">
-              <span class="used">Used this FY: ₹25,00,000</span>
+              <span class="used" id="cap-used">Used this FY: ₹25,00,000</span>
               <span class="cap">Cap: ₹50,00,000</span>
             </div>
             <div class="progress-bar progress-bar--thick">
-              <div class="progress-bar__fill" style="width:50%;"></div>
+              <div class="progress-bar__fill" id="cap-fill" style="width:50%;"></div>
             </div>
           </div>
           <div class="form-helper mt-3">
@@ -193,7 +198,39 @@
         <div class="empty-state__icon">🧾</div>
         <div class="empty-state__title">No 54EC Bonds Held</div>
         <div class="empty-state__body">Sold property or another long-term capital asset? Investing the gain in REC/PFC/NHAI bonds within 6 months can defer LTCG tax. Add a holding to track its lock-in here.</div>
-        <a href="index.html" class="btn btn--primary" style="min-width:180px; text-decoration:none;">+ Add 54EC Bond</a>
+        <button class="btn btn--primary" style="min-width:180px;" onclick="openEditBondSheet()">+ Add 54EC Bond</button>
+      </div>
+    </div>
+
+    <!-- Add/Edit 54EC Bond Sheet -->
+    <div class="sheet-backdrop" id="edit-bond-backdrop"></div>
+    <div class="sheet" id="edit-bond">
+      <div class="sheet__handle"></div>
+      <div class="sheet__header">
+        <span class="sheet__title">54EC Bond</span>
+        <button class="sheet__close" onclick="AG.closeSheet('edit-bond')" aria-label="Close">✕</button>
+      </div>
+      <div class="sheet__body">
+        <div class="form-group">
+          <label class="form-label">Issuer / Series</label>
+          <input class="form-input" id="eb-name" type="text" placeholder="e.g. REC Capital Gains Bonds — Series XI">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Amount Invested (₹, max 50,00,000/FY)</label>
+          <div class="form-input-wrap has-prefix">
+            <span class="input-prefix">₹</span>
+            <input class="form-input inr-input" id="eb-amount" type="text" inputmode="numeric" placeholder="0">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Investment Date</label>
+          <input class="form-input" id="eb-date" type="date">
+        </div>
+        <div class="form-helper">Fixed at 5.25% p.a., 5-year lock-in (Sec. 54EC).</div>
+      </div>
+      <div class="sheet__footer">
+        <button class="btn btn--ghost" onclick="AG.closeSheet('edit-bond')">Cancel</button>
+        <button class="btn btn--primary" onclick="saveBond()">Save Bond</button>
       </div>
     </div>
 
@@ -270,6 +307,47 @@
       document.getElementById('view-empty').style.display = '';
     },
   });
+
+  const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  function openEditBondSheet() {
+    const isPopulated = document.getElementById('view-populated').style.display !== 'none';
+    if (isPopulated) {
+      document.getElementById('eb-name').value = document.getElementById('bond-name').textContent;
+      document.getElementById('eb-amount').value = document.getElementById('hero-total').textContent.replace(/[₹,]/g, '');
+    } else {
+      document.getElementById('eb-name').value = '';
+      document.getElementById('eb-amount').value = '';
+      document.getElementById('eb-date').value = '';
+    }
+    AG.openSheet('edit-bond');
+  }
+
+  function saveBond() {
+    const name = document.getElementById('eb-name').value.trim();
+    const amount = parseInt(document.getElementById('eb-amount').value.replace(/,/g, '') || '0', 10);
+    const dateVal = document.getElementById('eb-date').value;
+    if (!name) { AG.showToast('Enter the issuer / series', 'error'); return; }
+    if (!amount) { AG.showToast('Enter the amount invested', 'error'); return; }
+    if (amount > 5000000) { AG.showToast('54EC caps at ₹50,00,000 per financial year', 'error'); return; }
+
+    document.getElementById('bond-name').textContent = name;
+    document.getElementById('hero-total').textContent = AG.formatINR(amount * 100);
+    document.getElementById('cap-used').textContent = 'Used this FY: ' + AG.formatINR(amount * 100);
+    document.getElementById('cap-fill').style.width = Math.min(100, Math.round(amount / 5000000 * 100)) + '%';
+
+    if (dateVal) {
+      const d = new Date(dateVal + 'T00:00:00');
+      const maturity = new Date(d);
+      maturity.setFullYear(maturity.getFullYear() + 5);
+      document.getElementById('bond-maturity').textContent = `${maturity.getDate()} ${MONTH_NAMES[maturity.getMonth()]} ${maturity.getFullYear()}`;
+    }
+
+    document.getElementById('view-populated').style.display = '';
+    document.getElementById('view-empty').style.display = 'none';
+    AG.closeSheet('edit-bond');
+    AG.showToast('54EC Bond saved ✓', 'success');
+  }
 </script>
 </body>
 </html>
