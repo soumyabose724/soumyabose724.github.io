@@ -457,11 +457,13 @@
       </div>
       <div class="form-group">
         <label class="form-label" for="inv-holding">Holding<span class="required">*</span></label>
-        <select class="form-select" id="inv-holding">
+        <select class="form-select" id="inv-holding" onchange="toggleNewHolding()">
           <option>HDFC Flexicap Fund</option>
           <option>Axis Bluechip Fund</option>
           <option>Nippon India Gold Fund</option>
+          <option value="__new__">+ New holding not listed above…</option>
         </select>
+        <input class="form-input" id="inv-holding-new" type="text" placeholder="e.g. Mirae Asset Large Cap Fund, RELIANCE" style="display:none;margin-top:var(--sp-2);">
       </div>
       <div class="form-group">
         <label class="form-label" for="inv-units">Units<span class="required">*</span></label>
@@ -603,6 +605,13 @@
     document.querySelectorAll('.seg-btn[data-inv-type]').forEach(b => b.classList.toggle('active', b.dataset.invType === type));
   }
 
+  function toggleNewHolding() {
+    const isNew = document.getElementById('inv-holding').value === '__new__';
+    const input = document.getElementById('inv-holding-new');
+    input.style.display = isNew ? '' : 'none';
+    if (isNew) input.focus();
+  }
+
   function updateInvestmentAmount() {
     const units = parseFloat(document.getElementById('inv-units').value) || 0;
     const nav = parseFloat((document.getElementById('inv-nav').value || '0').replace(/,/g, '')) || 0;
@@ -638,6 +647,14 @@
 
   function saveTransaction() {
     const activeType = document.querySelector('.type-tab.active').dataset.type;
+    if (activeType === 'investment' && document.getElementById('inv-holding').value === '__new__') {
+      const newName = document.getElementById('inv-holding-new').value.trim();
+      if (!newName) {
+        document.getElementById('inv-holding-new').focus();
+        AG.showToast('Enter the new holding\'s name', 'error');
+        return;
+      }
+    }
     AG.showToast(TYPE_TITLES[activeType].replace('Add ', '') + ' saved ✓', 'success');
     setTimeout(() => { location.href = 'index.html'; }, 900);
   }
