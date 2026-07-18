@@ -285,24 +285,24 @@
     <div class="bento-grid" style="margin-bottom: var(--sp-3);">
 
       <!-- Income Tile -->
-      <div class="glass-card glass-card--compact">
+      <a href="../transactions/index.html?filter=income" class="glass-card glass-card--compact" style="text-decoration:none; color:inherit; cursor:pointer;">
         <div class="tile-label">Income</div>
         <div class="tile-amount">₹2,05,000</div>
         <div class="tile-delta">
           <span class="delta delta--neu">— Same</span>
           <div class="tile-delta-sub">vs last month</div>
         </div>
-      </div>
+      </a>
 
       <!-- Expenses Tile -->
-      <div class="glass-card glass-card--compact" id="expenses-tile">
+      <a href="../transactions/index.html?filter=expense" class="glass-card glass-card--compact" id="expenses-tile" style="text-decoration:none; color:inherit; cursor:pointer;">
         <div class="tile-label">Expenses</div>
         <div class="tile-amount tile-amount--expense" id="expenses-amount">₹1,18,000</div>
         <div class="tile-delta">
           <span class="delta" id="expenses-delta" style="background:rgba(245,158,11,.12); color:var(--warning);">▲ +₹12K</span>
           <div class="tile-delta-sub" id="expenses-delta-sub">vs last month</div>
         </div>
-      </div>
+      </a>
 
       <!-- Budget Status (col-span-2) -->
       <a href="../budget/index.html" class="glass-card glass-card--compact col-span-2" style="text-decoration:none; color:inherit; cursor:pointer;">
@@ -341,91 +341,14 @@
         </div>
       </a>
 
-      <!-- Debt Payoff (col-span-2) -->
-      <div class="glass-card glass-card--compact col-span-2">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp-4);">
-          <div class="tile-label" style="margin-bottom:0;">Debt Payoff</div>
-          <a href="../loans/comparator.html" style="font-size:12px; color:var(--primary); font-weight:500;">Avalanche Plan →</a>
-        </div>
-        <div class="debt-item">
-          <div class="debt-row">
-            <span class="debt-name">Home Loan (HDFC)</span>
-            <span class="debt-amt">₹37.86L / ₹44.5L</span>
-          </div>
-          <div class="progress-bar progress-bar--thick">
-            <div class="progress-bar__fill" style="width:85%;"></div>
-          </div>
-          <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">85% outstanding · ₹38,500/mo EMI</div>
-        </div>
-        <div class="debt-item" style="margin-top:var(--sp-4);">
-          <div class="debt-row">
-            <span class="debt-name">Car Loan (ICICI)</span>
-            <span class="debt-amt">₹6.01L / ₹7.35L</span>
-          </div>
-          <div class="progress-bar progress-bar--thick">
-            <div class="progress-bar__fill progress-bar__fill--warning" style="width:82%;"></div>
-          </div>
-          <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">82% outstanding · ₹12,000/mo EMI</div>
-        </div>
-        <div style="display:flex; align-items:center; gap:var(--sp-2); margin-top:var(--sp-4); padding-top:var(--sp-3); border-top:1px solid var(--border);">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-          </svg>
-          <span style="font-size:12px; color:var(--text-muted);">Debt free est. <strong style="color:var(--text-secondary);">Aug 2040</strong></span>
-        </div>
-      </div>
-
-      <!-- Investments Tile (full width) -->
-      <div class="glass-card glass-card--compact col-span-2">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-3);">
-          <div class="tile-label" style="margin-bottom:0;">Investments</div>
-          <a href="../investments/index.html" style="font-size:12px;color:var(--primary);font-weight:500;">View Portfolio →</a>
-        </div>
-        <div style="display:flex;align-items:baseline;gap:var(--sp-3);margin-bottom:var(--sp-2);">
-          <div class="tile-amount" id="invest-total" style="font-size:22px;">₹3,71,100</div>
-          <span class="delta delta--pos">▲ +18.4% XIRR</span>
-        </div>
-        <div class="invest-chips" id="invest-chips">
-          <span class="invest-chip">3 SIPs</span>
-          <span class="invest-chip">Axis Bluechip</span>
-          <span class="invest-chip">Parag Parikh</span>
-          <span class="invest-chip">HDFC Nifty 50</span>
-        </div>
-        <div style="font-size:12px;color:var(--text-muted);margin-top:var(--sp-2);">₹18,000/mo combined SIP · Invested ₹3,04,000</div>
-      </div>
-
-    </div>
-
-    <!-- Quick Actions -->
-    <div style="margin-bottom:var(--sp-5);">
-      <div class="section-header"><h2>Quick Actions</h2></div>
-      <div class="quick-actions">
-        <button class="quick-pill" onclick="window.location.href='../transactions/add.html'">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Add Transaction
-        </button>
-        <button class="quick-pill" onclick="AG.showToast('Pay EMI recorded', 'success')">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-          Pay EMI
-        </button>
-        <button class="quick-pill" onclick="AG.showToast('SIP recorded', 'success')">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-          Record SIP
-        </button>
-        <button class="quick-pill" onclick="window.location.href='../reports/index.html'">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          View Reports
-        </button>
-        <button class="quick-pill" onclick="window.location.href='../tools/index.html'">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="11" x2="8" y2="11.01"/><line x1="12" y1="11" x2="12" y2="11.01"/><line x1="16" y1="11" x2="16" y2="11.01"/><line x1="8" y1="15" x2="8" y2="15.01"/><line x1="12" y1="15" x2="12" y2="15.01"/><line x1="16" y1="15" x2="16" y2="15.01"/><line x1="8" y1="19" x2="16" y2="19"/></svg>
-          Calculators
-        </button>
-      </div>
     </div>
 
     <!-- Upcoming This Week -->
     <div style="margin-bottom:var(--sp-5);">
-      <div class="section-header"><h2>Upcoming This Week</h2></div>
+      <div class="section-header">
+        <h2>Upcoming This Week</h2>
+        <a href="../scheduling/list.html" class="see-all">See all →</a>
+      </div>
 
       <div class="compact-row">
         <div class="compact-row__icon list-row__icon--emi">
@@ -542,6 +465,86 @@
 
     </div>
 
+    <!-- Bento Grid 2: Debt Payoff + Investments -->
+    <div class="bento-grid" style="margin-bottom: var(--sp-5);">
+
+      <!-- Debt Payoff (col-span-2) -->
+      <div class="glass-card glass-card--compact col-span-2">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp-4);">
+          <div class="tile-label" style="margin-bottom:0;">Debt Payoff</div>
+          <a href="../loans/comparator.html" style="font-size:12px; color:var(--primary); font-weight:500;">Avalanche Plan →</a>
+        </div>
+        <div class="debt-item">
+          <div class="debt-row">
+            <span class="debt-name">Home Loan (HDFC)</span>
+            <span class="debt-amt">₹37.86L / ₹44.5L</span>
+          </div>
+          <div class="progress-bar progress-bar--thick">
+            <div class="progress-bar__fill" style="width:85%;"></div>
+          </div>
+          <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">85% outstanding · ₹38,500/mo EMI</div>
+        </div>
+        <div class="debt-item" style="margin-top:var(--sp-4);">
+          <div class="debt-row">
+            <span class="debt-name">Car Loan (ICICI)</span>
+            <span class="debt-amt">₹6.01L / ₹7.35L</span>
+          </div>
+          <div class="progress-bar progress-bar--thick">
+            <div class="progress-bar__fill progress-bar__fill--warning" style="width:82%;"></div>
+          </div>
+          <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">82% outstanding · ₹12,000/mo EMI</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:var(--sp-2); margin-top:var(--sp-4); padding-top:var(--sp-3); border-top:1px solid var(--border);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+          <span style="font-size:12px; color:var(--text-muted);">Debt free est. <strong style="color:var(--text-secondary);">Aug 2040</strong></span>
+        </div>
+      </div>
+
+      <!-- Investments Tile (full width) -->
+      <div class="glass-card glass-card--compact col-span-2">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-3);">
+          <div class="tile-label" style="margin-bottom:0;">Investments</div>
+          <a href="../investments/index.html" style="font-size:12px;color:var(--primary);font-weight:500;">View Portfolio →</a>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:var(--sp-3);margin-bottom:var(--sp-2);">
+          <div class="tile-amount" id="invest-total" style="font-size:22px;">₹3,71,100</div>
+          <span class="delta delta--pos">▲ +18.4% XIRR</span>
+        </div>
+        <div class="invest-chips" id="invest-chips">
+          <span class="invest-chip">3 SIPs</span>
+        </div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:var(--sp-2);">₹18,000/mo combined SIP · Invested ₹3,04,000</div>
+      </div>
+
+    </div>
+
+    <!-- Intelligence -->
+    <div style="margin-bottom:var(--sp-4);">
+      <div class="section-header">
+        <h2>Intelligence</h2>
+        <a href="../intelligence/index.html" class="see-all">See all →</a>
+      </div>
+
+      <a href="../intelligence/index.html" class="glass-card glass-card--compact" style="display:flex; align-items:center; gap:var(--sp-4); text-decoration:none; color:inherit; cursor:pointer;">
+        <div class="progress-ring" id="dash-health-ring" style="width:56px; height:56px; flex-shrink:0;">
+          <svg width="56" height="56" viewBox="0 0 112 112">
+            <circle class="progress-ring__track"></circle>
+            <circle class="progress-ring__fill"></circle>
+          </svg>
+          <div class="progress-ring__label" style="font-size:18px;">74</div>
+        </div>
+        <div style="flex:1; min-width:0;">
+          <div style="font-size:13px; font-weight:600; color:var(--text-primary);">Financial Health Score · Good</div>
+          <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">4 insights found — biggest drag: Insurance Adequacy (30/100)</div>
+        </div>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted); flex-shrink:0;">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </a>
+    </div>
+
   </div><!-- /page-content -->
 
   <!-- FAB -->
@@ -597,6 +600,9 @@
     // Count-up animation for hero net worth
     const heroEl = document.getElementById('hero-networth');
     AG.countUp(heroEl, 5234000 * 100, 900);
+
+    // Intelligence health-score ring (same weighted model as intelligence/index.html)
+    AG.animateRing(document.getElementById('dash-health-ring'), 74, 44);
 
     // Demo state definitions
     AG.initDemoBar({

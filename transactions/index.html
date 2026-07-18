@@ -827,6 +827,17 @@
   }));
   document.getElementById('txn-search').addEventListener('input', applyFilters);
 
+  /* ── Pre-select filter from ?filter= query param (e.g. dashboard Income/Expense tiles) ── */
+  const requestedFilter = new URLSearchParams(location.search).get('filter');
+  if (requestedFilter) {
+    const matchingChip = document.querySelector(`.txn-chip[data-filter="${requestedFilter}"]`);
+    if (matchingChip) {
+      chips.forEach(x => x.classList.remove('active'));
+      matchingChip.classList.add('active');
+      applyFilters();
+    }
+  }
+
   function applyFilters() {
     const activeChip = document.querySelector('.txn-chip.active').dataset.filter;
     const q = document.getElementById('txn-search').value.trim().toLowerCase();
